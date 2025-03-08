@@ -1,0 +1,8 @@
+.next
+node_modules
+.dockerignore
+.env.development
+.env.production
+.env.test
+.gitignore
+Dockerfile

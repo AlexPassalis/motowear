@@ -1,0 +1,42 @@
+{
+  "private": true,
+  "name": "motowear",
+  "scripts": {
+    "dev": "cross-env NODE_ENV=development next dev",
+    "postgres:generate-dev": "drizzle-kit generate --config ./drizzle.config.ts",
+    "postgres:migrate-dev": "cross-env POSTGRES_MIGRATING=true drizzle-kit push --config ./drizzle.config.ts",
+    "lint": "next lint",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "axios": "^1.8.1",
+    "better-auth": "^1.2.3",
+    "cross-env": "^7.0.3",
+    "drizzle-kit": "^0.30.5",
+    "drizzle-orm": "^0.40.0",
+    "formidable": "^3.5.2",
+    "next": "15.2.1",
+    "pg": "^8.13.3",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-dropzone": "^14.3.8",
+    "react-icons": "^5.5.0",
+    "uuid": "^11.1.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@types/formidable": "^3.4.5",
+    "@types/node": "^20",
+    "@types/pg": "^8.11.11",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "15.2.1",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  },
+  "packageManager": "pnpm@9.15.4"
+}

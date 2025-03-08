@@ -1,2 +1,1 @@
-# motowear
-motowear.gr website
+www.motowear.gr
