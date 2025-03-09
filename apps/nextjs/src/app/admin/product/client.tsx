@@ -33,6 +33,8 @@ export function AdminProductClientPage({
 }: ConfigClientPageProps) {
   const [product, setProduct] = useState(postgresProduct)
   const [productNew, setProductNew] = useState([])
+  const [imageNew, setImageNew] = useState<File[]>([])
+
   const dialogRef = useRef<null | HTMLDialogElement>(null)
   const [deleteProductType, setDeleteProductType] = useState('')
   const newProductTypeRef = useRef<null | HTMLInputElement>(null)
@@ -40,6 +42,7 @@ export function AdminProductClientPage({
 
   // console.log('This is the product: ', product)
   console.log('This is the productNew: ', productNew)
+  console.log('This is the imageNew: ', imageNew)
 
   function openModal() {
     dialogRef.current?.showModal()
@@ -186,10 +189,16 @@ export function AdminProductClientPage({
                               return {
                                 [k]: obj[k].map((row, i) => {
                                   if (i === index) {
-                                    const images = row.images ?? []
+                                    const oldFilenames = row.images || []
+                                    const newFilenames = acceptedFiles.map(
+                                      f => f.name
+                                    )
                                     return {
                                       ...row,
-                                      images: [...images, ...acceptedFiles],
+                                      images: [
+                                        ...oldFilenames,
+                                        ...newFilenames,
+                                      ],
                                     }
                                   }
                                   return row
@@ -209,10 +218,16 @@ export function AdminProductClientPage({
                               return {
                                 [k]: obj[k].map((row, i) => {
                                   if (i === index) {
-                                    const images = row.images ?? []
+                                    const oldFilenames = row.images || []
+                                    const newFilenames = acceptedFiles.map(
+                                      f => f.name
+                                    )
                                     return {
                                       ...row,
-                                      images: [...images, ...acceptedFiles],
+                                      images: [
+                                        ...oldFilenames,
+                                        ...newFilenames,
+                                      ],
                                     }
                                   }
                                   return row
@@ -223,18 +238,21 @@ export function AdminProductClientPage({
                           })
 
                           if (!foundObj) {
+                            const newFilenames = acceptedFiles.map(f => f.name)
                             updated.push({
                               [type]: [
                                 {
                                   id: productRow.id,
                                   version: productRow.version,
-                                  images: acceptedFiles,
+                                  images: newFilenames,
                                 },
                               ],
                             })
                           }
                           return updated
                         })
+
+                        setImageNew(prev => [...prev, ...acceptedFiles])
                       }}
                     >
                       {function (renderProps) {
@@ -245,7 +263,7 @@ export function AdminProductClientPage({
                             <div {...getRootProps()}>
                               <input {...getInputProps()} />
                               <span>
-                                Drop or click to select <br /> images to upload.
+                                Drop or click to select images to upload.
                               </span>
                             </div>
                           </section>
@@ -316,42 +334,23 @@ export function AdminProductClientPage({
 
         <button
           onClick={async () => {
-            const { data: validatedProductNew } =
-              typeProduct.safeParse(productNew)
+            // const { data: validatedProductNew } =
+            //   typeProduct.safeParse(productNew)
 
-            if (!validatedProductNew) {
-              alert('productNew invalid input')
-              return
-            }
+            // if (!validatedProductNew) {
+            //   alert('productNew invalid input')
+            //   return
+            // }
 
             setOnRequest(true)
 
             let formData
             try {
               formData = new FormData()
-
-              // Turn the JSON data (minus the actual File objects) into a string
-              // but keep track of files separately
-              const productNewCopy = structuredClone(validatedProductNew)
-
-              productNewCopy.forEach(obj => {
-                const typeKey = Object.keys(obj)[0]
-                obj[typeKey].forEach((row, rowIdx) => {
-                  // If row has images, we attach them to formData
-                  if (row.images) {
-                    row.images.forEach(file => {
-                      // Append each file with a key that identifies which row
-                      formData.append('images', file, file.name)
-                    })
-                    // Now remove the actual File objects from the row
-                    // so the JSON is purely text data
-                    row.images = row.images.map(file => file.name)
-                  }
-                })
+              imageNew.forEach(image => {
+                formData.append('imageNew', image, image.name)
               })
-
-              // Add the (modified) productNew object as JSON
-              formData.append('productData', JSON.stringify(productNewCopy))
+              formData.append('productNew', JSON.stringify(productNew))
             } catch (e) {
               console.log(e)
             }
