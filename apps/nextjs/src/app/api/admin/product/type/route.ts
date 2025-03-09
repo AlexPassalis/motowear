@@ -18,7 +18,8 @@ export async function POST(req: NextRequest) {
     await postgres.execute(sql`
       CREATE TABLE IF NOT EXISTS product."${sql.raw(newProductType)}" (
         "id" UUID PRIMARY KEY,
-        "version" TEXT NOT NULL
+        "version" TEXT NOT NULL,
+        "images" TEXT[] NOT NULL
       );
     `)
     return NextResponse.json({ message: responseSuccessful }, { status: 200 })

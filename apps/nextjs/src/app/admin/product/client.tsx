@@ -8,7 +8,7 @@ import React, {
   RefObject,
 } from 'react'
 import axios from 'axios'
-import { Product, ProductRow } from '@/app/admin/product/page'
+import { ProductVersion, Product } from '@/data/types'
 import { z } from 'zod'
 import Dropzone from 'react-dropzone'
 
@@ -25,14 +25,13 @@ export const typeProduct = z.array(
 )
 
 type ConfigClientPageProps = {
-  product: Product
+  productPostgres: Product
 }
 
 export function AdminProductClientPage({
-  product: postgresProduct,
+  productPostgres,
 }: ConfigClientPageProps) {
-  const [product, setProduct] = useState(postgresProduct)
-  const [productNew, setProductNew] = useState([])
+  const [productNew, setProductNew] = useState(productPostgres)
   const [imageNew, setImageNew] = useState<File[]>([])
 
   const dialogRef = useRef<null | HTMLDialogElement>(null)
@@ -65,7 +64,7 @@ export function AdminProductClientPage({
         <div className="flex justify-center gap-2">
           <button
             onClick={async () => {
-              const currentProductTypes = product.map(
+              const currentProductTypes = productNew.map(
                 table => Object.keys(table)[0]
               )
               if (!currentProductTypes.includes(deleteProductType)) {
@@ -117,7 +116,7 @@ export function AdminProductClientPage({
       </dialog>
 
       <div className="flex flex-col justify-center items-center h-screen gap-2 text-black">
-        {product.map(table => {
+        {productNew.map(table => {
           const type = Object.keys(table)[0]
           return (
             <div
@@ -146,7 +145,7 @@ export function AdminProductClientPage({
               className="flex flex-col gap-2 border border-neutral-300 rounded-lg bg-white px-4 py-2"
             >
               <div className="flex justify-end items-center min-w-64">
-                <h1 className="absolute left-1/2 transform -translate-x-1/2 text-xl">
+                <h1 className="absolute left-1/2 transform -translate-x-1/2 text-2xl">
                   {type}
                 </h1>
                 <button
@@ -165,123 +164,106 @@ export function AdminProductClientPage({
                   {onRequest ? 'Wait ...' : 'Delete'}
                 </button>
               </div>
-              {table[type].length === 0 ? null : (
-                <div className="flex justify-evenly items-center">
-                  <h2>id</h2>
-                  <h2>version</h2>
-                </div>
-              )}
-              {table[type].map((productRow: ProductRow, index) => (
-                <div
-                  key={`${type}-${index}`}
-                  className="flex items-center gap-2"
-                >
-                  <h2>{productRow.id}</h2>
-                  <input type="text" value={productRow.version} />
-                  <div>
-                    {/* DO SOMETHING TO SHOW THE UPLOADED IMAGES HERE */}
-                    <Dropzone
-                      onDrop={function (acceptedFiles) {
-                        setProduct(prev => {
-                          return prev.map(obj => {
-                            const k = Object.keys(obj)[0]
-                            if (k === type) {
-                              return {
-                                [k]: obj[k].map((row, i) => {
-                                  if (i === index) {
-                                    const oldFilenames = row.images || []
-                                    const newFilenames = acceptedFiles.map(
-                                      f => f.name
-                                    )
-                                    return {
-                                      ...row,
-                                      images: [
-                                        ...oldFilenames,
-                                        ...newFilenames,
-                                      ],
-                                    }
-                                  }
-                                  return row
-                                }),
-                              }
-                            }
-                            return obj
-                          })
-                        })
 
-                        setProductNew(prev => {
-                          let foundObj = false
-                          const updated = prev.map(obj => {
-                            const k = Object.keys(obj)[0]
-                            if (k === type) {
-                              foundObj = true
-                              return {
-                                [k]: obj[k].map((row, i) => {
-                                  if (i === index) {
-                                    const oldFilenames = row.images || []
-                                    const newFilenames = acceptedFiles.map(
-                                      f => f.name
-                                    )
-                                    return {
-                                      ...row,
-                                      images: [
-                                        ...oldFilenames,
-                                        ...newFilenames,
-                                      ],
-                                    }
-                                  }
-                                  return row
-                                }),
+              {table[type].map((productRow: ProductVersion, index) => {
+                return (
+                  <div key={productRow.id} className="flex gap-2">
+                    <div>
+                      <h2 className="text-center text-xl">id</h2>
+                      <p>{productRow.id}</p>
+                    </div>
+                    <div>
+                      <h2 className="text-center text-xl">version</h2>
+                      <input
+                        value={productRow.version}
+                        onChange={e => {
+                          setProductNew(prev =>
+                            prev.map(obj => {
+                              const k = Object.keys(obj)[0]
+                              if (k === type) {
+                                return {
+                                  [k]: obj[k].map(row =>
+                                    row.id === productRow.id
+                                      ? { ...row, version: e.target.value }
+                                      : row
+                                  ),
+                                }
                               }
-                            }
-                            return obj
-                          })
-
-                          if (!foundObj) {
-                            const newFilenames = acceptedFiles.map(f => f.name)
-                            updated.push({
-                              [type]: [
-                                {
-                                  id: productRow.id,
-                                  version: productRow.version,
-                                  images: newFilenames,
-                                },
-                              ],
+                              return obj
                             })
-                          }
-                          return updated
-                        })
-
-                        setImageNew(prev => [...prev, ...acceptedFiles])
-                      }}
-                    >
-                      {function (renderProps) {
-                        const getRootProps = renderProps.getRootProps
-                        const getInputProps = renderProps.getInputProps
-                        return (
-                          <section className="self-center px-2 py-1 border border-dashed rounded-lg text-sm text-center">
-                            <div {...getRootProps()}>
-                              <input {...getInputProps()} />
-                              <span>
-                                Drop or click to select images to upload.
-                              </span>
-                            </div>
-                          </section>
-                        )
-                      }}
-                    </Dropzone>
+                          )
+                        }}
+                        className="text-center border rounded-lg"
+                      />
+                    </div>
+                    <div>
+                      <h2 className="text-center text-xl">images</h2>
+                      {productRow.images.map(image => {
+                        return <p key={`${productRow.id}-${image}`}>{image}</p>
+                      })}
+                    </div>
+                    <div>
+                      <Dropzone
+                        onDrop={function (acceptedFiles) {
+                          setProductNew(prev => {
+                            return prev.map(obj => {
+                              const k = Object.keys(obj)[0]
+                              if (k === type) {
+                                return {
+                                  [k]: obj[k].map((row, i) => {
+                                    if (i === index) {
+                                      const oldFilenames = row.images || []
+                                      const newFilenames = acceptedFiles.map(
+                                        f => f.name
+                                      )
+                                      return {
+                                        ...row,
+                                        images: [
+                                          ...oldFilenames,
+                                          ...newFilenames,
+                                        ],
+                                      }
+                                    }
+                                    return row
+                                  }),
+                                }
+                              }
+                              return obj
+                            })
+                          })
+                          setImageNew(prev => [...prev, ...acceptedFiles])
+                        }}
+                      >
+                        {function (renderProps) {
+                          const getRootProps = renderProps.getRootProps
+                          const getInputProps = renderProps.getInputProps
+                          return (
+                            <section className="self-center px-2 py-1 border border-dashed rounded-lg text-sm text-center">
+                              <div {...getRootProps()}>
+                                <input {...getInputProps()} />
+                                <span>
+                                  Drop or click to select <br /> images to
+                                  upload.
+                                </span>
+                              </div>
+                            </section>
+                          )
+                        }}
+                      </Dropzone>
+                    </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
+
               <button
                 onClick={() => {
                   const newVersion = {
-                    id: 'default',
-                    version: 'default',
+                    id: '',
+                    version: '',
                     images: [],
                   }
 
-                  const updatedProduct = product.map(obj => {
+                  const updatedProduct = productNew.map(obj => {
                     const key = Object.keys(obj)[0]
                     if (key === type) {
                       return {
@@ -290,27 +272,7 @@ export function AdminProductClientPage({
                     }
                     return obj
                   })
-                  setProduct(updatedProduct)
-
-                  setProductNew(prev => {
-                    let found = false
-                    const updated = prev.map(obj => {
-                      const key = Object.keys(obj)[0]
-                      if (key === type) {
-                        found = true
-                        return {
-                          [key]: [...obj[key], newVersion],
-                        }
-                      }
-                      return obj
-                    })
-                    if (!found) {
-                      updated.push({
-                        [type]: [newVersion],
-                      })
-                    }
-                    return updated
-                  })
+                  setProductNew(updatedProduct)
                 }}
                 type="button"
                 disabled={onRequest}
@@ -377,9 +339,9 @@ export function AdminProductClientPage({
             setOnRequest(false)
           }}
           type="button"
-          disabled={onRequest || productNew.length === 0}
+          disabled={onRequest || productNew === productPostgres}
           className={`self-center px-2 py-1 border rounded-lg text-sm text-center ${
-            onRequest || productNew.length === 0
+            onRequest || productNew === productPostgres
               ? 'opacity-50 cursor-not-allowed'
               : 'hover:bg-green-700 hover:text-white hover:cursor-pointer'
           }`}
