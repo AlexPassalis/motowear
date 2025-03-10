@@ -3,7 +3,6 @@ import { z } from 'zod'
 import { postgres } from '@/lib/postgres/index'
 import { sql } from 'drizzle-orm'
 import { errorBodyInvalid, errorPostgres } from '@/data/zod/error'
-import { responseSuccessful } from '@/data/zod/expected'
 
 export async function POST(req: NextRequest) {
   const bodyType = z.object({ newProductType: z.string() })
@@ -12,17 +11,17 @@ export async function POST(req: NextRequest) {
   if (!validatedBody) {
     return NextResponse.json({ message: errorBodyInvalid }, { status: 400 })
   }
-
   const { newProductType } = validatedBody
   try {
     await postgres.execute(sql`
       CREATE TABLE IF NOT EXISTS product."${sql.raw(newProductType)}" (
         "id" UUID PRIMARY KEY,
         "version" TEXT NOT NULL,
+        "color" TEXT NOT NULL,
         "images" TEXT[] NOT NULL
       );
     `)
-    return NextResponse.json({ message: responseSuccessful }, { status: 200 })
+    return NextResponse.json({}, { status: 200 })
   } catch (e) {
     console.error(errorPostgres, e)
     return NextResponse.json({ message: errorPostgres }, { status: 500 })
@@ -42,7 +41,7 @@ export async function DELETE(req: NextRequest) {
     await postgres.execute(sql`
       DROP TABLE IF EXISTS product."${sql.raw(deleteProductType)}"
     `)
-    return NextResponse.json({ message: responseSuccessful }, { status: 200 })
+    return NextResponse.json({}, { status: 200 })
   } catch (e) {
     console.error(errorPostgres, e)
     return NextResponse.json({ message: errorPostgres }, { status: 500 })
