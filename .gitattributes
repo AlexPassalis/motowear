@@ -1,0 +1,10 @@
+*.env.production filter=git-crypt diff=git-crypt
+*.key filter=git-crypt diff=git-crypt
+*.pem filter=git-crypt diff=git-crypt
+*.conf filter=git-crypt diff=git-crypt
+apps/nextjs/src/middleware.ts filter=git-crypt diff=git-crypt
+apps/nextjs/src/pages/** filter=git-crypt diff=git-crypt
+apps/nextjs/src/app/api/** filter=git-crypt diff=git-crypt
+apps/nextjs/src/app/admin/** filter=git-crypt diff=git-crypt
+apps/nextjs/src/lib/better-auth/** filter=git-crypt diff=git-crypt
+apps/nextjs/src/utils/readSecret.ts filter=git-crypt diff=git-crypt
