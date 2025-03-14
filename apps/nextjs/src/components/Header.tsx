@@ -1,6 +1,6 @@
 'use client'
 
-import { ROUTE_CONTACT, ROUTE_HOME, ROUTE_PRODUCTS } from '@/data/routes'
+import { ROUTE_HOME, ROUTE_PRODUCT } from '@/data/routes'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Dispatch, SetStateAction, useState } from 'react'
@@ -10,8 +10,15 @@ import {
   AiOutlineClose,
 } from 'react-icons/ai'
 import { HiMagnifyingGlass } from 'react-icons/hi2'
+import { InstantSearch, SearchBox, Hits } from 'react-instantsearch'
+import { typesenseClient } from '@/lib/typesense/client'
+import { ProductRow } from '@/data/types'
 
-export function Header() {
+type HeaderProps = {
+  productTypes: string[]
+}
+
+export function Header({ productTypes }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
@@ -26,7 +33,11 @@ export function Header() {
         isSearchOpen={isSearchOpen}
         setIsSearchOpen={setIsSearchOpen}
       />
-      <Menu isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
+      <Menu
+        productTypes={productTypes}
+        isMenuOpen={isMenuOpen}
+        setIsMenuOpen={setIsMenuOpen}
+      />
       <Cart isCartOpen={isCartOpen} setIsCartOpen={setIsCartOpen} />
       <Search isSearchOpen={isSearchOpen} setIsSearchOpen={setIsSearchOpen} />
     </>
@@ -51,7 +62,7 @@ function Main({
   setIsSearchOpen,
 }: MainProps) {
   return (
-    <header className="relative flex justify-between items-center w-full p-4">
+    <header className="relative flex justify-between items-center w-full p-4 border-b border-neutral-300">
       <div className="flex justify-start">
         <button
           onClick={() => {
@@ -88,25 +99,10 @@ function Main({
             className="sm:scale-110"
           />
         </Link>
-        <form className="hidden relative lg:flex">
-          <input
-            name="search"
-            type="text"
-            autoComplete="off"
-            placeholder="Αναζήτηση προϊόντων ..."
-            className="w-full rounded-lg border border-neutral-300 bg-white px-4 py-2 text-sm text-black placeholder:text-neutral-500"
-          />
-          <button
-            type="submit"
-            className="absolute right-0 top-0 mr-3 h-full hover:cursor-pointer"
-          >
-            <HiMagnifyingGlass />
-          </button>
-        </form>
       </div>
 
       <div className="flex justify-end gap-1 sm:gap-3 lg:gap-12 2xl:gap-32">
-        <button className="lg:hidden flex justify-center items-center h-10 w-10 sm:scale-110 rounded-md border border-neutral-200 bg-white transition-colors hover:cursor-pointer group">
+        <button className="flex justify-center items-center h-10 w-10 sm:scale-110 rounded-md border border-neutral-200 bg-white transition-colors hover:cursor-pointer group">
           <HiMagnifyingGlass
             onClick={() => {
               if (isMenuOpen) {
@@ -120,14 +116,6 @@ function Main({
             className="transition-transform duration-200 ease-in-out group-hover:scale-150"
           />
         </button>
-        <ul className="hidden lg:flex justify-center items-center gap-10">
-          <li className="text-neutral-500 hover:text-black hover:underline underline-offset-4 hover:cursor-pointer">
-            <Link href={ROUTE_PRODUCTS}>ΠΡΟΪΟΝΤΑ</Link>
-          </li>
-          <li className="text-neutral-500 hover:text-black hover:underline underline-offset-4 hover:cursor-pointer">
-            <Link href={ROUTE_CONTACT}>ΕΠΙΚΟΙΝΩΝΙΑ</Link>
-          </li>
-        </ul>
         <button
           onClick={() => {
             if (isMenuOpen) {
@@ -148,18 +136,19 @@ function Main({
 }
 
 interface MenuProps {
+  productTypes: string[]
   isMenuOpen: boolean
   setIsMenuOpen: Dispatch<SetStateAction<boolean>>
 }
 
-function Menu({ isMenuOpen, setIsMenuOpen }: MenuProps) {
+function Menu({ productTypes, isMenuOpen, setIsMenuOpen }: MenuProps) {
   return (
     <div
       className={`fixed top-0 left-0 h-full bg-neutral-50 w-80 shadow-lg transform transition-transform duration-300 ease-in-out ${
         isMenuOpen ? 'translate-x-0' : '-translate-x-full'
       }`}
     >
-      <div className="p-4">
+      <div className="flex flex-col gap-2 p-4">
         <div className="flex justify-between items-center w-full border-b-2 pb-2 border-neutral-200">
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -169,6 +158,11 @@ function Menu({ isMenuOpen, setIsMenuOpen }: MenuProps) {
           </button>
           <h1 className="text-2xl text-center font-bold">Επιλογές</h1>
         </div>
+        {productTypes.map(productType => (
+          <Link key={productType} href={`${ROUTE_PRODUCT}/${productType}`}>
+            {productType}
+          </Link>
+        ))}
       </div>
     </div>
   )
@@ -215,7 +209,7 @@ function Search({ isSearchOpen, setIsSearchOpen }: SearchProps) {
         isSearchOpen ? 'translate-y-0' : '-translate-y-full'
       }`}
     >
-      <div className="p-4">
+      <div className="flex flex-col gap-2 p-4">
         <div className="flex justify-between items-center w-full border-b-2 pb-2 border-neutral-200">
           <h1 className="text-2xl font-bold">Αναζήτηση</h1>
           <button
@@ -225,22 +219,33 @@ function Search({ isSearchOpen, setIsSearchOpen }: SearchProps) {
             <AiOutlineClose className="transition-transform duration-200 ease-in-out group-hover:scale-150" />
           </button>
         </div>
-        <form className="relative flex mt-4">
-          <input
-            name="search"
-            type="text"
-            autoComplete="off"
-            placeholder="Αναζήτηση προϊόντων ..."
-            className="w-full rounded-lg border border-neutral-300 bg-white px-4 py-2 text-sm text-black placeholder:text-neutral-500"
+        <InstantSearch
+          indexName="product"
+          searchClient={typesenseClient.searchClient}
+          future={{ preserveSharedStateOnUnmount: true }}
+        >
+          <SearchBox
+            classNames={{
+              root: 'w-full',
+              form: 'w-full',
+              input: 'w-full px-4 py-2 border border-neutral-300 rounded-lg',
+              submit: 'hidden',
+            }}
           />
-          <button
-            type="submit"
-            className="absolute right-0 top-0 mr-3 h-full hover:cursor-pointer"
-          >
-            <HiMagnifyingGlass />
-          </button>
-        </form>
+          <Hits hitComponent={SearchHit} />
+        </InstantSearch>
       </div>
+    </div>
+  )
+}
+
+function SearchHit({ hit }: { hit: ProductRow }) {
+  console.log(hit)
+  return (
+    <div className="border border-gray-300 rounded p-2 mb-2">
+      <h2 className="text-lg font-bold">{hit.version}</h2>
+      <p className="text-sm text-gray-700">Type: {hit.brand}</p>
+      <p className="text-sm text-gray-500">Price: {hit.price}</p>
     </div>
   )
 }

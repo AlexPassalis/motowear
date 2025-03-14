@@ -48,9 +48,9 @@ export default async function ProductPage({
   return (
     <ProductPageClient
       type={type}
-      productVersions={tableRows}
+      defaultVersions={tableRows}
       defaultVersion={version}
-      brands={uniqueBrands}
+      defaultBrands={uniqueBrands}
       defaultBrand={brand}
       defaultColor={color}
       defaultSize={size}

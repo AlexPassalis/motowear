@@ -1,144 +1,69 @@
 'use client'
 
 import { ProductRow } from '@/data/types'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
+import Image from 'next/image'
+import { Header } from '@/components/Header'
 import { useState } from 'react'
+import { AiOutlineLeftCircle, AiOutlineRightCircle } from 'react-icons/ai'
 
 type ProductPageClientProps = {
   type: string
-  productVersions: ProductRow[]
-  defaultVersion: string | undefined
-  brands: string[]
-  defaultBrand: string | undefined
-  defaultColor: string | undefined
-  defaultSize: string | undefined
+  defaultVersions: ProductRow[]
+  defaultVersion?: string
+  defaultBrands: string[]
+  defaultBrand?: string
+  defaultColor?: string
+  defaultSize?: string
 }
 
 export function ProductPageClient({
   type,
-  productVersions,
+  defaultVersions,
   defaultVersion,
-  brands,
+  defaultBrands,
   defaultBrand,
   defaultColor,
   defaultSize,
 }: ProductPageClientProps) {
-  const router = useRouter()
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
-  const [versions, setVersions] = useState(
-    defaultBrand
-      ? productVersions.filter(p => p.brand === defaultBrand)
-      : productVersions
-  )
-  const [version, setVersion] = useState(
-    defaultVersion
-      ? productVersions.find(v => v.version === defaultVersion) ??
-          productVersions[0]
-      : productVersions[0]
-  )
+  console.log(defaultVersions)
 
-  const [colors, setColors] = useState(
-    defaultVersion
-      ? productVersions
-          .filter(p => p.version === defaultVersion)
-          .map(v => v.color)
-          .filter(v => v !== null)
-      : productVersions.map(v => v.color).filter(v => v !== null)
-  )
-  const [color, setColor] = useState(defaultColor ?? colors[0])
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
+  const [version, setVersion] = useState(defaultVersions[0])
 
   return (
-    <form className="flex flex-col justify-center h-screen items-center gap-4">
-      <h1>Type: {type}</h1>
-
-      {brands.length !== 0 ? (
-        <div className="border rounded-lg border-neutral-300 bg-white px-4 py-2">
-          <label htmlFor="brand">Brand: </label>
-          <select
-            id="brand"
-            defaultValue={defaultBrand ?? '-'}
-            onChange={e => {
-              const params = new URLSearchParams(searchParams?.toString())
-              const selectedBrand = e.target.value
-              if (selectedBrand === '-') {
-                setVersions(productVersions)
-                params.delete('brand')
-                params.delete('version')
-              } else {
-                setVersions(
-                  productVersions.filter(p => p.brand === selectedBrand)
-                )
-                params.set('brand', selectedBrand)
-                params.delete('version')
-              }
-              router.push(`${pathname}?${params.toString()}`)
-            }}
-          >
-            <option value="-" className="text-center">
-              -
-            </option>
-            {brands.map(b => (
-              <option key={b} value={b}>
-                {b}
-              </option>
-            ))}
-          </select>
+    <>
+      <Header />
+      <div className="relative aspect-square bg-gray-50 rounded-lg overflow-hidden">
+        <div>
+          <Image
+            src={`http://minio:9000/product/${type}/${version.version}/${version.images[0]}`}
+            alt={version.version}
+            fill
+            className="object-contain"
+          />
         </div>
-      ) : null}
-
-      {productVersions.length > 1 ? (
-        <div className="border rounded-lg border-neutral-300 bg-white px-4 py-2">
-          <label htmlFor="version">Version: </label>
-          <select
-            id="version"
-            defaultValue={version.version}
-            onChange={e => {
-              const selectedVersion = e.target.value
-              setVersion(
-                productVersions.find(v => v.version === e.target.value) ??
-                  productVersions[0]
-              )
-              const params = new URLSearchParams(searchParams?.toString())
-              params.set('version', selectedVersion)
-              router.push(`${pathname}?${params.toString()}`)
-            }}
-          >
-            {versions.map(product => (
-              <option key={product.id} value={product.version}>
-                {product.version}
-              </option>
-            ))}
-          </select>
-        </div>
-      ) : null}
-
-      {colors.length > 1 ? (
-        <div className="border rounded-lg border-neutral-300 bg-white px-4 py-2">
-          <label htmlFor="color">Color: </label>
-          <select
-            id="color"
-            defaultValue={defaultColor ?? colors[0]}
-            onChange={e => {
-              const selectedColor = e.target.value
-              setColor(selectedColor)
-            }}
-          >
-            {colors.map(c => (
-              <option key={c}>{c}</option>
-            ))}
-          </select>
-        </div>
-      ) : null}
-
-      <h1>{defaultSize}</h1>
-
-      <button
-        type="submit"
-        onClick={e => {
-          e.preventDefault()
-        }}
-      ></button>
-    </form>
+        <button
+          onClick={() => {}}
+          className="absolute left-4 top-1/2 transform -translate-y-1/2 flex justify-center items-center h-10 w-10 rounded-md border border-neutral-200 bg-white transition-colors hover:cursor-pointer group"
+        >
+          <AiOutlineLeftCircle className="transition-transform duration-200 ease-in-out group-hover:scale-150" />
+        </button>
+        <button
+          onClick={() => {}}
+          className="absolute right-4 top-1/2 transform -translate-y-1/2 flex justify-center items-center h-10 w-10 rounded-md border border-neutral-200 bg-white transition-colors hover:cursor-pointer group"
+        >
+          <AiOutlineRightCircle className="transition-transform duration-200 ease-in-out group-hover:scale-150" />
+        </button>
+      </div>
+      <div className="flex gap-2 m-2">
+        <button>all</button>
+        {defaultBrands.map(b => (
+          <button key={b}>{b}</button>
+        ))}
+      </div>
+    </>
   )
 }

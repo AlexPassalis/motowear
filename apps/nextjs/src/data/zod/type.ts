@@ -5,13 +5,13 @@ export const typeProduct = z.record(
   z.array(
     z.object({
       id: z.string(),
-      brand: z.string().nullable(),
       version: z.string(),
       description: z.string(),
-      color: z.string().nullable(),
       images: z.array(z.string()),
-      sizes: z.array(z.string()).nullable(),
       price: z.number(),
+      brand: z.string().nullable(),
+      color: z.string().nullable(),
+      sizes: z.array(z.string()),
       price_before: z.number().nullable(),
     })
   )

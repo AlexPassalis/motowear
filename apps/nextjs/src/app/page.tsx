@@ -1,9 +1,12 @@
+import { getProductTypes } from '@/utils/getPostgres'
 import { Header } from '@/components/Header'
 
-export default function HomePage() {
+export default async function HomePage() {
+  const productTypes = await getProductTypes()
+
   return (
     <>
-      <Header />
+      <Header productTypes={productTypes} />
     </>
   )
 }

@@ -1,8 +1,8 @@
 import { Product, ProductTables, ProductRow } from '@/data/types'
 import { postgres } from '@/lib/postgres'
 
-export async function getProductPostgres() {
-  const { rows: productTable }: { rows: ProductTables } =
+async function getProductTables() {
+  const { rows: productTables }: { rows: ProductTables } =
     await postgres.execute(
       `
         SELECT table_name 
@@ -10,11 +10,21 @@ export async function getProductPostgres() {
         WHERE table_schema = 'product';
         `
     )
+  return productTables
+}
+
+export async function getProductTypes() {
+  const productTables = await getProductTables()
+  return productTables.map(productTable => productTable.table_name)
+}
+
+export async function getProductPostgres() {
+  const productTables = await getProductTables()
 
   const product: Product = {}
-  if (productTable.length !== 0) {
+  if (productTables.length !== 0) {
     await Promise.all(
-      productTable.map(async obj => {
+      productTables.map(async obj => {
         const { rows: tableRows }: { rows: ProductRow[] } =
           await postgres.execute(`SELECT * FROM product."${obj.table_name}"`)
         product[obj.table_name] = tableRows
