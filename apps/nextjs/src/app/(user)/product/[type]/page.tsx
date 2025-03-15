@@ -1,6 +1,6 @@
 import { ProductRow } from '@/data/types'
 import { postgres } from '@/lib/postgres'
-import { ProductPageClient } from '@/app/product/[type]/client'
+import { ProductPageClient } from '@/app/(user)/product/[type]/client'
 import { getProductTypes } from '@/utils/getPostgres'
 
 type ProductPageProps = {
@@ -48,6 +48,7 @@ export default async function ProductPage({
       uniqueBrands={uniqueBrands}
       uniqueVersions={uniqueVersions}
       defaultVersions={tableRows}
+      defaultVersion={version}
     />
   )
 }

@@ -24,7 +24,7 @@ export function Header({ productTypes }: HeaderProps) {
   const [isSearchOpen, setIsSearchOpen] = useState(false)
 
   return (
-    <>
+    <header className="relative z-50">
       <Main
         isMenuOpen={isMenuOpen}
         setIsMenuOpen={setIsMenuOpen}
@@ -40,7 +40,7 @@ export function Header({ productTypes }: HeaderProps) {
       />
       <Cart isCartOpen={isCartOpen} setIsCartOpen={setIsCartOpen} />
       <Search isSearchOpen={isSearchOpen} setIsSearchOpen={setIsSearchOpen} />
-    </>
+    </header>
   )
 }
 
