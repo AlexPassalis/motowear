@@ -8,26 +8,20 @@ import { useState } from 'react'
 import { AiOutlineLeftCircle, AiOutlineRightCircle } from 'react-icons/ai'
 
 type ProductPageClientProps = {
+  productTypes: string[]
   type: string
+  uniqueBrands: string[]
+  uniqueVersions: string[]
   defaultVersions: ProductRow[]
-  defaultVersion?: string
-  defaultBrands: string[]
-  defaultBrand?: string
-  defaultColor?: string
-  defaultSize?: string
 }
 
 export function ProductPageClient({
+  productTypes,
   type,
+  uniqueBrands,
+  uniqueVersions,
   defaultVersions,
-  defaultVersion,
-  defaultBrands,
-  defaultBrand,
-  defaultColor,
-  defaultSize,
 }: ProductPageClientProps) {
-  console.log(defaultVersions)
-
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -35,16 +29,14 @@ export function ProductPageClient({
 
   return (
     <>
-      <Header />
-      <div className="relative aspect-square bg-gray-50 rounded-lg overflow-hidden">
-        <div>
-          <Image
-            src={`http://minio:9000/product/${type}/${version.version}/${version.images[0]}`}
-            alt={version.version}
-            fill
-            className="object-contain"
-          />
-        </div>
+      <Header productTypes={productTypes} />
+      <div className="relative w-full h-[500px]">
+        <Image
+          src={`http://minio:9000/product/${type}/${version.version}/${version.images[0]}`}
+          alt={version.version}
+          fill
+          priority
+        />
         <button
           onClick={() => {}}
           className="absolute left-4 top-1/2 transform -translate-y-1/2 flex justify-center items-center h-10 w-10 rounded-md border border-neutral-200 bg-white transition-colors hover:cursor-pointer group"
@@ -58,11 +50,30 @@ export function ProductPageClient({
           <AiOutlineRightCircle className="transition-transform duration-200 ease-in-out group-hover:scale-150" />
         </button>
       </div>
-      <div className="flex gap-2 m-2">
-        <button>all</button>
-        {defaultBrands.map(b => (
-          <button key={b}>{b}</button>
-        ))}
+      <div className="flex gap-4 p-8">
+        {uniqueBrands.length > 0 && (
+          <>
+            <label htmlFor="brands">Filter versions by brand: </label>
+            <select id="brands">
+              <option value={'-'} className="text-center">
+                -
+              </option>
+              {uniqueBrands.map(brand => (
+                <option key={brand} value={brand}>
+                  {brand}
+                </option>
+              ))}
+            </select>
+          </>
+        )}
+        <label htmlFor="versions">Find version: </label>
+        <select id="versions">
+          {uniqueVersions.map(version => (
+            <option key={version} value={version}>
+              {version}
+            </option>
+          ))}
+        </select>
       </div>
     </>
   )

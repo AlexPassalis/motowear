@@ -22,7 +22,6 @@ export async function updateTypesense() {
         { name: 'type', type: 'string' as const },
         { name: 'id', type: 'string' as const },
         { name: 'version', type: 'string' as const },
-        { name: 'description', type: 'string' as const },
         { name: 'images', type: 'string[]' as const },
         { name: 'price', type: 'float' as const },
         { name: 'brand', type: 'string' as const },
@@ -51,4 +50,31 @@ export async function updateTypesense() {
       }
     }
   }
+}
+
+export async function deleteTypesenseVersion(id: string) {
+  await typesense.collections(collectionName).documents(id).delete()
+}
+
+export async function deleteTypesenseImage(id: string, image: string) {
+  const document = await typesense
+    .collections(collectionName)
+    .documents(id)
+    .retrieve()
+
+  const updatedImages = (document?.images || []).filter(
+    (img: string) => img !== image
+  )
+
+  await typesense
+    .collections(collectionName)
+    .documents(id)
+    .update({ images: updatedImages })
+}
+
+export async function deleteTypesenseType(productType: string) {
+  await typesense
+    .collections(collectionName)
+    .documents()
+    .delete({ filter_by: `type:=${productType}` })
 }

@@ -5,9 +5,9 @@ export type ProductRow = {
   description: string
   images: string[]
   price: number
-  brand: null | string
-  color: null | string
+  brand: string
+  color: string
   sizes: string[]
-  price_before: null | number
+  price_before: number
 }
 export type Product = { [key: string]: ProductRow[] }

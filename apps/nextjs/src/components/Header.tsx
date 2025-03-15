@@ -240,12 +240,42 @@ function Search({ isSearchOpen, setIsSearchOpen }: SearchProps) {
 }
 
 function SearchHit({ hit }: { hit: ProductRow }) {
-  console.log(hit)
   return (
-    <div className="border border-gray-300 rounded p-2 mb-2">
-      <h2 className="text-lg font-bold">{hit.version}</h2>
-      <p className="text-sm text-gray-700">Type: {hit.brand}</p>
-      <p className="text-sm text-gray-500">Price: {hit.price}</p>
+    <div className="p-2 mb-2 border border-gray-300 rounded-lg">
+      <Link href={`${ROUTE_PRODUCT}/${hit.type}?version=${hit.version}`}>
+        <div className="flex gap-2">
+          <Image
+            src={`http://minio:9000/product/${hit.type}/${hit.version}/${hit.images[0]}`}
+            alt={hit.version}
+            width={100}
+            height={100}
+          />
+          <div className="w-full">
+            <div className="flex justify-between text-2xl">
+              <h2>{hit.type}</h2>
+              <h2 className="font-bold">{hit.version}</h2>
+              <h2 className="text-gray-700">{hit.brand}</h2>
+            </div>
+            <div className="flex gap-4 items-center text-xl">
+              <h2>Τιμή: </h2>
+              <h2 className="text-red-500">{hit.price}€</h2>
+              <h2 className="text-gray-500 line-through">
+                {hit.price_before > 0 ? `${hit.price_before}€` : ''}
+              </h2>
+            </div>
+            <div className="flex gap-4 items-center text-xl">
+              <h2>Χρώμα: </h2>
+              <h2>{hit.color}</h2>
+            </div>
+            <div className="flex gap-4 items-center text-xl">
+              <h2>Μεγέθοι: </h2>
+              {hit.sizes.map(size => (
+                <h2 key={`${hit.id}-${size}`}>{size}</h2>
+              ))}
+            </div>
+          </div>
+        </div>
+      </Link>
     </div>
   )
 }

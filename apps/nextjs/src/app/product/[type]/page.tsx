@@ -1,8 +1,7 @@
-import { ROUTE_NOT_FOUND } from '@/data/routes'
 import { ProductRow } from '@/data/types'
 import { postgres } from '@/lib/postgres'
-import { redirect } from 'next/navigation'
 import { ProductPageClient } from '@/app/product/[type]/client'
+import { getProductTypes } from '@/utils/getPostgres'
 
 type ProductPageProps = {
   params: Promise<{
@@ -15,26 +14,23 @@ export default async function ProductPage({
   params,
   searchParams,
 }: ProductPageProps) {
-  const [resolvedParams, resolvedSearchParams] = await Promise.all([
-    params,
-    searchParams,
-  ])
-
+  const [resolvedParams, resolvedSearchParams, productTypes] =
+    await Promise.all([params, searchParams, getProductTypes()])
   const type = decodeURIComponent(resolvedParams.type)
-
   const { rows: tableRows }: { rows: ProductRow[] } = await postgres.execute(
     `SELECT * FROM product."${type}"`
   )
-  const version = resolvedSearchParams['version']
-    ? decodeURIComponent(resolvedSearchParams['version'])
-    : undefined
 
   const uniqueBrands = Array.from(
     new Set(
       tableRows.map(row => row.brand).filter((b): b is string => b !== null)
     )
   )
+  const uniqueVersions = Array.from(new Set(tableRows.map(row => row.version)))
 
+  const version = resolvedSearchParams['version']
+    ? decodeURIComponent(resolvedSearchParams['version'])
+    : undefined
   const brand = resolvedSearchParams['brand']
     ? decodeURIComponent(resolvedSearchParams['brand'])
     : undefined
@@ -47,13 +43,11 @@ export default async function ProductPage({
 
   return (
     <ProductPageClient
+      productTypes={productTypes}
       type={type}
+      uniqueBrands={uniqueBrands}
+      uniqueVersions={uniqueVersions}
       defaultVersions={tableRows}
-      defaultVersion={version}
-      defaultBrands={uniqueBrands}
-      defaultBrand={brand}
-      defaultColor={color}
-      defaultSize={size}
     />
   )
 }

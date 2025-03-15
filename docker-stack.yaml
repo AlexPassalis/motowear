@@ -1,0 +1,7 @@
+healthcheck:
+  start_period: 30s
+  start_interval: 5s
+  test: ['CMD', '/dozzle', 'healthcheck']
+  interval: 10s
+  timeout: 5s
+  retries: 2

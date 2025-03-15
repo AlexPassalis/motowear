@@ -65,3 +65,49 @@ export function uploadFile(file: File, objectName: string): Promise<string> {
     })
   })
 }
+
+export function deleteFile(objectName: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    minio.removeObject(bucketName, objectName, err => {
+      if (err) {
+        console.error(`Error deleting file ${objectName} from MinIO:`, err)
+        return reject(err)
+      }
+      console.log(
+        `File ${objectName} deleted successfully from bucket ${bucketName}`
+      )
+      resolve()
+    })
+  })
+}
+
+export function deleteTypeImages(productType: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const prefix = `${productType}/`
+    const objectsToDelete: string[] = []
+    const stream = minio.listObjects(bucketName, prefix, true)
+
+    stream.on('data', obj => {
+      if (obj.name) {
+        objectsToDelete.push(obj.name)
+      }
+    })
+    stream.on('error', err => reject(err))
+    stream.on('end', () => {
+      if (objectsToDelete.length > 0) {
+        ;(minio as any).removeObjects(
+          bucketName,
+          objectsToDelete,
+          (err: Error) => {
+            if (err) {
+              return reject(err)
+            }
+            resolve()
+          }
+        )
+      } else {
+        resolve()
+      }
+    })
+  })
+}

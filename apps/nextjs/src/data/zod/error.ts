@@ -1,6 +1,8 @@
 export const errorUnexpected = 'unexpected' as const
 
 export const errorPostgres = 'postgres' as const
+export const errorMinio = 'minio' as const
+export const errorTypesense = 'typesense' as const
 
 export const errorInvalidProductType = 'invalid-product-type' as const
 
