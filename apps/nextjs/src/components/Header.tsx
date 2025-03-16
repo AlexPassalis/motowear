@@ -62,7 +62,7 @@ function Main({
   setIsSearchOpen,
 }: MainProps) {
   return (
-    <header className="relative flex justify-between items-center w-full p-4 border-b border-neutral-300">
+    <div className="relative flex justify-between items-center w-full p-4 border-b border-neutral-300">
       <div className="flex justify-start">
         <button
           onClick={() => {
@@ -131,7 +131,7 @@ function Main({
           <AiOutlineShopping className="transition-transform duration-200 ease-in-out group-hover:scale-150" />
         </button>
       </div>
-    </header>
+    </div>
   )
 }
 
@@ -158,11 +158,17 @@ function Menu({ productTypes, isMenuOpen, setIsMenuOpen }: MenuProps) {
           </button>
           <h1 className="text-2xl text-center font-bold">Επιλογές</h1>
         </div>
-        {productTypes.map(productType => (
-          <Link key={productType} href={`${ROUTE_PRODUCT}/${productType}`}>
-            {productType}
-          </Link>
-        ))}
+        <nav>
+          <ul>
+            {productTypes.map(productType => (
+              <li key={productType}>
+                <Link href={`${ROUTE_PRODUCT}/${productType}`}>
+                  {productType}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
       </div>
     </div>
   )

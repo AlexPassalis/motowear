@@ -7,7 +7,7 @@ type ProductPageProps = {
   params: Promise<{
     type: string
   }>
-  searchParams: Promise<{ [key: string]: string | undefined }>
+  searchParams: Promise<{ [version: string]: string | undefined }>
 }
 
 export default async function ProductPage({
@@ -16,39 +16,33 @@ export default async function ProductPage({
 }: ProductPageProps) {
   const [resolvedParams, resolvedSearchParams, productTypes] =
     await Promise.all([params, searchParams, getProductTypes()])
-  const type = decodeURIComponent(resolvedParams.type)
-  const { rows: tableRows }: { rows: ProductRow[] } = await postgres.execute(
-    `SELECT * FROM product."${type}"`
-  )
 
-  const uniqueBrands = Array.from(
-    new Set(
-      tableRows.map(row => row.brand).filter((b): b is string => b !== null)
-    )
-  )
-  const uniqueVersions = Array.from(new Set(tableRows.map(row => row.version)))
-
-  const version = resolvedSearchParams['version']
+  const paramsType = decodeURIComponent(resolvedParams.type)
+  const searchParamsVersion = resolvedSearchParams['version']
     ? decodeURIComponent(resolvedSearchParams['version'])
     : undefined
-  const brand = resolvedSearchParams['brand']
-    ? decodeURIComponent(resolvedSearchParams['brand'])
-    : undefined
-  const color = resolvedSearchParams['color']
-    ? decodeURIComponent(resolvedSearchParams['color'])
-    : undefined
-  const size = resolvedSearchParams['size']
-    ? decodeURIComponent(resolvedSearchParams['size'])
-    : undefined
+
+  const { rows: postgresVersions }: { rows: ProductRow[] } =
+    await postgres.execute(`SELECT * FROM product."${paramsType}"`)
+
+  const displayedBrands = Array.from(
+    new Set(
+      postgresVersions
+        .map(row => row.brand)
+        .filter((b): b is string => b !== null)
+    )
+  )
+  const uniqueVersions = Array.from(
+    new Set(postgresVersions.map(row => row.version))
+  )
 
   return (
     <ProductPageClient
-      productTypes={productTypes}
-      type={type}
-      uniqueBrands={uniqueBrands}
+      paramsType={paramsType}
+      searchParamsVersion={searchParamsVersion}
+      postgresVersions={postgresVersions}
+      displayedBrands={displayedBrands}
       uniqueVersions={uniqueVersions}
-      defaultVersions={tableRows}
-      defaultVersion={version}
     />
   )
 }

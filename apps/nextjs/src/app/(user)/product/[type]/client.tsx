@@ -1,61 +1,171 @@
 'use client'
 
 import { ProductRow } from '@/data/types'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { RefObject, useRef, useState } from 'react'
+import { useState } from 'react'
 import { AiOutlineLeftCircle, AiOutlineRightCircle } from 'react-icons/ai'
+import { useDisclosure } from '@mantine/hooks'
+import { Modal, Button } from '@mantine/core'
+import { ROUTE_PRODUCT } from '@/data/routes'
 
 type ProductPageClientProps = {
-  productTypes: string[]
-  type: string
-  uniqueBrands: string[]
+  paramsType: string
+  searchParamsVersion: undefined | string
+  postgresVersions: ProductRow[]
+  displayedBrands: string[]
   uniqueVersions: string[]
-  defaultVersions: ProductRow[]
-  defaultVersion: undefined | string
 }
 
 export function ProductPageClient({
-  productTypes,
-  type,
-  uniqueBrands,
+  paramsType,
+  searchParamsVersion,
+  postgresVersions,
+  displayedBrands,
   uniqueVersions,
-  defaultVersions,
-  defaultVersion,
 }: ProductPageClientProps) {
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const dialogRef = useRef<null | HTMLDialogElement>(null)
-  const [dialogVersion, setDialogVersion] = useState<
-    '' | 'brand' | 'version' | 'color' | 'size'
-  >('')
 
-  const [choosenVersion, setChoosenVersion] = useState(
-    defaultVersions.find(row => row.version === defaultVersion) ??
-      defaultVersions[0]
+  const [displayedVersions, setDisplayedVersions] = useState(uniqueVersions)
+  const [selectedVersion, setSelectedVersion] = useState(
+    searchParamsVersion ?? postgresVersions[0].version
   )
 
-  function openDialog(string: 'brand' | 'version' | 'color' | 'size') {
-    setDialogVersion(string)
-    dialogRef.current?.showModal()
-  }
-  function closeDialog() {
-    dialogRef.current?.close()
-    setDialogVersion('')
+  const [selectedBrand, setSelectedBrand] = useState('-')
+
+  const defaultColorVersions = postgresVersions
+    .filter(product => product.version === searchParamsVersion)
+    .map(product => product.color)
+  const colorVersions = postgresVersions
+    .filter(product => product.version === postgresVersions[0].version)
+    .map(product => product.color)
+  const [displayedColors, setDisplayedColors] = useState(
+    searchParamsVersion
+      ? defaultColorVersions.length !== 0
+        ? defaultColorVersions
+        : colorVersions
+      : colorVersions
+  )
+  const [selectedColor, setSelectedColor] = useState(
+    searchParamsVersion
+      ? postgresVersions.find(
+          product => product.version === searchParamsVersion
+        )?.color ?? postgresVersions[0].color
+      : postgresVersions[0].color
+  )
+
+  const defaultSizesVersions = postgresVersions.find(
+    product => product.version === searchParamsVersion
+  )?.sizes
+  const sizesVersions = postgresVersions[0].sizes
+  const [displayedSizes, setDisplayedSizes] = useState(
+    searchParamsVersion ? defaultSizesVersions ?? sizesVersions : sizesVersions
+  )
+  const [selectedSize, setSelectedSize] = useState(
+    searchParamsVersion
+      ? defaultSizesVersions
+        ? defaultSizesVersions[0]
+        : sizesVersions[0]
+      : sizesVersions[0]
+  )
+
+  const [openedModal, { open: openModal, close: closeModal }] =
+    useDisclosure(false)
+  const [modalVersion, setModalVersion] = useState<
+    '-' | 'version' | 'brand' | 'color' | 'size'
+  >('-')
+  function renderModalContent() {
+    switch (modalVersion) {
+      case 'brand':
+        return (
+          <>
+            <Button
+              onClick={() => {
+                setSelectedBrand('-')
+                setDisplayedVersions(uniqueVersions)
+                closeModal()
+              }}
+              className="border border-black p-2 hover:cursor-pointer"
+            >
+              -
+            </Button>
+            {displayedBrands.map(brand => (
+              <Button
+                key={brand}
+                onClick={() => {
+                  setSelectedBrand(brand)
+                  setDisplayedVersions(
+                    postgresVersions
+                      .filter(product => product.brand === brand)
+                      .map(product => product.version)
+                  )
+                  setSelectedVersion(
+                    postgresVersions.find(product => product.brand === brand)
+                      ?.version ?? postgresVersions[0].version
+                  )
+                  closeModal()
+                  router.push(`${ROUTE_PRODUCT}/${paramsType}`)
+                }}
+                className={`${
+                  brand === selectedBrand && 'text-red-500'
+                } border border-black p-2 hover:cursor-pointer`}
+              >
+                {brand}
+              </Button>
+            ))}
+          </>
+        )
+      case 'version':
+        return (
+          <>
+            {displayedVersions.map(version => (
+              <Button
+                key={version}
+                onClick={() => {
+                  setSelectedVersion(version)
+                  closeModal()
+                  router.push(
+                    `${ROUTE_PRODUCT}/${paramsType}?version=${version}`
+                  )
+                }}
+                className={`${
+                  version === selectedVersion && 'text-red-500'
+                } border border-black p-2 hover:cursor-pointer`}
+              >
+                {version}
+              </Button>
+            ))}
+          </>
+        )
+      case 'color':
+        return <h1>Color</h1>
+      case 'size':
+        return <h1>Size</h1>
+      default:
+        return <p>unknown modal version</p>
+    }
   }
 
   return (
     <>
-      <Dialog
-        dialogRef={dialogRef}
-        dialogVersion={dialogVersion}
-        closeDialog={closeDialog}
-      />
+      <Modal
+        opened={openedModal}
+        onClose={closeModal}
+        title="Διάλεξε εκδωχή: "
+        centered
+      >
+        <div className="flex flex-col gap-2">{renderModalContent()}</div>
+      </Modal>
+
       <div className="flex flex-col">
         <div className="relative w-full h-[400px]">
           <Image
-            src={`http://minio:9000/product/${type}/${choosenVersion.version}/${choosenVersion.images[0]}`}
-            alt={choosenVersion.version}
+            src={`http://minio:9000/product/${paramsType}/${selectedVersion}/${
+              postgresVersions.find(
+                product => product.version === selectedVersion
+              )?.images[0]
+            }`}
+            alt={selectedVersion}
             quality={100}
             fill
             sizes="100vw"
@@ -76,75 +186,49 @@ export function ProductPageClient({
           </button>
         </div>
       </div>
-      <div className="flex flex-col items-start gap-4 m-4">
-        <button onClick={() => {}} className="border p-2 hover: cursor-pointer">
-          Διάλεξε μάρκα: {}
-        </button>
-        <button
+      <div className="flex justify-between m-2">
+        <h1>{selectedVersion}</h1>
+        <h1>{selectedBrand}</h1>
+      </div>
+      <div className="flex justify-between m-2">
+        <Button
+          size="compact-sm"
           onClick={() => {
-            openDialog('brand')
+            openModal()
+            setModalVersion('version')
           }}
-          className="border p-2 hover: cursor-pointer"
         >
-          Διάλεξε εκδωχή:{' '}
-          <span className="text-red-500">{choosenVersion.version}</span>
-        </button>
+          Διάλεξε εκδωχή
+        </Button>
+        <Button
+          size="compact-sm"
+          onClick={() => {
+            openModal()
+            setModalVersion('brand')
+          }}
+        >
+          Διάλεξε μάρκα
+        </Button>
+      </div>
+      <div className="flex items-center m-2">
+        <h1 className="mr-2">Χρώματα</h1>
+        <div className="flex gap-2">
+          {displayedColors.map(color => (
+            <div
+              key={color}
+              className={`bg-${color} w-8 h-8 rounded-full hover:cursor-pointer`}
+            />
+          ))}
+        </div>
+      </div>
+      <div className="flex items-center m-2">
+        <h1 className="mr-2">Μεγέθοι</h1>
+        <div className="flex gap-2">
+          {displayedSizes.map(size => (
+            <Button key={size}>{size}</Button>
+          ))}
+        </div>
       </div>
     </>
-  )
-}
-
-type DialogProps = {
-  dialogRef: RefObject<HTMLDialogElement | null>
-  dialogVersion: '' | 'brand' | 'version' | 'color' | 'size'
-  closeDialog: () => void
-}
-
-function Dialog({ dialogRef, dialogVersion, closeDialog }: DialogProps) {
-  function ExitButton() {
-    return <button onClick={() => closeDialog()}>Έξοδος</button>
-  }
-  function renderContent() {
-    switch (dialogVersion) {
-      case 'brand':
-        return (
-          <>
-            <h1>Brand</h1>
-            <ExitButton />
-          </>
-        )
-      case 'version':
-        return (
-          <>
-            <h1>Version</h1>
-            <ExitButton />
-          </>
-        )
-      case 'color':
-        return (
-          <>
-            <h1>Color</h1>
-            <ExitButton />
-          </>
-        )
-      case 'size':
-        return (
-          <>
-            <h1>Size</h1>
-            <ExitButton />
-          </>
-        )
-      default:
-        return <ExitButton />
-    }
-  }
-
-  return (
-    <dialog
-      ref={dialogRef}
-      className="top-1/2 left-1/2 transform -translate-1/2 border rounded-lg border-neutral-300 bg-white px-4 py-2"
-    >
-      {renderContent()}
-    </dialog>
   )
 }

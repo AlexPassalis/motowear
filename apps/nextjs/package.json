@@ -10,6 +10,8 @@
     "start": "next start"
   },
   "dependencies": {
+    "@mantine/core": "^7.17.2",
+    "@mantine/hooks": "^7.17.2",
     "axios": "^1.8.1",
     "better-auth": "^1.2.3",
     "cross-env": "^7.0.3",
@@ -38,10 +40,14 @@
     "@types/pg": "^8.11.11",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "autoprefixer": "^10.4.21",
     "eslint": "^9",
     "eslint-config-next": "15.2.1",
+    "postcss": "^8.5.3",
+    "postcss-preset-mantine": "^1.17.0",
+    "postcss-simple-vars": "^7.0.1",
     "tailwindcss": "^4",
     "typescript": "^5"
   },
-  "packageManager": "pnpm@9.15.4"
+  "packageManager": "pnpm@10.6.3"
 }
