@@ -8,11 +8,8 @@ export default async function UserLayout({
 }: Readonly<{
   children: ReactNode
 }>) {
-  const productTypes = await getProductTypes()
-
   return (
     <>
-      <Header productTypes={productTypes} />
       {children}
       <Footer />
     </>

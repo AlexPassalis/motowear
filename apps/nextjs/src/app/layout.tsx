@@ -9,6 +9,8 @@ import {
   createTheme,
   mantineHtmlProps,
 } from '@mantine/core'
+import '@mantine/carousel/styles.css'
+import '@mantine/notifications/styles.css'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',

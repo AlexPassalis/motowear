@@ -7,24 +7,29 @@ import { Dispatch, SetStateAction, useState } from 'react'
 import {
   AiOutlineMenu,
   AiOutlineShopping,
+  AiFillShopping,
   AiOutlineClose,
 } from 'react-icons/ai'
 import { HiMagnifyingGlass } from 'react-icons/hi2'
 import { InstantSearch, SearchBox, Hits } from 'react-instantsearch'
 import { typesenseClient } from '@/lib/typesense/client'
 import { ProductRow } from '@/data/types'
+import { LocalStorageCart } from '@/utils/localStorage'
+import { Indicator, Grid } from '@mantine/core'
 
 type HeaderProps = {
   productTypes: string[]
+  cart: LocalStorageCart
+  setCart: Dispatch<SetStateAction<LocalStorageCart>>
 }
 
-export function Header({ productTypes }: HeaderProps) {
+export function Header({ productTypes, cart, setCart }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
 
   return (
-    <header className="relative z-50">
+    <header className="relative z-20">
       <Main
         isMenuOpen={isMenuOpen}
         setIsMenuOpen={setIsMenuOpen}
@@ -32,25 +37,27 @@ export function Header({ productTypes }: HeaderProps) {
         setIsCartOpen={setIsCartOpen}
         isSearchOpen={isSearchOpen}
         setIsSearchOpen={setIsSearchOpen}
+        cart={cart}
       />
       <Menu
         productTypes={productTypes}
         isMenuOpen={isMenuOpen}
         setIsMenuOpen={setIsMenuOpen}
       />
-      <Cart isCartOpen={isCartOpen} setIsCartOpen={setIsCartOpen} />
+      <Cart isCartOpen={isCartOpen} setIsCartOpen={setIsCartOpen} cart={cart} />
       <Search isSearchOpen={isSearchOpen} setIsSearchOpen={setIsSearchOpen} />
     </header>
   )
 }
 
-interface MainProps {
+type MainProps = {
   isMenuOpen: boolean
   setIsMenuOpen: Dispatch<SetStateAction<boolean>>
   isCartOpen: boolean
   setIsCartOpen: Dispatch<SetStateAction<boolean>>
   isSearchOpen: boolean
   setIsSearchOpen: Dispatch<SetStateAction<boolean>>
+  cart: LocalStorageCart
 }
 
 function Main({
@@ -60,6 +67,7 @@ function Main({
   setIsCartOpen,
   isSearchOpen,
   setIsSearchOpen,
+  cart,
 }: MainProps) {
   return (
     <div className="relative flex justify-between items-center w-full p-4 border-b border-neutral-300">
@@ -116,26 +124,39 @@ function Main({
             className="transition-transform duration-200 ease-in-out group-hover:scale-150"
           />
         </button>
-        <button
-          onClick={() => {
-            if (isMenuOpen) {
-              setIsMenuOpen(false)
-            }
-            if (isSearchOpen) {
-              setIsSearchOpen(false)
-            }
-            setIsCartOpen(!isCartOpen)
-          }}
-          className="flex justify-center items-center h-10 w-10 sm:scale-110 rounded-md border border-neutral-200 bg-white transition-colors hover:cursor-pointer group"
+        <Indicator
+          disabled={cart.length < 1}
+          position="bottom-end"
+          color="red"
+          label={cart.length}
+          size={18}
+          zIndex={1}
         >
-          <AiOutlineShopping className="transition-transform duration-200 ease-in-out group-hover:scale-150" />
-        </button>
+          <button
+            onClick={() => {
+              if (isMenuOpen) {
+                setIsMenuOpen(false)
+              }
+              if (isSearchOpen) {
+                setIsSearchOpen(false)
+              }
+              setIsCartOpen(!isCartOpen)
+            }}
+            className="flex justify-center items-center h-10 w-10 sm:scale-110 rounded-md border border-neutral-200 bg-white transition-colors hover:cursor-pointer group"
+          >
+            {cart.length < 1 ? (
+              <AiOutlineShopping className="transition-transform duration-200 ease-in-out group-hover:scale-150" />
+            ) : (
+              <AiFillShopping className="transition-transform duration-200 ease-in-out group-hover:scale-150" />
+            )}
+          </button>
+        </Indicator>
       </div>
     </div>
   )
 }
 
-interface MenuProps {
+type MenuProps = {
   productTypes: string[]
   isMenuOpen: boolean
   setIsMenuOpen: Dispatch<SetStateAction<boolean>>
@@ -144,7 +165,7 @@ interface MenuProps {
 function Menu({ productTypes, isMenuOpen, setIsMenuOpen }: MenuProps) {
   return (
     <div
-      className={`fixed top-0 left-0 h-full bg-neutral-50 w-80 shadow-lg transform transition-transform duration-300 ease-in-out ${
+      className={`z-10 fixed top-0 left-0 h-full bg-neutral-50 w-80 shadow-lg transform transition-transform duration-300 ease-in-out ${
         isMenuOpen ? 'translate-x-0' : '-translate-x-full'
       }`}
     >
@@ -174,20 +195,21 @@ function Menu({ productTypes, isMenuOpen, setIsMenuOpen }: MenuProps) {
   )
 }
 
-interface CartProps {
+type CartProps = {
   isCartOpen: boolean
   setIsCartOpen: Dispatch<SetStateAction<boolean>>
+  cart: LocalStorageCart
 }
 
-function Cart({ isCartOpen, setIsCartOpen }: CartProps) {
+function Cart({ isCartOpen, setIsCartOpen, cart }: CartProps) {
   return (
     <div
-      className={`fixed top-0 right-0 h-full bg-neutral-50 w-80 shadow-lg transform transition-transform duration-300 ease-in-out ${
+      className={`z-10 fixed top-0 right-0 h-full bg-neutral-50 w-80 shadow-lg transform transition-transform duration-300 ease-in-out ${
         isCartOpen ? 'translate-x-0' : 'translate-x-full'
       }`}
     >
       <div className="p-4">
-        <div className="flex justify-between items-center w-full border-b-2 pb-2 border-neutral-200">
+        <div className="flex justify-between items-center w-full border-b-2 pb-2 mb-2 border-neutral-200">
           <h1 className="text-2xl text-center font-bold">Καλάθι</h1>
           <button
             onClick={() => {
@@ -198,12 +220,78 @@ function Cart({ isCartOpen, setIsCartOpen }: CartProps) {
             <AiOutlineClose className="transition-transform duration-200 ease-in-out group-hover:scale-150" />
           </button>
         </div>
+        {cart.length < 1 ? (
+          <h1>Το καλάθι σου είναι άδειο.</h1>
+        ) : (
+          <div className="flex flex-col gap-2">
+            {cart.map(product => (
+              <div
+                key={`${product.type}-${product.version}-${product.color}-${product.size}`}
+              >
+                <Grid>
+                  <Grid.Col span={9}>
+                    <div className="flex gap-1">
+                      <h1>{product.type}</h1>
+                      <h2 className="font-bold">{product.version}</h2>
+                    </div>
+                    {product.color && (
+                      <div className="flex gap-1">
+                        <h1>Χρώμα</h1>
+                        <div
+                          className={`bg-${product.color} w-6 h-6 rounded-full`}
+                        />
+                      </div>
+                    )}
+                    {product.size && (
+                      <div className="flex gap-1">
+                        <h1>Μέγεθος</h1>
+                        <h2 className="font-bold">{product.size}</h2>
+                      </div>
+                    )}
+                    <div className="flex gap-1">
+                      <h1>Τιμή</h1>
+                      {product.price_before > 0 && (
+                        <h2 className="text-gray-500 line-through">
+                          {product.price_before * product.quantity}€
+                        </h2>
+                      )}
+                      <h2 className="font-bold">
+                        {product.price * product.quantity}€
+                      </h2>
+                    </div>
+                    {product.price_before > 0 && (
+                      <h2 className="text-green-700">
+                        (Κερδίζεις{' '}
+                        {(product.price_before - product.price) *
+                          product.quantity}
+                        €)
+                      </h2>
+                    )}
+                    <div className="flex gap-1">
+                      <h1>Ποσότητα</h1>
+                      <h2 className="font-bold">{product.quantity}</h2>
+                    </div>
+                    {product.quantity > 1 && (
+                      <h2>({product.price}€ ανά τεμάχειο)</h2>
+                    )}
+                  </Grid.Col>
+                  <Grid.Col span={3}></Grid.Col>
+                </Grid>
+
+                <Grid>
+                  <Grid.Col span={6}></Grid.Col>
+                  <Grid.Col span={6}></Grid.Col>
+                </Grid>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )
 }
 
-interface SearchProps {
+type SearchProps = {
   isSearchOpen: boolean
   setIsSearchOpen: Dispatch<SetStateAction<boolean>>
 }
@@ -211,7 +299,7 @@ interface SearchProps {
 function Search({ isSearchOpen, setIsSearchOpen }: SearchProps) {
   return (
     <div
-      className={`fixed top-0 left-0 w-full bg-neutral-50 shadow-lg transform transition-transform duration-300 ease-in-out ${
+      className={`z-10 fixed top-0 left-0 w-full bg-neutral-50 shadow-lg transform transition-transform duration-300 ease-in-out ${
         isSearchOpen ? 'translate-y-0' : '-translate-y-full'
       }`}
     >

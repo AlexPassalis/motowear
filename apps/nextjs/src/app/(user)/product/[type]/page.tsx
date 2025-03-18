@@ -40,6 +40,7 @@ export default async function ProductPage({
     <ProductPageClient
       paramsType={paramsType}
       searchParamsVersion={searchParamsVersion}
+      productTypes={productTypes}
       postgresVersions={postgresVersions}
       displayedBrands={displayedBrands}
       uniqueVersions={uniqueVersions}
