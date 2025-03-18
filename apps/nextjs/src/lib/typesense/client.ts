@@ -3,12 +3,12 @@ import TypesenseInstantSearchAdapter from 'typesense-instantsearch-adapter'
 
 export const typesenseClient = new TypesenseInstantSearchAdapter({
   server: {
-    apiKey: 'dev-xyz',
+    apiKey: env.TYPESENSE_SEARCH_ONLY_API_KEY,
     nodes: [
       {
-        port: 443,
         protocol: 'https',
         host: env.HOST,
+        port: 443,
         path: '/typesense',
       },
     ],

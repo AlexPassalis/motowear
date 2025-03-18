@@ -1,0 +1,5 @@
+.dockerignore
+.env.development
+.env.production
+.gitignore
+Dockerfile

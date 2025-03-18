@@ -1,7 +1,8 @@
 'use client'
 
 import { ROUTE_HOME, ROUTE_PRODUCT } from '@/data/routes'
-import Image from 'next/image'
+import { Image } from '@mantine/core'
+import NextImage from 'next/image'
 import Link from 'next/link'
 import { Dispatch, SetStateAction, useState } from 'react'
 import {
@@ -13,14 +14,15 @@ import {
 import { HiMagnifyingGlass } from 'react-icons/hi2'
 import { InstantSearch, SearchBox, Hits } from 'react-instantsearch'
 import { typesenseClient } from '@/lib/typesense/client'
-import { ProductRow } from '@/data/types'
-import { LocalStorageCart } from '@/utils/localStorage'
-import { Indicator, Grid } from '@mantine/core'
+import { LocalStorageCartItem } from '@/utils/localStorage'
+import { Indicator, Grid, Button } from '@mantine/core'
+import { env } from '@/env'
+import { Document } from '@/lib/typesense/server'
 
 type HeaderProps = {
   productTypes: string[]
-  cart: LocalStorageCart
-  setCart: Dispatch<SetStateAction<LocalStorageCart>>
+  cart: LocalStorageCartItem[]
+  setCart: Dispatch<SetStateAction<LocalStorageCartItem[]>>
 }
 
 export function Header({ productTypes, cart, setCart }: HeaderProps) {
@@ -44,7 +46,12 @@ export function Header({ productTypes, cart, setCart }: HeaderProps) {
         isMenuOpen={isMenuOpen}
         setIsMenuOpen={setIsMenuOpen}
       />
-      <Cart isCartOpen={isCartOpen} setIsCartOpen={setIsCartOpen} cart={cart} />
+      <Cart
+        isCartOpen={isCartOpen}
+        setIsCartOpen={setIsCartOpen}
+        cart={cart}
+        setCart={setCart}
+      />
       <Search isSearchOpen={isSearchOpen} setIsSearchOpen={setIsSearchOpen} />
     </header>
   )
@@ -57,7 +64,7 @@ type MainProps = {
   setIsCartOpen: Dispatch<SetStateAction<boolean>>
   isSearchOpen: boolean
   setIsSearchOpen: Dispatch<SetStateAction<boolean>>
-  cart: LocalStorageCart
+  cart: LocalStorageCartItem[]
 }
 
 function Main({
@@ -88,6 +95,7 @@ function Main({
         </button>
         <Link href={ROUTE_HOME} className="hidden lg:block">
           <Image
+            component={NextImage}
             src="/motowear.webp"
             width={164}
             height={164}
@@ -100,6 +108,7 @@ function Main({
       <div className="absolute left-1/2 transform -translate-x-1/2 lg:w-1/4">
         <Link href={ROUTE_HOME} className="lg:hidden">
           <Image
+            component={NextImage}
             src="/motowear.webp"
             width={164}
             height={164}
@@ -129,7 +138,7 @@ function Main({
           position="bottom-end"
           color="red"
           label={cart.length}
-          size={18}
+          size={20}
           zIndex={1}
         >
           <button
@@ -198,10 +207,11 @@ function Menu({ productTypes, isMenuOpen, setIsMenuOpen }: MenuProps) {
 type CartProps = {
   isCartOpen: boolean
   setIsCartOpen: Dispatch<SetStateAction<boolean>>
-  cart: LocalStorageCart
+  cart: LocalStorageCartItem[]
+  setCart: Dispatch<SetStateAction<LocalStorageCartItem[]>>
 }
 
-function Cart({ isCartOpen, setIsCartOpen, cart }: CartProps) {
+function Cart({ isCartOpen, setIsCartOpen, cart, setCart }: CartProps) {
   return (
     <div
       className={`z-10 fixed top-0 right-0 h-full bg-neutral-50 w-80 shadow-lg transform transition-transform duration-300 ease-in-out ${
@@ -224,12 +234,12 @@ function Cart({ isCartOpen, setIsCartOpen, cart }: CartProps) {
           <h1>Το καλάθι σου είναι άδειο.</h1>
         ) : (
           <div className="flex flex-col gap-2">
-            {cart.map(product => (
+            {cart.map((product, index) => (
               <div
                 key={`${product.type}-${product.version}-${product.color}-${product.size}`}
               >
                 <Grid>
-                  <Grid.Col span={9}>
+                  <Grid.Col span={6}>
                     <div className="flex gap-1">
                       <h1>{product.type}</h1>
                       <h2 className="font-bold">{product.version}</h2>
@@ -248,6 +258,22 @@ function Cart({ isCartOpen, setIsCartOpen, cart }: CartProps) {
                         <h2 className="font-bold">{product.size}</h2>
                       </div>
                     )}
+                  </Grid.Col>
+
+                  <Grid.Col span={6}>
+                    <div className="relative w-full aspect-square">
+                      <Image
+                        component={NextImage}
+                        src={`${env.MINIO_PRODUCT_URL}/${product.type}/${product.version}/${product.image}`}
+                        alt={`${product.type}/${product.version}`}
+                        fill
+                      />
+                    </div>
+                  </Grid.Col>
+                </Grid>
+
+                <Grid>
+                  <Grid.Col span={6}>
                     <div className="flex gap-1">
                       <h1>Τιμή</h1>
                       {product.price_before > 0 && (
@@ -267,20 +293,48 @@ function Cart({ isCartOpen, setIsCartOpen, cart }: CartProps) {
                         €)
                       </h2>
                     )}
-                    <div className="flex gap-1">
-                      <h1>Ποσότητα</h1>
-                      <h2 className="font-bold">{product.quantity}</h2>
-                    </div>
-                    {product.quantity > 1 && (
-                      <h2>({product.price}€ ανά τεμάχειο)</h2>
-                    )}
                   </Grid.Col>
-                  <Grid.Col span={3}></Grid.Col>
-                </Grid>
 
-                <Grid>
-                  <Grid.Col span={6}></Grid.Col>
-                  <Grid.Col span={6}></Grid.Col>
+                  <Grid.Col span={6}>
+                    <div className="inline-flex items-center gap-3 border">
+                      <Button
+                        onClick={() =>
+                          setCart(prev =>
+                            prev.reduce<LocalStorageCartItem[]>(
+                              (acc, item, i) => {
+                                if (i === index) {
+                                  const newQuantity = item.quantity - 1
+                                  if (newQuantity > 0) {
+                                    acc.push({ ...item, quantity: newQuantity })
+                                  }
+                                } else {
+                                  acc.push(item)
+                                }
+                                return acc
+                              },
+                              [] as LocalStorageCartItem[]
+                            )
+                          )
+                        }
+                      >
+                        -
+                      </Button>
+                      <h1>{product.quantity}</h1>
+                      <Button
+                        onClick={() =>
+                          setCart(prev =>
+                            prev.map((item, i) =>
+                              i === index
+                                ? { ...item, quantity: item.quantity + 1 }
+                                : item
+                            )
+                          )
+                        }
+                      >
+                        +
+                      </Button>
+                    </div>
+                  </Grid.Col>
                 </Grid>
               </div>
             ))}
@@ -333,12 +387,13 @@ function Search({ isSearchOpen, setIsSearchOpen }: SearchProps) {
   )
 }
 
-function SearchHit({ hit }: { hit: ProductRow }) {
+function SearchHit({ hit }: { hit: Document }) {
   return (
     <div className="p-2 mb-2 border border-gray-300 rounded-lg">
       <Link href={`${ROUTE_PRODUCT}/${hit.type}?version=${hit.version}`}>
         <div className="flex gap-2">
           <Image
+            component={NextImage}
             src={`http://minio:9000/product/${hit.type}/${hit.version}/${hit.images[0]}`}
             alt={hit.version}
             width={100}

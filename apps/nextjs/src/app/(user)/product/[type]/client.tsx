@@ -1,15 +1,15 @@
 'use client'
 
 import { ProductRow } from '@/data/types'
-import { redirect, useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useEffect, useReducer, useState } from 'react'
 import { useDisclosure, useCounter } from '@mantine/hooks'
 import { Modal, Button, Image } from '@mantine/core'
-import { ROUTE_ERROR, ROUTE_PRODUCT } from '@/data/routes'
+import { ROUTE_PRODUCT } from '@/data/routes'
 import { Header } from '@/components/Header'
 import {
   getLocalStorageCart,
-  LocalStorageCart,
+  LocalStorageCartItem,
   setLocalStorageCart,
 } from '@/utils/localStorage'
 import NextImage from 'next/image'
@@ -21,7 +21,7 @@ type ProductPageClientProps = {
   searchParamsVersion: undefined | string
   productTypes: string[]
   postgresVersions: ProductRow[]
-  displayedBrands: string[]
+  uniqueBrands: string[]
   uniqueVersions: string[]
 }
 
@@ -30,96 +30,157 @@ export function ProductPageClient({
   paramsType,
   searchParamsVersion,
   postgresVersions,
-  displayedBrands,
+  uniqueBrands,
   uniqueVersions,
 }: ProductPageClientProps) {
   const router = useRouter()
 
-  console.log(paramsType)
+  console.log(postgresVersions)
 
-  const defaultSelectedBrand = '-'
-
-  const defaultSelectedVersion =
-    searchParamsVersion ?? postgresVersions[0].version
-
-  const defaultColorVersions = postgresVersions
-    .filter(product => product.version === searchParamsVersion)
-    .map(product => product.color)
-  const colorVersions = postgresVersions
-    .filter(product => product.version === postgresVersions[0].version)
-    .map(product => product.color)
-
-  const defaultDisplayedColors = searchParamsVersion
-    ? defaultColorVersions.length !== 0
-      ? defaultColorVersions
-      : colorVersions
-    : colorVersions
-  const defaultSelectedColor = searchParamsVersion
-    ? postgresVersions.find(product => product.version === searchParamsVersion)
-        ?.color ?? postgresVersions[0].color
-    : postgresVersions[0].color
-
-  const defaultImages = searchParamsVersion
-    ? postgresVersions.find(product => product.version === searchParamsVersion)
-        ?.images ?? postgresVersions[0].images
-    : postgresVersions[0].images
-  const defaultDisplayedImages = defaultImages.map(
-    image =>
-      `${env.MINIO_PRODUCT_URL}/${paramsType}/${defaultSelectedVersion}/${image}`
-  )
-
-  const defaultDescription = searchParamsVersion
-    ? postgresVersions.find(product => product.version === searchParamsVersion)
-        ?.description ?? postgresVersions[0].description
-    : postgresVersions[0].description
-
-  const defaultSizesVersions = postgresVersions.find(
+  const productFound = postgresVersions.find(
     product => product.version === searchParamsVersion
-  )?.sizes
-  const sizesVersions = postgresVersions[0].sizes
-
-  const defaultDisplayedSizes = searchParamsVersion
-    ? defaultSizesVersions ?? sizesVersions
-    : sizesVersions
-
-  const defaultSelectedSize = searchParamsVersion
-    ? defaultSizesVersions
-      ? defaultSizesVersions[0]
-      : sizesVersions[0]
-    : sizesVersions[0]
-
-  const defaultPrice = searchParamsVersion
-    ? postgresVersions.find(product => product.version === searchParamsVersion)
-        ?.price ?? postgresVersions[0].price
-    : postgresVersions[0].price
-
-  const defaultPriceBefore = searchParamsVersion
-    ? postgresVersions.find(product => product.version === searchParamsVersion)
-        ?.price_before ?? postgresVersions[0].price_before
-    : postgresVersions[0].price_before
-
-  const [versionState, setVersionState] = useState({
-    selectedBrand: defaultSelectedBrand,
+  )
+  const fallbackProduct = postgresVersions[0]
+  const initialState = {
+    selectedBrand: '-',
     displayedVersions: uniqueVersions,
-    selectedVersion: defaultSelectedVersion,
-    displayedColors: defaultDisplayedColors,
-    selectedColor: defaultSelectedColor,
-    displayedImages: defaultDisplayedImages,
-    description: defaultDescription,
-    displayedSizes: defaultDisplayedSizes,
-    selectedSize: defaultSelectedSize,
-    price: defaultPrice,
-    price_before: defaultPriceBefore,
-  })
-  useEffect(() => {
-    console.log(versionState)
-  }, [versionState])
+    selectedVersion: searchParamsVersion ?? fallbackProduct.version,
+    displayedColors: searchParamsVersion
+      ? postgresVersions
+          .filter(product => product.version === searchParamsVersion)
+          .map(product => product.color)
+      : postgresVersions
+          .filter(product => product.version === fallbackProduct.version)
+          .map(product => product.color),
+    selectedColor: searchParamsVersion
+      ? productFound?.color ?? fallbackProduct.color
+      : fallbackProduct.color,
+    images: searchParamsVersion
+      ? productFound?.images ?? fallbackProduct.images
+      : fallbackProduct.images,
+    description: searchParamsVersion
+      ? productFound?.description ?? fallbackProduct.description
+      : fallbackProduct.description,
+    price: searchParamsVersion
+      ? productFound?.price ?? fallbackProduct.price
+      : fallbackProduct.price,
+    price_before: searchParamsVersion
+      ? productFound?.price_before ?? fallbackProduct.price_before
+      : fallbackProduct.price_before,
+    displayedSizes: searchParamsVersion
+      ? productFound?.sizes ?? fallbackProduct.sizes
+      : fallbackProduct.sizes,
+    selectedSize: searchParamsVersion
+      ? productFound?.sizes[0] ?? fallbackProduct.sizes[0]
+      : fallbackProduct.sizes[0],
+  }
+  type State = typeof initialState
+  type Action =
+    | { type: 'brand'; payload: { selectedBrand: string } }
+    | { type: 'version'; payload: { selectedVersion: string } }
+    | { type: 'color'; payload: { selectedColor: string } }
+    | { type: 'size'; payload: { selectedSize: string } }
+  function reducer(state: State, action: Action) {
+    switch (action.type) {
+      case 'brand': {
+        const selectedBrand = action.payload.selectedBrand
+        if (selectedBrand !== initialState.selectedBrand) {
+          const displayedVersions = [
+            ...new Set(
+              postgresVersions
+                .filter(product => product.brand === selectedBrand)
+                .map(product => product.version)
+            ),
+          ]
+          const displayedColors = postgresVersions
+            .filter(product => product.brand === selectedBrand)
+            .filter(product => product.version === displayedVersions[0])
+            .map(product => product.color)
+          const foundVersion = postgresVersions.find(
+            product => product.brand === selectedBrand
+          )!
+
+          return {
+            ...state,
+            selectedBrand: selectedBrand,
+            displayedVersions: displayedVersions,
+            selectedVersion: displayedVersions[0],
+            displayedColors: displayedColors,
+            selectedColor: displayedColors[0],
+            images: foundVersion.images,
+            description: foundVersion.description,
+            price: foundVersion.price,
+            price_before: foundVersion.price_before,
+            displayedSizes: foundVersion.sizes,
+            selectedSize: foundVersion.sizes[0],
+          }
+        } else {
+          return {
+            ...state,
+            selectedBrand: selectedBrand,
+            displayedVersions: initialState.displayedVersions,
+          }
+        }
+      }
+      case 'version': {
+        const selectedVersion = action.payload.selectedVersion
+        const displayedColors = postgresVersions
+          .filter(product => product.version === selectedVersion)
+          .map(product => product.color)
+        const foundVersion = postgresVersions.find(
+          product => product.version === selectedVersion
+        )!
+
+        return {
+          ...state,
+          selectedVersion: selectedVersion,
+          displayedColors: displayedColors,
+          selectedColor: displayedColors[0],
+          images: foundVersion.images,
+          description: foundVersion.description,
+          price: foundVersion.price,
+          price_before: foundVersion.price_before,
+          displayedSizes: foundVersion.sizes,
+          selectedSize: foundVersion.sizes[0],
+        }
+      }
+      case 'color': {
+        const selectedColor = action.payload.selectedColor
+        const foundVersion = postgresVersions.find(
+          product =>
+            product.version === state.selectedVersion &&
+            product.color === selectedColor
+        )!
+        return {
+          ...state,
+          selectedColor: selectedColor,
+          images: foundVersion.images,
+          description: foundVersion.description,
+          price: foundVersion.price,
+          price_before: foundVersion.price_before,
+          displayedSizes: foundVersion.sizes,
+          selectedSize: foundVersion.sizes[0],
+        }
+      }
+      case 'size': {
+        const selectedSize = action.payload.selectedSize
+        return {
+          ...state,
+          selectedSize: selectedSize,
+        }
+      }
+      default:
+        return state
+    }
+  }
+
+  const [state, dispatch] = useReducer(reducer, initialState)
 
   const [openedModal, { open: openModal, close: closeModal }] =
     useDisclosure(false)
   const [modalVersion, setModalVersion] = useState<
-    typeof defaultSelectedBrand | 'brand' | 'version'
-  >(defaultSelectedBrand)
+    typeof initialState.selectedBrand | 'brand' | 'version'
+  >(initialState.selectedBrand)
   function renderModalContent() {
     switch (modalVersion) {
       case 'brand':
@@ -127,62 +188,36 @@ export function ProductPageClient({
           <>
             <Button
               onClick={() => {
-                setVersionState(prev => ({
-                  ...prev,
-                  selectedBrand: defaultSelectedBrand,
-                  displayedVersions: uniqueVersions,
-                }))
+                dispatch({
+                  type: 'brand',
+                  payload: { selectedBrand: initialState.selectedBrand },
+                })
                 closeModal()
               }}
-              className="border border-black p-2 hover:cursor-pointer"
+              style={
+                state.selectedBrand === initialState.selectedBrand
+                  ? { border: '2px solid black' }
+                  : {}
+              }
             >
-              {defaultSelectedBrand}
+              {initialState.selectedBrand}
             </Button>
-            {displayedBrands.map(brand => (
+            {uniqueBrands.map(brand => (
               <Button
                 key={brand}
                 onClick={() => {
-                  const findBrand = postgresVersions.find(
-                    product => product.brand === brand
-                  )
-                  setVersionState(prev => ({
-                    ...prev,
-                    selectedBrand: brand,
-                    displayedVersions: [
-                      ...new Set(
-                        postgresVersions
-                          .filter(product => product.brand === brand)
-                          .map(product => product.version)
-                      ),
-                    ],
-                    selectedVersion:
-                      findBrand?.version ?? postgresVersions[0].version,
-                    displayedColors: postgresVersions
-                      .filter(
-                        product =>
-                          product.version ===
-                          (findBrand?.version ?? postgresVersions[0].version)
-                      )
-                      .map(version => version.color),
-                    selectedColor:
-                      findBrand?.color ?? postgresVersions[0].color,
-                    description:
-                      findBrand?.description ?? postgresVersions[0].description,
-                    displayedSizes:
-                      findBrand?.sizes ?? postgresVersions[0].sizes,
-                    selectedSize:
-                      findBrand?.sizes[0] ?? postgresVersions[0].sizes[0],
-                    price: findBrand?.price ?? postgresVersions[0].price,
-                    price_before:
-                      findBrand?.price_before ??
-                      postgresVersions[0].price_before,
-                  }))
+                  dispatch({
+                    type: 'brand',
+                    payload: { selectedBrand: brand },
+                  })
                   closeModal()
                   router.push(`${ROUTE_PRODUCT}/${paramsType}`)
                 }}
-                className={`${
-                  brand === versionState.selectedBrand && 'text-red-500'
-                } border border-black p-2 hover:cursor-pointer`}
+                style={
+                  state.selectedBrand === brand
+                    ? { border: '2px solid black' }
+                    : {}
+                }
               >
                 {brand}
               </Button>
@@ -192,37 +227,24 @@ export function ProductPageClient({
       case 'version':
         return (
           <>
-            {versionState.displayedVersions.map(version => (
+            {state.displayedVersions.map(version => (
               <Button
                 key={version}
                 onClick={() => {
-                  setVersionState(prev => {
-                    const matchedProduct =
-                      postgresVersions.find(
-                        product => product.version === version
-                      ) ?? postgresVersions[0]
-                    return {
-                      ...prev,
-                      selectedVersion: version,
-                      displayedColors: postgresVersions
-                        .filter(product => product.version === version)
-                        .map(product => product.color),
-                      selectedColor: matchedProduct.color,
-                      description: matchedProduct.description,
-                      displayedSizes: matchedProduct.sizes,
-                      selectedSize: matchedProduct.sizes[0],
-                      price: matchedProduct.price,
-                      price_before: matchedProduct.price_before,
-                    }
+                  dispatch({
+                    type: 'version',
+                    payload: { selectedVersion: version },
                   })
                   closeModal()
                   router.push(
                     `${ROUTE_PRODUCT}/${paramsType}?version=${version}`
                   )
                 }}
-                className={`${
-                  version === versionState.selectedVersion && 'text-red-500'
-                } border border-black p-2 hover:cursor-pointer`}
+                style={
+                  state.selectedVersion === version
+                    ? { border: '2px solid black' }
+                    : {}
+                }
               >
                 {version}
               </Button>
@@ -235,11 +257,11 @@ export function ProductPageClient({
   }
 
   function carouselSlides() {
-    return defaultDisplayedImages.map(url => (
+    return state.images.map(url => (
       <Carousel.Slide key={url}>
         <Image
           component={NextImage}
-          src={url}
+          src={`${env.MINIO_PRODUCT_URL}/${paramsType}/${state.selectedVersion}/${url}`}
           alt={url}
           fill
           // objectFit="contain"
@@ -248,7 +270,7 @@ export function ProductPageClient({
     ))
   }
 
-  const [cart, setCart] = useState<LocalStorageCart>([])
+  const [cart, setCart] = useState<LocalStorageCartItem[]>([])
   useEffect(() => {
     setCart(getLocalStorageCart())
   }, [])
@@ -276,8 +298,8 @@ export function ProductPageClient({
       </Carousel>
 
       <div className="flex justify-between m-2">
-        <h1>{versionState.selectedVersion}</h1>
-        <h1>{versionState.selectedBrand}</h1>
+        <h1>{state.selectedVersion}</h1>
+        <h1>{state.selectedBrand}</h1>
       </div>
 
       <div className="flex justify-between m-2">
@@ -304,27 +326,11 @@ export function ProductPageClient({
       <div className="flex items-center m-2">
         <h1 className="mr-2">Χρώματα</h1>
         <div className="flex gap-2">
-          {versionState.displayedColors.map(color => {
+          {state.displayedColors.map(color => {
             function handleOnClick() {
-              setVersionState(prev => {
-                const foundVersion = postgresVersions.find(
-                  product => product.color === color
-                )
-                if (!foundVersion) {
-                  redirect(`${ROUTE_ERROR}?error=product-version-not-found`)
-                }
-                return {
-                  ...prev,
-                  selectedColor: color,
-                  description: foundVersion.description,
-                  displayedSizes: foundVersion.sizes,
-                  selectedSize: foundVersion.sizes[0],
-                  price: foundVersion.price,
-                  price_before: foundVersion.price_before,
-                }
-              })
+              dispatch({ type: 'color', payload: { selectedColor: color } })
             }
-            return color === versionState.selectedColor ? (
+            return color === state.selectedColor ? (
               <button
                 key={color}
                 onClick={() => handleOnClick()}
@@ -345,55 +351,46 @@ export function ProductPageClient({
 
       <div className="flex items-center m-2">
         <h1 className="mr-2">Περιγραφή</h1>
-        <textarea value={versionState.description} readOnly={true} />
+        <textarea value={state.description} readOnly={true} />
       </div>
 
       <div className="flex items-center m-2">
         <h1 className="mr-2">Μεγέθοι</h1>
         <div className="flex gap-2">
-          {versionState.displayedSizes.map(size =>
-            size === versionState.selectedSize ? (
-              <div key={size} className="border p-0.5">
-                <Button
-                  onClick={() => {
-                    setVersionState(prev => ({ ...prev, selectedSize: size }))
-                  }}
-                >
-                  {size}
-                </Button>
-              </div>
-            ) : (
-              <Button
-                key={size}
-                onClick={() =>
-                  setVersionState(prev => ({ ...prev, selectedSize: size }))
-                }
-              >
-                {size}
-              </Button>
-            )
-          )}
+          {state.displayedSizes.map(size => (
+            <Button
+              key={size}
+              onClick={() =>
+                dispatch({ type: 'size', payload: { selectedSize: size } })
+              }
+              style={
+                size === state.selectedSize ? { border: '2px solid black' } : {}
+              }
+            >
+              {size}
+            </Button>
+          ))}
         </div>
       </div>
 
       <div className="flex items-center gap-2 m-2">
         <h1>Τιμή</h1>
-        {versionState.price_before && (
+        {state.price_before && (
           <span className="text-gray-500 line-through">
-            {versionState.price_before}€
+            {state.price_before}€
           </span>
         )}
-        <span className="font-bold">{versionState.price}€</span>
-        {versionState.price_before && (
+        <span className="font-bold">{state.price}€</span>
+        {state.price_before && (
           <span className="text-green-700">
-            (Κερδίζεις {versionState.price_before - versionState.price}€)
+            (Κερδίζεις {state.price_before - state.price}€)
           </span>
         )}
       </div>
 
-      <div className="flex m-2 items-center">
+      <div className="inline-flex items-center gap-3 m-2 border">
         <Button onClick={handlers.decrement}>-</Button>
-        <h1 className="px-3 py-1 border">{count}</h1>
+        <h1 className="">{count}</h1>
         <Button onClick={handlers.increment}>+</Button>
       </div>
 
@@ -404,9 +401,9 @@ export function ProductPageClient({
               const existingIndex = prev.findIndex(
                 item =>
                   item.type === paramsType &&
-                  item.version === versionState.selectedVersion &&
-                  item.color === versionState.selectedColor &&
-                  item.size === versionState.selectedSize
+                  item.version === state.selectedVersion &&
+                  item.color === state.selectedColor &&
+                  item.size === state.selectedSize
               )
               if (existingIndex !== -1) {
                 const updatedCart = [...prev]
@@ -420,12 +417,12 @@ export function ProductPageClient({
                   ...prev,
                   {
                     type: paramsType,
-                    version: versionState.selectedVersion,
-                    color: versionState.selectedColor,
-                    image: `${paramsType}/${versionState.selectedVersion}`,
-                    size: versionState.selectedSize,
-                    price: versionState.price,
-                    price_before: versionState.price_before,
+                    version: state.selectedVersion,
+                    color: state.selectedColor,
+                    image: state.images[0],
+                    size: state.selectedSize,
+                    price: state.price,
+                    price_before: state.price_before,
                     quantity: count,
                   },
                 ]

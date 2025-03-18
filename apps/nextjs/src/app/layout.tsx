@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { ReactNode } from 'react'
-import './globals.css'
+
 import '@mantine/core/styles.css'
 import {
   ColorSchemeScript,
@@ -11,6 +11,8 @@ import {
 } from '@mantine/core'
 import '@mantine/carousel/styles.css'
 import '@mantine/notifications/styles.css'
+
+import './globals.css'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -35,6 +37,22 @@ const customTheme = createTheme({
     xl: '80em', // 1280px
     '2xl': '96em', // 1536px
   },
+  colors: {
+    red: [
+      'oklch(0.971 0.013 17.38)', // red-50
+      'oklch(0.936 0.032 17.717)', // red-100
+      'oklch(0.885 0.062 18.334)', // red-200
+      'oklch(0.808 0.114 19.571)', // red-300
+      'oklch(0.704 0.191 22.216)', // red-400
+      'oklch(0.637 0.237 25.331)', // red-500
+      'oklch(0.577 0.245 27.325)', // red-600
+      'oklch(0.505 0.213 27.518)', // red-700
+      'oklch(0.444 0.177 26.899)', // red-800
+      'oklch(0.396 0.141 25.723)', // red-900
+      'oklch(0.258 0.092 26.042)', // red-950
+    ],
+  },
+  primaryColor: 'red',
 })
 
 export default function RootLayout({

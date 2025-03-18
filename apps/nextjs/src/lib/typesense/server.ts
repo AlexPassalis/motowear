@@ -3,7 +3,7 @@ import { getProductPostgres } from '@/utils/getPostgres'
 
 const typesense = new Typesense.Client({
   nodes: [{ host: 'typesense', port: 8108, protocol: 'http' }],
-  apiKey: 'dev-xyz',
+  apiKey: process.env.TYPESENSE_API_KEY!,
 })
 
 const collectionName = 'product'
@@ -14,7 +14,7 @@ export async function updateTypesense() {
   try {
     await typesense.collections(collectionName).retrieve()
     console.log('Collection exists.')
-  } catch (err) {
+  } catch {
     console.log('Collection not found. Creating a new one...')
     const schema = {
       name: collectionName,
@@ -37,13 +37,13 @@ export async function updateTypesense() {
   for (const productType in productPostgres) {
     const products = productPostgres[productType]
     for (const product of products) {
-      product.type = productType
+      const document = { ...product, type: productType }
 
       try {
         const result = await typesense
           .collections(collectionName)
           .documents()
-          .upsert(product)
+          .upsert(document)
         console.log(`Upserted product ${product.id}:`, result)
       } catch (err) {
         console.error(`Error upserting product ${product.id}:`, err)
@@ -52,17 +52,29 @@ export async function updateTypesense() {
   }
 }
 
+export type Document = {
+  type: string
+  id: string
+  version: string
+  images: string[]
+  price: number
+  brand: string
+  color: string
+  sizes: string[]
+  price_before: number
+}
+
 export async function deleteTypesenseVersion(id: string) {
   await typesense.collections(collectionName).documents(id).delete()
 }
 
 export async function deleteTypesenseImage(id: string, image: string) {
-  const document = await typesense
+  const document = (await typesense
     .collections(collectionName)
     .documents(id)
-    .retrieve()
+    .retrieve()) as Document
 
-  const updatedImages = (document?.images || []).filter(
+  const updatedImages = (document.images || []).filter(
     (img: string) => img !== image
   )
 

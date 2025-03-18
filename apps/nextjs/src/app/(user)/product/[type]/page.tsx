@@ -25,7 +25,7 @@ export default async function ProductPage({
   const { rows: postgresVersions }: { rows: ProductRow[] } =
     await postgres.execute(`SELECT * FROM product."${paramsType}"`)
 
-  const displayedBrands = Array.from(
+  const uniqueBrands = Array.from(
     new Set(
       postgresVersions
         .map(row => row.brand)
@@ -42,7 +42,7 @@ export default async function ProductPage({
       searchParamsVersion={searchParamsVersion}
       productTypes={productTypes}
       postgresVersions={postgresVersions}
-      displayedBrands={displayedBrands}
+      uniqueBrands={uniqueBrands}
       uniqueVersions={uniqueVersions}
     />
   )

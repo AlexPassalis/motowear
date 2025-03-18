@@ -1,7 +1,6 @@
 certs
 .dockerignore
 .gitignore
-cloudflare.conf
 Dockerfile
 nginx-development.conf
 nginx.conf

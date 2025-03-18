@@ -81,6 +81,14 @@ export function deleteFile(objectName: string): Promise<void> {
   })
 }
 
+type MinioClientWithRemoveObjects = Client & {
+  removeObjects: (
+    bucketName: string,
+    objects: string[],
+    callback: (err: Error | null) => void
+  ) => void
+}
+
 export function deleteTypeImages(productType: string): Promise<void> {
   return new Promise((resolve, reject) => {
     const prefix = `${productType}/`
@@ -95,10 +103,10 @@ export function deleteTypeImages(productType: string): Promise<void> {
     stream.on('error', err => reject(err))
     stream.on('end', () => {
       if (objectsToDelete.length > 0) {
-        ;(minio as any).removeObjects(
+        ;(minio as MinioClientWithRemoveObjects).removeObjects(
           bucketName,
           objectsToDelete,
-          (err: Error) => {
+          (err: Error | null) => {
             if (err) {
               return reject(err)
             }
