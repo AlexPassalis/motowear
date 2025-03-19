@@ -14,7 +14,7 @@ import {
 } from '@/utils/localStorage'
 import NextImage from 'next/image'
 import { Carousel } from '@mantine/carousel'
-import { env } from '@/env'
+import { envClient } from '@/env'
 
 type ProductPageClientProps = {
   paramsType: string
@@ -261,7 +261,7 @@ export function ProductPageClient({
       <Carousel.Slide key={url}>
         <Image
           component={NextImage}
-          src={`${env.MINIO_PRODUCT_URL}/${paramsType}/${state.selectedVersion}/${url}`}
+          src={`${envClient.MINIO_PRODUCT_URL}/${paramsType}/${state.selectedVersion}/${url}`}
           alt={url}
           fill
           // objectFit="contain"

@@ -16,7 +16,7 @@ import { InstantSearch, SearchBox, Hits } from 'react-instantsearch'
 import { typesenseClient } from '@/lib/typesense/client'
 import { LocalStorageCartItem } from '@/utils/localStorage'
 import { Indicator, Grid, Button } from '@mantine/core'
-import { env } from '@/env'
+import { envClient } from '@/env'
 import { Document } from '@/lib/typesense/server'
 
 type HeaderProps = {
@@ -264,7 +264,7 @@ function Cart({ isCartOpen, setIsCartOpen, cart, setCart }: CartProps) {
                     <div className="relative w-full aspect-square">
                       <Image
                         component={NextImage}
-                        src={`${env.MINIO_PRODUCT_URL}/${product.type}/${product.version}/${product.image}`}
+                        src={`${envClient.MINIO_PRODUCT_URL}/${product.type}/${product.version}/${product.image}`}
                         alt={`${product.type}/${product.version}`}
                         fill
                       />
