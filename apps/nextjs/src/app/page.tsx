@@ -1,12 +1,8 @@
 import { getProductTypes } from '@/utils/getPostgres'
-import { Header } from '@/components/Header'
+import { HomePageClient } from '@/app/client'
 
 export default async function HomePage() {
   const productTypes = await getProductTypes()
 
-  return (
-    <>
-      <Header productTypes={productTypes} />
-    </>
-  )
+  return <HomePageClient productTypes={productTypes} />
 }
