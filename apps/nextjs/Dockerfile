@@ -1,10 +1,10 @@
-FROM node:20-alpine AS base
+FROM node:20-alpine3.20 AS base
 # Install curl for the healthcheck
 RUN apk add --no-cache curl
 
 FROM base AS deps
 WORKDIR /app
-COPY ./package.json ./pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml ./
 RUN corepack enable && corepack prepare pnpm@10.6.3 --activate && pnpm i --frozen-lockfile
 
 

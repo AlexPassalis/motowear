@@ -1,0 +1,44 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  Deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone repository into GitHub Actions runner (ubuntu VM)
+        uses: actions/checkout@master
+
+      - name: Decrypt git-crypted files
+        uses: sliteteam/github-action-git-crypt-unlock@1.3.0
+        env:
+          GIT_CRYPT_KEY: ${{ secrets.GIT_CRYPT_KEY }}
+
+      - name: Copy-paste files from github repository to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+          username: ${{ secrets.VPS_USER }}
+          host: ${{ secrets.VPS_IP }}
+          passphrase: ${{ secrets.VPS_PASSPHRASE }}
+          source: './docker-stack.yaml,./apps/postgres/.env.production,./apps/redis/redis.conf,./apps/hono/.env.production,./apps/nextjs/.env.production,./apps/nginx/certs,./apps/nginx/cloudflare.conf,./apps/nginx/nginx.conf'
+          target: '/home/${{ secrets.VPS_USER }}/alexpassalis_com/'
+
+      - name: Docker stack deploy
+        uses: appleboy/ssh-action@v1.2.1
+        with:
+          key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+          username: ${{ secrets.VPS_USER }}
+          host: ${{ secrets.VPS_IP }}
+          passphrase: ${{ secrets.VPS_PASSPHRASE }}
+          script: |
+            cd /home/${{ secrets.VPS_USER }}/alexpassalis_com
+            echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            docker stack deploy -c ./docker-stack.yaml --detach=false --resolve-image always --with-registry-auth stack-alexpassalis_com
+            docker system prune -af
+            docker logout ghcr.io

@@ -1,13 +1,13 @@
-import { env } from '@/env'
+import { envClient } from '@/env'
 import TypesenseInstantSearchAdapter from 'typesense-instantsearch-adapter'
 
 export const typesenseClient = new TypesenseInstantSearchAdapter({
   server: {
-    apiKey: env.TYPESENSE_SEARCH_ONLY_API_KEY,
+    apiKey: envClient.TYPESENSE_SEARCH_ONLY_API_KEY,
     nodes: [
       {
         protocol: 'https',
-        host: env.HOST,
+        host: envClient.HOST,
         port: 443,
         path: '/typesense',
       },

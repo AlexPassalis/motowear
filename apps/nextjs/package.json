@@ -6,7 +6,7 @@
     "postgres:generate-dev": "drizzle-kit generate --config ./drizzle.config.ts",
     "postgres:migrate-dev": "cross-env POSTGRES_MIGRATING=true drizzle-kit push --config ./drizzle.config.ts",
     "lint": "next lint",
-    "build": "next build",
+    "build": "cross-env NODE_ENV=production next build",
     "start": "next start"
   },
   "dependencies": {
@@ -14,6 +14,7 @@
     "@mantine/core": "^7.17.2",
     "@mantine/hooks": "^7.17.2",
     "@mantine/notifications": "^7.17.2",
+    "argon2": "^0.41.1",
     "axios": "^1.8.1",
     "better-auth": "^1.2.3",
     "cross-env": "^7.0.3",
@@ -56,6 +57,7 @@
   "packageManager": "pnpm@10.6.3",
   "pnpm": {
     "onlyBuiltDependencies": [
+      "argon2",
       "esbuild",
       "sharp",
       "typesense-instantsearch-adapter"
