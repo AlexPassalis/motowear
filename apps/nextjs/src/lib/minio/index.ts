@@ -13,26 +13,19 @@ const minio = new Client({
 
 const bucketName = 'product'
 
-export async function uploadFile(file: File, path: string): Promise<void> {
+export async function uploadFile(path: string, file: File): Promise<void> {
   const objectName = `${path}/${sanitizeFilename(
     file.originalFilename || 'undefinedOriginalFilename'
   )}`
   await minio.fPutObject(bucketName, objectName, file.filepath, {})
 }
 
-export function deleteFile(objectName: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    minio.removeObject(bucketName, objectName, err => {
-      if (err) {
-        console.error(`Error deleting file ${objectName} from MinIO:`, err)
-        return reject(err)
-      }
-      console.log(
-        `File ${objectName} deleted successfully from bucket ${bucketName}`
-      )
-      resolve()
-    })
-  })
+export async function deleteFile(
+  path: string,
+  fileName: string
+): Promise<void> {
+  const objectName = `${path}/${fileName}`
+  await minio.removeObject(bucketName, objectName)
 }
 
 type MinioClientWithRemoveObjects = Client & {

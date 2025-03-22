@@ -10,6 +10,6 @@ export {
 
 export const productSchema = pgSchema('product')
 export const brand = productSchema.table('brand', {
-  index: integer('index').unique().notNull(),
+  index: integer('index').notNull(),
   image: text('image').primaryKey(),
 })
