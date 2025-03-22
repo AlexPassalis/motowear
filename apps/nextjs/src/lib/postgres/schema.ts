@@ -1,3 +1,5 @@
+import { pgSchema, text, integer } from 'drizzle-orm/pg-core'
+
 export {
   authSchema,
   user,
@@ -6,4 +8,8 @@ export {
   session,
 } from '@/lib/postgres/auth.schema'
 
-export { productSchema } from '@/lib/postgres/product.schema'
+export const productSchema = pgSchema('product')
+export const brand = productSchema.table('brand', {
+  index: integer('index').unique().notNull(),
+  image: text('image').primaryKey(),
+})

@@ -1,3 +1,4 @@
+import { envServer } from '@/env'
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
@@ -17,6 +18,11 @@ const nextConfig: NextConfig = {
         hostname: 'minio',
         port: '9000',
         pathname: '/product/**',
+      },
+      {
+        protocol: 'https',
+        hostname: `${envServer.HOST}`,
+        pathname: '/api/admin/product/brand/image/**',
       },
     ],
   },
