@@ -4,6 +4,10 @@ import { postgres } from '@/lib/postgres'
 import { ProductPageClient } from '@/app/(user)/product/[type]/client'
 import { getProductTypes } from '@/utils/getPostgres'
 import { notFound } from 'next/navigation'
+import { v4 as id } from 'uuid'
+import { formatMessage } from '@/utils/formatMessage'
+import { errorPostgres } from '@/data/error'
+import { sendTelegramMessage } from '@/lib/telegram'
 
 type ProductPageProps = {
   params: Promise<{
@@ -38,6 +42,9 @@ export default async function ProductPage({
     if (e instanceof DatabaseError && e.code === '42P01') {
       return notFound()
     } else {
+      const message = formatMessage(id(), '/product/[type]', errorPostgres, e)
+      console.error(message)
+      sendTelegramMessage('ERROR', message)
       throw e
     }
   }
