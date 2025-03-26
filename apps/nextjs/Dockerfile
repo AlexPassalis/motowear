@@ -38,8 +38,8 @@ WORKDIR /app
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-COPY --from=build --chown=nextjs:nodejs /app/.next/standalone ./
-RUN mkdir -p src/lib/postgres/migrations && chown -R nextjs:nodejs src/lib/postgres/migrations
+COPY --from=build /app/.next/standalone ./
+RUN chown -R nextjs:nodejs ./
 
 USER nextjs
 ENV NEXT_TELEMETRY_DISABLED=1
