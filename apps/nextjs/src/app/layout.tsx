@@ -14,6 +14,8 @@ import '@mantine/notifications/styles.css'
 
 import './globals.css'
 
+import '@/lib/cron/index'
+
 const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],
