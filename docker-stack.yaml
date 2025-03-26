@@ -24,6 +24,12 @@ secrets:
     external: true
   BETTER_AUTH_SECRET:
     external: true
+  TELEGRAM_BOT_TOKEN:
+    external: true
+  TELEGRAM_ERROR_CHAT_ID:
+    external: true
+  TELEGRAM_AUTH_CHAT_ID:
+    external: true
 
 services:
   dozzle:
@@ -193,6 +199,10 @@ services:
       - BETTER_AUTH_SECRET
       - MINIO_ROOT_USER
       - MINIO_ROOT_PASSWORD
+      - TYPESENSE_ADMIN_API_KEY
+      - TELEGRAM_BOT_TOKEN
+      - TELEGRAM_ERROR_CHAT_ID
+      - TELEGRAM_AUTH_CHAT_ID
     environment:
       HOSTNAME: 0.0.0.0
       PORT: 3000
