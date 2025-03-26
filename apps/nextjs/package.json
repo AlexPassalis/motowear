@@ -3,8 +3,8 @@
   "name": "motowear",
   "scripts": {
     "dev": "cross-env NODE_ENV=development next dev",
-    "postgres:generate-dev": "drizzle-kit generate --config ./drizzle.config.ts",
-    "postgres:migrate-dev": "cross-env POSTGRES_MIGRATING=true drizzle-kit push --config ./drizzle.config.ts",
+    "postgres:generate": "drizzle-kit generate",
+    "postgres:migrate": "cross-env POSTGRES_MIGRATING=true drizzle-kit push",
     "lint": "next lint",
     "build": "cross-env NODE_ENV=production BUILD_TIME=true next build",
     "start": "next start"
