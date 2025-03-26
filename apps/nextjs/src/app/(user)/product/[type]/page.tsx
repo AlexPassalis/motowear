@@ -2,6 +2,7 @@ import { ProductRow } from '@/data/types'
 import { postgres } from '@/lib/postgres'
 import { ProductPageClient } from '@/app/(user)/product/[type]/client'
 import { getProductTypes } from '@/utils/getPostgres'
+import { notFound } from 'next/navigation'
 
 type ProductPageProps = {
   params: Promise<{
@@ -22,8 +23,23 @@ export default async function ProductPage({
     ? decodeURIComponent(resolvedSearchParams['version'])
     : undefined
 
-  const { rows: postgresVersions }: { rows: ProductRow[] } =
-    await postgres.execute(`SELECT * FROM product."${paramsType}"`)
+  if (!searchParamsVersion) {
+    return notFound()
+  }
+
+  let postgresVersions: ProductRow[]
+  try {
+    const { rows }: { rows: ProductRow[] } = await postgres.execute(
+      `SELECT * FROM product."${paramsType}"`
+    )
+    postgresVersions = rows
+  } catch (e: any) {
+    if (e.code === '42P01') {
+      return notFound()
+    } else {
+      throw e
+    }
+  }
 
   const uniqueBrands = Array.from(
     new Set(
