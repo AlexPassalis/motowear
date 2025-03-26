@@ -26,8 +26,8 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           host: ${{ secrets.VPS_IP }}
           passphrase: ${{ secrets.VPS_PASSPHRASE }}
-          source: './docker-stack.yaml,./apps/postgres/.env.production,./apps/redis/redis.conf,./apps/hono/.env.production,./apps/nextjs/.env.production,./apps/nginx/certs,./apps/nginx/cloudflare.conf,./apps/nginx/nginx.conf'
-          target: '/home/${{ secrets.VPS_USER }}/alexpassalis_com/'
+          source: './docker-stack.yaml,./apps/postgres/.env,./apps/nginx/certs,./apps/nginx/nginx.conf'
+          target: '/home/${{ secrets.VPS_USER }}/motowear/'
 
       - name: Docker stack deploy
         uses: appleboy/ssh-action@v1.2.1
@@ -37,8 +37,8 @@ jobs:
           host: ${{ secrets.VPS_IP }}
           passphrase: ${{ secrets.VPS_PASSPHRASE }}
           script: |
-            cd /home/${{ secrets.VPS_USER }}/alexpassalis_com
+            cd /home/${{ secrets.VPS_USER }}/motowear
             echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            docker stack deploy -c ./docker-stack.yaml --detach=false --resolve-image always --with-registry-auth stack-alexpassalis_com
+            docker stack deploy -c ./docker-stack.yaml --detach=false --resolve-image always --with-registry-auth stack-motowear
             docker system prune -af
             docker logout ghcr.io
