@@ -10,7 +10,7 @@ const typesense = new Typesense.Client({
 const collectionName = 'product'
 
 export async function updateTypesense() {
-  const productPostgres = await getProductPostgres()
+  const { product: productPostgres } = await getProductPostgres()
 
   try {
     await typesense.collections(collectionName).retrieve()
@@ -27,7 +27,7 @@ export async function updateTypesense() {
         { name: 'price', type: 'float' as const },
         { name: 'brand', type: 'string' as const },
         { name: 'color', type: 'string' as const },
-        { name: 'sizes', type: 'string[]' as const },
+        { name: 'size', type: 'string' as const },
         { name: 'price_before', type: 'float' as const },
       ],
     }
@@ -39,7 +39,6 @@ export async function updateTypesense() {
     const products = productPostgres[productType]
     for (const product of products) {
       const document = { ...product, type: productType }
-
       try {
         const result = await typesense
           .collections(collectionName)
@@ -61,7 +60,7 @@ export type Document = {
   price: number
   brand: string
   color: string
-  sizes: string[]
+  size: string
   price_before: number
 }
 

@@ -1,5 +1,7 @@
 export type ProductTables = { table_name: string }[]
 
+export type ImageType = { [key: string]: string[] }
+
 export type BrandRow = { index: number; image: string }
 
 export type ProductRow = {
@@ -15,3 +17,4 @@ export type ProductRow = {
 }
 
 export type Product = { [key: string]: ProductRow[] }
+

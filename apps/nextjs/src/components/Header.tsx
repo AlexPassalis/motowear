@@ -394,7 +394,7 @@ function SearchHit({ hit }: { hit: Document }) {
         <div className="flex gap-2">
           <Image
             component={NextImage}
-            src={`http://minio:9000/product/${hit.type}/${hit.version}/${hit.images[0]}`}
+            src={`http://minio:9000/product/${hit.type}/${hit.images[0]}`}
             alt={hit.version}
             width={100}
             height={100}
@@ -417,10 +417,8 @@ function SearchHit({ hit }: { hit: Document }) {
               <h2>{hit.color}</h2>
             </div>
             <div className="flex gap-4 items-center text-xl">
-              <h2>Μεγέθοι: </h2>
-              {hit.sizes.map(size => (
-                <h2 key={`${hit.id}-${size}`}>{size}</h2>
-              ))}
+              <h2>Μεγέθος: </h2>
+              <h2>{hit.size}</h2>
             </div>
           </div>
         </div>

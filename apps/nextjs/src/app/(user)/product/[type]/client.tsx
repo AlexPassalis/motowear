@@ -67,12 +67,12 @@ export function ProductPageClient({
     price_before: searchParamsVersion
       ? productFound?.price_before ?? fallbackProduct.price_before
       : fallbackProduct.price_before,
-    displayedSizes: searchParamsVersion
-      ? productFound?.sizes ?? fallbackProduct.sizes
-      : fallbackProduct.sizes,
+    displayedSize: searchParamsVersion
+      ? productFound?.size ?? fallbackProduct.size
+      : fallbackProduct.size,
     selectedSize: searchParamsVersion
-      ? productFound?.sizes[0] ?? fallbackProduct.sizes[0]
-      : fallbackProduct.sizes[0],
+      ? productFound?.size ?? fallbackProduct.size
+      : fallbackProduct.size,
   }
   type State = typeof initialState
   type Action =
@@ -111,8 +111,8 @@ export function ProductPageClient({
             description: foundVersion.description,
             price: foundVersion.price,
             price_before: foundVersion.price_before,
-            displayedSizes: foundVersion.sizes,
-            selectedSize: foundVersion.sizes[0],
+            displayedSize: foundVersion.size,
+            selectedSize: foundVersion.size,
           }
         } else {
           return {
@@ -140,8 +140,8 @@ export function ProductPageClient({
           description: foundVersion.description,
           price: foundVersion.price,
           price_before: foundVersion.price_before,
-          displayedSizes: foundVersion.sizes,
-          selectedSize: foundVersion.sizes[0],
+          displayedSize: foundVersion.size,
+          selectedSize: foundVersion.size[0],
         }
       }
       case 'color': {
@@ -158,8 +158,8 @@ export function ProductPageClient({
           description: foundVersion.description,
           price: foundVersion.price,
           price_before: foundVersion.price_before,
-          displayedSizes: foundVersion.sizes,
-          selectedSize: foundVersion.sizes[0],
+          displayedSize: foundVersion.size,
+          selectedSize: foundVersion.size,
         }
       }
       case 'size': {
@@ -261,7 +261,7 @@ export function ProductPageClient({
       <Carousel.Slide key={url}>
         <Image
           component={NextImage}
-          src={`${envClient.MINIO_PRODUCT_URL}/${paramsType}/${state.selectedVersion}/${url}`}
+          src={`${envClient.MINIO_PRODUCT_URL}/${paramsType}/${url}`}
           alt={url}
           fill
           // objectFit="contain"
@@ -356,21 +356,7 @@ export function ProductPageClient({
 
       <div className="flex items-center m-2">
         <h1 className="mr-2">Μεγέθοι</h1>
-        <div className="flex gap-2">
-          {state.displayedSizes.map(size => (
-            <Button
-              key={size}
-              onClick={() =>
-                dispatch({ type: 'size', payload: { selectedSize: size } })
-              }
-              style={
-                size === state.selectedSize ? { border: '2px solid black' } : {}
-              }
-            >
-              {size}
-            </Button>
-          ))}
-        </div>
+        <div className="flex gap-2">{state.displayedSize}</div>
       </div>
 
       <div className="flex items-center gap-2 m-2">

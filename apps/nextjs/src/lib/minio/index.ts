@@ -13,19 +13,32 @@ const minio = new Client({
 
 const bucketName = 'product'
 
-export async function uploadFile(path: string, file: File): Promise<void> {
+export async function uploadFile(path: string, file: File) {
   const objectName = `${path}/${sanitizeFilename(
-    file.originalFilename || 'undefinedOriginalFilename'
+    file.originalFilename || 'undefined_file_name'
   )}`
   await minio.fPutObject(bucketName, objectName, file.filepath, {})
 }
 
-export async function deleteFile(
-  path: string,
-  fileName: string
-): Promise<void> {
+export async function deleteFile(path: string, fileName: string) {
   const objectName = `${path}/${fileName}`
   await minio.removeObject(bucketName, objectName)
+}
+
+export async function getFileNames(table_name: string) {
+  const fileNames: string[] = []
+  const prefix = `${table_name}/`
+  const stream = minio.listObjects(bucketName, prefix, false)
+
+  for await (const obj of stream) {
+    if (obj.name) {
+      const strippedName = obj.name.startsWith(prefix)
+        ? obj.name.slice(prefix.length)
+        : obj.name
+      fileNames.push(strippedName)
+    }
+  }
+  return fileNames
 }
 
 type MinioClientWithRemoveObjects = Client & {

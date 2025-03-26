@@ -1,4 +1,11 @@
-import { Product, ProductTables, ProductRow, BrandRow } from '@/data/types'
+import {
+  Product,
+  ProductTables,
+  ProductRow,
+  BrandRow,
+  ImageType,
+} from '@/data/types'
+import { getFileNames } from '@/lib/minio'
 import { postgres } from '@/lib/postgres'
 
 async function getProductTables() {
@@ -21,8 +28,10 @@ export async function getProductTypes() {
 export async function getProductPostgres() {
   const productTables = await getProductTables()
 
+  const image: ImageType = {}
   const brand: string[] = []
   const product: Product = {}
+
   if (productTables.length !== 0) {
     await Promise.all(
       productTables.map(async obj => {
@@ -34,13 +43,18 @@ export async function getProductPostgres() {
             .map(row => row.image)
           brand.push(...sortedBrandImages)
         } else {
-          const { rows: tableRows }: { rows: ProductRow[] } =
-            await postgres.execute(`SELECT * FROM product."${obj.table_name}"`)
+          const [fileNames, { rows: tableRows }] = await Promise.all([
+            getFileNames(obj.table_name),
+            postgres.execute(
+              `SELECT * FROM product."${obj.table_name}"`
+            ) as Promise<{ rows: ProductRow[] }>,
+          ])
+          image[obj.table_name] = fileNames
           product[obj.table_name] = tableRows
         }
       })
     )
   }
 
-  return { brand, product }
+  return { image, brand, product }
 }
