@@ -24,13 +24,6 @@ export default async function ProductPage({
     await Promise.all([params, searchParams, getProductTypes()])
 
   const paramsType = decodeURIComponent(resolvedParams.type)
-  const searchParamsVersion = resolvedSearchParams['version']
-    ? decodeURIComponent(resolvedSearchParams['version'])
-    : undefined
-
-  if (!searchParamsVersion) {
-    return notFound()
-  }
 
   let postgresVersions: ProductRow[]
   try {
@@ -48,6 +41,10 @@ export default async function ProductPage({
       throw e
     }
   }
+
+  const searchParamsVersion = resolvedSearchParams['version']
+    ? decodeURIComponent(resolvedSearchParams['version'])
+    : undefined
 
   const uniqueBrands = Array.from(
     new Set(

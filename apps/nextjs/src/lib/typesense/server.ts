@@ -14,9 +14,8 @@ export async function updateTypesense() {
 
   try {
     await typesense.collections(collectionName).retrieve()
-    console.log('Collection exists.')
   } catch {
-    console.log('Collection not found. Creating a new one...')
+    console.log(`Collection ${collectionName} not found. Creating it ...`)
     const schema = {
       name: collectionName,
       fields: [
@@ -32,7 +31,7 @@ export async function updateTypesense() {
       ],
     }
     await typesense.collections().create(schema)
-    console.log('Collection created.')
+    console.log(`Collection ${collectionName} created successfully.`)
   }
 
   for (const productType in productPostgres) {
@@ -40,11 +39,7 @@ export async function updateTypesense() {
     for (const product of products) {
       const document = { ...product, type: productType }
       try {
-        const result = await typesense
-          .collections(collectionName)
-          .documents()
-          .upsert(document)
-        console.log(`Upserted product ${product.id}:`, result)
+        await typesense.collections(collectionName).documents().upsert(document)
       } catch (err) {
         console.error(`Error upserting product ${product.id}:`, err)
       }

@@ -6,6 +6,7 @@ import { errorCron } from '@/data/error'
 import { sendTelegramMessage } from '@/lib/telegram/index'
 
 function establishCron() {
+  console.debug(os.hostname())
   if (os.hostname().startsWith('stack-motowear_nextjs.1')) {
     try {
       global.cron = new CronJob(
@@ -25,7 +26,6 @@ function establishCron() {
       process.exit(1)
     }
   }
-
   return global.cron
 }
 
