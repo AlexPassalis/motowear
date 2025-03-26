@@ -1,4 +1,5 @@
 import { ProductRow } from '@/data/types'
+import { DatabaseError } from 'pg'
 import { postgres } from '@/lib/postgres'
 import { ProductPageClient } from '@/app/(user)/product/[type]/client'
 import { getProductTypes } from '@/utils/getPostgres'
@@ -33,8 +34,8 @@ export default async function ProductPage({
       `SELECT * FROM product."${paramsType}"`
     )
     postgresVersions = rows
-  } catch (e: any) {
-    if (e.code === '42P01') {
+  } catch (e) {
+    if (e instanceof DatabaseError && e.code === '42P01') {
       return notFound()
     } else {
       throw e
