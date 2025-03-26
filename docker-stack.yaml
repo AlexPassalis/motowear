@@ -49,7 +49,7 @@ services:
     ports:
       - '8080:8080'
     healthcheck:
-      start_period: 30s
+      start_period: 60s
       start_interval: 5s
       test: ['CMD', '/dozzle', 'healthcheck']
       interval: 10s
@@ -79,7 +79,7 @@ services:
     volumes:
       - postgres:/var/lib/postgresql/data
     healthcheck:
-      start_period: 30s
+      start_period: 60s
       start_interval: 5s
       test:
         [
@@ -109,7 +109,7 @@ services:
     ports:
       - '8081:8081'
     healthcheck:
-      start_period: 30s
+      start_period: 60s
       start_interval: 5s
       test: ['CMD', 'nc', '-vz', '127.0.0.1', '8081']
       interval: 10s
@@ -139,7 +139,7 @@ services:
     volumes:
       - minio:/data
     healthcheck:
-      start_period: 30s
+      start_period: 60s
       start_interval: 5s
       test:
         [
@@ -173,12 +173,12 @@ services:
     volumes:
       - typesense:/data
     healthcheck:
-      start_period: 30s
+      start_period: 60s
       start_interval: 5s
       test:
         [
           'CMD-SHELL',
-          'curl -f http://localhost:8108/health | grep ok || exit 1',
+          'curl -f http://localhost:8108/health | grep true || exit 1',
         ]
       interval: 10s
       timeout: 5s
@@ -208,7 +208,7 @@ services:
       HOSTNAME: 0.0.0.0
       PORT: 3000
     healthcheck:
-      start_period: 30s
+      start_period: 60s
       start_interval: 5s
       test:
         [
@@ -238,7 +238,7 @@ services:
         protocol: tcp
         mode: host
     healthcheck:
-      start_period: 30s
+      start_period: 60s
       start_interval: 5s
       test:
         ['CMD-SHELL', 'curl -kf https://localhost/nginx | grep ok || exit 1']
