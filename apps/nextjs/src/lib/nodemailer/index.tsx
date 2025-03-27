@@ -38,6 +38,7 @@ export async function sendReviewEmail(email: string) {
   }
   try {
     await transporter.sendMail(options)
+    console.debug('Email send successfully.')
   } catch (e) {
     const message = formatMessage(id(), location, errorNodemailer, e)
     console.error(message)
