@@ -54,6 +54,24 @@ services:
       timeout: 5s
       retries: 2
 
+  # rclone:
+  #   deploy:
+  #     restart_policy:
+  #       condition: any
+  #     update_config:
+  #       order: start-first
+  #       failure_action: rollback
+  #   image: rclone/rclone:sha-839eef0
+  #   networks:
+  #     - network-motowear
+  #   healthcheck:
+  #     start_period: 30s
+  #     start_interval: 5s
+  #     test: ['CMD', '/dozzle', 'healthcheck']
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 2
+
   postgres:
     deploy:
       restart_policy:
@@ -193,6 +211,7 @@ services:
       - TELEGRAM_ERROR_CHAT_ID
       - TELEGRAM_AUTH_CHAT_ID
     environment:
+      INSTANCE_ID: '{{.Task.Slot}}'
       HOSTNAME: 0.0.0.0
       PORT: 3000
     healthcheck:
