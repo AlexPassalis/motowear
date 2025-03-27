@@ -1,10 +1,10 @@
 import Typesense from 'typesense'
 import { getProductPostgres } from '@/utils/getPostgres'
-import { readSecret } from '@/utils/readSecret'
+import { envServer } from '@/env'
 
 const typesense = new Typesense.Client({
   nodes: [{ host: 'typesense', port: 8108, protocol: 'http' }],
-  apiKey: readSecret('TYPESENSE_ADMIN_API_KEY'),
+  apiKey: envServer.TYPESENSE_ADMIN_API_KEY,
 })
 
 const collectionName = 'product'
