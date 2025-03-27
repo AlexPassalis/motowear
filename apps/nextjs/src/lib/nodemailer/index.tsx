@@ -30,7 +30,7 @@ export async function sendReviewEmail(email: string) {
     sendTelegramMessage('ERROR', message)
   }
   const options = {
-    from: readSecret('NODEMAILER_AUTH_USER'),
+    from: readSecret('NODEMAILER_EMAIL'),
     to: email,
     subject: 'motowear.com',
     text: 'This is the text field',
@@ -38,7 +38,7 @@ export async function sendReviewEmail(email: string) {
   }
   try {
     await transporter.sendMail(options)
-    console.debug('Email send successfully.')
+    console.debug('Review email send successfully.')
   } catch (e) {
     const message = formatMessage(id(), location, errorNodemailer, e)
     console.error(message)

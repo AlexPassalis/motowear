@@ -5,6 +5,6 @@ export function formatMessage(
   error?: unknown
 ) {
   return `Id: ${id}\nLocation: ${location}\nMessage: ${message}${
-    error ? `\nError: ${error}.` : '.'
+    error ? `\n${error}.` : '.'
   }`
 }

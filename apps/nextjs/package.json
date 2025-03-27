@@ -2,7 +2,7 @@
   "private": true,
   "name": "motowear",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development next dev",
+    "dev": "next dev",
     "postgres:generate": "drizzle-kit generate",
     "postgres:migrate": "cross-env POSTGRES_MIGRATING=true drizzle-kit push",
     "lint": "next lint",

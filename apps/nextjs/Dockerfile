@@ -3,7 +3,7 @@ FROM node:20-alpine3.20 AS base
 RUN apk add --no-cache curl
 
 FROM base AS deps
-WORKDIR /app
+WORKDIR /app/deps
 COPY package.json pnpm-lock.yaml ./
 RUN corepack enable && corepack prepare pnpm@10.6.3 --activate && pnpm i --frozen-lockfile
 
@@ -11,8 +11,9 @@ RUN corepack enable && corepack prepare pnpm@10.6.3 --activate && pnpm i --froze
 
 FROM deps AS dev
 WORKDIR /app
-COPY . .
-COPY --from=deps /app/node_modules ./node_modules
+COPY . . 
+COPY --from=deps /app/deps/node_modules ./node_modules
+RUN rm -rf /app/deps
 
 ENV WATCHPACK_POLLING=true
 ENV NEXT_TELEMETRY_DISABLED=1
@@ -22,9 +23,10 @@ CMD ["pnpm", "run", "dev"]
 
 
 FROM deps AS build
-WORKDIR /app
+WORKDIR /app/build
 COPY . .
-COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/deps/node_modules ./node_modules
+RUN rm -rf /app/deps
 
 ENV NEXT_TELEMETRY_DISABLED=1
 
@@ -38,7 +40,9 @@ WORKDIR /app
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-COPY --from=build /app/.next/standalone ./
+COPY --from=build /app/build/.next/standalone ./
+COPY --from=build /app/build/drizzle.config.ts ./
+RUN rm -rf /app/build
 RUN chown -R nextjs:nodejs ./
 
 USER nextjs
