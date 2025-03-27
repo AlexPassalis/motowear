@@ -1,4 +1,4 @@
-import { readSecret } from '@/utils/readSecret'
+import { readSecret } from './src/utils/readSecret'
 import { defineConfig } from 'drizzle-kit'
 
 export default defineConfig({
@@ -6,7 +6,7 @@ export default defineConfig({
   dbCredentials: {
     url: readSecret('POSTGRES_URL'),
   },
-  schemaFilter: ['public', 'auth', 'product'],
+  schemaFilter: ['public', 'auth', 'product'], // remove product after the first migration, so that tables are not dropped.
   schema: './src/lib/postgres/schema.ts',
   out: './src/lib/postgres/migrations',
   verbose: true,

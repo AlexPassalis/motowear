@@ -23,6 +23,14 @@ CMD ["pnpm", "run", "dev"]
 
 
 FROM deps AS build
+WORKDIR /app/migrate
+COPY --from=deps /app/deps/package.json ./
+COPY --from=deps /app/deps/pnpm-lock.yaml ./
+COPY --from=deps /app/deps/node_modules ./node_modules
+COPY ./drizzle.config.ts ./
+COPY ./src/utils/readSecret.ts ./src/utils/
+COPY ./src/lib/postgres/ ./src/lib/postgres/
+
 WORKDIR /app/build
 COPY . .
 COPY --from=deps /app/deps/node_modules ./node_modules
@@ -40,8 +48,8 @@ WORKDIR /app
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
+COPY --from=build /app/migrate ./migrate
 COPY --from=build /app/build/.next/standalone ./
-COPY --from=build /app/build/drizzle.config.ts ./
 RUN rm -rf /app/build
 RUN chown -R nextjs:nodejs ./
 
