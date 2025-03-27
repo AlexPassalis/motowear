@@ -264,7 +264,7 @@ function Cart({ isCartOpen, setIsCartOpen, cart, setCart }: CartProps) {
                     <div className="relative w-full aspect-square">
                       <Image
                         component={NextImage}
-                        src={`${envClient.MINIO_PRODUCT_URL}/${product.type}/${product.version}/${product.image}`}
+                        src={`${envClient.MINIO_PRODUCT_URL}/${product.type}/${product.image}`}
                         alt={`${product.type}/${product.version}`}
                         fill
                       />
