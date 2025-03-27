@@ -28,6 +28,10 @@ secrets:
     external: true
   TELEGRAM_AUTH_CHAT_ID:
     external: true
+  NODEMAILER_AUTH_USER:
+    external: true
+  NODEMAILER_AUTH_PASS:
+    external: true
 
 services:
   dozzle:
@@ -67,7 +71,7 @@ services:
   #   healthcheck:
   #     start_period: 30s
   #     start_interval: 5s
-  #     test: ['CMD', '/dozzle', 'healthcheck']
+  #     test: []
   #     interval: 10s
   #     timeout: 5s
   #     retries: 2
@@ -210,6 +214,8 @@ services:
       - TELEGRAM_BOT_TOKEN
       - TELEGRAM_ERROR_CHAT_ID
       - TELEGRAM_AUTH_CHAT_ID
+      - NODEMAILER_AUTH_USER
+      - NODEMAILER_AUTH_PASS
     environment:
       INSTANCE_ID: '{{.Task.Slot}}'
       HOSTNAME: 0.0.0.0
