@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import localFont from 'next/font/local'
 import { ReactNode } from 'react'
 
 import '@mantine/core/styles.css'
@@ -13,9 +14,6 @@ import '@mantine/notifications/styles.css'
 
 import './globals.css'
 
-import '@/lib/cron/index'
-
-import localFont from 'next/font/local'
 const proximaNovaExtraBold = localFont({
   src: [
     {
@@ -83,6 +81,8 @@ const customTheme = createTheme({
   },
   primaryColor: 'red',
 })
+
+import '@/lib/cron/index'
 
 export default function RootLayout({
   children,
