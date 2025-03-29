@@ -1,7 +1,7 @@
 'use client'
 
 import { ProductRow } from '@/data/types'
-import { useRouter } from 'next/navigation'
+// import { useRouter } from 'next/navigation'
 import { useEffect, useReducer, useState } from 'react'
 import { useCounter } from '@mantine/hooks'
 import { Button, Image, UnstyledButton } from '@mantine/core'
@@ -39,7 +39,7 @@ export function ProductPageClient({
   uniqueBrands,
   uniqueVersions,
 }: ProductPageClientProps) {
-  const router = useRouter()
+  // const router = useRouter()
 
   console.log(postgresVersions)
 
@@ -102,17 +102,23 @@ export function ProductPageClient({
                 .map(product => product.version)
             ),
           ]
-          const displayedColors = postgresVersions
-            .filter(product => product.brand === selectedBrand)
-            .filter(product => product.version === displayedVersions[0])
-            .map(product => product.color)
+          const displayedColors = [
+            ...new Set(
+              postgresVersions
+                .filter(product => product.version === displayedVersions[0])
+                .map(product => product.color)
+            ),
+          ]
           const foundVersion = postgresVersions.find(
             product => product.brand === selectedBrand
           )!
-          const displayedSizes = postgresVersions
-            .filter(product => product.brand === selectedBrand)
-            .filter(product => product.size === displayedVersions[0])
-            .map(product => product.size)
+          const displayedSizes = [
+            ...new Set(
+              postgresVersions
+                .filter(product => product.version === displayedVersions[0])
+                .map(product => product.size)
+            ),
+          ]
 
           return {
             ...state,
@@ -138,15 +144,23 @@ export function ProductPageClient({
       }
       case 'version': {
         const selectedVersion = action.payload.selectedVersion
-        const displayedColors = postgresVersions
-          .filter(product => product.version === selectedVersion)
-          .map(product => product.color)
+        const displayedColors = [
+          ...new Set(
+            postgresVersions
+              .filter(product => product.version === selectedVersion)
+              .map(product => product.color)
+          ),
+        ]
         const foundVersion = postgresVersions.find(
           product => product.version === selectedVersion
         )!
-        const displayedSizes = postgresVersions
-          .filter(product => product.version === selectedVersion)
-          .map(product => product.size)
+        const displayedSizes = [
+          ...new Set(
+            postgresVersions
+              .filter(product => product.version === selectedVersion)
+              .map(product => product.size)
+          ),
+        ]
 
         return {
           ...state,
@@ -172,6 +186,7 @@ export function ProductPageClient({
           .filter(product => product.version === state.selectedVersion)
           .filter(product => product.color === selectedColor)
           .map(product => product.size)
+
         return {
           ...state,
           selectedColor: selectedColor,

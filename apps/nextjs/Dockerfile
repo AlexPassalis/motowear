@@ -51,7 +51,7 @@ RUN adduser --system --uid 1001 nextjs
 COPY --from=build /app/migrate ./migrate
 COPY --from=build /app/build/.next/standalone ./
 COPY --from=build /app/build/.next/static ./.next/static
-COPY --from=build /app/public ./public
+COPY ./public ./public
 RUN rm -rf /app/build
 RUN chown -R nextjs:nodejs ./
 
