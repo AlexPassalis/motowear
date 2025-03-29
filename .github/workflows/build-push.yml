@@ -32,7 +32,7 @@ jobs:
           # echo "IMAGE_POSTGRES=ghcr.io/$OWNER/image-motowear-postgres" >> $GITHUB_ENV
           # echo "IMAGE_TYPESENSE=ghcr.io/$OWNER/image-motowear-typesense" >> $GITHUB_ENV
           echo "IMAGE_NEXTJS=ghcr.io/$OWNER/image-motowear-nextjs" >> $GITHUB_ENV
-          # echo "IMAGE_NGINX=ghcr.io/$OWNER/image-motowear-nginx" >> $GITHUB_ENV
+          echo "IMAGE_NGINX=ghcr.io/$OWNER/image-motowear-nginx" >> $GITHUB_ENV
 
       # - name: image-postgres (build and tag)
       #   run: |
