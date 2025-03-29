@@ -77,7 +77,7 @@ function Main({
   cart,
 }: MainProps) {
   return (
-    <div className="relative flex justify-between items-center w-full p-4 border-b border-neutral-300">
+    <div className="relative flex justify-between items-center w-full p-2">
       <div className="flex justify-start">
         <button
           onClick={() => {
@@ -89,11 +89,14 @@ function Main({
             }
             setIsMenuOpen(!isMenuOpen)
           }}
-          className="lg:hidden flex justify-center items-center h-10 w-10 sm:scale-110 rounded-md border border-neutral-200 bg-white transition-colors hover:cursor-pointer group"
+          className="flex justify-center items-center h-10 w-10 sm:scale-110 rounded-md border border-neutral-200 bg-white transition-colors hover:cursor-pointer group"
         >
           <AiOutlineMenu className="transition-transform duration-200 ease-in-out group-hover:scale-150" />
         </button>
-        <Link href={ROUTE_HOME} className="hidden lg:block">
+      </div>
+
+      <div className="flex justify-center">
+        <Link href={ROUTE_HOME}>
           <Image
             component={NextImage}
             src="/motowear.webp"
@@ -105,20 +108,7 @@ function Main({
         </Link>
       </div>
 
-      <div className="absolute left-1/2 transform -translate-x-1/2 lg:w-1/4">
-        <Link href={ROUTE_HOME} className="lg:hidden">
-          <Image
-            component={NextImage}
-            src="/motowear.webp"
-            width={164}
-            height={164}
-            alt="Motowear logo"
-            className="sm:scale-110"
-          />
-        </Link>
-      </div>
-
-      <div className="flex justify-end gap-1 sm:gap-3 lg:gap-12 2xl:gap-32">
+      <div className="flex justify-end gap-1 sm:gap-3">
         <button className="flex justify-center items-center h-10 w-10 sm:scale-110 rounded-md border border-neutral-200 bg-white transition-colors hover:cursor-pointer group">
           <HiMagnifyingGlass
             onClick={() => {
@@ -189,14 +179,17 @@ function Menu({ productTypes, isMenuOpen, setIsMenuOpen }: MenuProps) {
           <h1 className="text-2xl text-center font-bold">Επιλογές</h1>
         </div>
         <nav>
-          <ul>
-            {productTypes.map(productType => (
-              <li key={productType}>
-                <Link href={`${ROUTE_PRODUCT}/${productType}`}>
-                  {productType}
-                </Link>
-              </li>
-            ))}
+          <ul className="flex flex-col items-end">
+            {productTypes.map(
+              productType =>
+                productType !== 'brand' && (
+                  <li key={productType}>
+                    <Link href={`${ROUTE_PRODUCT}/${productType}`}>
+                      {productType}
+                    </Link>
+                  </li>
+                )
+            )}
           </ul>
         </nav>
       </div>

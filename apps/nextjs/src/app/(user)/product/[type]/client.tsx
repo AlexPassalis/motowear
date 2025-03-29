@@ -3,18 +3,24 @@
 import { ProductRow } from '@/data/types'
 import { useRouter } from 'next/navigation'
 import { useEffect, useReducer, useState } from 'react'
-import { useDisclosure, useCounter } from '@mantine/hooks'
-import { Modal, Button, Image } from '@mantine/core'
-import { ROUTE_PRODUCT } from '@/data/routes'
+import { useCounter } from '@mantine/hooks'
+import { Button, Image, UnstyledButton } from '@mantine/core'
+import NextImage from 'next/image'
+import Link from 'next/link'
+import { ROUTE_COLLECTION } from '@/data/routes'
 import { Header } from '@/components/Header'
 import {
   getLocalStorageCart,
   LocalStorageCartItem,
   setLocalStorageCart,
 } from '@/utils/localStorage'
-import NextImage from 'next/image'
 import { Carousel } from '@mantine/carousel'
 import { envClient } from '@/env'
+import { IoIosArrowDown } from 'react-icons/io'
+import { Fragment } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { FaPlus } from 'react-icons/fa'
+import { FaMinus } from 'react-icons/fa'
 
 type ProductPageClientProps = {
   paramsType: string
@@ -67,9 +73,13 @@ export function ProductPageClient({
     price_before: searchParamsVersion
       ? productFound?.price_before ?? fallbackProduct.price_before
       : fallbackProduct.price_before,
-    displayedSize: searchParamsVersion
-      ? productFound?.size ?? fallbackProduct.size
-      : fallbackProduct.size,
+    displayedSizes: searchParamsVersion
+      ? postgresVersions
+          .filter(product => product.version === searchParamsVersion)
+          .map(product => product.size)
+      : postgresVersions
+          .filter(product => product.version === fallbackProduct.version)
+          .map(product => product.size),
     selectedSize: searchParamsVersion
       ? productFound?.size ?? fallbackProduct.size
       : fallbackProduct.size,
@@ -99,6 +109,10 @@ export function ProductPageClient({
           const foundVersion = postgresVersions.find(
             product => product.brand === selectedBrand
           )!
+          const displayedSizes = postgresVersions
+            .filter(product => product.brand === selectedBrand)
+            .filter(product => product.size === displayedVersions[0])
+            .map(product => product.size)
 
           return {
             ...state,
@@ -111,8 +125,8 @@ export function ProductPageClient({
             description: foundVersion.description,
             price: foundVersion.price,
             price_before: foundVersion.price_before,
-            displayedSize: foundVersion.size,
-            selectedSize: foundVersion.size,
+            displayedSizes: displayedSizes,
+            selectedSize: displayedSizes[0],
           }
         } else {
           return {
@@ -130,6 +144,9 @@ export function ProductPageClient({
         const foundVersion = postgresVersions.find(
           product => product.version === selectedVersion
         )!
+        const displayedSizes = postgresVersions
+          .filter(product => product.version === selectedVersion)
+          .map(product => product.size)
 
         return {
           ...state,
@@ -140,8 +157,8 @@ export function ProductPageClient({
           description: foundVersion.description,
           price: foundVersion.price,
           price_before: foundVersion.price_before,
-          displayedSize: foundVersion.size,
-          selectedSize: foundVersion.size[0],
+          displayedSizes: displayedSizes,
+          selectedSize: displayedSizes[0],
         }
       }
       case 'color': {
@@ -151,6 +168,10 @@ export function ProductPageClient({
             product.version === state.selectedVersion &&
             product.color === selectedColor
         )!
+        const displayedSizes = postgresVersions
+          .filter(product => product.version === state.selectedVersion)
+          .filter(product => product.color === selectedColor)
+          .map(product => product.size)
         return {
           ...state,
           selectedColor: selectedColor,
@@ -158,8 +179,8 @@ export function ProductPageClient({
           description: foundVersion.description,
           price: foundVersion.price,
           price_before: foundVersion.price_before,
-          displayedSize: foundVersion.size,
-          selectedSize: foundVersion.size,
+          displayedSizes: displayedSizes,
+          selectedSize: displayedSizes[0],
         }
       }
       case 'size': {
@@ -176,85 +197,8 @@ export function ProductPageClient({
 
   const [state, dispatch] = useReducer(reducer, initialState)
 
-  const [openedModal, { open: openModal, close: closeModal }] =
-    useDisclosure(false)
-  const [modalVersion, setModalVersion] = useState<
-    typeof initialState.selectedBrand | 'brand' | 'version'
-  >(initialState.selectedBrand)
-  function renderModalContent() {
-    switch (modalVersion) {
-      case 'brand':
-        return (
-          <>
-            <Button
-              onClick={() => {
-                dispatch({
-                  type: 'brand',
-                  payload: { selectedBrand: initialState.selectedBrand },
-                })
-                closeModal()
-              }}
-              style={
-                state.selectedBrand === initialState.selectedBrand
-                  ? { border: '2px solid black' }
-                  : {}
-              }
-            >
-              {initialState.selectedBrand}
-            </Button>
-            {uniqueBrands.map(brand => (
-              <Button
-                key={brand}
-                onClick={() => {
-                  dispatch({
-                    type: 'brand',
-                    payload: { selectedBrand: brand },
-                  })
-                  closeModal()
-                  router.push(`${ROUTE_PRODUCT}/${paramsType}`)
-                }}
-                style={
-                  state.selectedBrand === brand
-                    ? { border: '2px solid black' }
-                    : {}
-                }
-              >
-                {brand}
-              </Button>
-            ))}
-          </>
-        )
-      case 'version':
-        return (
-          <>
-            {state.displayedVersions.map(version => (
-              <Button
-                key={version}
-                onClick={() => {
-                  dispatch({
-                    type: 'version',
-                    payload: { selectedVersion: version },
-                  })
-                  closeModal()
-                  router.push(
-                    `${ROUTE_PRODUCT}/${paramsType}?version=${version}`
-                  )
-                }}
-                style={
-                  state.selectedVersion === version
-                    ? { border: '2px solid black' }
-                    : {}
-                }
-              >
-                {version}
-              </Button>
-            ))}
-          </>
-        )
-      default:
-        return <p>unknown modal version</p>
-    }
-  }
+  const [brandDropdown, setBrandDropdown] = useState(false)
+  const [versionDropdown, setVersionDropdown] = useState(false)
 
   function carouselSlides() {
     return state.images.map(url => (
@@ -282,27 +226,372 @@ export function ProductPageClient({
 
   return (
     <>
-      <Modal
-        opened={openedModal}
-        onClose={closeModal}
-        title="Διάλεξε εκδωχή: "
-        centered
-      >
-        <div className="flex flex-col gap-2">{renderModalContent()}</div>
-      </Modal>
-
       <Header productTypes={productTypes} cart={cart} setCart={setCart} />
-
       <Carousel withIndicators height={400}>
         {carouselSlides()}
       </Carousel>
+      <div className="flex flex-col gap-2 m-2">
+        <div className="flex gap-2 text-lg">
+          <Link href={`${ROUTE_COLLECTION}/${paramsType}`}>{paramsType}</Link>
+          <p>/</p>
+          <h1>{state.selectedVersion}</h1>
+          <div className="flex gap-2 ml-auto">
+            <h2>{`${state.price}€`}</h2>
+            {state.price_before && (
+              <h2
+                style={{
+                  textDecorationLine: 'line-through',
+                  textDecorationStyle: 'double',
+                  textDecorationColor: 'red',
+                }}
+                className="text-gray-400"
+              >{`${state.price_before}€`}</h2>
+            )}
+            {state.price_before && (
+              <h2 className="text-green-500">{`-${(
+                ((state.price_before - state.price) / state.price_before) *
+                100
+              ).toFixed(0)}%`}</h2>
+            )}
+          </div>
+        </div>
 
-      <div className="flex justify-between m-2">
-        <h1>{state.selectedVersion}</h1>
-        <h1>{state.selectedBrand}</h1>
+        {uniqueBrands.length > 0 && (
+          <div>
+            <h1 className="text-lg">Μάρκα</h1>
+            <div
+              className={`flex items-center pb-0.5 ${
+                !brandDropdown ? 'border-b border-gray-400' : ''
+              }`}
+            >
+              {state.selectedBrand === '-' ? (
+                <UnstyledButton
+                  onClick={() => setBrandDropdown(prev => !prev)}
+                  style={{
+                    height: '48px',
+                    width: '100%',
+                    marginLeft: '8px',
+                  }}
+                >
+                  διάλεξε
+                </UnstyledButton>
+              ) : (
+                <div
+                  onClick={() => setBrandDropdown(prev => !prev)}
+                  className="relative w-full max-w-96 h-12"
+                >
+                  <Image
+                    component={NextImage}
+                    src={`${envClient.MINIO_PRODUCT_URL}/brand/${state.selectedBrand}`}
+                    alt={state.selectedBrand}
+                    fill
+                  />
+                </div>
+              )}
+              <motion.span
+                className="ml-auto"
+                initial={{ rotate: 0 }}
+                animate={{ rotate: brandDropdown ? 180 : 0 }}
+                transition={{ duration: 0.1, ease: 'easeInOut' }}
+              >
+                <IoIosArrowDown />
+              </motion.span>
+            </div>
+            <AnimatePresence>
+              {brandDropdown && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{
+                    duration: 0.1,
+                    ease: 'easeInOut',
+                  }}
+                  className="flex flex-col gap-1 max-h-48 overflow-y-auto p-1 border"
+                >
+                  {state.selectedBrand !== '-' && (
+                    <>
+                      <UnstyledButton
+                        onClick={() => {
+                          dispatch({
+                            type: 'brand',
+                            payload: { selectedBrand: '-' },
+                          })
+                          setBrandDropdown(prev => !prev)
+                        }}
+                        style={{
+                          maxWidth: '384px',
+                          height: '48px',
+                          textAlign: 'center',
+                          border: '1px solid black',
+                        }}
+                        className="flex-shrink-0"
+                      >
+                        καμία μάρκα
+                      </UnstyledButton>
+                      <hr className="w-full border-t border-gray-400" />
+                    </>
+                  )}
+                  {uniqueBrands
+                    .filter(brand => brand !== state.selectedBrand)
+                    .map((brand, index, array) => (
+                      <Fragment key={index}>
+                        <div className="border p-1">
+                          <div
+                            onClick={() => {
+                              dispatch({
+                                type: 'brand',
+                                payload: { selectedBrand: brand },
+                              })
+                              setBrandDropdown(prev => !prev)
+                            }}
+                            className="relative w-full max-w-96 h-12 flex-shrink-0"
+                          >
+                            <Image
+                              component={NextImage}
+                              src={`${envClient.MINIO_PRODUCT_URL}/brand/${brand}`}
+                              alt={brand}
+                              fill
+                            />
+                          </div>
+                        </div>
+                        {index !== array.length - 1 && (
+                          <hr className="w-full border-t border-gray-400" />
+                        )}
+                      </Fragment>
+                    ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        )}
+
+        <div>
+          <h1 className="text-lg">Εκδωχή</h1>
+          <div
+            className={`flex items-center pb-0.5 ${
+              !versionDropdown ? 'border-b border-gray-400' : ''
+            }`}
+          >
+            <button
+              onClick={() => setVersionDropdown(prev => !prev)}
+              style={{
+                height: '48px',
+                width: '100%',
+                textAlign: 'left',
+                marginLeft: '8px',
+              }}
+            >
+              {state.selectedVersion}
+            </button>
+            <motion.span
+              className="ml-auto"
+              initial={{ rotate: 0 }}
+              animate={{ rotate: versionDropdown ? 180 : 0 }}
+              transition={{ duration: 0.1, ease: 'easeInOut' }}
+            >
+              <IoIosArrowDown />
+            </motion.span>
+          </div>
+          <AnimatePresence>
+            {versionDropdown && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{
+                  duration: 0.1,
+                  ease: 'easeInOut',
+                }}
+                className="flex flex-col gap-1 max-h-48 overflow-y-auto p-1 border"
+              >
+                {uniqueVersions
+                  .filter(version => version !== state.selectedVersion)
+                  .map((version, index, array) => (
+                    <Fragment key={index}>
+                      <div className="border p-1">
+                        <button
+                          onClick={() => {
+                            dispatch({
+                              type: 'version',
+                              payload: { selectedVersion: version },
+                            })
+                            setVersionDropdown(prev => !prev)
+                          }}
+                          className="relative w-full max-w-96 h-12 flex-shrink-0 text-left"
+                        >
+                          {version}
+                        </button>
+                      </div>
+                      {index !== array.length - 1 && (
+                        <hr className="w-full border-t border-gray-400" />
+                      )}
+                    </Fragment>
+                  ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {state.displayedColors.length > 0 && (
+          <div>
+            <h1 className="text-lg">Χρώμα</h1>
+            <div className="flex gap-2">
+              {state.displayedColors.map((color, index) => (
+                <div
+                  key={index}
+                  className={`w-12 h-[42px] p-0.5 border-2 ${
+                    state.selectedColor === color
+                      ? 'border-black'
+                      : 'border-gray-400'
+                  }`}
+                >
+                  <UnstyledButton
+                    onClick={() =>
+                      dispatch({
+                        type: 'color',
+                        payload: { selectedColor: color },
+                      })
+                    }
+                    size="md"
+                    style={{
+                      backgroundColor: color,
+                      width: '100%',
+                      height: '100%',
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {state.displayedSizes.length > 0 && (
+          <div>
+            <h1 className="text-lg">Μέγεθος</h1>
+            <div className="flex gap-2">
+              {state.displayedSizes.map((size, index) => (
+                <div
+                  key={index}
+                  className={`w-12 h-[42px] border-2 ${
+                    state.selectedSize === size
+                      ? 'border-black'
+                      : 'border-gray-400'
+                  }`}
+                >
+                  <UnstyledButton
+                    onClick={() =>
+                      dispatch({
+                        type: 'size',
+                        payload: { selectedSize: size },
+                      })
+                    }
+                    size="md"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}
+                  >
+                    {size}
+                  </UnstyledButton>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="flex gap-2 w-full justify-center items-center">
+          <div className="flex w-24 h-[42px] border-2 border-gray-400">
+            <div className="flex w-1/2 items-center justify-center border-r-1 border-gray-400">
+              <p>{count}</p>
+            </div>
+            <div className="flex flex-col w-1/2">
+              <UnstyledButton
+                onClick={() => handlers.increment()}
+                color="green"
+                size="compact-sm"
+                style={{
+                  width: '100%',
+                  height: '50%',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  borderBottom: '0.5px solid grey',
+                }}
+              >
+                <FaPlus />
+              </UnstyledButton>
+              <UnstyledButton
+                onClick={() => handlers.decrement()}
+                color="red"
+                size="compact-sm"
+                style={{
+                  width: '100%',
+                  height: '50%',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                <FaMinus />
+              </UnstyledButton>
+            </div>
+          </div>
+          <Button
+            onClick={() => {
+              setCart(prev => {
+                const existingIndex = prev.findIndex(
+                  item =>
+                    item.type === paramsType &&
+                    item.version === state.selectedVersion &&
+                    item.color === state.selectedColor &&
+                    item.size === state.selectedSize
+                )
+                if (existingIndex !== -1) {
+                  const updatedCart = [...prev]
+                  updatedCart[existingIndex] = {
+                    ...updatedCart[existingIndex],
+                    quantity: updatedCart[existingIndex].quantity + count,
+                  }
+                  return updatedCart
+                } else {
+                  return [
+                    ...prev,
+                    {
+                      type: paramsType,
+                      version: state.selectedVersion,
+                      color: state.selectedColor,
+                      image: state.images[0],
+                      size: state.selectedSize,
+                      price: state.price,
+                      price_before: state.price_before,
+                      quantity: count,
+                    },
+                  ]
+                }
+              })
+              handlers.reset()
+            }}
+            size="md"
+            radius="xs"
+            style={{ width: '100%' }}
+          >
+            Προσθήκη στο Καλάθι
+          </Button>
+        </div>
       </div>
+    </>
+  )
+}
 
-      <div className="flex justify-between m-2">
+{
+  /* <div className="flex justify-between m-2">
         <Button
           size="compact-sm"
           onClick={() => {
@@ -321,35 +610,11 @@ export function ProductPageClient({
         >
           Διάλεξε μάρκα
         </Button>
-      </div>
+      </div> */
+}
 
-      <div className="flex items-center m-2">
-        <h1 className="mr-2">Χρώματα</h1>
-        <div className="flex gap-2">
-          {state.displayedColors.map(color => {
-            function handleOnClick() {
-              dispatch({ type: 'color', payload: { selectedColor: color } })
-            }
-            return color === state.selectedColor ? (
-              <button
-                key={color}
-                onClick={() => handleOnClick()}
-                className="w-10 h-10 rounded-full border hover:cursor-pointer flex items-center justify-center"
-              >
-                <div className={`bg-${color} w-9 h-9 rounded-full`} />
-              </button>
-            ) : (
-              <button
-                key={color}
-                onClick={() => handleOnClick()}
-                className={`bg-${color} w-10 h-10 rounded-full hover:cursor-pointer`}
-              />
-            )
-          })}
-        </div>
-      </div>
-
-      <div className="flex items-center m-2">
+{
+  /* <div className="flex items-center m-2">
         <h1 className="mr-2">Περιγραφή</h1>
         <textarea value={state.description} readOnly={true} />
       </div>
@@ -357,9 +622,11 @@ export function ProductPageClient({
       <div className="flex items-center m-2">
         <h1 className="mr-2">Μεγέθοι</h1>
         <div className="flex gap-2">{state.displayedSize}</div>
-      </div>
+      </div> */
+}
 
-      <div className="flex items-center gap-2 m-2">
+{
+  /* <div className="flex items-center gap-2 m-2">
         <h1>Τιμή</h1>
         {state.price_before && (
           <span className="text-gray-500 line-through">
@@ -378,48 +645,5 @@ export function ProductPageClient({
         <Button onClick={handlers.decrement}>-</Button>
         <h1 className="">{count}</h1>
         <Button onClick={handlers.increment}>+</Button>
-      </div>
-
-      <div className="m-2">
-        <Button
-          onClick={() => {
-            setCart(prev => {
-              const existingIndex = prev.findIndex(
-                item =>
-                  item.type === paramsType &&
-                  item.version === state.selectedVersion &&
-                  item.color === state.selectedColor &&
-                  item.size === state.selectedSize
-              )
-              if (existingIndex !== -1) {
-                const updatedCart = [...prev]
-                updatedCart[existingIndex] = {
-                  ...updatedCart[existingIndex],
-                  quantity: updatedCart[existingIndex].quantity + count,
-                }
-                return updatedCart
-              } else {
-                return [
-                  ...prev,
-                  {
-                    type: paramsType,
-                    version: state.selectedVersion,
-                    color: state.selectedColor,
-                    image: state.images[0],
-                    size: state.selectedSize,
-                    price: state.price,
-                    price_before: state.price_before,
-                    quantity: count,
-                  },
-                ]
-              }
-            })
-            handlers.reset()
-          }}
-        >
-          Προσθήκη στο Καλάθι
-        </Button>
-      </div>
-    </>
-  )
+      </div> */
 }
