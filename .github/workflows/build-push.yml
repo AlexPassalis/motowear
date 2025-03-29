@@ -67,16 +67,16 @@ jobs:
           $IMAGE_NEXTJS:latest \
           $IMAGE_NEXTJS:${{ github.sha }}
 
-      # - name: image-nginx (build and tag)
-      #   run: |
-      #     docker build \
-      #     -t $IMAGE_NGINX:latest \
-      #     -f ./apps/nginx/Dockerfile \
-      #     ./apps/nginx
+      - name: image-nginx (build and tag)
+        run: |
+          docker build \
+          -t $IMAGE_NGINX:latest \
+          -f ./apps/nginx/Dockerfile \
+          ./apps/nginx
 
-      #     docker tag \
-      #     $IMAGE_NGINX:latest \
-      #     $IMAGE_NGINX:${{ github.sha }}
+          docker tag \
+          $IMAGE_NGINX:latest \
+          $IMAGE_NGINX:${{ github.sha }}
 
       - name: Log in to GHCR
         uses: docker/login-action@v2
@@ -96,5 +96,5 @@ jobs:
           docker push $IMAGE_NEXTJS:latest
           docker push $IMAGE_NEXTJS:${{ github.sha }}
 
-          # docker push $IMAGE_NGINX:latest
-          # docker push $IMAGE_NGINX:${{ github.sha }}
+          docker push $IMAGE_NGINX:latest
+          docker push $IMAGE_NGINX:${{ github.sha }}
