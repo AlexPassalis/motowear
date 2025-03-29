@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import localFont from 'next/font/local'
+import { Geist, Geist_Mono } from 'next/font/google'
 import { ReactNode } from 'react'
 
 import '@mantine/core/styles.css'
@@ -23,6 +24,16 @@ const proximaNovaExtraBold = localFont({
     },
   ],
   variable: '--font-proxima-nova-extra-bold',
+})
+
+const geistSans = Geist({
+  variable: '--font-geist-sans',
+  subsets: ['latin'],
+})
+
+const geistMono = Geist_Mono({
+  variable: '--font-geist-mono',
+  subsets: ['latin'],
 })
 
 export const metadata: Metadata = {
@@ -93,7 +104,9 @@ export default function RootLayout({
       <head>
         <ColorSchemeScript />
       </head>
-      <body className={`${proximaNovaExtraBold.variable} antialiased`}>
+      <body
+        className={`${proximaNovaExtraBold.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
         <MantineProvider theme={customTheme}>{children}</MantineProvider>
       </body>
     </html>
