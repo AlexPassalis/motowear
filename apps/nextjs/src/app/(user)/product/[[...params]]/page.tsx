@@ -1,7 +1,7 @@
 import { ProductRow } from '@/data/types'
 import { DatabaseError } from 'pg'
 import { postgres } from '@/lib/postgres'
-import { ProductPageClient } from '@/app/(user)/product/[type]/client'
+import { ProductPageClient } from '@/app/(user)/product/[[...params]]/client'
 import { getProductTypes } from '@/utils/getPostgres'
 import { notFound } from 'next/navigation'
 import { v4 as id } from 'uuid'
@@ -10,20 +10,20 @@ import { errorPostgres } from '@/data/error'
 import { sendTelegramMessage } from '@/lib/telegram'
 
 type ProductPageProps = {
-  params: Promise<{
-    type: string
-  }>
-  searchParams: Promise<{ [version: string]: string | undefined }>
+  params: Promise<{ params?: [type: string, version?: string] }>
 }
 
-export default async function ProductPage({
-  params,
-  searchParams,
-}: ProductPageProps) {
-  const [resolvedParams, resolvedSearchParams, productTypes] =
-    await Promise.all([params, searchParams, getProductTypes()])
+export default async function ProductPage({ params }: ProductPageProps) {
+  const [resolvedParams, productTypes] = await Promise.all([
+    params,
+    getProductTypes(),
+  ])
 
-  const paramsType = decodeURIComponent(resolvedParams.type)
+  if (!resolvedParams || Object.keys(resolvedParams).length === 0) {
+    return notFound()
+  }
+
+  const paramsType = decodeURIComponent(resolvedParams.params![0])
 
   let postgresVersions: ProductRow[]
   try {
@@ -42,8 +42,8 @@ export default async function ProductPage({
     }
   }
 
-  const searchParamsVersion = resolvedSearchParams['version']
-    ? decodeURIComponent(resolvedSearchParams['version'])
+  const searchParamsVersion = resolvedParams.params![1]
+    ? decodeURIComponent(resolvedParams.params![1])
     : undefined
 
   const uniqueBrands = Array.from(

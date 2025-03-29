@@ -1,13 +1,12 @@
 'use client'
 
 import { ProductRow } from '@/data/types'
-// import { useRouter } from 'next/navigation'
 import { useEffect, useReducer, useState } from 'react'
 import { useCounter } from '@mantine/hooks'
 import { Button, Image, UnstyledButton } from '@mantine/core'
 import NextImage from 'next/image'
 import Link from 'next/link'
-import { ROUTE_COLLECTION } from '@/data/routes'
+import { ROUTE_COLLECTION, ROUTE_PRODUCT } from '@/data/routes'
 import { Header } from '@/components/Header'
 import {
   getLocalStorageCart,
@@ -39,8 +38,6 @@ export function ProductPageClient({
   uniqueBrands,
   uniqueVersions,
 }: ProductPageClientProps) {
-  // const router = useRouter()
-
   console.log(postgresVersions)
 
   const productFound = postgresVersions.find(
@@ -359,6 +356,11 @@ export function ProductPageClient({
                                 payload: { selectedBrand: brand },
                               })
                               setBrandDropdown(prev => !prev)
+                              window.history.pushState(
+                                {},
+                                '',
+                                `${ROUTE_PRODUCT}/${paramsType}`
+                              )
                             }}
                             className="relative w-full max-w-96 h-12 flex-shrink-0"
                           >
@@ -432,6 +434,11 @@ export function ProductPageClient({
                               payload: { selectedVersion: version },
                             })
                             setVersionDropdown(prev => !prev)
+                            window.history.pushState(
+                              {},
+                              '',
+                              `${ROUTE_PRODUCT}/${paramsType}/${version}`
+                            )
                           }}
                           className="relative w-full max-w-96 h-12 flex-shrink-0 text-left"
                         >
