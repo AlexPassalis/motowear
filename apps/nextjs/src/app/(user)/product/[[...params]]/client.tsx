@@ -251,7 +251,7 @@ export function ProductPageClient({
   return (
     <>
       <Header productTypes={productTypes} cart={cart} setCart={setCart} />
-      <Carousel withIndicators height={400}>
+      <Carousel withIndicators height={500}>
         {carouselSlides()}
       </Carousel>
       <div className="flex flex-col gap-2 m-4">
