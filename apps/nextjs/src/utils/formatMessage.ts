@@ -5,6 +5,8 @@ export function formatMessage(
   error?: unknown
 ) {
   return `Id: ${id}\nLocation: ${location}\nMessage: ${message}${
-    error ? `\n${error}.` : '.'
+    error
+      ? `\n${String(error).replace(/([_*[\]()~\`>#+\-=|{}.!])/g, '\\$1')}.`
+      : '.'
   }`
 }
