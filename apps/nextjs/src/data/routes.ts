@@ -5,5 +5,6 @@ export const ROUTE_COLLECTION = '/collection' as const
 export const ROUTE_PRODUCT = '/product' as const
 export const ROUTE_CONTACT = '/contact' as const
 
-export const ROUTE_ADMIN = '/admin' as const
 export const ROUTE_ADMIN_AUTH = '/admin/auth' as const
+export const ROUTE_ADMIN = '/admin' as const
+export const ROUTE_ADMIN_PRODUCT = '/admin' as const

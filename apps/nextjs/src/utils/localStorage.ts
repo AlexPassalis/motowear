@@ -1,12 +1,12 @@
 export type LocalStorageCartItem = {
   type: string
   version: string
-  color: string
   image: string
-  size: string
   price: number
-  price_before: number
   quantity: number
+  color?: string
+  size?: string
+  price_before?: number
 }
 
 export function getLocalStorageCart(): LocalStorageCartItem[] {

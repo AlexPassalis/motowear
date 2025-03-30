@@ -35,16 +35,17 @@ export default async function ProductPage({ params }: ProductPageProps) {
     if (e instanceof DatabaseError && e.code === '42P01') {
       return notFound()
     } else {
-      const message = formatMessage(id(), '/product/[type]', errorPostgres, e)
+      const message = formatMessage(
+        id(),
+        '/product/[[...params]]',
+        errorPostgres,
+        e
+      )
       console.error(message)
       sendTelegramMessage('ERROR', message)
       throw e
     }
   }
-
-  const searchParamsVersion = resolvedParams.params![1]
-    ? decodeURIComponent(resolvedParams.params![1])
-    : undefined
 
   const uniqueBrands = Array.from(
     new Set(
@@ -56,6 +57,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const uniqueVersions = Array.from(
     new Set(postgresVersions.map(row => row.version))
   )
+
+  const searchParamsVersion = resolvedParams.params![1]
+    ? uniqueVersions.find(
+        v => v === decodeURIComponent(resolvedParams.params![1]!)
+      )
+    : undefined
 
   return (
     <ProductPageClient

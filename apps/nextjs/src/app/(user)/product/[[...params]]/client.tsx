@@ -49,36 +49,48 @@ export function ProductPageClient({
     displayedVersions: uniqueVersions,
     selectedVersion: searchParamsVersion ?? fallbackProduct.version,
     displayedColors: searchParamsVersion
-      ? postgresVersions
-          .filter(product => product.version === searchParamsVersion)
-          .map(product => product.color)
-      : postgresVersions
-          .filter(product => product.version === fallbackProduct.version)
-          .map(product => product.color),
+      ? [
+          ...new Set(
+            postgresVersions
+              .filter(product => product.version === searchParamsVersion)
+              .map(product => product.color)
+          ),
+        ]
+      : [
+          ...new Set(
+            postgresVersions
+              .filter(product => product.version === fallbackProduct.version)
+              .map(product => product.color)
+          ),
+        ],
     selectedColor: searchParamsVersion
-      ? productFound?.color ?? fallbackProduct.color
+      ? productFound?.color
       : fallbackProduct.color,
-    images: searchParamsVersion
-      ? productFound?.images ?? fallbackProduct.images
-      : fallbackProduct.images,
+    images: searchParamsVersion ? productFound!.images : fallbackProduct.images,
     description: searchParamsVersion
-      ? productFound?.description ?? fallbackProduct.description
+      ? productFound?.description
       : fallbackProduct.description,
-    price: searchParamsVersion
-      ? productFound?.price ?? fallbackProduct.price
-      : fallbackProduct.price,
+    price: searchParamsVersion ? productFound!.price : fallbackProduct.price,
     price_before: searchParamsVersion
-      ? productFound?.price_before ?? fallbackProduct.price_before
+      ? productFound!.price_before
       : fallbackProduct.price_before,
     displayedSizes: searchParamsVersion
-      ? postgresVersions
-          .filter(product => product.version === searchParamsVersion)
-          .map(product => product.size)
-      : postgresVersions
-          .filter(product => product.version === fallbackProduct.version)
-          .map(product => product.size),
+      ? [
+          ...new Set(
+            postgresVersions
+              .filter(product => product.version === searchParamsVersion)
+              .map(product => product.size)
+          ),
+        ]
+      : [
+          ...new Set(
+            postgresVersions
+              .filter(product => product.version === fallbackProduct.version)
+              .map(product => product.size)
+          ),
+        ],
     selectedSize: searchParamsVersion
-      ? productFound?.size ?? fallbackProduct.size
+      ? productFound?.size
       : fallbackProduct.size,
   }
   type State = typeof initialState
@@ -242,7 +254,7 @@ export function ProductPageClient({
       <Carousel withIndicators height={400}>
         {carouselSlides()}
       </Carousel>
-      <div className="flex flex-col gap-2 m-2">
+      <div className="flex flex-col gap-2 m-4">
         <div className="flex gap-2 text-lg">
           <Link href={`${ROUTE_COLLECTION}/${paramsType}`}>{paramsType}</Link>
           <p>/</p>
@@ -253,7 +265,6 @@ export function ProductPageClient({
               <h2
                 style={{
                   textDecorationLine: 'line-through',
-                  textDecorationStyle: 'double',
                   textDecorationColor: 'red',
                 }}
                 className="text-gray-400"
@@ -267,6 +278,8 @@ export function ProductPageClient({
             )}
           </div>
         </div>
+
+        {state.description && <p className="my-2">{state.description}</p>}
 
         {uniqueBrands.length > 0 && (
           <div>
@@ -323,24 +336,24 @@ export function ProductPageClient({
                 >
                   {state.selectedBrand !== '-' && (
                     <>
-                      <UnstyledButton
-                        onClick={() => {
-                          dispatch({
-                            type: 'brand',
-                            payload: { selectedBrand: '-' },
-                          })
-                          setBrandDropdown(prev => !prev)
-                        }}
-                        style={{
-                          maxWidth: '384px',
-                          height: '48px',
-                          textAlign: 'center',
-                          border: '1px solid black',
-                        }}
-                        className="flex-shrink-0"
-                      >
-                        καμία μάρκα
-                      </UnstyledButton>
+                      <div className="border p-1">
+                        <UnstyledButton
+                          onClick={() => {
+                            dispatch({
+                              type: 'brand',
+                              payload: { selectedBrand: '-' },
+                            })
+                            setBrandDropdown(prev => !prev)
+                          }}
+                          style={{
+                            width: '100%',
+                            height: '48px',
+                          }}
+                          className="flex-shrink-0"
+                        >
+                          καμία μάρκα
+                        </UnstyledButton>
+                      </div>
                       <hr className="w-full border-t border-gray-400" />
                     </>
                   )}
@@ -588,12 +601,18 @@ export function ProductPageClient({
                     {
                       type: paramsType,
                       version: state.selectedVersion,
-                      color: state.selectedColor,
                       image: state.images[0],
-                      size: state.selectedSize,
                       price: state.price,
-                      price_before: state.price_before,
                       quantity: count,
+                      ...(state.selectedColor
+                        ? { color: state.selectedColor }
+                        : {}),
+                      ...(state.selectedSize
+                        ? { selectedSize: state.selectedSize }
+                        : {}),
+                      ...(state.price_before
+                        ? { price_before: state.price_before }
+                        : {}),
                     },
                   ]
                 }

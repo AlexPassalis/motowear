@@ -89,7 +89,7 @@ function Main({
             }
             setIsMenuOpen(!isMenuOpen)
           }}
-          className="flex justify-center items-center h-10 w-10 sm:scale-110 rounded-md border border-neutral-200 bg-white transition-colors hover:cursor-pointer group"
+          className="flex justify-center items-center h-10 w-10 sm:scale-110 rounded-md border border-neutral-200 transition-colors hover:cursor-pointer group"
         >
           <AiOutlineMenu className="transition-transform duration-200 ease-in-out group-hover:scale-150" />
         </button>
@@ -109,7 +109,7 @@ function Main({
       </div>
 
       <div className="flex justify-end gap-1 sm:gap-3">
-        <button className="flex justify-center items-center h-10 w-10 sm:scale-110 rounded-md border border-neutral-200 bg-white transition-colors hover:cursor-pointer group">
+        <button className="flex justify-center items-center h-10 w-10 sm:scale-110 rounded-md border border-neutral-200 transition-colors hover:cursor-pointer group">
           <HiMagnifyingGlass
             onClick={() => {
               if (isMenuOpen) {
@@ -125,10 +125,11 @@ function Main({
         </button>
         <Indicator
           disabled={cart.length < 1}
-          position="bottom-end"
+          position="bottom-start"
           color="red"
+          inline
           label={cart.length}
-          size={20}
+          size={15}
           zIndex={1}
         >
           <button
@@ -141,7 +142,7 @@ function Main({
               }
               setIsCartOpen(!isCartOpen)
             }}
-            className="flex justify-center items-center h-10 w-10 sm:scale-110 rounded-md border border-neutral-200 bg-white transition-colors hover:cursor-pointer group"
+            className="flex justify-center items-center h-10 w-10 sm:scale-110 rounded-md border border-neutral-200 transition-colors hover:cursor-pointer group"
           >
             {cart.length < 1 ? (
               <AiOutlineShopping className="transition-transform duration-200 ease-in-out group-hover:scale-150" />
@@ -164,7 +165,7 @@ type MenuProps = {
 function Menu({ productTypes, isMenuOpen, setIsMenuOpen }: MenuProps) {
   return (
     <div
-      className={`z-10 fixed top-0 left-0 h-full bg-neutral-50 w-80 shadow-lg transform transition-transform duration-300 ease-in-out ${
+      className={`z-10 fixed top-0 left-0 h-full w-80 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${
         isMenuOpen ? 'translate-x-0' : '-translate-x-full'
       }`}
     >
@@ -172,7 +173,7 @@ function Menu({ productTypes, isMenuOpen, setIsMenuOpen }: MenuProps) {
         <div className="flex justify-between items-center w-full border-b-2 pb-2 border-neutral-200">
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="flex justify-center items-center h-10 w-10 rounded-md border border-neutral-200 bg-white transition-colors hover:cursor-pointer group"
+            className="flex justify-center items-center h-10 w-10 rounded-md border border-neutral-200 transition-colors hover:cursor-pointer group"
           >
             <AiOutlineClose className="transition-transform duration-200 ease-in-out group-hover:scale-150" />
           </button>
@@ -207,18 +208,18 @@ type CartProps = {
 function Cart({ isCartOpen, setIsCartOpen, cart, setCart }: CartProps) {
   return (
     <div
-      className={`z-10 fixed top-0 right-0 h-full bg-neutral-50 w-80 shadow-lg transform transition-transform duration-300 ease-in-out ${
+      className={`z-10 fixed top-0 right-0 h-full w-80 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${
         isCartOpen ? 'translate-x-0' : 'translate-x-full'
       }`}
     >
-      <div className="p-4">
+      <div className="flex flex-col h-full p-4">
         <div className="flex justify-between items-center w-full border-b-2 pb-2 mb-2 border-neutral-200">
           <h1 className="text-2xl text-center font-bold">Καλάθι</h1>
           <button
             onClick={() => {
               setIsCartOpen(!isCartOpen)
             }}
-            className="flex justify-center items-center h-10 w-10 rounded-md border border-neutral-200 bg-white transition-colors hover:cursor-pointer group"
+            className="flex justify-center items-center h-10 w-10 rounded-md border border-neutral-200 transition-colors hover:cursor-pointer group"
           >
             <AiOutlineClose className="transition-transform duration-200 ease-in-out group-hover:scale-150" />
           </button>
@@ -228,9 +229,7 @@ function Cart({ isCartOpen, setIsCartOpen, cart, setCart }: CartProps) {
         ) : (
           <div className="flex flex-col gap-2">
             {cart.map((product, index) => (
-              <div
-                key={`${product.type}-${product.version}-${product.color}-${product.size}`}
-              >
+              <div key={index}>
                 <Grid>
                   <Grid.Col span={6}>
                     <div className="flex gap-1">
@@ -269,7 +268,7 @@ function Cart({ isCartOpen, setIsCartOpen, cart, setCart }: CartProps) {
                   <Grid.Col span={6}>
                     <div className="flex gap-1">
                       <h1>Τιμή</h1>
-                      {product.price_before > 0 && (
+                      {product.price_before && product.price_before > 0 && (
                         <h2 className="text-gray-500 line-through">
                           {product.price_before * product.quantity}€
                         </h2>
@@ -278,7 +277,7 @@ function Cart({ isCartOpen, setIsCartOpen, cart, setCart }: CartProps) {
                         {product.price * product.quantity}€
                       </h2>
                     </div>
-                    {product.price_before > 0 && (
+                    {product.price_before && product.price_before > 0 && (
                       <h2 className="text-green-700">
                         (Κερδίζεις{' '}
                         {(product.price_before - product.price) *
@@ -298,7 +297,10 @@ function Cart({ isCartOpen, setIsCartOpen, cart, setCart }: CartProps) {
                                 if (i === index) {
                                   const newQuantity = item.quantity - 1
                                   if (newQuantity > 0) {
-                                    acc.push({ ...item, quantity: newQuantity })
+                                    acc.push({
+                                      ...item,
+                                      quantity: newQuantity,
+                                    })
                                   }
                                 } else {
                                   acc.push(item)
@@ -333,6 +335,12 @@ function Cart({ isCartOpen, setIsCartOpen, cart, setCart }: CartProps) {
             ))}
           </div>
         )}
+        {cart.length > 0 && (
+          <Button color="red" style={{ marginTop: 'auto' }}>
+            Ταμείο{' '}
+            {cart.reduce((acc, item) => acc + item.price * item.quantity, 0)}€
+          </Button>
+        )}
       </div>
     </div>
   )
@@ -346,7 +354,7 @@ type SearchProps = {
 function Search({ isSearchOpen, setIsSearchOpen }: SearchProps) {
   return (
     <div
-      className={`z-10 fixed top-0 left-0 w-full bg-neutral-50 shadow-lg transform transition-transform duration-300 ease-in-out ${
+      className={`z-10 fixed top-0 left-0 w-full bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${
         isSearchOpen ? 'translate-y-0' : '-translate-y-full'
       }`}
     >
@@ -355,7 +363,7 @@ function Search({ isSearchOpen, setIsSearchOpen }: SearchProps) {
           <h1 className="text-2xl font-bold">Αναζήτηση</h1>
           <button
             onClick={() => setIsSearchOpen(!isSearchOpen)}
-            className="flex justify-center items-center h-10 w-10 rounded-md border border-neutral-200 bg-white transition-colors hover:cursor-pointer group"
+            className="flex justify-center items-center h-10 w-10 rounded-md border border-neutral-200 transition-colors hover:cursor-pointer group"
           >
             <AiOutlineClose className="transition-transform duration-200 ease-in-out group-hover:scale-150" />
           </button>

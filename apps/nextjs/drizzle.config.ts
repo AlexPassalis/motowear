@@ -6,9 +6,9 @@ export default defineConfig({
   dbCredentials: {
     url: readSecret('POSTGRES_URL'),
   },
-  schemaFilter: ['public', 'auth', 'product'], // remove product after the first migration, so that tables are not dropped.
+  schemaFilter: ['public', 'auth', 'metrics'], // remove 'product' schema after the first migration, so that tables are not dropped.
   schema: './src/lib/postgres/schema.ts',
   out: './src/lib/postgres/migrations',
   verbose: true,
-  strict: true,
+  strict: false,
 })
