@@ -3,13 +3,13 @@ import { Footer } from '@/components/Footer'
 
 export default async function UserLayout({
   children,
-}: Readonly<{
+}: {
   children: ReactNode
-}>) {
+}) {
   return (
-    <>
-      {children}
+    <div className="flex flex-col min-h-screen">
+      <main className="flex-1">{children}</main>
       <Footer />
-    </>
+    </div>
   )
 }

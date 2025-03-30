@@ -1,29 +1,24 @@
 import { ProductRow } from '@/data/types'
 import { DatabaseError } from 'pg'
 import { postgres } from '@/lib/postgres'
-import { ProductPageClient } from '@/app/(user)/product/[[...params]]/client'
-import { getProductTypes } from '@/utils/getPostgres'
 import { notFound } from 'next/navigation'
 import { v4 as id } from 'uuid'
 import { formatMessage } from '@/utils/formatMessage'
 import { errorPostgres } from '@/data/error'
 import { sendTelegramMessage } from '@/lib/telegram'
+import { CollectionPageClient } from '@/app/(user)/collection/[type]/client'
+import { getProductTypes } from '@/utils/getPostgres'
 
 type ProductPageProps = {
-  params: Promise<{ params?: [type: string, version?: string] }>
+  params: Promise<{ type: string }>
 }
 
-export default async function ProductPage({ params }: ProductPageProps) {
+export default async function CollectionPage({ params }: ProductPageProps) {
   const [resolvedParams, productTypes] = await Promise.all([
     params,
     getProductTypes(),
   ])
-
-  if (!resolvedParams || Object.keys(resolvedParams).length < 1) {
-    return notFound()
-  }
-
-  const paramsType = decodeURIComponent(resolvedParams.params![0])
+  const paramsType = decodeURIComponent(resolvedParams.type)
 
   let postgresVersions: ProductRow[]
   try {
@@ -58,16 +53,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
     new Set(postgresVersions.map(row => row.version))
   )
 
-  const searchParamsVersion = resolvedParams.params![1]
-    ? uniqueVersions.find(
-        v => v === decodeURIComponent(resolvedParams.params![1]!)
-      )
-    : undefined
-
   return (
-    <ProductPageClient
+    <CollectionPageClient
       paramsType={paramsType}
-      searchParamsVersion={searchParamsVersion}
       productTypes={productTypes}
       postgresVersions={postgresVersions}
       uniqueBrands={uniqueBrands}
