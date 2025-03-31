@@ -38,8 +38,6 @@ export function ProductPageClient({
   uniqueBrands,
   uniqueVersions,
 }: ProductPageClientProps) {
-  console.log(postgresVersions)
-
   const productFound = postgresVersions.find(
     product => product.version === searchParamsVersion
   )
@@ -472,34 +470,33 @@ export function ProductPageClient({
           <div>
             <h1 className="text-lg">Χρώμα</h1>
             <div className="flex gap-2">
-              {state.displayedColors.map((color, index) => (
-                <div
-                  key={index}
-                  className={`w-12 h-[42px] p-0.5 border-2 ${
-                    state.selectedColor === color
-                      ? 'border-black'
-                      : 'border-gray-400'
-                  }`}
-                >
-                  <UnstyledButton
-                    onClick={() =>
-                      dispatch({
-                        type: 'color',
-                        payload: { selectedColor: color },
-                      })
-                    }
-                    size="md"
-                    style={{
-                      backgroundColor: color,
-                      width: '100%',
-                      height: '100%',
-                      display: 'flex',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                    }}
+              {state.displayedColors.map((color, index) =>
+                color === state.selectedColor ? (
+                  <div
+                    key={index}
+                    className={`w-11 h-11 rounded-full p-0.5 border-2 ${
+                      state.selectedColor === color
+                        ? 'border-black'
+                        : 'border-gray-400'
+                    }`}
+                  >
+                    <div
+                      style={{ backgroundColor: color }}
+                      className={'w-full h-full rounded-full'}
+                    />
+                  </div>
+                ) : (
+                  <div
+                    key={index}
+                    style={{ backgroundColor: color }}
+                    className={`w-11 h-11 rounded-full p-0.5 border-2 ${
+                      state.selectedColor === color
+                        ? 'border-black'
+                        : 'border-gray-400'
+                    }`}
                   />
-                </div>
-              ))}
+                )
+              )}
             </div>
           </div>
         )}
@@ -511,7 +508,7 @@ export function ProductPageClient({
               {state.displayedSizes.map((size, index) => (
                 <div
                   key={index}
-                  className={`w-12 h-[42px] border-2 ${
+                  className={`w-12 h-[42px] border-2 rounded-lg ${
                     state.selectedSize === size
                       ? 'border-black'
                       : 'border-gray-400'
@@ -542,30 +539,31 @@ export function ProductPageClient({
         )}
 
         <div className="flex gap-2 w-full justify-center items-center">
-          <div className="flex w-24 h-[42px] border-2 border-gray-400">
-            <div className="flex w-1/2 items-center justify-center border-r-1 border-gray-400">
+          <div className="flex w-24 h-[42px] rounded-lg border-2 border-gray-400">
+            <div className="flex w-1/2 items-center justify-center border-r-2 border-gray-400">
               <p>{count}</p>
             </div>
             <div className="flex flex-col w-1/2">
-              <UnstyledButton
-                onClick={() => handlers.increment()}
-                color="green"
-                size="compact-sm"
-                style={{
-                  width: '100%',
-                  height: '50%',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  borderBottom: '0.5px solid grey',
-                }}
-              >
-                <FaPlus />
-              </UnstyledButton>
+              <div className="w-full h-1/2 border-b-1 border-gray-400">
+                <UnstyledButton
+                  onClick={() => handlers.increment()}
+                  color="green"
+                  size="compact-sm"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}
+                >
+                  <FaPlus size={10} />
+                </UnstyledButton>
+              </div>
               <UnstyledButton
                 onClick={() => handlers.decrement()}
                 color="red"
-                size="compact-sm"
+                size="compact-md"
                 style={{
                   width: '100%',
                   height: '50%',
@@ -574,7 +572,7 @@ export function ProductPageClient({
                   alignItems: 'center',
                 }}
               >
-                <FaMinus />
+                <FaMinus size={10} />
               </UnstyledButton>
             </div>
           </div>
@@ -619,8 +617,9 @@ export function ProductPageClient({
               })
               handlers.reset()
             }}
+            color="red"
             size="md"
-            radius="xs"
+            radius="md"
             style={{ width: '100%' }}
           >
             Προσθήκη στο Καλάθι
@@ -629,62 +628,4 @@ export function ProductPageClient({
       </div>
     </>
   )
-}
-
-{
-  /* <div className="flex justify-between m-2">
-        <Button
-          size="compact-sm"
-          onClick={() => {
-            openModal()
-            setModalVersion('version')
-          }}
-        >
-          Διάλεξε εκδωχή
-        </Button>
-        <Button
-          size="compact-sm"
-          onClick={() => {
-            openModal()
-            setModalVersion('brand')
-          }}
-        >
-          Διάλεξε μάρκα
-        </Button>
-      </div> */
-}
-
-{
-  /* <div className="flex items-center m-2">
-        <h1 className="mr-2">Περιγραφή</h1>
-        <textarea value={state.description} readOnly={true} />
-      </div>
-
-      <div className="flex items-center m-2">
-        <h1 className="mr-2">Μεγέθοι</h1>
-        <div className="flex gap-2">{state.displayedSize}</div>
-      </div> */
-}
-
-{
-  /* <div className="flex items-center gap-2 m-2">
-        <h1>Τιμή</h1>
-        {state.price_before && (
-          <span className="text-gray-500 line-through">
-            {state.price_before}€
-          </span>
-        )}
-        <span className="font-bold">{state.price}€</span>
-        {state.price_before && (
-          <span className="text-green-700">
-            (Κερδίζεις {state.price_before - state.price}€)
-          </span>
-        )}
-      </div>
-
-      <div className="inline-flex items-center gap-3 m-2 border">
-        <Button onClick={handlers.decrement}>-</Button>
-        <h1 className="">{count}</h1>
-        <Button onClick={handlers.increment}>+</Button>
-      </div> */
 }

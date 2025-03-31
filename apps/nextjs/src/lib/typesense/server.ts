@@ -19,15 +19,10 @@ export async function updateTypesense() {
     const schema = {
       name: collectionName,
       fields: [
-        { name: 'type', type: 'string' as const },
         { name: 'id', type: 'string' as const },
-        { name: 'version', type: 'string' as const },
-        { name: 'images', type: 'string[]' as const },
-        { name: 'price', type: 'float' as const },
-        { name: 'brand', type: 'string' as const },
-        { name: 'color', type: 'string' as const },
-        { name: 'size', type: 'string' as const },
-        { name: 'price_before', type: 'float' as const },
+        { name: 'type', type: 'string' as const, infix: true },
+        { name: 'version', type: 'string' as const, infix: true },
+        { name: 'image', type: 'string' as const },
       ],
     }
     await typesense.collections().create(schema)
@@ -36,27 +31,34 @@ export async function updateTypesense() {
 
   for (const productType in productPostgres) {
     const products = productPostgres[productType]
+    const upsertedVersions = [] as string[]
     for (const product of products) {
-      const document = { ...product, type: productType }
-      try {
-        await typesense.collections(collectionName).documents().upsert(document)
-      } catch (err) {
-        console.error(`Error upserting product ${product.id}:`, err)
+      if (!upsertedVersions.includes(product.version)) {
+        const document = {
+          id: product.id,
+          type: productType,
+          version: product.version,
+          image: product.images[0],
+        }
+        try {
+          await typesense
+            .collections(collectionName)
+            .documents()
+            .upsert(document)
+        } catch (e) {
+          console.error(`Error upserting product ${product.id}:`, e)
+        }
+        upsertedVersions.push(product.version)
       }
     }
   }
 }
 
 export type Document = {
-  type: string
   id: string
+  type: string
   version: string
-  images: string[]
-  price: number
-  brand: string
-  color: string
-  size: string
-  price_before: number
+  image: string
 }
 
 export async function deleteTypesenseVersion(id: string) {

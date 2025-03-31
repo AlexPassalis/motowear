@@ -4,7 +4,7 @@ import { ROUTE_HOME, ROUTE_PRODUCT } from '@/data/routes'
 import { Image } from '@mantine/core'
 import NextImage from 'next/image'
 import Link from 'next/link'
-import { Dispatch, SetStateAction, useState } from 'react'
+import { Dispatch, Fragment, SetStateAction, useState } from 'react'
 import {
   AiOutlineMenu,
   AiOutlineShopping,
@@ -12,7 +12,8 @@ import {
   AiOutlineClose,
 } from 'react-icons/ai'
 import { HiMagnifyingGlass } from 'react-icons/hi2'
-import { InstantSearch, SearchBox, Hits } from 'react-instantsearch'
+import { InstantSearch, SearchBox, Hits, Highlight } from 'react-instantsearch'
+import type { Hit } from 'instantsearch.js/es/types/results.d.ts'
 import { typesenseClient } from '@/lib/typesense/client'
 import { LocalStorageCartItem } from '@/utils/localStorage'
 import { Indicator, Grid, Button } from '@mantine/core'
@@ -89,7 +90,7 @@ function Main({
             }
             setIsMenuOpen(!isMenuOpen)
           }}
-          className="flex justify-center items-center h-10 w-10 sm:scale-110 rounded-md border border-neutral-200 transition-colors hover:cursor-pointer group"
+          className="flex justify-center items-center h-10 w-10 sm:scale-110 rounded-md border border-gray-200 transition-colors hover:cursor-pointer group"
         >
           <AiOutlineMenu className="transition-transform duration-200 ease-in-out group-hover:scale-150" />
         </button>
@@ -109,7 +110,7 @@ function Main({
       </div>
 
       <div className="flex justify-end gap-1 sm:gap-3">
-        <button className="flex justify-center items-center h-10 w-10 sm:scale-110 rounded-md border border-neutral-200 transition-colors hover:cursor-pointer group">
+        <button className="flex justify-center items-center h-10 w-10 sm:scale-110 rounded-md border border-gray-200 transition-colors hover:cursor-pointer group">
           <HiMagnifyingGlass
             onClick={() => {
               if (isMenuOpen) {
@@ -142,7 +143,7 @@ function Main({
               }
               setIsCartOpen(!isCartOpen)
             }}
-            className="flex justify-center items-center h-10 w-10 sm:scale-110 rounded-md border border-neutral-200 transition-colors hover:cursor-pointer group"
+            className="flex justify-center items-center h-10 w-10 sm:scale-110 rounded-md border border-gray-200 transition-colors hover:cursor-pointer group"
           >
             {cart.length < 1 ? (
               <AiOutlineShopping className="transition-transform duration-200 ease-in-out group-hover:scale-150" />
@@ -165,30 +166,40 @@ type MenuProps = {
 function Menu({ productTypes, isMenuOpen, setIsMenuOpen }: MenuProps) {
   return (
     <div
-      className={`z-10 fixed top-0 left-0 h-full w-80 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${
+      className={`z-10 fixed top-0 left-0 h-full w-3/4 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${
         isMenuOpen ? 'translate-x-0' : '-translate-x-full'
       }`}
     >
       <div className="flex flex-col gap-2 p-4">
-        <div className="flex justify-between items-center w-full border-b-2 pb-2 border-neutral-200">
+        <div className="flex justify-between items-center w-full border-b-2 pb-2 border-gray-200">
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="flex justify-center items-center h-10 w-10 rounded-md border border-neutral-200 transition-colors hover:cursor-pointer group"
+            className="flex justify-center items-center h-10 w-10 rounded-md border border-gray-200 transition-colors hover:cursor-pointer group"
           >
             <AiOutlineClose className="transition-transform duration-200 ease-in-out group-hover:scale-150" />
           </button>
-          <h1 className="text-2xl text-center font-bold">Επιλογές</h1>
+          <h1 className="absolute left-1/2 transform -translate-x-1/2 text-3xl">
+            Περιήγηση
+          </h1>
         </div>
         <nav>
-          <ul className="flex flex-col items-end">
+          <ul className="flex flex-col gap-2">
             {productTypes.map(
-              productType =>
+              (productType, index, array) =>
                 productType !== 'brand' && (
-                  <li key={productType}>
-                    <Link href={`${ROUTE_PRODUCT}/${productType}`}>
-                      {productType}
-                    </Link>
-                  </li>
+                  <Fragment key={index}>
+                    <li>
+                      <Link
+                        href={`${ROUTE_PRODUCT}/${productType}`}
+                        className="text-2xl hover:text-red-500"
+                      >
+                        {productType}
+                      </Link>
+                    </li>
+                    {index !== array.length - 1 && (
+                      <hr className="w-full border-t border-gray-200" />
+                    )}
+                  </Fragment>
                 )
             )}
           </ul>
@@ -208,24 +219,26 @@ type CartProps = {
 function Cart({ isCartOpen, setIsCartOpen, cart, setCart }: CartProps) {
   return (
     <div
-      className={`z-10 fixed top-0 right-0 h-full w-80 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${
+      className={`z-10 fixed top-0 right-0 h-full w-3/4 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${
         isCartOpen ? 'translate-x-0' : 'translate-x-full'
       }`}
     >
       <div className="flex flex-col h-full p-4">
-        <div className="flex justify-between items-center w-full border-b-2 pb-2 mb-2 border-neutral-200">
-          <h1 className="text-2xl text-center font-bold">Καλάθι</h1>
+        <div className="flex justify-between items-center w-full border-b-2 pb-2 mb-2 border-gray-200">
+          <h1 className="absolute left-1/2 transform -translate-x-1/2 text-3xl">
+            Καλάθι
+          </h1>
           <button
             onClick={() => {
               setIsCartOpen(!isCartOpen)
             }}
-            className="flex justify-center items-center h-10 w-10 rounded-md border border-neutral-200 transition-colors hover:cursor-pointer group"
+            className="flex justify-center items-center h-10 w-10 rounded-md border border-gray-200 transition-colors hover:cursor-pointer group"
           >
             <AiOutlineClose className="transition-transform duration-200 ease-in-out group-hover:scale-150" />
           </button>
         </div>
         {cart.length < 1 ? (
-          <h1>Το καλάθι σου είναι άδειο.</h1>
+          <h1 className="text-2xl">Το καλάθι σου είναι άδειο.</h1>
         ) : (
           <div className="flex flex-col gap-2">
             {cart.map((product, index) => (
@@ -359,27 +372,33 @@ function Search({ isSearchOpen, setIsSearchOpen }: SearchProps) {
       }`}
     >
       <div className="flex flex-col gap-2 p-4">
-        <div className="flex justify-between items-center w-full border-b-2 pb-2 border-neutral-200">
-          <h1 className="text-2xl font-bold">Αναζήτηση</h1>
+        <div className="flex justify-between items-center w-full border-b-2 pb-2 border-gray-200">
+          <h1 className="absolute left-1/2 transform -translate-x-1/2 text-3xl">
+            Αναζήτηση
+          </h1>
           <button
             onClick={() => setIsSearchOpen(!isSearchOpen)}
-            className="flex justify-center items-center h-10 w-10 rounded-md border border-neutral-200 transition-colors hover:cursor-pointer group"
+            className="flex justify-center items-center h-10 w-10 rounded-md border border-gray-200 transition-colors hover:cursor-pointer group"
           >
             <AiOutlineClose className="transition-transform duration-200 ease-in-out group-hover:scale-150" />
           </button>
         </div>
         <InstantSearch
-          indexName="product"
           searchClient={typesenseClient.searchClient}
+          indexName="product"
           future={{ preserveSharedStateOnUnmount: true }}
         >
           <SearchBox
             classNames={{
-              root: 'w-full',
-              form: 'w-full',
-              input: 'w-full px-4 py-2 border border-neutral-300 rounded-lg',
+              form: 'relative w-full',
+              input: 'searchbox-no-clear w-full pr-10 pl-2 border rounded-lg',
+              reset:
+                'block absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer',
+              resetIcon: 'w-4 h-4',
               submit: 'hidden',
+              submitIcon: 'hidden',
             }}
+            className="text-2xl text-center"
           />
           <Hits hitComponent={SearchHit} />
         </InstantSearch>
@@ -388,39 +407,34 @@ function Search({ isSearchOpen, setIsSearchOpen }: SearchProps) {
   )
 }
 
-function SearchHit({ hit }: { hit: Document }) {
+function SearchHit({ hit }: { hit: Hit<Document> }) {
   return (
-    <div className="p-2 mb-2 border border-gray-300 rounded-lg">
-      <Link href={`${ROUTE_PRODUCT}/${hit.type}?version=${hit.version}`}>
-        <div className="flex gap-2">
+    <div className="w-full p-2 mb-2 border border-gray-200 hover:border-red-500 rounded-lg">
+      <Link
+        href={`${ROUTE_PRODUCT}/${hit.type}?version=${hit.version}`}
+        className="flex"
+      >
+        <div className="relative w-1/2 h-32">
           <Image
             component={NextImage}
-            src={`http://minio:9000/product/${hit.type}/${hit.images[0]}`}
+            src={`${envClient.MINIO_PRODUCT_URL}/${hit.type}/${hit.image}`}
             alt={hit.version}
-            width={100}
-            height={100}
+            fill
+            objectFit="contain"
           />
-          <div className="w-full">
-            <div className="flex justify-between text-2xl">
-              <h2>{hit.type}</h2>
-              <h2 className="font-bold">{hit.version}</h2>
-              <h2 className="text-gray-700">{hit.brand}</h2>
-            </div>
-            <div className="flex gap-4 items-center text-xl">
-              <h2>Τιμή: </h2>
-              <h2 className="text-red-500">{hit.price}€</h2>
-              <h2 className="text-gray-500 line-through">
-                {hit.price_before > 0 ? `${hit.price_before}€` : ''}
-              </h2>
-            </div>
-            <div className="flex gap-4 items-center text-xl">
-              <h2>Χρώμα: </h2>
-              <h2>{hit.color}</h2>
-            </div>
-            <div className="flex gap-4 items-center text-xl">
-              <h2>Μεγέθος: </h2>
-              <h2>{hit.size}</h2>
-            </div>
+        </div>
+        <div className="flex gap-2 w-1/2 items-center">
+          <div className="flex flex-col text-2xl">
+            <p>
+              <Highlight attribute="type" hit={hit} highlightedTagName="mark" />
+            </p>
+            <p>
+              <Highlight
+                attribute="version"
+                hit={hit}
+                highlightedTagName="mark"
+              />
+            </p>
           </div>
         </div>
       </Link>

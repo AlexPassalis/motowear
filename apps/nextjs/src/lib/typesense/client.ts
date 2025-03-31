@@ -14,6 +14,9 @@ export const typesenseClient = new TypesenseInstantSearchAdapter({
     ],
   },
   additionalSearchParameters: {
-    query_by: 'type,version,brand,color,size',
+    query_by: 'type,version',
+    highlight_full_fields: '*',
+    prefix: true,
+    infix: 'always',
   },
 })
