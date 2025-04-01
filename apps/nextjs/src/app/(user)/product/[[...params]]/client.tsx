@@ -306,23 +306,11 @@ function Main({
           <Link href={`${ROUTE_COLLECTION}/${paramsType}`}>{paramsType}</Link>
           <p>/</p>
           <h1>{state.selectedVersion}</h1>
-          <div className="flex gap-2 ml-auto">
+          <div className="flex gap-2 items-center ml-auto">
+            {state.price_before && (
+              <h2 className="text-base text-gray-400 line-through decoration-red-500">{`${state.price_before}€`}</h2>
+            )}
             <h2>{`${state.price}€`}</h2>
-            {state.price_before && (
-              <h2
-                style={{
-                  textDecorationLine: 'line-through',
-                  textDecorationColor: 'red',
-                }}
-                className="text-gray-400"
-              >{`${state.price_before}€`}</h2>
-            )}
-            {state.price_before && (
-              <h2 className="text-green-500">{`-${(
-                ((state.price_before - state.price) / state.price_before) *
-                100
-              ).toFixed(0)}%`}</h2>
-            )}
           </div>
         </div>
 
@@ -332,13 +320,13 @@ function Main({
           <div>
             <h1 className="text-lg">Μάρκα</h1>
             <div
+              onClick={() => setBrandDropdown(prev => !prev)}
               className={`flex items-center pb-0.5 border-1 border-white ${
                 brandDropdown ? 'border-b-white' : 'border-b-gray-400'
               } hover:border hover:rounded-lg hover:border-red-500`}
             >
               {state.selectedBrand === '-' ? (
                 <UnstyledButton
-                  onClick={() => setBrandDropdown(prev => !prev)}
                   style={{
                     height: '48px',
                     width: '100%',
@@ -349,10 +337,7 @@ function Main({
                   διάλεξε
                 </UnstyledButton>
               ) : (
-                <div
-                  onClick={() => setBrandDropdown(prev => !prev)}
-                  className="relative w-full max-w-96 h-12"
-                >
+                <div className="relative w-full max-w-96 h-12">
                   <Image
                     component={NextImage}
                     src={`${envClient.MINIO_PRODUCT_URL}/brand/${state.selectedBrand}`}
@@ -448,12 +433,12 @@ function Main({
         <div>
           <h1 className="text-lg">Εκδωχή</h1>
           <div
+            onClick={() => setVersionDropdown(prev => !prev)}
             className={`flex items-center pb-0.5 border-1 border-white ${
               versionDropdown ? 'border-b-white' : 'border-b-gray-400'
             } hover:border hover:rounded-lg hover:border-red-500`}
           >
             <button
-              onClick={() => setVersionDropdown(prev => !prev)}
               style={{
                 height: '48px',
                 width: '100%',
@@ -528,10 +513,17 @@ function Main({
           <div>
             <h1 className="text-lg">Χρώμα</h1>
             <div className="flex gap-2">
-              {state.displayedColors.map((color, index) =>
-                color === state.selectedColor ? (
+              {state.displayedColors.map((color, index) => {
+                function handleClick() {
+                  dispatch({
+                    type: 'color',
+                    payload: { selectedColor: color },
+                  })
+                }
+                return color === state.selectedColor ? (
                   <div
                     key={index}
+                    onClick={() => handleClick()}
                     className={`w-11 h-11 rounded-full p-0.5 border-2 ${
                       state.selectedColor === color
                         ? 'border-black'
@@ -546,11 +538,12 @@ function Main({
                 ) : (
                   <div
                     key={index}
+                    onClick={() => handleClick()}
                     style={{ backgroundColor: color }}
                     className="w-11 h-11 rounded-full hover:cursor-pointer"
                   />
                 )
-              )}
+              })}
             </div>
           </div>
         )}
@@ -562,6 +555,12 @@ function Main({
               {state.displayedSizes.map((size, index) => (
                 <div
                   key={index}
+                  onClick={() =>
+                    dispatch({
+                      type: 'size',
+                      payload: { selectedSize: size },
+                    })
+                  }
                   className={`w-12 h-[42px] border-2 rounded-lg ${
                     state.selectedSize === size
                       ? 'border-black'
@@ -569,12 +568,6 @@ function Main({
                   }`}
                 >
                   <UnstyledButton
-                    onClick={() =>
-                      dispatch({
-                        type: 'size',
-                        payload: { selectedSize: size },
-                      })
-                    }
                     size="md"
                     style={{
                       width: '100%',
@@ -594,9 +587,8 @@ function Main({
 
         <div className="flex gap-2 w-full justify-center items-center mt-2">
           <div className="flex w-24 h-[42px] rounded-lg border-2 border-gray-400">
-            <div className="w-1/3">
+            <div onClick={() => handlers.decrement()} className="w-1/3">
               <UnstyledButton
-                onClick={() => handlers.decrement()}
                 size="compact-sm"
                 style={{
                   width: '100%',
@@ -612,9 +604,8 @@ function Main({
             <div className="flex w-1/3 items-center justify-center border-x-1 border-gray-400">
               <p>{count}</p>
             </div>
-            <div className="w-1/3">
+            <div onClick={() => handlers.increment()} className="w-1/3">
               <UnstyledButton
-                onClick={() => handlers.increment()}
                 size="compact-md"
                 style={{
                   width: '100%',

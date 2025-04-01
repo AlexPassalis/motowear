@@ -57,7 +57,7 @@ export function Header({
         </Link>
       </div>
 
-      <div className="flex justify-end gap-1 sm:gap-3">
+      <div className="flex justify-end gap-2 sm:gap-4">
         <button
           onClick={() => setIsSearchOpen(!isSearchOpen)}
           className="flex justify-center items-center h-10 w-10 sm:scale-110 rounded-md border border-gray-200 transition-colors hover:cursor-pointer group"
@@ -75,7 +75,7 @@ export function Header({
             </>
           ) : (
             <>
-              <div className="absolute bottom-0 right-0 flex items-center justify-center w-4 h-4 sm:scale-110 rounded-full bg-red-500 text-white text-xs transform translate-x-1/2 translate-y-1/2">
+              <div className="absolute bottom-0 left-0 flex items-center justify-center w-4 h-4 sm:scale-110 rounded-full bg-red-500 text-white text-xs transform -translate-x-1/2 translate-y-1/2">
                 <span className="relative top-0.25">{cart.length}</span>
               </div>
               <AiFillShopping className="transition-transform duration-200 ease-in-out group-hover:scale-150" />

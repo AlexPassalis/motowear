@@ -60,7 +60,7 @@ function Instant() {
     <>
       <SearchBox
         autoFocus
-        placeholder="Αναζήτησε τα αγαπημένα σου προϊόντα ..."
+        placeholder="π.χ. Μπλουζάκι crypton-x"
         classNames={{
           form: 'relative w-full',
           input:

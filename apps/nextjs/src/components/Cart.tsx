@@ -7,6 +7,8 @@ import { AiOutlineClose } from 'react-icons/ai'
 import { FaTrashCan } from 'react-icons/fa6'
 import { FaPlus } from 'react-icons/fa'
 import { FaMinus } from 'react-icons/fa'
+import Link from 'next/link'
+import { ROUTE_PRODUCT } from '@/data/routes'
 
 type CartProps = {
   isCartOpen: boolean
@@ -43,7 +45,10 @@ export function Cart({ cart, setCart, isCartOpen, setIsCartOpen }: CartProps) {
                 key={index}
                 className="flex w-full h-36 p-1 mb-2 rounded-lg border border-gray-200"
               >
-                <div className="relative w-1/3 h-full">
+                <Link
+                  href={`${ROUTE_PRODUCT}/${product.type}/${product.version}`}
+                  className="relative w-1/3 h-full"
+                >
                   <Image
                     component={NextImage}
                     src={`${envClient.MINIO_PRODUCT_URL}/${product.type}/${product.image}`}
@@ -51,7 +56,7 @@ export function Cart({ cart, setCart, isCartOpen, setIsCartOpen }: CartProps) {
                     fill
                     objectFit="contain"
                   />
-                </div>
+                </Link>
                 <div className="relative w-2/3 flex flex-col justify-center gap-0.5 p-1 pl-4">
                   <FaTrashCan
                     onClick={() =>
@@ -78,7 +83,7 @@ export function Cart({ cart, setCart, isCartOpen, setIsCartOpen }: CartProps) {
                   )}
                   {product?.price_before ? (
                     <>
-                      <div className="flex gap-1 items-center">
+                      <div className="flex gap-2 items-center">
                         <h2 className="text-sm text-gray-400 line-through decoration-red-500">
                           {product.price_before * product.quantity}€
                         </h2>
@@ -90,17 +95,19 @@ export function Cart({ cart, setCart, isCartOpen, setIsCartOpen }: CartProps) {
                   )}
 
                   <div className="absolute bottom-1 right-1 flex w-16 h-[28px] rounded-lg border-2 border-gray-400">
-                    <div className="w-1/3">
-                      <UnstyledButton
-                        onClick={() =>
-                          setCart(prev =>
-                            prev.map((item, i) =>
-                              i === index && item.quantity > 1
-                                ? { ...item, quantity: item.quantity - 1 }
-                                : item
-                            )
+                    <div
+                      onClick={() =>
+                        setCart(prev =>
+                          prev.map((item, i) =>
+                            i === index && item.quantity > 1
+                              ? { ...item, quantity: item.quantity - 1 }
+                              : item
                           )
-                        }
+                        )
+                      }
+                      className="w-1/3"
+                    >
+                      <UnstyledButton
                         size="compact-md"
                         style={{
                           width: '100%',
@@ -116,17 +123,19 @@ export function Cart({ cart, setCart, isCartOpen, setIsCartOpen }: CartProps) {
                     <div className="flex w-1/3 items-center justify-center border-x-1 border-gray-400">
                       <p>{product.quantity}</p>
                     </div>
-                    <div className="w-1/3">
-                      <UnstyledButton
-                        onClick={() =>
-                          setCart(prev =>
-                            prev.map((item, i) =>
-                              i === index
-                                ? { ...item, quantity: item.quantity + 1 }
-                                : item
-                            )
+                    <div
+                      onClick={() =>
+                        setCart(prev =>
+                          prev.map((item, i) =>
+                            i === index
+                              ? { ...item, quantity: item.quantity + 1 }
+                              : item
                           )
-                        }
+                        )
+                      }
+                      className="w-1/3"
+                    >
+                      <UnstyledButton
                         size="compact-sm"
                         style={{
                           width: '100%',
