@@ -20,8 +20,8 @@ export async function updateTypesense() {
       name: collectionName,
       fields: [
         { name: 'id', type: 'string' as const },
-        { name: 'type', type: 'string' as const, infix: true },
-        { name: 'version', type: 'string' as const, infix: true },
+        { name: 'type', type: 'string' as const, tokenize: 'ngram' },
+        { name: 'version', type: 'string' as const, tokenize: 'ngram' },
         { name: 'image', type: 'string' as const },
       ],
     }
@@ -65,21 +65,21 @@ export async function deleteTypesenseVersion(id: string) {
   await typesense.collections(collectionName).documents(id).delete()
 }
 
-export async function deleteTypesenseImage(id: string, image: string) {
-  const document = (await typesense
-    .collections(collectionName)
-    .documents(id)
-    .retrieve()) as Document
+// export async function deleteTypesenseImage(id: string, image: string) {
+//   const document = (await typesense
+//     .collections(collectionName)
+//     .documents(id)
+//     .retrieve()) as Document
 
-  const updatedImages = (document.images || []).filter(
-    (img: string) => img !== image
-  )
+//   const updatedImages = (document.image || []).filter(
+//     (img: string) => img !== image
+//   )
 
-  await typesense
-    .collections(collectionName)
-    .documents(id)
-    .update({ images: updatedImages })
-}
+//   await typesense
+//     .collections(collectionName)
+//     .documents(id)
+//     .update({ images: updatedImages })
+// }
 
 export async function deleteTypesenseType(productType: string) {
   await typesense

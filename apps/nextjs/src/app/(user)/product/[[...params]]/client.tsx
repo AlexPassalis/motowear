@@ -1,18 +1,19 @@
 'use client'
 
 import { ProductRow } from '@/data/types'
-import { useEffect, useReducer, useState } from 'react'
-import { useCounter } from '@mantine/hooks'
-import { Button, Image, UnstyledButton } from '@mantine/core'
+import {
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useReducer,
+  useRef,
+  useState,
+} from 'react'
+import { useCounter, useDisclosure } from '@mantine/hooks'
+import { Button, Image, Modal, UnstyledButton } from '@mantine/core'
 import NextImage from 'next/image'
 import Link from 'next/link'
 import { ROUTE_COLLECTION, ROUTE_PRODUCT } from '@/data/routes'
-import { Header } from '@/components/Header'
-import {
-  getLocalStorageCart,
-  LocalStorageCartItem,
-  setLocalStorageCart,
-} from '@/utils/localStorage'
 import { Carousel } from '@mantine/carousel'
 import { envClient } from '@/env'
 import { IoIosArrowDown } from 'react-icons/io'
@@ -20,11 +21,13 @@ import { Fragment } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { FaPlus } from 'react-icons/fa'
 import { FaMinus } from 'react-icons/fa'
+import HeaderProvider from '@/context/HeaderProvider'
+import { useHeaderContext } from '@/context/useHeaderContext'
 
 type ProductPageClientProps = {
-  paramsType: string
-  searchParamsVersion: undefined | string
   productTypes: string[]
+  paramsType: string
+  paramsVersion: undefined | string
   postgresVersions: ProductRow[]
   uniqueBrands: string[]
   uniqueVersions: string[]
@@ -33,24 +36,76 @@ type ProductPageClientProps = {
 export function ProductPageClient({
   productTypes,
   paramsType,
-  searchParamsVersion,
+  paramsVersion,
   postgresVersions,
   uniqueBrands,
   uniqueVersions,
 }: ProductPageClientProps) {
+  const [brandDropdown, setBrandDropdown] = useState(false)
+  const [versionDropdown, setVersionDropdown] = useState(false)
+
+  return (
+    <div
+      onClick={() => {
+        if (brandDropdown) setBrandDropdown(false)
+        if (versionDropdown) setVersionDropdown(false)
+      }}
+    >
+      <HeaderProvider productTypes={productTypes}>
+        <Main
+          paramsType={paramsType}
+          paramsVersion={paramsVersion}
+          postgresVersions={postgresVersions}
+          uniqueBrands={uniqueBrands}
+          uniqueVersions={uniqueVersions}
+          brandDropdown={brandDropdown}
+          setBrandDropdown={setBrandDropdown}
+          versionDropdown={versionDropdown}
+          setVersionDropdown={setVersionDropdown}
+        />
+      </HeaderProvider>
+    </div>
+  )
+}
+
+type MainProps = {
+  paramsType: string
+  paramsVersion: undefined | string
+  postgresVersions: ProductRow[]
+  uniqueBrands: string[]
+  uniqueVersions: string[]
+  brandDropdown: boolean
+  setBrandDropdown: Dispatch<SetStateAction<boolean>>
+  versionDropdown: boolean
+  setVersionDropdown: Dispatch<SetStateAction<boolean>>
+}
+
+function Main({
+  paramsType,
+  paramsVersion,
+  postgresVersions,
+  uniqueBrands,
+  uniqueVersions,
+  brandDropdown,
+  setBrandDropdown,
+  versionDropdown,
+  setVersionDropdown,
+}: MainProps) {
+  const { setCart, setIsCartOpen } = useHeaderContext()
+
   const productFound = postgresVersions.find(
-    product => product.version === searchParamsVersion
+    product => product.version === paramsVersion
   )
   const fallbackProduct = postgresVersions[0]
   const initialState = {
     selectedBrand: '-',
     displayedVersions: uniqueVersions,
-    selectedVersion: searchParamsVersion ?? fallbackProduct.version,
-    displayedColors: searchParamsVersion
+    selectedVersion: paramsVersion ?? fallbackProduct.version,
+    displayedColors: paramsVersion
       ? [
           ...new Set(
             postgresVersions
-              .filter(product => product.version === searchParamsVersion)
+              .filter(product => product.version === paramsVersion)
               .map(product => product.color)
           ),
         ]
@@ -61,22 +116,20 @@ export function ProductPageClient({
               .map(product => product.color)
           ),
         ],
-    selectedColor: searchParamsVersion
-      ? productFound?.color
-      : fallbackProduct.color,
-    images: searchParamsVersion ? productFound!.images : fallbackProduct.images,
-    description: searchParamsVersion
+    selectedColor: paramsVersion ? productFound?.color : fallbackProduct.color,
+    images: paramsVersion ? productFound!.images : fallbackProduct.images,
+    description: paramsVersion
       ? productFound?.description
       : fallbackProduct.description,
-    price: searchParamsVersion ? productFound!.price : fallbackProduct.price,
-    price_before: searchParamsVersion
+    price: paramsVersion ? productFound!.price : fallbackProduct.price,
+    price_before: paramsVersion
       ? productFound!.price_before
       : fallbackProduct.price_before,
-    displayedSizes: searchParamsVersion
+    displayedSizes: paramsVersion
       ? [
           ...new Set(
             postgresVersions
-              .filter(product => product.version === searchParamsVersion)
+              .filter(product => product.version === paramsVersion)
               .map(product => product.size)
           ),
         ]
@@ -87,9 +140,7 @@ export function ProductPageClient({
               .map(product => product.size)
           ),
         ],
-    selectedSize: searchParamsVersion
-      ? productFound?.size
-      : fallbackProduct.size,
+    selectedSize: paramsVersion ? productFound?.size : fallbackProduct.size,
   }
   type State = typeof initialState
   type Action =
@@ -216,42 +267,40 @@ export function ProductPageClient({
         return state
     }
   }
-
   const [state, dispatch] = useReducer(reducer, initialState)
-
-  const [brandDropdown, setBrandDropdown] = useState(false)
-  const [versionDropdown, setVersionDropdown] = useState(false)
-
-  function carouselSlides() {
-    return state.images.map(url => (
-      <Carousel.Slide key={url}>
-        <Image
-          component={NextImage}
-          src={`${envClient.MINIO_PRODUCT_URL}/${paramsType}/${url}`}
-          alt={url}
-          fill
-          // objectFit="contain"
-        />
-      </Carousel.Slide>
-    ))
-  }
-
-  const [cart, setCart] = useState<LocalStorageCartItem[]>([])
-  useEffect(() => {
-    setCart(getLocalStorageCart())
-  }, [])
-  useEffect(() => {
-    setLocalStorageCart(cart)
-  }, [cart])
+  console.log(state)
 
   const [count, handlers] = useCounter(0, { min: 1, max: 9 })
+  const [opened, { open, close }] = useDisclosure(false)
+  const isInitialMount = useRef(true)
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false
+    } else {
+      if (!opened) {
+        setIsCartOpen(true)
+      }
+    }
+  }, [opened])
 
   return (
-    <>
-      <Header productTypes={productTypes} cart={cart} setCart={setCart} />
+    <main>
+      <Modal opened={opened} onClose={close} title="Upsell" centered></Modal>
+
       <Carousel withIndicators height={500}>
-        {carouselSlides()}
+        {state.images.map(url => (
+          <Carousel.Slide key={url}>
+            <Image
+              component={NextImage}
+              src={`${envClient.MINIO_PRODUCT_URL}/${paramsType}/${url}`}
+              alt={url}
+              fill
+              priority
+            />
+          </Carousel.Slide>
+        ))}
       </Carousel>
+
       <div className="flex flex-col gap-2 m-4">
         <div className="flex gap-2 text-lg">
           <Link href={`${ROUTE_COLLECTION}/${paramsType}`}>{paramsType}</Link>
@@ -283,9 +332,9 @@ export function ProductPageClient({
           <div>
             <h1 className="text-lg">Μάρκα</h1>
             <div
-              className={`flex items-center pb-0.5 ${
-                !brandDropdown ? 'border-b border-gray-400' : ''
-              }`}
+              className={`flex items-center pb-0.5 border-1 border-white ${
+                brandDropdown ? 'border-b-white' : 'border-b-gray-400'
+              } hover:border hover:rounded-lg hover:border-red-500`}
             >
               {state.selectedBrand === '-' ? (
                 <UnstyledButton
@@ -294,6 +343,7 @@ export function ProductPageClient({
                     height: '48px',
                     width: '100%',
                     marginLeft: '8px',
+                    cursor: 'pointer',
                   }}
                 >
                   διάλεξε
@@ -330,24 +380,26 @@ export function ProductPageClient({
                     duration: 0.1,
                     ease: 'easeInOut',
                   }}
-                  className="flex flex-col gap-1 max-h-48 overflow-y-auto p-1 border"
+                  className="flex flex-col gap-1 max-h-48 overflow-y-auto p-1 border mt-0.5"
                 >
                   {state.selectedBrand !== '-' && (
                     <>
-                      <div className="border p-1">
+                      <div
+                        onClick={() =>
+                          dispatch({
+                            type: 'brand',
+                            payload: { selectedBrand: '-' },
+                          })
+                        }
+                        className="p-1 border rounded-lg hover:border-red-500"
+                      >
                         <UnstyledButton
-                          onClick={() => {
-                            dispatch({
-                              type: 'brand',
-                              payload: { selectedBrand: '-' },
-                            })
-                            setBrandDropdown(prev => !prev)
-                          }}
                           style={{
                             width: '100%',
                             height: '48px',
+                            textAlign: 'center',
                           }}
-                          className="flex-shrink-0"
+                          className="hover:cursor-pointer"
                         >
                           καμία μάρκα
                         </UnstyledButton>
@@ -359,22 +411,21 @@ export function ProductPageClient({
                     .filter(brand => brand !== state.selectedBrand)
                     .map((brand, index, array) => (
                       <Fragment key={index}>
-                        <div className="border p-1">
-                          <div
-                            onClick={() => {
-                              dispatch({
-                                type: 'brand',
-                                payload: { selectedBrand: brand },
-                              })
-                              setBrandDropdown(prev => !prev)
-                              window.history.pushState(
-                                {},
-                                '',
-                                `${ROUTE_PRODUCT}/${paramsType}`
-                              )
-                            }}
-                            className="relative w-full max-w-96 h-12 flex-shrink-0"
-                          >
+                        <div
+                          onClick={() => {
+                            dispatch({
+                              type: 'brand',
+                              payload: { selectedBrand: brand },
+                            })
+                            window.history.pushState(
+                              {},
+                              '',
+                              `${ROUTE_PRODUCT}/${paramsType}`
+                            )
+                          }}
+                          className="p-1 border rounded-lg hover:border-red-500"
+                        >
+                          <div className="relative mx-auto w-full max-w-96 h-12 hover:cursor-pointer">
                             <Image
                               component={NextImage}
                               src={`${envClient.MINIO_PRODUCT_URL}/brand/${brand}`}
@@ -397,9 +448,9 @@ export function ProductPageClient({
         <div>
           <h1 className="text-lg">Εκδωχή</h1>
           <div
-            className={`flex items-center pb-0.5 ${
-              !versionDropdown ? 'border-b border-gray-400' : ''
-            }`}
+            className={`flex items-center pb-0.5 border-1 border-white ${
+              versionDropdown ? 'border-b-white' : 'border-b-gray-400'
+            } hover:border hover:rounded-lg hover:border-red-500`}
           >
             <button
               onClick={() => setVersionDropdown(prev => !prev)}
@@ -408,6 +459,7 @@ export function ProductPageClient({
                 width: '100%',
                 textAlign: 'left',
                 marginLeft: '8px',
+                cursor: 'pointer',
               }}
             >
               {state.selectedVersion}
@@ -431,30 +483,36 @@ export function ProductPageClient({
                   duration: 0.1,
                   ease: 'easeInOut',
                 }}
-                className="flex flex-col gap-1 max-h-48 overflow-y-auto p-1 border"
+                className="flex flex-col gap-1 max-h-48 overflow-y-auto p-1 border mt-0.5"
               >
                 {uniqueVersions
                   .filter(version => version !== state.selectedVersion)
                   .map((version, index, array) => (
                     <Fragment key={index}>
-                      <div className="border p-1">
-                        <button
-                          onClick={() => {
-                            dispatch({
-                              type: 'version',
-                              payload: { selectedVersion: version },
-                            })
-                            setVersionDropdown(prev => !prev)
-                            window.history.pushState(
-                              {},
-                              '',
-                              `${ROUTE_PRODUCT}/${paramsType}/${version}`
-                            )
+                      <div
+                        onClick={() => {
+                          dispatch({
+                            type: 'version',
+                            payload: { selectedVersion: version },
+                          })
+                          window.history.pushState(
+                            {},
+                            '',
+                            `${ROUTE_PRODUCT}/${paramsType}/${version}`
+                          )
+                        }}
+                        className="flex justify-center p-1 border rounded-lg hover:border-red-500"
+                      >
+                        <UnstyledButton
+                          style={{
+                            width: '100%',
+                            height: '48px',
+                            textAlign: 'center',
                           }}
-                          className="relative w-full max-w-96 h-12 flex-shrink-0 text-left"
+                          className="hover:cursor-pointer"
                         >
                           {version}
-                        </button>
+                        </UnstyledButton>
                       </div>
                       {index !== array.length - 1 && (
                         <hr className="w-full border-t border-gray-400" />
@@ -478,7 +536,7 @@ export function ProductPageClient({
                       state.selectedColor === color
                         ? 'border-black'
                         : 'border-gray-400'
-                    }`}
+                    } hover:cursor-pointer`}
                   >
                     <div
                       style={{ backgroundColor: color }}
@@ -489,11 +547,7 @@ export function ProductPageClient({
                   <div
                     key={index}
                     style={{ backgroundColor: color }}
-                    className={`w-11 h-11 rounded-full p-0.5 border-2 ${
-                      state.selectedColor === color
-                        ? 'border-black'
-                        : 'border-gray-400'
-                    }`}
+                    className="w-11 h-11 rounded-full hover:cursor-pointer"
                   />
                 )
               )}
@@ -538,35 +592,15 @@ export function ProductPageClient({
           </div>
         )}
 
-        <div className="flex gap-2 w-full justify-center items-center">
+        <div className="flex gap-2 w-full justify-center items-center mt-2">
           <div className="flex w-24 h-[42px] rounded-lg border-2 border-gray-400">
-            <div className="flex w-1/2 items-center justify-center border-r-2 border-gray-400">
-              <p>{count}</p>
-            </div>
-            <div className="flex flex-col w-1/2">
-              <div className="w-full h-1/2 border-b-1 border-gray-400">
-                <UnstyledButton
-                  onClick={() => handlers.increment()}
-                  color="green"
-                  size="compact-sm"
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                  }}
-                >
-                  <FaPlus size={10} />
-                </UnstyledButton>
-              </div>
+            <div className="w-1/3">
               <UnstyledButton
                 onClick={() => handlers.decrement()}
-                color="red"
-                size="compact-md"
+                size="compact-sm"
                 style={{
                   width: '100%',
-                  height: '50%',
+                  height: '100%',
                   display: 'flex',
                   justifyContent: 'center',
                   alignItems: 'center',
@@ -575,9 +609,28 @@ export function ProductPageClient({
                 <FaMinus size={10} />
               </UnstyledButton>
             </div>
+            <div className="flex w-1/3 items-center justify-center border-x-1 border-gray-400">
+              <p>{count}</p>
+            </div>
+            <div className="w-1/3">
+              <UnstyledButton
+                onClick={() => handlers.increment()}
+                size="compact-md"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                <FaPlus size={10} />
+              </UnstyledButton>
+            </div>
           </div>
           <Button
             onClick={() => {
+              open()
               setCart(prev => {
                 const existingIndex = prev.findIndex(
                   item =>
@@ -606,7 +659,7 @@ export function ProductPageClient({
                         ? { color: state.selectedColor }
                         : {}),
                       ...(state.selectedSize
-                        ? { selectedSize: state.selectedSize }
+                        ? { size: state.selectedSize }
                         : {}),
                       ...(state.price_before
                         ? { price_before: state.price_before }
@@ -626,6 +679,6 @@ export function ProductPageClient({
           </Button>
         </div>
       </div>
-    </>
+    </main>
   )
 }

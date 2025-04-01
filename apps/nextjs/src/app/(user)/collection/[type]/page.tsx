@@ -1,13 +1,14 @@
 import { ProductRow } from '@/data/types'
 import { DatabaseError } from 'pg'
 import { postgres } from '@/lib/postgres'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { v4 as id } from 'uuid'
 import { formatMessage } from '@/utils/formatMessage'
 import { errorPostgres } from '@/data/error'
 import { sendTelegramMessage } from '@/lib/telegram'
 import { CollectionPageClient } from '@/app/(user)/collection/[type]/client'
 import { getProductTypes } from '@/utils/getPostgres'
+import { ROUTE_ERROR } from '@/data/routes'
 
 type ProductPageProps = {
   params: Promise<{ type: string }>
@@ -32,13 +33,13 @@ export default async function CollectionPage({ params }: ProductPageProps) {
     } else {
       const message = formatMessage(
         id(),
-        '/product/[[...params]]',
+        '@/app/(user)/collection/[type]/page.tsx',
         errorPostgres,
         e
       )
       console.error(message)
       sendTelegramMessage('ERROR', message)
-      throw e
+      redirect(`${ROUTE_ERROR}?message=${errorPostgres}`)
     }
   }
 
@@ -55,8 +56,8 @@ export default async function CollectionPage({ params }: ProductPageProps) {
 
   return (
     <CollectionPageClient
-      paramsType={paramsType}
       productTypes={productTypes}
+      paramsType={paramsType}
       postgresVersions={postgresVersions}
       uniqueBrands={uniqueBrands}
       uniqueVersions={uniqueVersions}

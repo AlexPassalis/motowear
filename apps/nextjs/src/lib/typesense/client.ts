@@ -17,6 +17,6 @@ export const typesenseClient = new TypesenseInstantSearchAdapter({
     query_by: 'type,version',
     highlight_full_fields: '*',
     prefix: true,
-    infix: 'always',
+    // infix: 'always',
   },
 })

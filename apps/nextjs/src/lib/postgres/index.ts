@@ -14,7 +14,7 @@ async function establishPostgres() {
     process.once('SIGINT', () => postgresPool.end())
     process.once('SIGTERM', () => postgresPool.end())
     global.postgres = drizzle(postgresPool, { schema })
-    if (!process.env.BUILD_TIME) {
+    if (process.env.BUILD_TIME !== 'true') {
       await postgresPing()
     }
   }

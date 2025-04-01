@@ -3,21 +3,27 @@ import { DatabaseError } from 'pg'
 import { postgres } from '@/lib/postgres'
 import { ProductPageClient } from '@/app/(user)/product/[[...params]]/client'
 import { getProductTypes } from '@/utils/getPostgres'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { v4 as id } from 'uuid'
 import { formatMessage } from '@/utils/formatMessage'
 import { errorPostgres } from '@/data/error'
 import { sendTelegramMessage } from '@/lib/telegram'
+import { ROUTE_ERROR } from '@/data/routes'
 
 type ProductPageProps = {
   params: Promise<{ params?: [type: string, version?: string] }>
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {
-  const [resolvedParams, productTypes] = await Promise.all([
-    params,
-    getProductTypes(),
-  ])
+  let resolvedParams
+  let productTypes
+  try {
+    const resolved = await Promise.all([params, getProductTypes()])
+    resolvedParams = resolved[0]
+    productTypes = resolved[1]
+  } catch {
+    redirect(`${ROUTE_ERROR}?message=${errorPostgres}`)
+  }
 
   if (!resolvedParams || Object.keys(resolvedParams).length < 1) {
     return notFound()
@@ -37,13 +43,13 @@ export default async function ProductPage({ params }: ProductPageProps) {
     } else {
       const message = formatMessage(
         id(),
-        '/product/[[...params]]',
+        '@/app/(user)/product/[[...params]]/page.tsx',
         errorPostgres,
         e
       )
       console.error(message)
       sendTelegramMessage('ERROR', message)
-      throw e
+      redirect(`${ROUTE_ERROR}?message=${errorPostgres}`)
     }
   }
 
@@ -58,7 +64,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
     new Set(postgresVersions.map(row => row.version))
   )
 
-  const searchParamsVersion = resolvedParams.params![1]
+  const paramsVersion = resolvedParams.params![1]
     ? uniqueVersions.find(
         v => v === decodeURIComponent(resolvedParams.params![1]!)
       )
@@ -66,9 +72,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   return (
     <ProductPageClient
-      paramsType={paramsType}
-      searchParamsVersion={searchParamsVersion}
       productTypes={productTypes}
+      paramsType={paramsType}
+      paramsVersion={paramsVersion}
       postgresVersions={postgresVersions}
       uniqueBrands={uniqueBrands}
       uniqueVersions={uniqueVersions}

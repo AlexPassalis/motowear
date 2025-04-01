@@ -4,6 +4,9 @@ import { MdOutlineEmail } from 'react-icons/md'
 import { FaPhoneAlt } from 'react-icons/fa'
 import { FaInstagram } from 'react-icons/fa'
 import { FaFacebookSquare } from 'react-icons/fa'
+import Image from 'next/image'
+import Link from 'next/link'
+import { ROUTE_HOME } from '@/data/routes'
 
 const links = [
   { link: '#', label: 'Contact' },
@@ -21,9 +24,16 @@ export function Footer() {
   ))
 
   return (
-    <div className={classes.footer}>
+    <footer className={`p-2 ${classes.footer}`}>
       <div className={classes.inner}>
-        {/* <MantineLogo size={28} /> */}
+        <Link href={ROUTE_HOME}>
+          <Image
+            src="/motowear.png"
+            alt="Motowear logo"
+            width={200}
+            height={100}
+          />
+        </Link>
 
         <Group className={classes.links}>{items}</Group>
 
@@ -42,6 +52,6 @@ export function Footer() {
           </ActionIcon>
         </Group>
       </div>
-    </div>
+    </footer>
   )
 }
