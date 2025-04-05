@@ -1,10 +1,7 @@
 import { ErrorPageClient } from '@/app/(user)/error/client'
 import { errorPostgres, errorUnexpected } from '@/data/error'
 import { ROUTE_ERROR } from '@/data/routes'
-import {
-  getAllVariantsCached,
-  getProductTypesCached,
-} from '@/utils/getPostgres'
+import { getVariantsCached, getProductTypesCached } from '@/app/(user)/cache'
 import { redirect } from 'next/navigation'
 
 type ErrorPageProps = {
@@ -15,7 +12,7 @@ export default async function ErrorPage({ searchParams }: ErrorPageProps) {
   const resolved = await Promise.allSettled([
     searchParams,
     getProductTypesCached(),
-    getAllVariantsCached(),
+    getVariantsCached(),
   ])
   if (resolved[1].status === 'rejected' || resolved[2].status === 'rejected') {
     redirect(`${ROUTE_ERROR}?message=${errorPostgres}`)

@@ -1,12 +1,15 @@
-import { drizzle } from 'drizzle-orm/node-postgres'
-import { Context, Telegraf } from 'telegraf'
+import type { drizzle } from 'drizzle-orm/node-postgres'
+import type Redis from 'ioredis'
+import type { Context, Telegraf } from 'telegraf'
 import type { Update } from 'telegraf/types'
-import { CronJob } from 'cron'
+import type { CronJob } from 'cron'
 
 declare global {
-  var postgres: ReturnType<typeof drizzle> | undefined
-  var telegram: Telegraf<Context<Update>> | undefined
-  var cron: CronJob | undefined
+  var global_postgres: ReturnType<typeof drizzle> | undefined
+  var global_redisPub: Redis | undefined
+  var global_redisSub: Redis | undefined
+  var global_telegram: Telegraf<Context<Update>> | undefined
+  var global_cron: CronJob | undefined
 }
 
 export {}

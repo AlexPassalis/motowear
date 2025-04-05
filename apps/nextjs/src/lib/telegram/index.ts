@@ -1,6 +1,8 @@
 import { errorTelegram } from '@/data/error'
+import { formatMessage } from '@/utils/formatMessage'
 import { readSecret } from '@/utils/readSecret'
 import { Telegraf } from 'telegraf'
+import { v4 as id } from 'uuid'
 
 const chatIds = {
   ERROR: readSecret('TELEGRAM_ERROR_CHAT_ID'),
@@ -13,33 +15,49 @@ export async function sendTelegramMessage(
   chat: keyof typeof chatIds,
   message: string
 ) {
-  if (!global.telegram) {
-    global.telegram = new Telegraf(readSecret('TELEGRAM_BOT_TOKEN'))
-    process.once('SIGINT', () => global.telegram!.stop('SIGINT'))
-    process.once('SIGTERM', () => global.telegram!.stop('SIGTERM'))
+  if (!global.global_telegram) {
+    global.global_telegram = new Telegraf(readSecret('TELEGRAM_BOT_TOKEN'))
+    process.once('SIGINT', () => {
+      global.global_telegram!.stop('SIGINT')
+      console.info('Telegram connection closed.')
+    })
+    process.once('SIGTERM', () => {
+      global.global_telegram!.stop('SIGTERM')
+      console.info('Telegram connection closed.')
+    })
     await telegramPing()
   }
 
   const chatId = chatIds[chat]
   try {
-    await global.telegram.telegram.sendMessage(chatId, message, {
+    await global.global_telegram.telegram.sendMessage(chatId, message, {
       parse_mode: 'Markdown',
     })
   } catch (e) {
-    console.error(
-      `Location: src/lib/telegram/index\nMessage: ${errorTelegram}\nError: ${e}.`
+    const message = formatMessage(
+      id(),
+      '@/lib/telegram/index.ts sendTelegramMessage()',
+      errorTelegram,
+      e
     )
+    console.error(message)
+    sendTelegramMessage('ERROR', message)
   }
 }
 
 async function telegramPing() {
   try {
-    await global.telegram!.telegram.getMe()
-    console.log('Telegram connected successfully')
+    await global.global_telegram!.telegram.getMe()
+    console.log('Telegram connected successfully.')
   } catch (e) {
-    console.error(
-      `Location: src/lib/telegram/index\nMessage: Telegram connection failed\nError: ${e}.`
+    const message = formatMessage(
+      id(),
+      '@/lib/telegram/index.ts telegramPing()',
+      'Telegram connection failed.',
+      e
     )
+    console.error(message)
+    sendTelegramMessage('ERROR', message)
     process.exit(1)
   }
 }

@@ -1,7 +1,4 @@
-import {
-  getAllVariantsCached,
-  getProductTypesCached,
-} from '@/utils/getPostgres'
+import { getVariantsCached, getProductTypesCached } from '@/app/(user)/cache'
 import { HomePageClient } from '@/app/(user)/client'
 import { redirect } from 'next/navigation'
 import { ROUTE_ERROR } from '@/data/routes'
@@ -10,7 +7,7 @@ import { errorPostgres } from '@/data/error'
 export default async function HomePage() {
   const resolved = await Promise.allSettled([
     getProductTypesCached(),
-    getAllVariantsCached(),
+    getVariantsCached(),
   ])
 
   if (resolved[0].status === 'rejected' || resolved[1].status === 'rejected') {

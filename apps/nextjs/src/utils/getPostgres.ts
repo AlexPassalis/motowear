@@ -5,7 +5,6 @@ import { sendTelegramMessage } from '@/lib/telegram'
 import { formatMessage } from '@/utils/formatMessage'
 import { eq } from 'drizzle-orm'
 import { v4 as id } from 'uuid'
-import { unstable_cache } from 'next/cache'
 
 export async function getProductTypes() {
   async function productTypes() {
@@ -29,14 +28,6 @@ export async function getProductTypes() {
   }
   return process.env.BUILD_TIME !== 'true' ? await productTypes() : []
 }
-export const getProductTypesCached = unstable_cache(
-  async () => getProductTypes(),
-  ['product_types'],
-  {
-    tags: ['product_types'],
-    revalidate: 3600,
-  }
-)
 
 export async function getBrands() {
   let array
@@ -59,7 +50,32 @@ export async function getBrands() {
     .map(row => row.image)
 }
 
-export async function getVariants(product_type: string) {
+export async function getVariants() {
+  if (process.env.BUILD_TIME !== 'true') {
+    try {
+      const array = await postgres.select().from(variants)
+      /* eslint-disable @typescript-eslint/no-unused-vars */
+      return array
+        .sort((a, b) => a.index - b.index)
+        .map(({ index, ...rest }) => rest)
+      /* eslint-disable @typescript-eslint/no-unused-vars */
+    } catch (e) {
+      const message = formatMessage(
+        id(),
+        '@/utils/getVariants.ts getVariants()',
+        errorPostgres,
+        e
+      )
+      console.error(message)
+      sendTelegramMessage('ERROR', message)
+      throw errorPostgres
+    }
+  } else {
+    return []
+  }
+}
+
+export async function getVariantsProductType(product_type: string) {
   if (process.env.BUILD_TIME !== 'true') {
     try {
       const array = await postgres
@@ -74,7 +90,7 @@ export async function getVariants(product_type: string) {
     } catch (e) {
       const message = formatMessage(
         id(),
-        '@/utils/getPostgres.ts getVariants()',
+        '@/utils/getVariants.ts getVariants()',
         errorPostgres,
         e
       )
@@ -86,44 +102,3 @@ export async function getVariants(product_type: string) {
     return []
   }
 }
-export const getVariantsCashed = unstable_cache(
-  async (product_type: string) => getVariants(product_type),
-  ['variants'],
-  {
-    tags: ['variants'],
-    revalidate: 3600,
-  }
-)
-
-export async function getAllVariants() {
-  if (process.env.BUILD_TIME !== 'true') {
-    try {
-      const array = await postgres.select().from(variants)
-      /* eslint-disable @typescript-eslint/no-unused-vars */
-      return array
-        .sort((a, b) => a.index - b.index)
-        .map(({ index, ...rest }) => rest)
-      /* eslint-disable @typescript-eslint/no-unused-vars */
-    } catch (e) {
-      const message = formatMessage(
-        id(),
-        '@/utils/getPostgres.ts getVariants()',
-        errorPostgres,
-        e
-      )
-      console.error(message)
-      sendTelegramMessage('ERROR', message)
-      throw errorPostgres
-    }
-  } else {
-    return []
-  }
-}
-export const getAllVariantsCached = unstable_cache(
-  async () => getAllVariants(),
-  ['all_variants'],
-  {
-    tags: ['all_variants'],
-    revalidate: 3600,
-  }
-)

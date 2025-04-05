@@ -4,6 +4,7 @@ networks:
 
 volumes:
   postgres:
+  redis:
   minio:
   typesense:
 
@@ -59,24 +60,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 2
-
-  # rclone:
-  #   deploy:
-  #     restart_policy:
-  #       condition: any
-  #     update_config:
-  #       order: start-first
-  #       failure_action: rollback
-  #   image: rclone/rclone:sha-839eef0
-  #   networks:
-  #     - network-motowear
-  #   healthcheck:
-  #     start_period: 30s
-  #     start_interval: 5s
-  #     test: []
-  #     interval: 10s
-  #     timeout: 5s
-  #     retries: 2
 
   postgres:
     deploy:
@@ -137,6 +120,29 @@ services:
       interval: 10s
       timeout: 5s
       retries: 2
+
+  redis:
+    deploy:
+      restart_policy:
+        condition: any
+      update_config:
+        order: start-first
+        failure_action: rollback
+    image: redis:7-alpine
+    networks:
+      - network-motowear
+    volumes:
+      - redis:/data
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'redis-cli -h localhost -p 6379 ping | grep PONG || exit 1',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
 
   minio:
     deploy:

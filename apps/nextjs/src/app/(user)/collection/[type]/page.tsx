@@ -1,11 +1,7 @@
 import { notFound, redirect } from 'next/navigation'
 import { errorPostgres } from '@/data/error'
 import { CollectionPageClient } from '@/app/(user)/collection/[type]/client'
-import {
-  getAllVariantsCached,
-  getProductTypesCached,
-  getVariantsCashed,
-} from '@/utils/getPostgres'
+import { getProductTypesCached, getVariantsCached } from '@/app/(user)/cache'
 import { ROUTE_ERROR } from '@/data/routes'
 
 type ProductPageProps = {
@@ -16,7 +12,7 @@ export default async function CollectionPage({ params }: ProductPageProps) {
   const resolved = await Promise.allSettled([
     params,
     getProductTypesCached(),
-    getAllVariantsCached(),
+    getVariantsCached(),
   ])
   if (resolved[1].status === 'rejected' || resolved[2].status === 'rejected') {
     redirect(`${ROUTE_ERROR}?message=${errorPostgres}`)
@@ -32,8 +28,8 @@ export default async function CollectionPage({ params }: ProductPageProps) {
   }
   const paramsProduct_type = decodeURIComponent(resolvedParams.params[0])
 
-  const postgresVariants = await getVariantsCashed(paramsProduct_type).catch(
-    () => notFound()
+  const postgresVariants = resolved[2].value.filter(
+    variant => variant.product_type === paramsProduct_type
   )
 
   const uniqueBrands = Array.from(
