@@ -60,28 +60,30 @@ export async function getBrands() {
 }
 
 export async function getVariants(product_type: string) {
-  try {
-    const array = await postgres
-      .select()
-      .from(variants)
-      .where(eq(variants.product_type, product_type))
-    /* eslint-disable @typescript-eslint/no-unused-vars */
-    return process.env.BUILD_TIME !== 'true'
-      ? array
-          .sort((a, b) => a.index - b.index)
-          .map(({ index, ...rest }) => rest)
-      : []
-    /* eslint-disable @typescript-eslint/no-unused-vars */
-  } catch (e) {
-    const message = formatMessage(
-      id(),
-      '@/utils/getPostgres.ts getVariants()',
-      errorPostgres,
-      e
-    )
-    console.error(message)
-    sendTelegramMessage('ERROR', message)
-    throw errorPostgres
+  if (process.env.BUILD_TIME !== 'true') {
+    try {
+      const array = await postgres
+        .select()
+        .from(variants)
+        .where(eq(variants.product_type, product_type))
+      /* eslint-disable @typescript-eslint/no-unused-vars */
+      return array
+        .sort((a, b) => a.index - b.index)
+        .map(({ index, ...rest }) => rest)
+      /* eslint-disable @typescript-eslint/no-unused-vars */
+    } catch (e) {
+      const message = formatMessage(
+        id(),
+        '@/utils/getPostgres.ts getVariants()',
+        errorPostgres,
+        e
+      )
+      console.error(message)
+      sendTelegramMessage('ERROR', message)
+      throw errorPostgres
+    }
+  } else {
+    return []
   }
 }
 export const getVariantsCashed = unstable_cache(
@@ -94,25 +96,27 @@ export const getVariantsCashed = unstable_cache(
 )
 
 export async function getAllVariants() {
-  try {
-    const array = await postgres.select().from(variants)
-    /* eslint-disable @typescript-eslint/no-unused-vars */
-    return process.env.BUILD_TIME !== 'true'
-      ? array
-          .sort((a, b) => a.index - b.index)
-          .map(({ index, ...rest }) => rest)
-      : []
-    /* eslint-disable @typescript-eslint/no-unused-vars */
-  } catch (e) {
-    const message = formatMessage(
-      id(),
-      '@/utils/getPostgres.ts getVariants()',
-      errorPostgres,
-      e
-    )
-    console.error(message)
-    sendTelegramMessage('ERROR', message)
-    throw errorPostgres
+  if (process.env.BUILD_TIME !== 'true') {
+    try {
+      const array = await postgres.select().from(variants)
+      /* eslint-disable @typescript-eslint/no-unused-vars */
+      return array
+        .sort((a, b) => a.index - b.index)
+        .map(({ index, ...rest }) => rest)
+      /* eslint-disable @typescript-eslint/no-unused-vars */
+    } catch (e) {
+      const message = formatMessage(
+        id(),
+        '@/utils/getPostgres.ts getVariants()',
+        errorPostgres,
+        e
+      )
+      console.error(message)
+      sendTelegramMessage('ERROR', message)
+      throw errorPostgres
+    }
+  } else {
+    return []
   }
 }
 export const getAllVariantsCached = unstable_cache(
