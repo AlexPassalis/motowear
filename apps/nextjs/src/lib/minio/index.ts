@@ -25,9 +25,9 @@ export async function deleteFile(path: string, fileName: string) {
   await minio.removeObject(bucketName, objectName)
 }
 
-export async function getFileNames(table_name: string) {
+export async function getFileNames(product_type: string) {
   const fileNames: string[] = []
-  const prefix = `${table_name}/`
+  const prefix = `${product_type}/`
   const stream = minio.listObjects(bucketName, prefix, false)
 
   for await (const obj of stream) {

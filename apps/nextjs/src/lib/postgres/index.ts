@@ -1,4 +1,4 @@
-import { Pool, types } from 'pg'
+import { Pool } from 'pg'
 import { readSecret } from '@/utils/readSecret'
 import { drizzle } from 'drizzle-orm/node-postgres'
 import * as schema from '@/lib/postgres/schema'
@@ -32,9 +32,5 @@ async function postgresPing() {
     process.exit(1)
   }
 }
-
-types.setTypeParser(types.builtins.NUMERIC, (value: null | string) =>
-  value === null ? null : parseFloat(value)
-)
 
 export const postgres = await establishPostgres()

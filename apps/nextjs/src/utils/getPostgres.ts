@@ -1,32 +1,51 @@
 import { errorPostgres } from '@/data/error'
-import {
-  Product,
-  ProductTables,
-  ProductRow,
-  BrandRow,
-  ImageType,
-} from '@/data/types'
-import { getFileNames } from '@/lib/minio'
 import { postgres } from '@/lib/postgres'
+import { product_types, brands, variants } from '@/lib/postgres/schema'
 import { sendTelegramMessage } from '@/lib/telegram'
 import { formatMessage } from '@/utils/formatMessage'
+import { eq } from 'drizzle-orm'
 import { v4 as id } from 'uuid'
+import { unstable_cache } from 'next/cache'
 
-async function getProductTables() {
-  let productTables: ProductTables
+export async function getProductTypes() {
+  async function productTypes() {
+    let array
+    try {
+      array = await postgres
+        .select({ product_type: product_types.product_type })
+        .from(product_types)
+    } catch (e) {
+      const message = formatMessage(
+        id(),
+        '@/utils/getPostgres.ts getProductTypes()',
+        errorPostgres,
+        e
+      )
+      console.error(message)
+      sendTelegramMessage('ERROR', message)
+      throw errorPostgres
+    }
+    return array.map(row => row.product_type)
+  }
+  return process.env.BUILD_TIME !== 'true' ? await productTypes() : []
+}
+export const getProductTypesCached = unstable_cache(
+  async () => getProductTypes(),
+  ['product_types'],
+  {
+    tags: ['product_types'],
+    revalidate: 3600,
+  }
+)
+
+export async function getBrands() {
+  let array
   try {
-    const { rows }: { rows: ProductTables } = await postgres.execute(
-      `
-        SELECT table_name 
-        FROM information_schema.tables 
-        WHERE table_schema = 'product';
-        `
-    )
-    productTables = rows
+    array = await postgres.select().from(brands)
   } catch (e) {
     const message = formatMessage(
       id(),
-      '@/utils/getPostgres.ts getProductTables()',
+      '@/utils/getPostgres.ts getBrands()',
       errorPostgres,
       e
     )
@@ -34,60 +53,73 @@ async function getProductTables() {
     sendTelegramMessage('ERROR', message)
     throw errorPostgres
   }
-  return productTables
+  return array
+    .filter(brand => brand.image !== '')
+    .sort((a, b) => a.index - b.index)
+    .map(row => row.image)
 }
 
-export async function getProductTypes() {
-  const productTables =
-    process.env.BUILD_TIME !== 'true' ? await getProductTables() : []
-  return productTables.map(productTable => productTable.table_name)
-}
-
-export async function getProductPostgres() {
-  const productTables = await getProductTables()
-
-  const image: ImageType = {}
-  const brand: string[] = []
-  const product: Product = {}
-
-  if (productTables.length !== 0) {
-    await Promise.all(
-      productTables.map(async obj => {
-        if (obj.table_name === 'brand') {
-          let brandRows: BrandRow[]
-          try {
-            const { rows }: { rows: BrandRow[] } = await postgres.execute(
-              `SELECT * FROM product."${obj.table_name}"`
-            )
-            brandRows = rows
-          } catch (e) {
-            const message = formatMessage(
-              id(),
-              '@/utils/getPostgres.ts getProductPostgres()',
-              errorPostgres,
-              e
-            )
-            console.error(message)
-            sendTelegramMessage('ERROR', message)
-            throw errorPostgres
-          }
-          const sortedBrandImages = brandRows
-            .sort((a, b) => a.index - b.index)
-            .map(row => row.image)
-          brand.push(...sortedBrandImages)
-        } else {
-          const [fileNames, { rows: tableRows }] = await Promise.all([
-            getFileNames(obj.table_name),
-            postgres.execute(
-              `SELECT * FROM product."${obj.table_name}"`
-            ) as Promise<{ rows: ProductRow[] }>,
-          ])
-          image[obj.table_name] = fileNames
-          product[obj.table_name] = tableRows
-        }
-      })
+export async function getVariants(product_type: string) {
+  try {
+    const array = await postgres
+      .select()
+      .from(variants)
+      .where(eq(variants.product_type, product_type))
+    /* eslint-disable @typescript-eslint/no-unused-vars */
+    return process.env.BUILD_TIME !== 'true'
+      ? array
+          .sort((a, b) => a.index - b.index)
+          .map(({ index, ...rest }) => rest)
+      : []
+    /* eslint-disable @typescript-eslint/no-unused-vars */
+  } catch (e) {
+    const message = formatMessage(
+      id(),
+      '@/utils/getPostgres.ts getVariants()',
+      errorPostgres,
+      e
     )
+    console.error(message)
+    sendTelegramMessage('ERROR', message)
+    throw errorPostgres
   }
-
-  return { image, brand, product }
 }
+export const getVariantsCashed = unstable_cache(
+  async (product_type: string) => getVariants(product_type),
+  ['variants'],
+  {
+    tags: ['variants'],
+    revalidate: 3600,
+  }
+)
+
+export async function getAllVariants() {
+  try {
+    const array = await postgres.select().from(variants)
+    /* eslint-disable @typescript-eslint/no-unused-vars */
+    return process.env.BUILD_TIME !== 'true'
+      ? array
+          .sort((a, b) => a.index - b.index)
+          .map(({ index, ...rest }) => rest)
+      : []
+    /* eslint-disable @typescript-eslint/no-unused-vars */
+  } catch (e) {
+    const message = formatMessage(
+      id(),
+      '@/utils/getPostgres.ts getVariants()',
+      errorPostgres,
+      e
+    )
+    console.error(message)
+    sendTelegramMessage('ERROR', message)
+    throw errorPostgres
+  }
+}
+export const getAllVariantsCached = unstable_cache(
+  async () => getAllVariants(),
+  ['all_variants'],
+  {
+    tags: ['all_variants'],
+    revalidate: 3600,
+  }
+)

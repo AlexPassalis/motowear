@@ -4,8 +4,7 @@ import { Cart } from '@/components/Cart'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import {
-  getLocalStorageCart,
-  LocalStorageCartItem,
+  getFilteredLocalStorageCart,
   setLocalStorageCart,
 } from '@/utils/localStorage'
 import {
@@ -16,6 +15,8 @@ import {
   useEffect,
   useState,
 } from 'react'
+import { LocalStorageCartItem } from '@/data/type'
+import type { Variants } from '@/data/type'
 
 type HeaderContext = {
   setCart: Dispatch<SetStateAction<LocalStorageCartItem[]>>
@@ -25,10 +26,15 @@ type HeaderContext = {
 
 export const HeaderContext = createContext<HeaderContext | null>(null)
 
-type HeaderProviderProps = { productTypes: string[]; children: ReactNode }
+type HeaderProviderProps = {
+  product_types: string[]
+  all_variants: Variants
+  children: ReactNode
+}
 
 export default function HeaderProvider({
-  productTypes,
+  product_types,
+  all_variants,
   children,
 }: HeaderProviderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -37,8 +43,8 @@ export default function HeaderProvider({
 
   const [cart, setCart] = useState<LocalStorageCartItem[]>([])
   useEffect(() => {
-    setCart(getLocalStorageCart())
-  }, [])
+    setCart(getFilteredLocalStorageCart(all_variants))
+  }, [all_variants])
   useEffect(() => {
     setLocalStorageCart(cart)
   }, [cart])
@@ -52,7 +58,7 @@ export default function HeaderProvider({
       }}
     >
       <Menu
-        productTypes={productTypes}
+        product_types={product_types}
         isMenuOpen={isMenuOpen}
         setIsMenuOpen={setIsMenuOpen}
       />

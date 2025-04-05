@@ -1,14 +1,19 @@
 'use client'
 
 import HeaderProvider from '@/context/HeaderProvider'
+import type { Variants } from '@/data/type'
 
 type ContactPageClientProps = {
-  productTypes: string[]
+  product_types: string[]
+  all_variants: Variants
 }
 
-export function ContactPageClient({ productTypes }: ContactPageClientProps) {
+export function ContactPageClient({
+  product_types,
+  all_variants,
+}: ContactPageClientProps) {
   return (
-    <HeaderProvider productTypes={productTypes}>
+    <HeaderProvider product_types={product_types} all_variants={all_variants}>
       <main>
         <h1>This is the Contact Page</h1>
       </main>

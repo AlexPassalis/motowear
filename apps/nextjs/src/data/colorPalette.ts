@@ -1,4 +1,5 @@
 export const colorPalette = [
+  '',
   'AliceBlue',
   'AntiqueWhite',
   'Aqua',

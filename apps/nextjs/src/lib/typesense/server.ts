@@ -1,6 +1,12 @@
 import Typesense from 'typesense'
-import { getProductPostgres } from '@/utils/getPostgres'
+import { getAllVariants, getVariants } from '@/utils/getPostgres'
 import { envServer } from '@/env'
+import { formatMessage } from '@/utils/formatMessage'
+import { v4 as id } from 'uuid'
+import { errorPostgres, errorTypesense } from '@/data/error'
+import { sendTelegramMessage } from '../telegram'
+import { NextResponse } from 'next/server'
+import pLimit from 'p-limit'
 
 const typesense = new Typesense.Client({
   nodes: [{ host: 'typesense', port: 8108, protocol: 'http' }],
@@ -10,7 +16,7 @@ const typesense = new Typesense.Client({
 const collectionName = 'product'
 
 export async function updateTypesense() {
-  const { product: productPostgres } = await getProductPostgres()
+  const variantsPostgres = await getAllVariants()
 
   try {
     await typesense.collections(collectionName).retrieve()
@@ -20,8 +26,8 @@ export async function updateTypesense() {
       name: collectionName,
       fields: [
         { name: 'id', type: 'string' as const },
-        { name: 'type', type: 'string' as const, tokenize: 'ngram' },
-        { name: 'version', type: 'string' as const, tokenize: 'ngram' },
+        { name: 'product_type', type: 'string' as const, tokenize: 'ngram' },
+        { name: 'variant', type: 'string' as const, tokenize: 'ngram' },
         { name: 'image', type: 'string' as const },
       ],
     }
@@ -29,61 +35,90 @@ export async function updateTypesense() {
     console.log(`Collection ${collectionName} created successfully.`)
   }
 
-  for (const productType in productPostgres) {
-    const products = productPostgres[productType]
-    const upsertedVersions = [] as string[]
-    for (const product of products) {
-      if (!upsertedVersions.includes(product.version)) {
-        const document = {
-          id: product.id,
-          type: productType,
-          version: product.version,
-          image: product.images[0],
-        }
-        try {
-          await typesense
-            .collections(collectionName)
-            .documents()
-            .upsert(document)
-        } catch (e) {
-          console.error(`Error upserting product ${product.id}:`, e)
-        }
-        upsertedVersions.push(product.version)
+  const upsertedVersions = [] as string[]
+  for (const variant of variantsPostgres) {
+    if (!upsertedVersions.includes(variant.variant)) {
+      const document = {
+        id: variant.id,
+        product_type: variant.product_type,
+        variant: variant.variant,
+        image: variant.images[0],
       }
+      try {
+        await typesense.collections(collectionName).documents().upsert(document)
+      } catch (e) {
+        const message = formatMessage(
+          id(),
+          '@/lib/typesense/server.ts updateTypesense()',
+          errorTypesense,
+          e
+        )
+        console.error(message)
+        sendTelegramMessage('ERROR', message)
+      }
+      upsertedVersions.push(variant.variant)
     }
   }
 }
 
-export type Document = {
-  id: string
-  type: string
-  version: string
-  image: string
-}
+export async function updateTypesenseProductType(product_type: string) {
+  const limit = pLimit(10)
+  const resolved = await Promise.allSettled([
+    limit(() => getVariants(product_type)),
+    limit(() =>
+      typesense
+        .collections(collectionName)
+        .documents()
+        .delete({ filter_by: `product_type:=${product_type}` })
+    ),
+  ])
 
-export async function deleteTypesenseVersion(id: string) {
-  await typesense.collections(collectionName).documents(id).delete()
-}
+  if (resolved[0].status === 'rejected') {
+    const message = formatMessage(
+      id(),
+      '@/lib/typesense/server.ts updateTypesenseProductType()',
+      errorPostgres,
+      resolved[0].reason
+    )
+    console.error(message)
+    sendTelegramMessage('ERROR', message)
+    return NextResponse.json({ message: errorPostgres }, { status: 500 })
+  }
 
-// export async function deleteTypesenseImage(id: string, image: string) {
-//   const document = (await typesense
-//     .collections(collectionName)
-//     .documents(id)
-//     .retrieve()) as Document
+  if (resolved[1].status === 'rejected') {
+    const message = formatMessage(
+      id(),
+      '@/lib/typesense/server.ts updateTypesenseProductType() 1',
+      errorTypesense,
+      resolved[1].reason
+    )
+    console.error(message)
+    sendTelegramMessage('ERROR', message)
+    return NextResponse.json({ message: errorTypesense }, { status: 500 })
+  }
 
-//   const updatedImages = (document.image || []).filter(
-//     (img: string) => img !== image
-//   )
-
-//   await typesense
-//     .collections(collectionName)
-//     .documents(id)
-//     .update({ images: updatedImages })
-// }
-
-export async function deleteTypesenseType(productType: string) {
-  await typesense
-    .collections(collectionName)
-    .documents()
-    .delete({ filter_by: `type:=${productType}` })
+  const upsertedVersions = [] as string[]
+  for (const variant of resolved[0].value) {
+    if (!upsertedVersions.includes(variant.variant)) {
+      const document = {
+        id: variant.id,
+        product_type: variant.product_type,
+        variant: variant.variant,
+        image: variant.images[0],
+      }
+      try {
+        await typesense.collections(collectionName).documents().upsert(document)
+      } catch (e) {
+        const message = formatMessage(
+          id(),
+          '@/lib/typesense/server.ts updateTypesenseProductType() 2',
+          errorTypesense,
+          e
+        )
+        console.error(message)
+        sendTelegramMessage('ERROR', message)
+      }
+      upsertedVersions.push(variant.variant)
+    }
+  }
 }

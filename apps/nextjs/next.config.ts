@@ -8,10 +8,11 @@ const nextConfig: NextConfig = {
       '@mantine/core',
       '@mantine/hooks',
       '@mantine/carousel',
-      '@mantine/notifications',
+      '@mantine/form',
     ],
   },
   images: {
+    minimumCacheTTL: 3600, // Set TTL to 1 hour (3600 seconds) for Clouflare
     remotePatterns: [
       {
         protocol: 'http',
@@ -19,11 +20,11 @@ const nextConfig: NextConfig = {
         port: '9000',
         pathname: '/product/**',
       },
-      {
-        protocol: 'https',
-        hostname: `${envServer.HOST}`,
-        pathname: '/api/admin/product/brand/image/**',
-      },
+      // {
+      //   protocol: 'https',
+      //   hostname: `${envServer.HOST}`,
+      //   pathname: '/api/admin/product/brand/image/**',
+      // },
     ],
   },
 }

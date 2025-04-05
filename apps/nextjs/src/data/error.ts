@@ -18,3 +18,4 @@ export const errorInvalidParams = 'invalid-params' as const
 export const errorFormidable = 'formidable' as const
 
 export const errorInvalidRequest = 'invalid-request' as const
+export const errroInvalidResponse = 'invalid-response' as const

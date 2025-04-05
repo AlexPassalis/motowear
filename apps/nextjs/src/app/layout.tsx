@@ -11,7 +11,6 @@ import {
   mantineHtmlProps,
 } from '@mantine/core'
 import '@mantine/carousel/styles.css'
-import '@mantine/notifications/styles.css'
 
 import './globals.css'
 
@@ -90,6 +89,7 @@ const customTheme = createTheme({
       'oklch(0.282 0.091 267.935)', // blue-950
     ],
   },
+  primaryColor: 'red',
 })
 
 import '@/lib/cron/index'

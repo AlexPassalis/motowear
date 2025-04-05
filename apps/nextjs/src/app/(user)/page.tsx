@@ -1,16 +1,26 @@
-import { getProductTypes } from '@/utils/getPostgres'
+import {
+  getAllVariantsCached,
+  getProductTypesCached,
+} from '@/utils/getPostgres'
 import { HomePageClient } from '@/app/(user)/client'
 import { redirect } from 'next/navigation'
 import { ROUTE_ERROR } from '@/data/routes'
 import { errorPostgres } from '@/data/error'
 
 export default async function HomePage() {
-  let productTypes
-  try {
-    productTypes = await getProductTypes()
-  } catch {
+  const resolved = await Promise.allSettled([
+    getProductTypesCached(),
+    getAllVariantsCached(),
+  ])
+
+  if (resolved[0].status === 'rejected' || resolved[1].status === 'rejected') {
     redirect(`${ROUTE_ERROR}?message=${errorPostgres}`)
   }
 
-  return <HomePageClient productTypes={productTypes} />
+  return (
+    <HomePageClient
+      product_types={resolved[0].value}
+      all_variants={resolved[1].value}
+    />
+  )
 }

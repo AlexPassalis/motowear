@@ -1,13 +1,11 @@
-import { ProductRow } from '@/data/types'
-import { DatabaseError } from 'pg'
-import { postgres } from '@/lib/postgres'
 import { notFound, redirect } from 'next/navigation'
-import { v4 as id } from 'uuid'
-import { formatMessage } from '@/utils/formatMessage'
 import { errorPostgres } from '@/data/error'
-import { sendTelegramMessage } from '@/lib/telegram'
 import { CollectionPageClient } from '@/app/(user)/collection/[type]/client'
-import { getProductTypes } from '@/utils/getPostgres'
+import {
+  getAllVariantsCached,
+  getProductTypesCached,
+  getVariantsCashed,
+} from '@/utils/getPostgres'
 import { ROUTE_ERROR } from '@/data/routes'
 
 type ProductPageProps = {
@@ -15,52 +13,44 @@ type ProductPageProps = {
 }
 
 export default async function CollectionPage({ params }: ProductPageProps) {
-  const [resolvedParams, productTypes] = await Promise.all([
+  const resolved = await Promise.allSettled([
     params,
-    getProductTypes(),
+    getProductTypesCached(),
+    getAllVariantsCached(),
   ])
-  const paramsType = decodeURIComponent(resolvedParams.type)
-
-  let postgresVersions: ProductRow[]
-  try {
-    const { rows }: { rows: ProductRow[] } = await postgres.execute(
-      `SELECT * FROM product."${paramsType}"`
-    )
-    postgresVersions = rows
-  } catch (e) {
-    if (e instanceof DatabaseError && e.code === '42P01') {
-      return notFound()
-    } else {
-      const message = formatMessage(
-        id(),
-        '@/app/(user)/collection/[type]/page.tsx',
-        errorPostgres,
-        e
-      )
-      console.error(message)
-      sendTelegramMessage('ERROR', message)
-      redirect(`${ROUTE_ERROR}?message=${errorPostgres}`)
-    }
+  if (resolved[1].status === 'rejected' || resolved[2].status === 'rejected') {
+    redirect(`${ROUTE_ERROR}?message=${errorPostgres}`)
   }
 
-  const uniqueBrands = Array.from(
-    new Set(
-      postgresVersions
-        .map(row => row.brand)
-        .filter((b): b is string => b !== null)
-    )
+  const resolvedParams = (
+    resolved[0] as PromiseFulfilledResult<{
+      params?: [type: string, version?: string]
+    }>
+  ).value
+  if (!resolvedParams.params || resolvedParams.params.length < 1) {
+    return notFound()
+  }
+  const paramsProduct_type = decodeURIComponent(resolvedParams.params[0])
+
+  const postgresVariants = await getVariantsCashed(paramsProduct_type).catch(
+    () => notFound()
   )
-  const uniqueVersions = Array.from(
-    new Set(postgresVersions.map(row => row.version))
+
+  const uniqueBrands = Array.from(
+    new Set(postgresVariants.map(variant => variant.brand).filter(Boolean))
+  )
+
+  const uniqueVariants = Array.from(
+    new Set(postgresVariants.map(variant => variant.variant).filter(Boolean))
   )
 
   return (
     <CollectionPageClient
-      productTypes={productTypes}
-      paramsType={paramsType}
-      postgresVersions={postgresVersions}
+      product_types={resolved[1].value}
+      all_variants={resolved[2].value}
+      paramsProduct_type={paramsProduct_type}
+      uniqueVariants={uniqueVariants}
       uniqueBrands={uniqueBrands}
-      uniqueVersions={uniqueVersions}
     />
   )
 }

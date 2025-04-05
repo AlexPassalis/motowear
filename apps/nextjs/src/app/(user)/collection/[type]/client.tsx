@@ -1,31 +1,29 @@
 'use client'
 
 import HeaderProvider from '@/context/HeaderProvider'
-import { ProductRow } from '@/data/types'
+import type { Variants } from '@/data/type'
 
 type CollectionPageClientProps = {
-  productTypes: string[]
-  paramsType: string
-  postgresVersions: ProductRow[]
+  product_types: string[]
+  all_variants: Variants
+  paramsProduct_type: string
+  uniqueVariants: string[]
   uniqueBrands: string[]
-  uniqueVersions: string[]
 }
 
 export function CollectionPageClient({
-  productTypes,
-  paramsType,
-  postgresVersions,
+  product_types,
+  all_variants,
+  paramsProduct_type,
+  uniqueVariants,
   uniqueBrands,
-  uniqueVersions,
 }: CollectionPageClientProps) {
-  console.log(paramsType)
-  console.log(postgresVersions)
-  console.log(postgresVersions)
+  console.log(paramsProduct_type)
+  console.log(uniqueVariants)
   console.log(uniqueBrands)
-  console.log(uniqueVersions)
 
   return (
-    <HeaderProvider productTypes={productTypes}>
+    <HeaderProvider product_types={product_types} all_variants={all_variants}>
       <main></main>
     </HeaderProvider>
   )

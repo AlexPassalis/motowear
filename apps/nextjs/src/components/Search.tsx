@@ -31,7 +31,7 @@ export function Search({ isSearchOpen, setIsSearchOpen }: SearchProps) {
     >
       <div className="flex flex-col gap-2 h-full p-4">
         <div className="flex justify-between items-center w-full border-b-2 pb-2 border-gray-200">
-          <h1 className="absolute left-1/2 transform -translate-x-1/2 text-3xl">
+          <h1 className="absolute left-1/2 transform -translate-x-1/2 text-2xl">
             Αναζήτηση
           </h1>
           <button
@@ -95,25 +95,29 @@ function SearchHit({ hit }: { hit: Hit }) {
       className="flex justify-center w-full p-1 mb-2 rounded-lg border border-gray-200 hover:border-red-500"
     >
       <Link
-        href={`${ROUTE_PRODUCT}/${hit.type}/${hit.version}`}
+        href={`${ROUTE_PRODUCT}/${hit.product_type}/${hit.variant}`}
         className="flex items-center gap-2 w-3/4 h-20"
       >
         <div className="relative w-1/2 h-full">
           <Image
             component={NextImage}
-            src={`${envClient.MINIO_PRODUCT_URL}/${hit.type}/${hit.image}`}
-            alt={hit.version}
+            src={`${envClient.MINIO_PRODUCT_URL}/${hit.product_type}/${hit.image}`}
+            alt={hit.variant}
             fill
-            objectFit="contain"
+            style={{ objectFit: 'contain' }}
           />
         </div>
         <div className="flex flex-col w-1/2 h-full text-xl justify-center">
           <p>
-            <Highlight attribute="type" hit={hit} highlightedTagName="mark" />
+            <Highlight
+              attribute="product_type"
+              hit={hit}
+              highlightedTagName="mark"
+            />
           </p>
           <p>
             <Highlight
-              attribute="version"
+              attribute="variant"
               hit={hit}
               highlightedTagName="mark"
             />

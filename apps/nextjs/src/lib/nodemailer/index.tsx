@@ -19,13 +19,54 @@ const transporter = nodemailer.createTransport({
   },
 })
 
-export async function sendReviewEmail(email: string) {
-  const location = '/lib/nodemailer/sendReviewEmail'
+export async function sendOrderEmail(email: string) {
   let emailHtml
   try {
     emailHtml = await render(<AirbnbReviewEmail />)
   } catch (e) {
-    const message = formatMessage(id(), location, errorReactEmail, e)
+    const message = formatMessage(
+      id(),
+      '@/lib/nodemailer/sendOrderEmail',
+      errorReactEmail,
+      e
+    )
+    console.error(message)
+    sendTelegramMessage('ERROR', message)
+    throw errorReactEmail
+  }
+  const options = {
+    from: readSecret('NODEMAILER_EMAIL'),
+    to: email,
+    subject: 'motowear.com',
+    text: 'This is the text field',
+    html: emailHtml,
+  }
+  try {
+    await transporter.sendMail(options)
+  } catch (e) {
+    const message = formatMessage(
+      id(),
+      '@/lib/nodemailer/sendOrderEmail',
+      errorNodemailer,
+      e
+    )
+    console.error(message)
+    sendTelegramMessage('ERROR', message)
+    throw errorNodemailer
+  }
+}
+
+export async function sendReviewEmail(email: string) {
+  let emailHtml
+  try {
+    emailHtml = await render(<AirbnbReviewEmail />)
+  } catch (e) {
+    const message = formatMessage(
+      id(),
+      '@/lib/nodemailer/sendReviewEmail',
+      errorReactEmail,
+      e
+    )
     console.error(message)
     sendTelegramMessage('ERROR', message)
   }
@@ -38,9 +79,13 @@ export async function sendReviewEmail(email: string) {
   }
   try {
     await transporter.sendMail(options)
-    console.debug('Review email send successfully.')
   } catch (e) {
-    const message = formatMessage(id(), location, errorNodemailer, e)
+    const message = formatMessage(
+      id(),
+      '@/lib/nodemailer/sendReviewEmail',
+      errorNodemailer,
+      e
+    )
     console.error(message)
     sendTelegramMessage('ERROR', message)
   }

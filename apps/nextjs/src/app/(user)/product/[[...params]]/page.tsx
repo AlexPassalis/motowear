@@ -1,83 +1,63 @@
-import { ProductRow } from '@/data/types'
-import { DatabaseError } from 'pg'
-import { postgres } from '@/lib/postgres'
 import { ProductPageClient } from '@/app/(user)/product/[[...params]]/client'
-import { getProductTypes } from '@/utils/getPostgres'
+import {
+  getAllVariantsCached,
+  getProductTypesCached,
+  getVariantsCashed,
+} from '@/utils/getPostgres'
 import { notFound, redirect } from 'next/navigation'
-import { v4 as id } from 'uuid'
-import { formatMessage } from '@/utils/formatMessage'
-import { errorPostgres } from '@/data/error'
-import { sendTelegramMessage } from '@/lib/telegram'
 import { ROUTE_ERROR } from '@/data/routes'
+import { errorPostgres } from '@/data/error'
 
 type ProductPageProps = {
   params: Promise<{ params?: [type: string, version?: string] }>
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {
-  let resolvedParams
-  let productTypes
-  try {
-    const resolved = await Promise.all([params, getProductTypes()])
-    resolvedParams = resolved[0]
-    productTypes = resolved[1]
-  } catch {
+  const resolved = await Promise.allSettled([
+    params,
+    getProductTypesCached(),
+    getAllVariantsCached(),
+  ])
+  if (resolved[1].status === 'rejected' || resolved[2].status === 'rejected') {
     redirect(`${ROUTE_ERROR}?message=${errorPostgres}`)
   }
 
-  if (!resolvedParams || Object.keys(resolvedParams).length < 1) {
+  const resolvedParams = (
+    resolved[0] as PromiseFulfilledResult<{
+      params?: [type: string, version?: string]
+    }>
+  ).value
+  if (!resolvedParams.params || resolvedParams.params.length < 1) {
     return notFound()
   }
+  const paramsProduct_type = decodeURIComponent(resolvedParams.params[0])
 
-  const paramsType = decodeURIComponent(resolvedParams.params![0])
-
-  let postgresVersions: ProductRow[]
-  try {
-    const { rows }: { rows: ProductRow[] } = await postgres.execute(
-      `SELECT * FROM product."${paramsType}"`
-    )
-    postgresVersions = rows
-  } catch (e) {
-    if (e instanceof DatabaseError && e.code === '42P01') {
-      return notFound()
-    } else {
-      const message = formatMessage(
-        id(),
-        '@/app/(user)/product/[[...params]]/page.tsx',
-        errorPostgres,
-        e
-      )
-      console.error(message)
-      sendTelegramMessage('ERROR', message)
-      redirect(`${ROUTE_ERROR}?message=${errorPostgres}`)
-    }
-  }
+  const postgresVariants = await getVariantsCashed(paramsProduct_type).catch(
+    () => notFound()
+  )
 
   const uniqueBrands = Array.from(
-    new Set(
-      postgresVersions
-        .map(row => row.brand)
-        .filter((b): b is string => b !== null)
-    )
-  )
-  const uniqueVersions = Array.from(
-    new Set(postgresVersions.map(row => row.version))
+    new Set(postgresVariants.map(variant => variant.brand).filter(Boolean))
   )
 
-  const paramsVersion = resolvedParams.params![1]
-    ? uniqueVersions.find(
-        v => v === decodeURIComponent(resolvedParams.params![1]!)
-      )
+  const uniqueVariants = Array.from(
+    new Set(postgresVariants.map(variant => variant.variant).filter(Boolean))
+  )
+
+  const variant = resolvedParams.params?.[1]
+  const paramsVariant = variant
+    ? uniqueVariants.find(v => v === decodeURIComponent(variant))
     : undefined
 
   return (
     <ProductPageClient
-      productTypes={productTypes}
-      paramsType={paramsType}
-      paramsVersion={paramsVersion}
-      postgresVersions={postgresVersions}
+      product_types={resolved[1].value}
+      all_variants={resolved[2].value}
+      paramsProduct_type={paramsProduct_type}
+      paramsVariant={paramsVariant}
+      postgresVariants={postgresVariants}
       uniqueBrands={uniqueBrands}
-      uniqueVersions={uniqueVersions}
+      uniqueVariants={uniqueVariants}
     />
   )
 }

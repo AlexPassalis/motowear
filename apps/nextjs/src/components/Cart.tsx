@@ -1,5 +1,4 @@
 import { envClient } from '@/env'
-import { LocalStorageCartItem } from '@/utils/localStorage'
 import { Button, Image, UnstyledButton } from '@mantine/core'
 import NextImage from 'next/image'
 import { Dispatch, SetStateAction } from 'react'
@@ -8,7 +7,8 @@ import { FaTrashCan } from 'react-icons/fa6'
 import { FaPlus } from 'react-icons/fa'
 import { FaMinus } from 'react-icons/fa'
 import Link from 'next/link'
-import { ROUTE_PRODUCT } from '@/data/routes'
+import { ROUTE_CHECKOUT, ROUTE_PRODUCT } from '@/data/routes'
+import { LocalStorageCartItem } from '@/data/type'
 
 type CartProps = {
   isCartOpen: boolean
@@ -26,7 +26,7 @@ export function Cart({ cart, setCart, isCartOpen, setIsCartOpen }: CartProps) {
     >
       <div className="flex flex-col h-full p-4 min-h-0">
         <div className="flex justify-between items-center w-full border-b-2 pb-2 mb-2 border-gray-200">
-          <h1 className="absolute left-1/2 transform -translate-x-1/2 text-3xl">
+          <h1 className="absolute left-1/2 transform -translate-x-1/2 text-2xl">
             Καλάθι ({cart.length})
           </h1>
           <button
@@ -46,15 +46,16 @@ export function Cart({ cart, setCart, isCartOpen, setIsCartOpen }: CartProps) {
                 className="flex w-full h-36 p-1 mb-2 rounded-lg border border-gray-200"
               >
                 <Link
-                  href={`${ROUTE_PRODUCT}/${product.type}/${product.version}`}
+                  href={`${ROUTE_PRODUCT}/${product.procuct_type}/${product.variant}`}
                   className="relative w-1/3 h-full"
                 >
                   <Image
                     component={NextImage}
-                    src={`${envClient.MINIO_PRODUCT_URL}/${product.type}/${product.image}`}
-                    alt={`${product.type}/${product.version}`}
+                    src={`${envClient.MINIO_PRODUCT_URL}/${product.procuct_type}/${product.image}`}
+                    alt={`${product.procuct_type}/${product.variant}`}
                     fill
-                    objectFit="contain"
+                    style={{ objectFit: 'contain' }}
+                    sizes="auto"
                   />
                 </Link>
                 <div className="relative w-2/3 flex flex-col justify-center gap-0.5 p-1 pl-4">
@@ -64,8 +65,8 @@ export function Cart({ cart, setCart, isCartOpen, setIsCartOpen }: CartProps) {
                     }
                     className="absolute top-1 right-1 hover:cursor-pointer"
                   />
-                  <h1>{product.type}</h1>
-                  <h1>{product.version}</h1>
+                  <h1>{product.procuct_type}</h1>
+                  <h1>{product.variant}</h1>
                   {product?.color && (
                     <div className="flex gap-1">
                       <h2>Χρώμα: </h2>
@@ -94,7 +95,7 @@ export function Cart({ cart, setCart, isCartOpen, setIsCartOpen }: CartProps) {
                     <h2>{product.price * product.quantity}€</h2>
                   )}
 
-                  <div className="absolute bottom-1 right-1 flex w-16 h-[28px] rounded-lg border-2 border-gray-400">
+                  <div className="absolute bottom-1 right-1 flex w-16 h-[28px] rounded-lg border-2 border-gray-200">
                     <div
                       onClick={() =>
                         setCart(prev =>
@@ -120,7 +121,7 @@ export function Cart({ cart, setCart, isCartOpen, setIsCartOpen }: CartProps) {
                         <FaMinus size={10} />
                       </UnstyledButton>
                     </div>
-                    <div className="flex w-1/3 items-center justify-center border-x-1 border-gray-400">
+                    <div className="flex w-1/3 items-center justify-center border-x-1 border-gray-200">
                       <p>{product.quantity}</p>
                     </div>
                     <div
@@ -155,16 +156,14 @@ export function Cart({ cart, setCart, isCartOpen, setIsCartOpen }: CartProps) {
           </div>
         )}
         {cart.length > 0 && (
-          <Button color="red" className="mt-auto">
-            Ταμείο{' '}
-            {cart.reduce((acc, item) => acc + item.price * item.quantity, 0)}€
-          </Button>
+          <Link href={ROUTE_CHECKOUT} className="mt-auto">
+            <Button color="red" style={{ width: '100%' }}>
+              Ταμείο{' '}
+              {cart.reduce((acc, item) => acc + item.price * item.quantity, 0)}€
+            </Button>
+          </Link>
         )}
       </div>
     </section>
   )
-}
-
-{
-  ;<Button>+</Button>
 }

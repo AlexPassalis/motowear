@@ -11,8 +11,8 @@ import {
   AiFillShopping,
 } from 'react-icons/ai'
 import { HiMagnifyingGlass } from 'react-icons/hi2'
-
-import { LocalStorageCartItem } from '@/utils/localStorage'
+import type { LocalStorageCartItem } from '@/data/type'
+import { Indicator } from '@mantine/core'
 
 type HeaderProps = {
   isMenuOpen: boolean
@@ -65,23 +65,31 @@ export function Header({
           <HiMagnifyingGlass className="transition-transform duration-200 ease-in-out group-hover:scale-150" />
         </button>
 
-        <button
-          onClick={() => setIsCartOpen(!isCartOpen)}
-          className="relative flex justify-center items-center h-10 w-10 sm:scale-110 rounded-md border border-gray-200 transition-colors hover:cursor-pointer group"
-        >
-          {cart.length < 1 ? (
-            <>
-              <AiOutlineShopping className="transition-transform duration-200 ease-in-out group-hover:scale-150" />
-            </>
-          ) : (
-            <>
-              <div className="absolute bottom-0 left-0 flex items-center justify-center w-4 h-4 sm:scale-110 rounded-full bg-red-500 text-white text-xs transform -translate-x-1/2 translate-y-1/2">
-                <span className="relative top-0.25">{cart.length}</span>
-              </div>
+        {cart.length > 0 ? (
+          <Indicator
+            radius="xl"
+            position="bottom-start"
+            color="red"
+            inline
+            label={cart.length}
+            size={15}
+            zIndex={10}
+          >
+            <button
+              onClick={() => setIsCartOpen(!isCartOpen)}
+              className="relative flex justify-center items-center h-10 w-10 sm:scale-110 rounded-md border border-gray-200 transition-colors hover:cursor-pointer group"
+            >
               <AiFillShopping className="transition-transform duration-200 ease-in-out group-hover:scale-150" />
-            </>
-          )}
-        </button>
+            </button>
+          </Indicator>
+        ) : (
+          <button
+            onClick={() => setIsCartOpen(!isCartOpen)}
+            className="relative flex justify-center items-center h-10 w-10 sm:scale-110 rounded-md border border-gray-200 transition-colors hover:cursor-pointer group"
+          >
+            <AiOutlineShopping className="transition-transform duration-200 ease-in-out group-hover:scale-150" />
+          </button>
+        )}
       </div>
     </header>
   )

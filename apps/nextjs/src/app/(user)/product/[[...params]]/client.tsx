@@ -1,14 +1,6 @@
 'use client'
 
-import { ProductRow } from '@/data/types'
-import {
-  Dispatch,
-  SetStateAction,
-  useEffect,
-  useReducer,
-  useRef,
-  useState,
-} from 'react'
+import { Dispatch, SetStateAction, useReducer, useState } from 'react'
 import { useCounter, useDisclosure } from '@mantine/hooks'
 import { Button, Image, Modal, UnstyledButton } from '@mantine/core'
 import NextImage from 'next/image'
@@ -23,45 +15,48 @@ import { FaPlus } from 'react-icons/fa'
 import { FaMinus } from 'react-icons/fa'
 import HeaderProvider from '@/context/HeaderProvider'
 import { useHeaderContext } from '@/context/useHeaderContext'
+import type { Variants } from '@/data/type'
 
 type ProductPageClientProps = {
-  productTypes: string[]
-  paramsType: string
-  paramsVersion: undefined | string
-  postgresVersions: ProductRow[]
+  product_types: string[]
+  all_variants: Variants
+  paramsProduct_type: string
+  paramsVariant: undefined | string
+  postgresVariants: Variants
   uniqueBrands: string[]
-  uniqueVersions: string[]
+  uniqueVariants: string[]
 }
 
 export function ProductPageClient({
-  productTypes,
-  paramsType,
-  paramsVersion,
-  postgresVersions,
+  product_types,
+  all_variants,
+  paramsProduct_type,
+  paramsVariant,
+  postgresVariants,
   uniqueBrands,
-  uniqueVersions,
+  uniqueVariants,
 }: ProductPageClientProps) {
   const [brandDropdown, setBrandDropdown] = useState(false)
-  const [versionDropdown, setVersionDropdown] = useState(false)
+  const [variantDropdown, setVariantDropdown] = useState(false)
 
   return (
     <div
       onClick={() => {
         if (brandDropdown) setBrandDropdown(false)
-        if (versionDropdown) setVersionDropdown(false)
+        if (variantDropdown) setVariantDropdown(false)
       }}
     >
-      <HeaderProvider productTypes={productTypes}>
+      <HeaderProvider product_types={product_types} all_variants={all_variants}>
         <Main
-          paramsType={paramsType}
-          paramsVersion={paramsVersion}
-          postgresVersions={postgresVersions}
+          paramsProduct_type={paramsProduct_type}
+          paramsVariant={paramsVariant}
+          postgresVariants={postgresVariants}
           uniqueBrands={uniqueBrands}
-          uniqueVersions={uniqueVersions}
+          uniqueVariants={uniqueVariants}
           brandDropdown={brandDropdown}
           setBrandDropdown={setBrandDropdown}
-          versionDropdown={versionDropdown}
-          setVersionDropdown={setVersionDropdown}
+          variantDropdown={variantDropdown}
+          setVariantDropdown={setVariantDropdown}
         />
       </HeaderProvider>
     </div>
@@ -69,83 +64,94 @@ export function ProductPageClient({
 }
 
 type MainProps = {
-  paramsType: string
-  paramsVersion: undefined | string
-  postgresVersions: ProductRow[]
+  paramsProduct_type: string
+  paramsVariant: undefined | string
+  postgresVariants: Variants
   uniqueBrands: string[]
-  uniqueVersions: string[]
+  uniqueVariants: string[]
   brandDropdown: boolean
   setBrandDropdown: Dispatch<SetStateAction<boolean>>
-  versionDropdown: boolean
-  setVersionDropdown: Dispatch<SetStateAction<boolean>>
+  variantDropdown: boolean
+  setVariantDropdown: Dispatch<SetStateAction<boolean>>
 }
 
 function Main({
-  paramsType,
-  paramsVersion,
-  postgresVersions,
+  paramsProduct_type,
+  paramsVariant,
+  postgresVariants,
   uniqueBrands,
-  uniqueVersions,
+  uniqueVariants,
   brandDropdown,
   setBrandDropdown,
-  versionDropdown,
-  setVersionDropdown,
+  variantDropdown,
+  setVariantDropdown,
 }: MainProps) {
   const { setCart, setIsCartOpen } = useHeaderContext()
 
-  const productFound = postgresVersions.find(
-    product => product.version === paramsVersion
-  )
-  const fallbackProduct = postgresVersions[0]
+  const fallbackProduct = postgresVariants[0]
+  const productFound =
+    postgresVariants.find(product => product.variant === paramsVariant) ||
+    fallbackProduct
+
   const initialState = {
     selectedBrand: '-',
-    displayedVersions: uniqueVersions,
-    selectedVersion: paramsVersion ?? fallbackProduct.version,
-    displayedColors: paramsVersion
+    displayedVariants: uniqueVariants,
+    selectedVariant: paramsVariant ?? fallbackProduct.variant,
+    displayedColors: paramsVariant
       ? [
           ...new Set(
-            postgresVersions
-              .filter(product => product.version === paramsVersion)
+            postgresVariants
+              .filter(
+                product => product.variant === paramsVariant && product.color
+              )
               .map(product => product.color)
           ),
         ]
       : [
           ...new Set(
-            postgresVersions
-              .filter(product => product.version === fallbackProduct.version)
+            postgresVariants
+              .filter(
+                product =>
+                  product.variant === fallbackProduct.variant && product.color
+              )
               .map(product => product.color)
           ),
         ],
-    selectedColor: paramsVersion ? productFound?.color : fallbackProduct.color,
-    images: paramsVersion ? productFound!.images : fallbackProduct.images,
-    description: paramsVersion
+    selectedColor: paramsVariant ? productFound?.color : fallbackProduct.color,
+    images: paramsVariant ? productFound!.images : fallbackProduct.images,
+    description: paramsVariant
       ? productFound?.description
       : fallbackProduct.description,
-    price: paramsVersion ? productFound!.price : fallbackProduct.price,
-    price_before: paramsVersion
+    price: paramsVariant ? productFound!.price : fallbackProduct.price,
+    price_before: paramsVariant
       ? productFound!.price_before
       : fallbackProduct.price_before,
-    displayedSizes: paramsVersion
+    displayedSizes: paramsVariant
       ? [
           ...new Set(
-            postgresVersions
-              .filter(product => product.version === paramsVersion)
+            postgresVariants
+              .filter(
+                product => product.variant === paramsVariant && product.size
+              )
               .map(product => product.size)
           ),
         ]
       : [
           ...new Set(
-            postgresVersions
-              .filter(product => product.version === fallbackProduct.version)
+            postgresVariants
+              .filter(
+                product =>
+                  product.variant === fallbackProduct.variant && product.size
+              )
               .map(product => product.size)
           ),
         ],
-    selectedSize: paramsVersion ? productFound?.size : fallbackProduct.size,
+    selectedSize: paramsVariant ? productFound?.size : fallbackProduct.size,
   }
   type State = typeof initialState
   type Action =
     | { type: 'brand'; payload: { selectedBrand: string } }
-    | { type: 'version'; payload: { selectedVersion: string } }
+    | { type: 'variant'; payload: { selectedVariant: string } }
     | { type: 'color'; payload: { selectedColor: string } }
     | { type: 'size'; payload: { selectedSize: string } }
   function reducer(state: State, action: Action) {
@@ -153,42 +159,42 @@ function Main({
       case 'brand': {
         const selectedBrand = action.payload.selectedBrand
         if (selectedBrand !== initialState.selectedBrand) {
-          const displayedVersions = [
+          const displayedVariants = [
             ...new Set(
-              postgresVersions
+              postgresVariants
                 .filter(product => product.brand === selectedBrand)
-                .map(product => product.version)
+                .map(product => product.variant)
             ),
           ]
           const displayedColors = [
             ...new Set(
-              postgresVersions
-                .filter(product => product.version === displayedVersions[0])
-                .map(product => product.color)
+              postgresVariants
+                .filter(product => product.variant === displayedVariants[0])
+                .map(product => product.color && product.color)
             ),
           ]
-          const foundVersion = postgresVersions.find(
+          const foundVariant = postgresVariants.find(
             product => product.brand === selectedBrand
           )!
           const displayedSizes = [
             ...new Set(
-              postgresVersions
-                .filter(product => product.version === displayedVersions[0])
-                .map(product => product.size)
+              postgresVariants
+                .filter(product => product.variant === displayedVariants[0])
+                .map(product => product.size && product.size)
             ),
           ]
 
           return {
             ...state,
             selectedBrand: selectedBrand,
-            displayedVersions: displayedVersions,
-            selectedVersion: displayedVersions[0],
+            displayedVariants: displayedVariants,
+            selectedVariant: displayedVariants[0],
             displayedColors: displayedColors,
             selectedColor: displayedColors[0],
-            images: foundVersion.images,
-            description: foundVersion.description,
-            price: foundVersion.price,
-            price_before: foundVersion.price_before,
+            images: foundVariant.images,
+            description: foundVariant.description,
+            price: foundVariant.price,
+            price_before: foundVariant.price_before,
             displayedSizes: displayedSizes,
             selectedSize: displayedSizes[0],
           }
@@ -196,62 +202,62 @@ function Main({
           return {
             ...state,
             selectedBrand: selectedBrand,
-            displayedVersions: initialState.displayedVersions,
+            displayedVariants: initialState.displayedVariants,
           }
         }
       }
-      case 'version': {
-        const selectedVersion = action.payload.selectedVersion
+      case 'variant': {
+        const selectedVariant = action.payload.selectedVariant
         const displayedColors = [
           ...new Set(
-            postgresVersions
-              .filter(product => product.version === selectedVersion)
-              .map(product => product.color)
+            postgresVariants
+              .filter(product => product.variant === selectedVariant)
+              .map(product => product.color && product.color)
           ),
         ]
-        const foundVersion = postgresVersions.find(
-          product => product.version === selectedVersion
+        const foundVariant = postgresVariants.find(
+          product => product.variant === selectedVariant
         )!
         const displayedSizes = [
           ...new Set(
-            postgresVersions
-              .filter(product => product.version === selectedVersion)
-              .map(product => product.size)
+            postgresVariants
+              .filter(product => product.variant === selectedVariant)
+              .map(product => product.size && product.size)
           ),
         ]
 
         return {
           ...state,
-          selectedVersion: selectedVersion,
+          selectedVariant: selectedVariant,
           displayedColors: displayedColors,
           selectedColor: displayedColors[0],
-          images: foundVersion.images,
-          description: foundVersion.description,
-          price: foundVersion.price,
-          price_before: foundVersion.price_before,
+          images: foundVariant.images,
+          description: foundVariant.description,
+          price: foundVariant.price,
+          price_before: foundVariant.price_before,
           displayedSizes: displayedSizes,
           selectedSize: displayedSizes[0],
         }
       }
       case 'color': {
         const selectedColor = action.payload.selectedColor
-        const foundVersion = postgresVersions.find(
+        const foundVariant = postgresVariants.find(
           product =>
-            product.version === state.selectedVersion &&
+            product.variant === state.selectedVariant &&
             product.color === selectedColor
         )!
-        const displayedSizes = postgresVersions
-          .filter(product => product.version === state.selectedVersion)
+        const displayedSizes = postgresVariants
+          .filter(product => product.variant === state.selectedVariant)
           .filter(product => product.color === selectedColor)
-          .map(product => product.size)
+          .map(product => product.size && product.size)
 
         return {
           ...state,
           selectedColor: selectedColor,
-          images: foundVersion.images,
-          description: foundVersion.description,
-          price: foundVersion.price,
-          price_before: foundVersion.price_before,
+          images: foundVariant.images,
+          description: foundVariant.description,
+          price: foundVariant.price,
+          price_before: foundVariant.price_before,
           displayedSizes: displayedSizes,
           selectedSize: displayedSizes[0],
         }
@@ -268,408 +274,422 @@ function Main({
     }
   }
   const [state, dispatch] = useReducer(reducer, initialState)
-  console.log(state)
 
   const [count, handlers] = useCounter(0, { min: 1, max: 9 })
   const [opened, { open, close }] = useDisclosure(false)
-  const isInitialMount = useRef(true)
-  useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false
-    } else {
-      if (!opened) {
-        setIsCartOpen(true)
-      }
-    }
-  }, [opened])
 
   return (
-    <main>
-      <Modal opened={opened} onClose={close} title="Upsell" centered></Modal>
+    <>
+      <Modal
+        opened={opened}
+        onClose={() => {
+          close()
+          setIsCartOpen(true)
+        }}
+        title="Upsell"
+        centered
+      ></Modal>
 
-      <Carousel withIndicators height={500}>
-        {state.images.map(url => (
-          <Carousel.Slide key={url}>
-            <Image
-              component={NextImage}
-              src={`${envClient.MINIO_PRODUCT_URL}/${paramsType}/${url}`}
-              alt={url}
-              fill
-              priority
-            />
-          </Carousel.Slide>
-        ))}
-      </Carousel>
+      <main>
+        <Carousel withIndicators height={500}>
+          {state.images.map(url => (
+            <Carousel.Slide key={url}>
+              <Image
+                component={NextImage}
+                src={`${envClient.MINIO_PRODUCT_URL}/${paramsProduct_type}/${url}`}
+                alt={url}
+                fill
+                priority
+              />
+            </Carousel.Slide>
+          ))}
+        </Carousel>
 
-      <div className="flex flex-col gap-2 m-4">
-        <div className="flex gap-2 text-lg">
-          <Link href={`${ROUTE_COLLECTION}/${paramsType}`}>{paramsType}</Link>
-          <p>/</p>
-          <h1>{state.selectedVersion}</h1>
-          <div className="flex gap-2 items-center ml-auto">
-            {state.price_before && (
-              <h2 className="text-base text-gray-400 line-through decoration-red-500">{`${state.price_before}€`}</h2>
-            )}
-            <h2>{`${state.price}€`}</h2>
+        <div className="flex flex-col gap-2 m-4">
+          <div className="flex gap-2 text-lg">
+            <Link href={`${ROUTE_COLLECTION}/${paramsProduct_type}`}>
+              {paramsProduct_type}
+            </Link>
+            <p>/</p>
+            <h1>{state.selectedVariant}</h1>
+            <div className="flex gap-2 items-center ml-auto">
+              {state.price_before > 0 && (
+                <h2 className="text-base text-gray-400 line-through decoration-red-500">{`${state.price_before}€`}</h2>
+              )}
+              <h2>{`${state.price}€`}</h2>
+            </div>
           </div>
-        </div>
 
-        {state.description && <p className="my-2">{state.description}</p>}
+          {state.description && <p className="my-2">{state.description}</p>}
 
-        {uniqueBrands.length > 0 && (
+          {uniqueBrands.length > 0 && (
+            <div>
+              <h1 className="text-lg">Μάρκα</h1>
+              <div
+                onClick={() => setBrandDropdown(prev => !prev)}
+                className={`flex items-center pb-0.5 border-1 border-white ${
+                  brandDropdown ? 'border-b-white' : 'border-b-gray-400'
+                } hover:border hover:rounded-lg hover:border-red-500`}
+              >
+                {state.selectedBrand === '-' ? (
+                  <UnstyledButton
+                    style={{
+                      height: '48px',
+                      width: '100%',
+                      marginLeft: '8px',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    διάλεξε
+                  </UnstyledButton>
+                ) : (
+                  <div className="relative w-full max-w-96 h-12">
+                    <Image
+                      component={NextImage}
+                      src={`${envClient.MINIO_PRODUCT_URL}/brands/${state.selectedBrand}`}
+                      alt={state.selectedBrand}
+                      fill
+                    />
+                  </div>
+                )}
+                <motion.span
+                  className="ml-auto"
+                  initial={{ rotate: 0 }}
+                  animate={{ rotate: brandDropdown ? 180 : 0 }}
+                  transition={{ duration: 0.025, ease: 'easeInOut' }}
+                >
+                  <IoIosArrowDown />
+                </motion.span>
+              </div>
+              <AnimatePresence>
+                {brandDropdown && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{
+                      duration: 0.025,
+                      ease: 'easeInOut',
+                    }}
+                    className="flex flex-col gap-1 max-h-48 overflow-y-auto p-1 border mt-0.5"
+                  >
+                    {state.selectedBrand !== '-' && (
+                      <>
+                        <div
+                          onClick={() =>
+                            dispatch({
+                              type: 'brand',
+                              payload: { selectedBrand: '-' },
+                            })
+                          }
+                          className="p-1 border rounded-lg hover:border-red-500"
+                        >
+                          <UnstyledButton
+                            style={{
+                              width: '100%',
+                              height: '48px',
+                              textAlign: 'center',
+                            }}
+                            className="hover:cursor-pointer"
+                          >
+                            καμία μάρκα
+                          </UnstyledButton>
+                        </div>
+                        {uniqueBrands.length !== 1 && (
+                          <hr className="w-full border-t border-gray-200" />
+                        )}
+                      </>
+                    )}
+                    {uniqueBrands
+                      .filter(brand => brand !== state.selectedBrand)
+                      .map((brand, index, array) => (
+                        <Fragment key={index}>
+                          <div
+                            onClick={() => {
+                              dispatch({
+                                type: 'brand',
+                                payload: { selectedBrand: brand },
+                              })
+                              window.history.pushState(
+                                {},
+                                '',
+                                `${ROUTE_PRODUCT}/${paramsProduct_type}`
+                              )
+                            }}
+                            className="p-1 border rounded-lg hover:border-red-500"
+                          >
+                            <div className="relative mx-auto w-full max-w-96 h-12 hover:cursor-pointer">
+                              <Image
+                                component={NextImage}
+                                src={`${envClient.MINIO_PRODUCT_URL}/brands/${brand}`}
+                                alt={brand}
+                                fill
+                              />
+                            </div>
+                          </div>
+                          {index !== array.length - 1 && (
+                            <hr className="w-full border-t border-gray-200" />
+                          )}
+                        </Fragment>
+                      ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
+
           <div>
-            <h1 className="text-lg">Μάρκα</h1>
-            <div
-              onClick={() => setBrandDropdown(prev => !prev)}
-              className={`flex items-center pb-0.5 border-1 border-white ${
-                brandDropdown ? 'border-b-white' : 'border-b-gray-400'
-              } hover:border hover:rounded-lg hover:border-red-500`}
-            >
-              {state.selectedBrand === '-' ? (
-                <UnstyledButton
+            <h1 className="text-lg">Εκδωχή</h1>
+            {state.displayedVariants.length > 1 ? (
+              <>
+                <div
+                  onClick={() => setVariantDropdown(prev => !prev)}
+                  className={`flex items-center pb-0.5 border-1 border-white ${
+                    variantDropdown ? 'border-b-white' : 'border-b-gray-400'
+                  } hover:border hover:rounded-lg hover:border-red-500`}
+                >
+                  <button
+                    style={{
+                      height: '48px',
+                      width: '100%',
+                      textAlign: 'left',
+                      marginLeft: '8px',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {state.selectedVariant}
+                  </button>
+                  <motion.span
+                    className="ml-auto"
+                    initial={{ rotate: 0 }}
+                    animate={{ rotate: variantDropdown ? 180 : 0 }}
+                    transition={{ duration: 0.025, ease: 'easeInOut' }}
+                  >
+                    <IoIosArrowDown />
+                  </motion.span>
+                </div>
+                <AnimatePresence>
+                  {variantDropdown && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{
+                        duration: 0.025,
+                        ease: 'easeInOut',
+                      }}
+                      className="flex flex-col gap-1 max-h-48 overflow-y-auto p-1 border mt-0.5"
+                    >
+                      {uniqueVariants
+                        .filter(variant => variant !== state.selectedVariant)
+                        .map((variant, index, array) => (
+                          <Fragment key={index}>
+                            <div
+                              onClick={() => {
+                                dispatch({
+                                  type: 'variant',
+                                  payload: { selectedVariant: variant },
+                                })
+                                window.history.pushState(
+                                  {},
+                                  '',
+                                  `${ROUTE_PRODUCT}/${paramsProduct_type}/${variant}`
+                                )
+                              }}
+                              className="flex justify-center p-1 border rounded-lg hover:border-red-500"
+                            >
+                              <UnstyledButton
+                                style={{
+                                  width: '100%',
+                                  height: '48px',
+                                  textAlign: 'center',
+                                }}
+                                className="hover:cursor-pointer"
+                              >
+                                {variant}
+                              </UnstyledButton>
+                            </div>
+                            {index !== array.length - 1 && (
+                              <hr className="w-full border-t border-gray-200" />
+                            )}
+                          </Fragment>
+                        ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </>
+            ) : (
+              <div className="flex items-center pb-0.5 border-1 border-white border-b-gray-400">
+                <button
                   style={{
                     height: '48px',
                     width: '100%',
+                    textAlign: 'left',
                     marginLeft: '8px',
-                    cursor: 'pointer',
                   }}
                 >
-                  διάλεξε
-                </UnstyledButton>
-              ) : (
-                <div className="relative w-full max-w-96 h-12">
-                  <Image
-                    component={NextImage}
-                    src={`${envClient.MINIO_PRODUCT_URL}/brand/${state.selectedBrand}`}
-                    alt={state.selectedBrand}
-                    fill
-                  />
-                </div>
-              )}
-              <motion.span
-                className="ml-auto"
-                initial={{ rotate: 0 }}
-                animate={{ rotate: brandDropdown ? 180 : 0 }}
-                transition={{ duration: 0.1, ease: 'easeInOut' }}
-              >
-                <IoIosArrowDown />
-              </motion.span>
-            </div>
-            <AnimatePresence>
-              {brandDropdown && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{
-                    duration: 0.1,
-                    ease: 'easeInOut',
-                  }}
-                  className="flex flex-col gap-1 max-h-48 overflow-y-auto p-1 border mt-0.5"
-                >
-                  {state.selectedBrand !== '-' && (
-                    <>
-                      <div
-                        onClick={() =>
-                          dispatch({
-                            type: 'brand',
-                            payload: { selectedBrand: '-' },
-                          })
-                        }
-                        className="p-1 border rounded-lg hover:border-red-500"
-                      >
-                        <UnstyledButton
-                          style={{
-                            width: '100%',
-                            height: '48px',
-                            textAlign: 'center',
-                          }}
-                          className="hover:cursor-pointer"
-                        >
-                          καμία μάρκα
-                        </UnstyledButton>
-                      </div>
-                      <hr className="w-full border-t border-gray-400" />
-                    </>
-                  )}
-                  {uniqueBrands
-                    .filter(brand => brand !== state.selectedBrand)
-                    .map((brand, index, array) => (
-                      <Fragment key={index}>
-                        <div
-                          onClick={() => {
-                            dispatch({
-                              type: 'brand',
-                              payload: { selectedBrand: brand },
-                            })
-                            window.history.pushState(
-                              {},
-                              '',
-                              `${ROUTE_PRODUCT}/${paramsType}`
-                            )
-                          }}
-                          className="p-1 border rounded-lg hover:border-red-500"
-                        >
-                          <div className="relative mx-auto w-full max-w-96 h-12 hover:cursor-pointer">
-                            <Image
-                              component={NextImage}
-                              src={`${envClient.MINIO_PRODUCT_URL}/brand/${brand}`}
-                              alt={brand}
-                              fill
-                            />
-                          </div>
-                        </div>
-                        {index !== array.length - 1 && (
-                          <hr className="w-full border-t border-gray-400" />
-                        )}
-                      </Fragment>
-                    ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        )}
-
-        <div>
-          <h1 className="text-lg">Εκδωχή</h1>
-          <div
-            onClick={() => setVersionDropdown(prev => !prev)}
-            className={`flex items-center pb-0.5 border-1 border-white ${
-              versionDropdown ? 'border-b-white' : 'border-b-gray-400'
-            } hover:border hover:rounded-lg hover:border-red-500`}
-          >
-            <button
-              style={{
-                height: '48px',
-                width: '100%',
-                textAlign: 'left',
-                marginLeft: '8px',
-                cursor: 'pointer',
-              }}
-            >
-              {state.selectedVersion}
-            </button>
-            <motion.span
-              className="ml-auto"
-              initial={{ rotate: 0 }}
-              animate={{ rotate: versionDropdown ? 180 : 0 }}
-              transition={{ duration: 0.1, ease: 'easeInOut' }}
-            >
-              <IoIosArrowDown />
-            </motion.span>
-          </div>
-          <AnimatePresence>
-            {versionDropdown && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{
-                  duration: 0.1,
-                  ease: 'easeInOut',
-                }}
-                className="flex flex-col gap-1 max-h-48 overflow-y-auto p-1 border mt-0.5"
-              >
-                {uniqueVersions
-                  .filter(version => version !== state.selectedVersion)
-                  .map((version, index, array) => (
-                    <Fragment key={index}>
-                      <div
-                        onClick={() => {
-                          dispatch({
-                            type: 'version',
-                            payload: { selectedVersion: version },
-                          })
-                          window.history.pushState(
-                            {},
-                            '',
-                            `${ROUTE_PRODUCT}/${paramsType}/${version}`
-                          )
-                        }}
-                        className="flex justify-center p-1 border rounded-lg hover:border-red-500"
-                      >
-                        <UnstyledButton
-                          style={{
-                            width: '100%',
-                            height: '48px',
-                            textAlign: 'center',
-                          }}
-                          className="hover:cursor-pointer"
-                        >
-                          {version}
-                        </UnstyledButton>
-                      </div>
-                      {index !== array.length - 1 && (
-                        <hr className="w-full border-t border-gray-400" />
-                      )}
-                    </Fragment>
-                  ))}
-              </motion.div>
+                  {state.selectedVariant}
+                </button>
+              </div>
             )}
-          </AnimatePresence>
-        </div>
-
-        {state.displayedColors.length > 0 && (
-          <div>
-            <h1 className="text-lg">Χρώμα</h1>
-            <div className="flex gap-2">
-              {state.displayedColors.map((color, index) => {
-                function handleClick() {
-                  dispatch({
-                    type: 'color',
-                    payload: { selectedColor: color },
-                  })
-                }
-                return color === state.selectedColor ? (
-                  <div
-                    key={index}
-                    onClick={() => handleClick()}
-                    className={`w-11 h-11 rounded-full p-0.5 border-2 ${
-                      state.selectedColor === color
-                        ? 'border-black'
-                        : 'border-gray-400'
-                    } hover:cursor-pointer`}
-                  >
-                    <div
-                      style={{ backgroundColor: color }}
-                      className={'w-full h-full rounded-full'}
-                    />
-                  </div>
-                ) : (
-                  <div
-                    key={index}
-                    onClick={() => handleClick()}
-                    style={{ backgroundColor: color }}
-                    className="w-11 h-11 rounded-full hover:cursor-pointer"
-                  />
-                )
-              })}
-            </div>
           </div>
-        )}
 
-        {state.displayedSizes.length > 0 && (
-          <div>
-            <h1 className="text-lg">Μέγεθος</h1>
-            <div className="flex gap-2">
-              {state.displayedSizes.map((size, index) => (
-                <div
-                  key={index}
-                  onClick={() =>
+          {state.displayedColors.length > 0 && (
+            <div>
+              <h1 className="text-lg">Χρώμα</h1>
+              <div className="flex gap-2">
+                {state.displayedColors.map((color, index) => {
+                  function handleClick() {
                     dispatch({
-                      type: 'size',
-                      payload: { selectedSize: size },
+                      type: 'color',
+                      payload: { selectedColor: color },
                     })
                   }
-                  className={`w-12 h-[42px] border-2 rounded-lg ${
-                    state.selectedSize === size
-                      ? 'border-black'
-                      : 'border-gray-400'
-                  }`}
-                >
-                  <UnstyledButton
-                    size="md"
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      display: 'flex',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                    }}
-                  >
-                    {size}
-                  </UnstyledButton>
-                </div>
-              ))}
+                  return color === state.selectedColor ? (
+                    <div
+                      key={index}
+                      onClick={() => handleClick()}
+                      className={`w-11 h-11 rounded-full p-0.5 border-2 ${
+                        state.selectedColor === color
+                          ? 'border-black'
+                          : 'border-gray-200'
+                      } hover:cursor-pointer`}
+                    >
+                      <div
+                        style={{ backgroundColor: color }}
+                        className={'w-full h-full rounded-full'}
+                      />
+                    </div>
+                  ) : (
+                    <div
+                      key={index}
+                      onClick={() => handleClick()}
+                      style={{ backgroundColor: color }}
+                      className="w-11 h-11 rounded-full hover:cursor-pointer"
+                    />
+                  )
+                })}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        <div className="flex gap-2 w-full justify-center items-center mt-2">
-          <div className="flex w-24 h-[42px] rounded-lg border-2 border-gray-400">
-            <div onClick={() => handlers.decrement()} className="w-1/3">
-              <UnstyledButton
-                size="compact-sm"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}
-              >
-                <FaMinus size={10} />
-              </UnstyledButton>
+          {state.displayedSizes.length > 0 && (
+            <div>
+              <h1 className="text-lg">Μέγεθος</h1>
+              <div className="flex gap-2">
+                {state.displayedSizes.map((size, index) => (
+                  <div
+                    key={index}
+                    onClick={() =>
+                      dispatch({
+                        type: 'size',
+                        payload: { selectedSize: size },
+                      })
+                    }
+                    className={`w-12 h-[42px] border-2 rounded-lg ${
+                      state.selectedSize === size
+                        ? 'border-black'
+                        : 'border-gray-200'
+                    }`}
+                  >
+                    <UnstyledButton
+                      size="md"
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                      }}
+                    >
+                      {size}
+                    </UnstyledButton>
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="flex w-1/3 items-center justify-center border-x-1 border-gray-400">
-              <p>{count}</p>
+          )}
+
+          <div className="flex gap-2 w-full justify-center items-center mt-2">
+            <div className="flex w-24 h-[42px] rounded-lg border-2 border-gray-200">
+              <div onClick={() => handlers.decrement()} className="w-1/3">
+                <UnstyledButton
+                  size="compact-sm"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}
+                >
+                  <FaMinus size={10} />
+                </UnstyledButton>
+              </div>
+              <div className="flex w-1/3 items-center justify-center border-x-1 border-gray-200">
+                <p>{count}</p>
+              </div>
+              <div onClick={() => handlers.increment()} className="w-1/3">
+                <UnstyledButton
+                  size="compact-md"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}
+                >
+                  <FaPlus size={10} />
+                </UnstyledButton>
+              </div>
             </div>
-            <div onClick={() => handlers.increment()} className="w-1/3">
-              <UnstyledButton
-                size="compact-md"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}
-              >
-                <FaPlus size={10} />
-              </UnstyledButton>
-            </div>
-          </div>
-          <Button
-            onClick={() => {
-              open()
-              setCart(prev => {
-                const existingIndex = prev.findIndex(
-                  item =>
-                    item.type === paramsType &&
-                    item.version === state.selectedVersion &&
-                    item.color === state.selectedColor &&
-                    item.size === state.selectedSize
-                )
-                if (existingIndex !== -1) {
-                  const updatedCart = [...prev]
-                  updatedCart[existingIndex] = {
-                    ...updatedCart[existingIndex],
-                    quantity: updatedCart[existingIndex].quantity + count,
+            <Button
+              onClick={() => {
+                open()
+                setCart(prev => {
+                  const existingIndex = prev.findIndex(
+                    item =>
+                      item.procuct_type === paramsProduct_type &&
+                      item.variant === state.selectedVariant &&
+                      item.color === state.selectedColor &&
+                      item.size === state.selectedSize
+                  )
+                  if (existingIndex !== -1) {
+                    const updatedCart = [...prev]
+                    updatedCart[existingIndex] = {
+                      ...updatedCart[existingIndex],
+                      quantity: updatedCart[existingIndex].quantity + count,
+                    }
+                    return updatedCart
+                  } else {
+                    return [
+                      ...prev,
+                      {
+                        procuct_type: paramsProduct_type,
+                        variant: state.selectedVariant,
+                        image: state.images[0],
+                        price: state.price,
+                        quantity: count,
+                        color: state.selectedColor,
+                        size: state.selectedSize,
+                        price_before: state.price_before,
+                      },
+                    ]
                   }
-                  return updatedCart
-                } else {
-                  return [
-                    ...prev,
-                    {
-                      type: paramsType,
-                      version: state.selectedVersion,
-                      image: state.images[0],
-                      price: state.price,
-                      quantity: count,
-                      ...(state.selectedColor
-                        ? { color: state.selectedColor }
-                        : {}),
-                      ...(state.selectedSize
-                        ? { size: state.selectedSize }
-                        : {}),
-                      ...(state.price_before
-                        ? { price_before: state.price_before }
-                        : {}),
-                    },
-                  ]
-                }
-              })
-              handlers.reset()
-            }}
-            color="red"
-            size="md"
-            radius="md"
-            style={{ width: '100%' }}
-          >
-            Προσθήκη στο Καλάθι
-          </Button>
+                })
+                handlers.reset()
+              }}
+              color="red"
+              size="md"
+              radius="md"
+              style={{ width: '100%' }}
+            >
+              Προσθήκη στο Καλάθι
+            </Button>
+          </div>
         </div>
-      </div>
-    </main>
+      </main>
+    </>
   )
 }
