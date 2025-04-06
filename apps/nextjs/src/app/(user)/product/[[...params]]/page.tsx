@@ -34,17 +34,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
     variant => variant.product_type === paramsProduct_type
   )
 
-  const uniqueBrands = Array.from(
-    new Set(postgresVariants.map(variant => variant.brand).filter(Boolean))
-  )
-
-  const uniqueVariants = Array.from(
-    new Set(postgresVariants.map(variant => variant.variant).filter(Boolean))
-  )
-
   const variant = resolvedParams.params?.[1]
   const paramsVariant = variant
-    ? uniqueVariants.find(v => v === decodeURIComponent(variant))
+    ? postgresVariants.find(v => v.variant === decodeURIComponent(variant)) ??
+      undefined
     : undefined
 
   return (
@@ -54,8 +47,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
       paramsProduct_type={paramsProduct_type}
       paramsVariant={paramsVariant}
       postgresVariants={postgresVariants}
-      uniqueBrands={uniqueBrands}
-      uniqueVariants={uniqueVariants}
     />
   )
 }

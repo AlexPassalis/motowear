@@ -23,6 +23,12 @@ export const typeCoupon = z.object({
   fixed: z.number().nullable(),
 })
 
+export type Coupon = {
+  coupon_code: string
+  percentage: null | number
+  fixed: null | number
+}
+
 export const typeCheckout = z.object({
   email: z.string().email({ message: 'Λάθος email.' }),
   receive_email: z.boolean(),
@@ -43,28 +49,30 @@ export const typeCheckout = z.object({
 })
 
 export type LocalStorageCartItem = {
+  image: string
   procuct_type: string
   variant: string
-  image: string
-  price: number
-  quantity: number
   color: string
   size: string
+  price: number
   price_before: number
+  quantity: number
 }
 
-export const typeCart = z.array(
-  z.object({
-    procuct_type: z.string(),
-    variant: z.string(),
-    image: z.string(),
-    price: z.number(),
-    quantity: z.number(),
-    color: z.string(),
-    size: z.string(),
-    price_before: z.number(),
-  })
-)
+export const typeCart = z
+  .array(
+    z.object({
+      image: z.string(),
+      procuct_type: z.string(),
+      variant: z.string(),
+      color: z.string(),
+      size: z.string(),
+      price: z.number(),
+      price_before: z.number(),
+      quantity: z.number(),
+    })
+  )
+  .min(1)
 
 export type ProductTypes = string[]
 export type Brands = string[]

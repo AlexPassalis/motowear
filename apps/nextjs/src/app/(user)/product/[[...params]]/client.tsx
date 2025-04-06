@@ -21,10 +21,8 @@ type ProductPageClientProps = {
   product_types: string[]
   all_variants: Variants
   paramsProduct_type: string
-  paramsVariant: undefined | string
+  paramsVariant: undefined | Variants[number]
   postgresVariants: Variants
-  uniqueBrands: string[]
-  uniqueVariants: string[]
 }
 
 export function ProductPageClient({
@@ -33,8 +31,6 @@ export function ProductPageClient({
   paramsProduct_type,
   paramsVariant,
   postgresVariants,
-  uniqueBrands,
-  uniqueVariants,
 }: ProductPageClientProps) {
   const [brandDropdown, setBrandDropdown] = useState(false)
   const [variantDropdown, setVariantDropdown] = useState(false)
@@ -51,8 +47,6 @@ export function ProductPageClient({
           paramsProduct_type={paramsProduct_type}
           paramsVariant={paramsVariant}
           postgresVariants={postgresVariants}
-          uniqueBrands={uniqueBrands}
-          uniqueVariants={uniqueVariants}
           brandDropdown={brandDropdown}
           setBrandDropdown={setBrandDropdown}
           variantDropdown={variantDropdown}
@@ -65,10 +59,8 @@ export function ProductPageClient({
 
 type MainProps = {
   paramsProduct_type: string
-  paramsVariant: undefined | string
+  paramsVariant: undefined | Variants[number]
   postgresVariants: Variants
-  uniqueBrands: string[]
-  uniqueVariants: string[]
   brandDropdown: boolean
   setBrandDropdown: Dispatch<SetStateAction<boolean>>
   variantDropdown: boolean
@@ -79,8 +71,6 @@ function Main({
   paramsProduct_type,
   paramsVariant,
   postgresVariants,
-  uniqueBrands,
-  uniqueVariants,
   brandDropdown,
   setBrandDropdown,
   variantDropdown,
@@ -88,21 +78,25 @@ function Main({
 }: MainProps) {
   const { setCart, setIsCartOpen } = useHeaderContext()
 
-  const fallbackProduct = postgresVariants[0]
-  const productFound =
-    postgresVariants.find(product => product.variant === paramsVariant) ||
-    fallbackProduct
-
+  const fallbackVariant = postgresVariants[0]
   const initialState = {
-    selectedBrand: '-',
-    displayedVariants: uniqueVariants,
-    selectedVariant: paramsVariant ?? fallbackProduct.variant,
+    displayedBrands: [
+      ...new Set(postgresVariants.map(product => product.brand)),
+    ],
+    selectedBrand: '',
+    displayedVariants: [
+      ...new Set(postgresVariants.map(product => product.variant)),
+    ],
+    selectedVariant: paramsVariant
+      ? paramsVariant.variant
+      : fallbackVariant.variant,
     displayedColors: paramsVariant
       ? [
           ...new Set(
             postgresVariants
               .filter(
-                product => product.variant === paramsVariant && product.color
+                variant =>
+                  variant.variant === paramsVariant.variant && variant.color
               )
               .map(product => product.color)
           ),
@@ -111,27 +105,20 @@ function Main({
           ...new Set(
             postgresVariants
               .filter(
-                product =>
-                  product.variant === fallbackProduct.variant && product.color
+                variant =>
+                  variant.variant === fallbackVariant.variant && variant.color
               )
               .map(product => product.color)
           ),
         ],
-    selectedColor: paramsVariant ? productFound?.color : fallbackProduct.color,
-    images: paramsVariant ? productFound!.images : fallbackProduct.images,
-    description: paramsVariant
-      ? productFound?.description
-      : fallbackProduct.description,
-    price: paramsVariant ? productFound!.price : fallbackProduct.price,
-    price_before: paramsVariant
-      ? productFound!.price_before
-      : fallbackProduct.price_before,
+    selectedColor: paramsVariant ? paramsVariant.color : fallbackVariant.color,
     displayedSizes: paramsVariant
       ? [
           ...new Set(
             postgresVariants
               .filter(
-                product => product.variant === paramsVariant && product.size
+                variant =>
+                  variant.variant === paramsVariant.variant && variant.size
               )
               .map(product => product.size)
           ),
@@ -140,13 +127,21 @@ function Main({
           ...new Set(
             postgresVariants
               .filter(
-                product =>
-                  product.variant === fallbackProduct.variant && product.size
+                variant =>
+                  variant.variant === fallbackVariant.variant && variant.size
               )
               .map(product => product.size)
           ),
         ],
-    selectedSize: paramsVariant ? productFound?.size : fallbackProduct.size,
+    selectedSize: paramsVariant ? paramsVariant.size : fallbackVariant.size,
+    images: paramsVariant ? paramsVariant.images : fallbackVariant.images,
+    description: paramsVariant
+      ? paramsVariant.description
+      : fallbackVariant.description,
+    price: paramsVariant ? paramsVariant.price : fallbackVariant.price,
+    price_before: paramsVariant
+      ? paramsVariant.price_before
+      : fallbackVariant.price_before,
   }
   type State = typeof initialState
   type Action =
@@ -158,7 +153,7 @@ function Main({
     switch (action.type) {
       case 'brand': {
         const selectedBrand = action.payload.selectedBrand
-        if (selectedBrand !== initialState.selectedBrand) {
+        if (selectedBrand) {
           const displayedVariants = [
             ...new Set(
               postgresVariants
@@ -292,12 +287,12 @@ function Main({
 
       <main>
         <Carousel withIndicators height={500}>
-          {state.images.map(url => (
-            <Carousel.Slide key={url}>
+          {state.images.map(img => (
+            <Carousel.Slide key={img}>
               <Image
                 component={NextImage}
-                src={`${envClient.MINIO_PRODUCT_URL}/${paramsProduct_type}/${url}`}
-                alt={url}
+                src={`${envClient.MINIO_PRODUCT_URL}/${paramsProduct_type}/${img}`}
+                alt={img}
                 fill
                 priority
               />
@@ -322,7 +317,7 @@ function Main({
 
           {state.description && <p className="my-2">{state.description}</p>}
 
-          {uniqueBrands.length > 0 && (
+          {state.displayedBrands.length > 0 && (
             <div>
               <h1 className="text-lg">Μάρκα</h1>
               <div
@@ -331,7 +326,7 @@ function Main({
                   brandDropdown ? 'border-b-white' : 'border-b-gray-400'
                 } hover:border hover:rounded-lg hover:border-red-500`}
               >
-                {state.selectedBrand === '-' ? (
+                {state.selectedBrand === '' ? (
                   <UnstyledButton
                     style={{
                       height: '48px',
@@ -373,13 +368,13 @@ function Main({
                     }}
                     className="flex flex-col gap-1 max-h-48 overflow-y-auto p-1 border mt-0.5"
                   >
-                    {state.selectedBrand !== '-' && (
+                    {state.selectedBrand !== '' && (
                       <>
                         <div
                           onClick={() =>
                             dispatch({
                               type: 'brand',
-                              payload: { selectedBrand: '-' },
+                              payload: { selectedBrand: '' },
                             })
                           }
                           className="p-1 border rounded-lg hover:border-red-500"
@@ -395,12 +390,12 @@ function Main({
                             καμία μάρκα
                           </UnstyledButton>
                         </div>
-                        {uniqueBrands.length !== 1 && (
+                        {state.displayedBrands.length !== 1 && (
                           <hr className="w-full border-t border-gray-200" />
                         )}
                       </>
                     )}
-                    {uniqueBrands
+                    {state.displayedBrands
                       .filter(brand => brand !== state.selectedBrand)
                       .map((brand, index, array) => (
                         <Fragment key={index}>
@@ -480,7 +475,7 @@ function Main({
                       }}
                       className="flex flex-col gap-1 max-h-48 overflow-y-auto p-1 border mt-0.5"
                     >
-                      {uniqueVariants
+                      {state.displayedVariants
                         .filter(variant => variant !== state.selectedVariant)
                         .map((variant, index, array) => (
                           <Fragment key={index}>
@@ -539,16 +534,15 @@ function Main({
               <h1 className="text-lg">Χρώμα</h1>
               <div className="flex gap-2">
                 {state.displayedColors.map((color, index) => {
-                  function handleClick() {
-                    dispatch({
-                      type: 'color',
-                      payload: { selectedColor: color },
-                    })
-                  }
                   return color === state.selectedColor ? (
                     <div
                       key={index}
-                      onClick={() => handleClick()}
+                      onClick={() =>
+                        dispatch({
+                          type: 'color',
+                          payload: { selectedColor: color },
+                        })
+                      }
                       className={`w-11 h-11 rounded-full p-0.5 border-2 ${
                         state.selectedColor === color
                           ? 'border-black'
@@ -563,7 +557,12 @@ function Main({
                   ) : (
                     <div
                       key={index}
-                      onClick={() => handleClick()}
+                      onClick={() =>
+                        dispatch({
+                          type: 'color',
+                          payload: { selectedColor: color },
+                        })
+                      }
                       style={{ backgroundColor: color }}
                       className="w-11 h-11 rounded-full hover:cursor-pointer"
                     />
@@ -666,14 +665,14 @@ function Main({
                     return [
                       ...prev,
                       {
+                        image: state.images[0],
                         procuct_type: paramsProduct_type,
                         variant: state.selectedVariant,
-                        image: state.images[0],
-                        price: state.price,
-                        quantity: count,
                         color: state.selectedColor,
                         size: state.selectedSize,
+                        price: state.price,
                         price_before: state.price_before,
+                        quantity: count,
                       },
                     ]
                   }

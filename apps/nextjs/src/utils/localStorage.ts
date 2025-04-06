@@ -1,7 +1,7 @@
 import type { LocalStorageCartItem } from '@/data/type'
 import type { Variants } from '@/data/type'
 
-export function getLocalStorageCart(): LocalStorageCartItem[] {
+function getLocalStorageCart(): LocalStorageCartItem[] {
   const cart = localStorage.getItem('cart')
   return cart ? JSON.parse(cart) : []
 }

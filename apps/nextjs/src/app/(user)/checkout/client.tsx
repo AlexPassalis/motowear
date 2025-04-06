@@ -26,13 +26,10 @@ import {
   typeCheckout,
   LocalStorageCartItem,
 } from '@/data/type'
-import { ROUTE_ERROR } from '@/data/routes'
+import { ROUTE_ERROR, ROUTE_HOME } from '@/data/routes'
 import { errorAxios, errorUnexpected, errroInvalidResponse } from '@/data/error'
 import { Footer } from '@/components/Footer'
-import {
-  getFilteredLocalStorageCart,
-  getLocalStorageCart,
-} from '@/utils/localStorage'
+import { getFilteredLocalStorageCart } from '@/utils/localStorage'
 import axios from 'axios'
 
 type CheckoutPageProps = {
@@ -81,9 +78,14 @@ export function CheckoutPageClient({ all_variants }: CheckoutPageProps) {
     if (checkout) {
       form.setValues(JSON.parse(checkout))
     }
-    setCart(getFilteredLocalStorageCart(all_variants))
+
+    const localStorageCart = getFilteredLocalStorageCart(all_variants)
+    if (localStorageCart.length < 1) {
+      router.push(ROUTE_HOME)
+    }
+    setCart(localStorageCart)
     setTotal(
-      getLocalStorageCart().reduce(
+      localStorageCart.reduce(
         (acc, item) => acc + item.price * item.quantity,
         0
       )
@@ -115,22 +117,27 @@ export function CheckoutPageClient({ all_variants }: CheckoutPageProps) {
         <form
           className="flex flex-col gap-8"
           onSubmit={form.onSubmit(async values => {
-            try {
-              const res = await axios.post(`${envClient.API_URL}/checkout`, {
-                checkout: values,
-                cart: cart,
-                coupon: coupon,
-              })
-              if (res.status !== 200) {
-                router.push(
-                  `${ROUTE_ERROR}/message?=${
-                    res?.data?.message || errorUnexpected
-                  }`
+            if (cart.length > 0) {
+              try {
+                const res = await axios.post(
+                  `${envClient.API_USER_URL}/checkout`,
+                  {
+                    checkout: values,
+                    cart: cart,
+                    coupon: coupon,
+                  }
                 )
+                if (res.status !== 200) {
+                  router.push(
+                    `${ROUTE_ERROR}?message=${
+                      res?.data?.message || errorUnexpected
+                    }`
+                  )
+                }
+                console.log(res)
+              } catch {
+                router.push(`${ROUTE_ERROR}?message=${errorAxios}`)
               }
-              console.log(res)
-            } catch {
-              router.push(`${ROUTE_ERROR}/message?=${errorAxios}`)
             }
           })}
         >
@@ -307,14 +314,14 @@ export function CheckoutPageClient({ all_variants }: CheckoutPageProps) {
                       try {
                         open()
                         const res = await axios.post(
-                          `${envClient.API_URL}/coupon_code`,
+                          `${envClient.API_USER_URL}/coupon_code`,
                           {
                             coupon_code: couponCodeRef.current.value,
                           }
                         )
                         if (res.status !== 200) {
                           router.push(
-                            `${ROUTE_ERROR}/message?=${
+                            `${ROUTE_ERROR}?message=${
                               res?.data?.message || errorUnexpected
                             }`
                           )
@@ -333,7 +340,7 @@ export function CheckoutPageClient({ all_variants }: CheckoutPageProps) {
                           setCoupon({})
                         }
                       } catch {
-                        router.push(`${ROUTE_ERROR}/message?=${errorAxios}`)
+                        router.push(`${ROUTE_ERROR}?message=${errorAxios}`)
                       } finally {
                         close()
                       }
@@ -395,6 +402,7 @@ export function CheckoutPageClient({ all_variants }: CheckoutPageProps) {
               </div>
               <Button
                 type="submit"
+                disabled={cart.length < 1}
                 mt="xl"
                 color="red"
                 size="md"
