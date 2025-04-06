@@ -1,5 +1,5 @@
 import { ErrorPageClient } from '@/app/(user)/error/client'
-import { errorPostgres, errorUnexpected } from '@/data/error'
+import { errorUnexpected } from '@/data/error'
 import { ROUTE_ERROR } from '@/data/routes'
 import { getVariantsCached, getProductTypesCached } from '@/app/(user)/cache'
 import { redirect } from 'next/navigation'
@@ -14,8 +14,11 @@ export default async function ErrorPage({ searchParams }: ErrorPageProps) {
     getProductTypesCached(),
     getVariantsCached(),
   ])
-  if (resolved[1].status === 'rejected' || resolved[2].status === 'rejected') {
-    redirect(`${ROUTE_ERROR}?message=${errorPostgres}`)
+  if (resolved[1].status === 'rejected') {
+    redirect(`${ROUTE_ERROR}?message=${resolved[1].reason}`)
+  }
+  if (resolved[2].status === 'rejected') {
+    redirect(`${ROUTE_ERROR}?message=${resolved[2].reason}`)
   }
 
   const resolvedSearchParams = (

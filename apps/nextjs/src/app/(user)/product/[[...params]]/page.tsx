@@ -2,7 +2,6 @@ import { ProductPageClient } from '@/app/(user)/product/[[...params]]/client'
 import { getProductTypesCached, getVariantsCached } from '@/app/(user)/cache'
 import { notFound, redirect } from 'next/navigation'
 import { ROUTE_ERROR } from '@/data/routes'
-import { errorPostgres } from '@/data/error'
 
 type ProductPageProps = {
   params: Promise<{ params?: [type: string, version?: string] }>
@@ -14,8 +13,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
     getProductTypesCached(),
     getVariantsCached(),
   ])
-  if (resolved[1].status === 'rejected' || resolved[2].status === 'rejected') {
-    redirect(`${ROUTE_ERROR}?message=${errorPostgres}`)
+  if (resolved[1].status === 'rejected') {
+    redirect(`${ROUTE_ERROR}?message=${resolved[1].reason}`)
+  }
+  if (resolved[2].status === 'rejected') {
+    redirect(`${ROUTE_ERROR}?message=${resolved[2].reason}`)
   }
 
   const resolvedParams = (

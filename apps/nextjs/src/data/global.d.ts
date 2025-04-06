@@ -6,8 +6,7 @@ import type { CronJob } from 'cron'
 
 declare global {
   var global_postgres: ReturnType<typeof drizzle> | undefined
-  var global_redisPub: Redis | undefined
-  var global_redisSub: Redis | undefined
+  var global_redis: Redis | undefined
   var global_telegram: Telegraf<Context<Update>> | undefined
   var global_cron: CronJob | undefined
 }

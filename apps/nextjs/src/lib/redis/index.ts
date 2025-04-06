@@ -4,38 +4,38 @@ import { v4 as id } from 'uuid'
 import { sendTelegramMessage } from '@/lib/telegram/index'
 import { envServer } from '@/env'
 
-async function establishRedisPub() {
-  if (!global.global_redisPub) {
-    global.global_redisPub = new Redis({
+async function establishRedis() {
+  if (!global.global_redis) {
+    global.global_redis = new Redis({
       host: envServer.REDIS_HOST,
       port: envServer.REDIS_PORT,
     })
     process.once('SIGINT', () => {
-      global.global_redisPub!.quit()
-      console.info('RedisPub connection closed.')
+      global.global_redis!.quit()
+      console.info('Redis connection closed.')
     })
     process.once('SIGTERM', () => {
-      global.global_redisPub!.quit()
-      console.info('RedisPub connection closed.')
+      global.global_redis!.quit()
+      console.info('Redis connection closed.')
     })
     if (process.env.BUILD_TIME !== 'true') {
-      await redisPubPing()
+      await redisPing()
     }
   }
-  return global.global_redisPub
+  return global.global_redis
 }
 
-async function redisPubPing() {
+async function redisPing() {
   try {
-    const result = await global.global_redisPub!.ping()
+    const result = await global.global_redis!.ping()
     if (result === 'PONG') {
-      console.info('RedisPub connected successfully.')
+      console.info('Redis connected successfully.')
     }
   } catch (e) {
     const message = formatMessage(
       id(),
-      '@/lib/redis/redisPub.ts redisPubPing()',
-      'RedisPub connection failed.',
+      '@/lib/redis/redis.ts redisPing()',
+      'Redis connection failed.',
       e
     )
     console.error(message)
@@ -44,4 +44,4 @@ async function redisPubPing() {
   }
 }
 
-export const redisPub = await establishRedisPub()
+export const redis = await establishRedis()

@@ -93,7 +93,6 @@ const customTheme = createTheme({
 })
 
 import '@/lib/cron/index'
-import '@/lib/redis/redisSub'
 
 export default function RootLayout({
   children,

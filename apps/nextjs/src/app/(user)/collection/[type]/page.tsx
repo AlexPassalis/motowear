@@ -1,5 +1,4 @@
 import { notFound, redirect } from 'next/navigation'
-import { errorPostgres } from '@/data/error'
 import { CollectionPageClient } from '@/app/(user)/collection/[type]/client'
 import { getProductTypesCached, getVariantsCached } from '@/app/(user)/cache'
 import { ROUTE_ERROR } from '@/data/routes'
@@ -14,8 +13,11 @@ export default async function CollectionPage({ params }: ProductPageProps) {
     getProductTypesCached(),
     getVariantsCached(),
   ])
-  if (resolved[1].status === 'rejected' || resolved[2].status === 'rejected') {
-    redirect(`${ROUTE_ERROR}?message=${errorPostgres}`)
+  if (resolved[1].status === 'rejected') {
+    redirect(`${ROUTE_ERROR}?message=${resolved[1].reason}`)
+  }
+  if (resolved[2].status === 'rejected') {
+    redirect(`${ROUTE_ERROR}?message=${resolved[2].reason}`)
   }
 
   const resolvedParams = (

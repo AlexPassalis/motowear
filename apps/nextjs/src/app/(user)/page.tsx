@@ -2,16 +2,17 @@ import { getVariantsCached, getProductTypesCached } from '@/app/(user)/cache'
 import { HomePageClient } from '@/app/(user)/client'
 import { redirect } from 'next/navigation'
 import { ROUTE_ERROR } from '@/data/routes'
-import { errorPostgres } from '@/data/error'
 
 export default async function HomePage() {
   const resolved = await Promise.allSettled([
     getProductTypesCached(),
     getVariantsCached(),
   ])
-
-  if (resolved[0].status === 'rejected' || resolved[1].status === 'rejected') {
-    redirect(`${ROUTE_ERROR}?message=${errorPostgres}`)
+  if (resolved[0].status === 'rejected') {
+    redirect(`${ROUTE_ERROR}?message=${resolved[0].reason}`)
+  }
+  if (resolved[1].status === 'rejected') {
+    redirect(`${ROUTE_ERROR}?message=${resolved[1].reason}`)
   }
 
   return (
