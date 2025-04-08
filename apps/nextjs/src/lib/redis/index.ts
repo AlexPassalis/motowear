@@ -1,6 +1,5 @@
 import { formatMessage } from '@/utils/formatMessage'
 import Redis from 'ioredis'
-import { v4 as id } from 'uuid'
 import { sendTelegramMessage } from '@/lib/telegram/index'
 import { envServer } from '@/env'
 
@@ -33,7 +32,6 @@ async function redisPing() {
     }
   } catch (e) {
     const message = formatMessage(
-      id(),
       '@/lib/redis/redis.ts redisPing()',
       'Redis connection failed.',
       e

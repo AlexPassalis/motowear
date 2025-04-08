@@ -2,7 +2,6 @@ import { errorTelegram } from '@/data/error'
 import { formatMessage } from '@/utils/formatMessage'
 import { readSecret } from '@/utils/readSecret'
 import { Telegraf } from 'telegraf'
-import { v4 as id } from 'uuid'
 
 const chatIds = {
   ERROR: readSecret('TELEGRAM_ERROR_CHAT_ID'),
@@ -35,7 +34,6 @@ export async function sendTelegramMessage(
     })
   } catch (e) {
     const message = formatMessage(
-      id(),
       '@/lib/telegram/index.ts sendTelegramMessage()',
       errorTelegram,
       e
@@ -51,7 +49,6 @@ async function telegramPing() {
     console.log('Telegram connected successfully.')
   } catch (e) {
     const message = formatMessage(
-      id(),
       '@/lib/telegram/index.ts telegramPing()',
       'Telegram connection failed.',
       e

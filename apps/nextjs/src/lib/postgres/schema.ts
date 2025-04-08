@@ -9,58 +9,51 @@ import {
   jsonb,
 } from 'drizzle-orm/pg-core'
 
+export { authSchema, user, account, verification, session } from './auth.schema'
+
 const Numeric = customType<{ data: number }>({
   dataType: () => 'numeric',
   toDriver: (value: number) => value.toString(),
   fromDriver: (value: unknown) => parseFloat(value as string),
 })
 
-export { authSchema, user, account, verification, session } from './auth.schema'
-
-export const productSchema = pgSchema('product')
-export const product_types = productSchema.table('product_types', {
+export const pagesSchema = pgSchema('pages')
+// export const home_page = pagesSchema.table('home_page', {})
+// export const collection_pages = pagesSchema.table('collection_pages', {})
+export const product_pages = pagesSchema.table('product_pages', {
   product_type: text('product_type').primaryKey(),
-  size_chart: text('image').notNull(),
+  size_chart: text('size_chart').notNull(),
   product_description: text('product_description').notNull(),
+  faq: jsonb('faq').$type<{ question: string; answer: string }[]>().notNull(),
+  carousel: jsonb('carousel')
+    .$type<{ text: string; image: string }[]>()
+    .notNull(),
 })
-export const faq = productSchema.table('faq', {
-  primary_key: uuid().primaryKey(),
-  product_type: text('product_type')
-    .notNull()
-    .references(() => product_types.product_type, { onDelete: 'cascade' }),
-  question: text('question').notNull(),
-  answer: text('answer').notNull(),
-})
-export const carousel = productSchema.table('carousel', {
-  primary_key: uuid().primaryKey(),
-  product_type: text('product_type')
-    .notNull()
-    .references(() => product_types.product_type, { onDelete: 'cascade' }),
-  index: integer('index').notNull(),
-  image: text('image').notNull(),
-  description: text('description').notNull(),
-})
-export const brands = productSchema.table('brands', {
+
+export const productsSchema = pgSchema('products')
+export const brand = productsSchema.table('brand', {
   index: integer('index').notNull(),
   image: text('image').primaryKey(),
 })
-export const variants = productSchema.table(
-  'variants',
+export const variant = productsSchema.table(
+  'variant',
   {
     product_type: text('product_type')
       .notNull()
-      .references(() => product_types.product_type, { onDelete: 'cascade' }),
+      .references(() => product_pages.product_type, {
+        onDelete: 'cascade',
+      }),
     index: integer('index').notNull(),
     id: uuid().primaryKey(),
-    variant: text('variant').notNull(),
-    description: text('description').notNull(),
     images: text('images').array().notNull(),
-    price: Numeric('price', { precision: 7, scale: 2 }).notNull(),
+    name: text('name').notNull(),
+    description: text('description').notNull(),
     brand: text('image')
       .notNull()
-      .references(() => brands.image),
+      .references(() => brand.image),
     color: text('color').notNull(),
     size: text('size').notNull(),
+    price: Numeric('price', { precision: 7, scale: 2 }).notNull(),
     price_before: Numeric('price_before', { precision: 7, scale: 2 }).notNull(),
   },
   variants => ({
@@ -68,9 +61,9 @@ export const variants = productSchema.table(
   })
 )
 
-export const orderSchema = pgSchema('order')
-export const coupons = orderSchema.table(
-  'coupons',
+export const ordersSchema = pgSchema('orders')
+export const coupon = ordersSchema.table(
+  'coupon',
   {
     coupon_code: text('code').primaryKey(),
     percentage: Numeric('percentage', { precision: 3, scale: 2 }),
@@ -80,24 +73,28 @@ export const coupons = orderSchema.table(
     validDiscount: sql`("percentage" > 0 OR "fixed" > 0)`,
   })
 )
-export const orders = orderSchema.table('orders', {
-  id: uuid().primaryKey(),
+export const order = ordersSchema.table('order', {
+  id: uuid('id').primaryKey(),
   checkout: jsonb('checkout').notNull(),
   cart: jsonb('cart').notNull(),
   coupon: jsonb('coupon'),
   total: integer('total').notNull(),
 })
 
-export const reviewSchema = pgSchema('review')
-export const reviews = reviewSchema.table('reviews', {
-  id: uuid().primaryKey(),
-  product_type: text('product_type').notNull(),
+export const reviewsSchema = pgSchema('reviews')
+export const review = reviewsSchema.table('review', {
+  id: uuid('id').primaryKey(),
   index: integer('index').notNull(),
+  product_type: text('product_type').notNull(),
+  rating: integer('rating').notNull(),
+  full_name: text('full_name').notNull(),
+  title: text('title').notNull(),
   review: text('review').notNull(),
+  date: date('date').notNull(),
 })
 
 export const metricsSchema = pgSchema('metrics')
-export const daily_sessions = metricsSchema.table('daily_sessions', {
+export const daily_session = metricsSchema.table('daily_session', {
   day: date('day').primaryKey(),
   count: integer('count').notNull(),
 })

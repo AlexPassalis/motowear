@@ -10,6 +10,7 @@ import {
   createTheme,
   mantineHtmlProps,
 } from '@mantine/core'
+import '@mantine/dates/styles.css'
 import '@mantine/carousel/styles.css'
 
 import './globals.css'

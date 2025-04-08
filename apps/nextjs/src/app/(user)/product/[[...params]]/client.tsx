@@ -1,12 +1,22 @@
 'use client'
 
-import { Dispatch, SetStateAction, useReducer, useState } from 'react'
+import classes from '@/css/FaqSimple.module.css'
+import { Dispatch, SetStateAction, useReducer, useRef, useState } from 'react'
 import { useCounter, useDisclosure } from '@mantine/hooks'
-import { Button, Image, Modal, UnstyledButton } from '@mantine/core'
+import {
+  Accordion,
+  Button,
+  Card,
+  Container,
+  Image,
+  Modal,
+  Text,
+  Title,
+  UnstyledButton,
+} from '@mantine/core'
 import NextImage from 'next/image'
 import Link from 'next/link'
 import { ROUTE_COLLECTION, ROUTE_PRODUCT } from '@/data/routes'
-import { Carousel } from '@mantine/carousel'
 import { envClient } from '@/env'
 import { IoIosArrowDown } from 'react-icons/io'
 import { Fragment } from 'react'
@@ -15,11 +25,17 @@ import { FaPlus } from 'react-icons/fa'
 import { FaMinus } from 'react-icons/fa'
 import HeaderProvider from '@/context/HeaderProvider'
 import { useHeaderContext } from '@/context/useHeaderContext'
-import type { Variants } from '@/data/type'
+import type { ProductPage, Review, Variants } from '@/data/type'
+import { Carousel } from '@mantine/carousel'
+import Autoplay from 'embla-carousel-autoplay'
+import { Pagination } from '@mantine/core'
+import { IoIosStar } from 'react-icons/io'
 
 type ProductPageClientProps = {
   product_types: string[]
   all_variants: Variants
+  page: ProductPage
+  postgres_reviews: Review[]
   paramsProduct_type: string
   paramsVariant: undefined | Variants[number]
   postgresVariants: Variants
@@ -28,6 +44,8 @@ type ProductPageClientProps = {
 export function ProductPageClient({
   product_types,
   all_variants,
+  page,
+  postgres_reviews,
   paramsProduct_type,
   paramsVariant,
   postgresVariants,
@@ -47,6 +65,8 @@ export function ProductPageClient({
           paramsProduct_type={paramsProduct_type}
           paramsVariant={paramsVariant}
           postgresVariants={postgresVariants}
+          page={page}
+          postgres_reviews={postgres_reviews}
           brandDropdown={brandDropdown}
           setBrandDropdown={setBrandDropdown}
           variantDropdown={variantDropdown}
@@ -61,6 +81,8 @@ type MainProps = {
   paramsProduct_type: string
   paramsVariant: undefined | Variants[number]
   postgresVariants: Variants
+  page: ProductPage
+  postgres_reviews: Review[]
   brandDropdown: boolean
   setBrandDropdown: Dispatch<SetStateAction<boolean>>
   variantDropdown: boolean
@@ -71,6 +93,8 @@ function Main({
   paramsProduct_type,
   paramsVariant,
   postgresVariants,
+  page,
+  postgres_reviews,
   brandDropdown,
   setBrandDropdown,
   variantDropdown,
@@ -81,22 +105,21 @@ function Main({
   const fallbackVariant = postgresVariants[0]
   const initialState = {
     displayedBrands: [
-      ...new Set(postgresVariants.map(product => product.brand)),
+      ...new Set(
+        postgresVariants.map(product => product.brand).filter(Boolean)
+      ),
     ],
     selectedBrand: '',
     displayedVariants: [
-      ...new Set(postgresVariants.map(product => product.variant)),
+      ...new Set(postgresVariants.map(product => product.name)),
     ],
-    selectedVariant: paramsVariant
-      ? paramsVariant.variant
-      : fallbackVariant.variant,
+    selectedVariant: paramsVariant ? paramsVariant.name : fallbackVariant.name,
     displayedColors: paramsVariant
       ? [
           ...new Set(
             postgresVariants
               .filter(
-                variant =>
-                  variant.variant === paramsVariant.variant && variant.color
+                variant => variant.name === paramsVariant.name && variant.color
               )
               .map(product => product.color)
           ),
@@ -106,7 +129,7 @@ function Main({
             postgresVariants
               .filter(
                 variant =>
-                  variant.variant === fallbackVariant.variant && variant.color
+                  variant.name === fallbackVariant.name && variant.color
               )
               .map(product => product.color)
           ),
@@ -117,8 +140,7 @@ function Main({
           ...new Set(
             postgresVariants
               .filter(
-                variant =>
-                  variant.variant === paramsVariant.variant && variant.size
+                variant => variant.name === paramsVariant.name && variant.size
               )
               .map(product => product.size)
           ),
@@ -127,8 +149,7 @@ function Main({
           ...new Set(
             postgresVariants
               .filter(
-                variant =>
-                  variant.variant === fallbackVariant.variant && variant.size
+                variant => variant.name === fallbackVariant.name && variant.size
               )
               .map(product => product.size)
           ),
@@ -158,13 +179,13 @@ function Main({
             ...new Set(
               postgresVariants
                 .filter(product => product.brand === selectedBrand)
-                .map(product => product.variant)
+                .map(product => product.name)
             ),
           ]
           const displayedColors = [
             ...new Set(
               postgresVariants
-                .filter(product => product.variant === displayedVariants[0])
+                .filter(product => product.name === displayedVariants[0])
                 .map(product => product.color && product.color)
             ),
           ]
@@ -174,7 +195,7 @@ function Main({
           const displayedSizes = [
             ...new Set(
               postgresVariants
-                .filter(product => product.variant === displayedVariants[0])
+                .filter(product => product.name === displayedVariants[0])
                 .map(product => product.size && product.size)
             ),
           ]
@@ -206,17 +227,17 @@ function Main({
         const displayedColors = [
           ...new Set(
             postgresVariants
-              .filter(product => product.variant === selectedVariant)
+              .filter(product => product.name === selectedVariant)
               .map(product => product.color && product.color)
           ),
         ]
         const foundVariant = postgresVariants.find(
-          product => product.variant === selectedVariant
+          product => product.name === selectedVariant
         )!
         const displayedSizes = [
           ...new Set(
             postgresVariants
-              .filter(product => product.variant === selectedVariant)
+              .filter(product => product.name === selectedVariant)
               .map(product => product.size && product.size)
           ),
         ]
@@ -238,11 +259,11 @@ function Main({
         const selectedColor = action.payload.selectedColor
         const foundVariant = postgresVariants.find(
           product =>
-            product.variant === state.selectedVariant &&
+            product.name === state.selectedVariant &&
             product.color === selectedColor
         )!
         const displayedSizes = postgresVariants
-          .filter(product => product.variant === state.selectedVariant)
+          .filter(product => product.name === state.selectedVariant)
           .filter(product => product.color === selectedColor)
           .map(product => product.size && product.size)
 
@@ -269,16 +290,44 @@ function Main({
     }
   }
   const [state, dispatch] = useReducer(reducer, initialState)
+  console.log(state)
 
   const [count, handlers] = useCounter(0, { min: 1, max: 9 })
-  const [opened, { open, close }] = useDisclosure(false)
+  const [
+    sizeChartModal,
+    { open: openSizeChartModal, close: closeSizeChartModal },
+  ] = useDisclosure(false)
+  const [upsellModal, { open: openUpsellModal, close: closeUpsellModal }] =
+    useDisclosure(false)
+
+  const [reviews, setReviews] = useState(postgres_reviews.slice(0, 5))
+
+  const autoplay = useRef(Autoplay({ delay: 3000 }))
 
   return (
     <>
+      {page.size_chart && (
+        <Modal
+          opened={sizeChartModal}
+          onClose={() => closeSizeChartModal()}
+          centered
+        >
+          <div className="h-96 w-96">
+            <Image
+              component={NextImage}
+              src={`${envClient.MINIO_PRODUCT_URL}/${paramsProduct_type}/${page.size_chart}`}
+              alt={page.size_chart}
+              fill
+              priority
+            />
+          </div>
+        </Modal>
+      )}
+
       <Modal
-        opened={opened}
+        opened={upsellModal}
         onClose={() => {
-          close()
+          closeUpsellModal()
           setIsCartOpen(true)
         }}
         title="Upsell"
@@ -574,7 +623,17 @@ function Main({
 
           {state.displayedSizes.length > 0 && (
             <div>
-              <h1 className="text-lg">Μέγεθος</h1>
+              <div className="flex gap-2 items-center">
+                <h1 className="text-lg">Μέγεθος</h1>
+                {page.size_chart && (
+                  <h2
+                    onClick={() => openSizeChartModal()}
+                    className="text-sm text-blue-700 hover:cursor-pointer"
+                  >
+                    (μεγεθολόγιο)
+                  </h2>
+                )}
+              </div>
               <div className="flex gap-2">
                 {state.displayedSizes.map((size, index) => (
                   <div
@@ -645,12 +704,12 @@ function Main({
             </div>
             <Button
               onClick={() => {
-                open()
+                openUpsellModal()
                 setCart(prev => {
                   const existingIndex = prev.findIndex(
                     item =>
                       item.procuct_type === paramsProduct_type &&
-                      item.variant === state.selectedVariant &&
+                      item.name === state.selectedVariant &&
                       item.color === state.selectedColor &&
                       item.size === state.selectedSize
                   )
@@ -667,7 +726,7 @@ function Main({
                       {
                         image: state.images[0],
                         procuct_type: paramsProduct_type,
-                        variant: state.selectedVariant,
+                        name: state.selectedVariant,
                         color: state.selectedColor,
                         size: state.selectedSize,
                         price: state.price,
@@ -688,6 +747,103 @@ function Main({
             </Button>
           </div>
         </div>
+
+        {page.product_description && (
+          <h2 className="m-4">{page.product_description}</h2>
+        )}
+
+        {page.faq.length > 0 && (
+          <Container size="sm" className={classes.wrapper}>
+            <Title ta="center" className={classes.title}>
+              FAQ
+            </Title>
+            <Accordion variant="separated">
+              {page.faq.map((faq, index) => (
+                <Accordion.Item
+                  key={index}
+                  className={classes.item}
+                  value={index.toString()}
+                  mb="sm"
+                >
+                  <Accordion.Control>{faq.question}</Accordion.Control>
+                  <Accordion.Panel>{faq.answer}</Accordion.Panel>
+                </Accordion.Item>
+              ))}
+            </Accordion>
+          </Container>
+        )}
+
+        {reviews.length > 0 && (
+          <div className="m-4">
+            <h1 className="mb-5 text-center text-3xl">Reviews</h1>
+            {reviews.map((review, index) => (
+              <div
+                key={index}
+                className="p-2 mb-3 mantine-background border rounded-lg mantine-border"
+              >
+                <div className="flex justify-between items-center">
+                  <div className="flex gap-0.5">
+                    {Array.from({ length: review.rating }, (_, i) => (
+                      <IoIosStar key={i} className="text-yellow-500" />
+                    ))}
+                  </div>
+                  <h2>{review.full_name}</h2>
+                  <h2>{review.date}</h2>
+                </div>
+                <h2 className="my-1">{review.title}</h2>
+                <h2>{review.review}</h2>
+              </div>
+            ))}
+            <div className="flex justify-center">
+              <Pagination
+                total={Math.ceil(postgres_reviews.length / 5)}
+                onChange={pageNumber =>
+                  setReviews(
+                    postgres_reviews.slice((pageNumber - 1) * 5, pageNumber * 5)
+                  )
+                }
+              />
+            </div>
+          </div>
+        )}
+
+        {page.carousel.length > 0 && (
+          <Card radius="md" withBorder padding="xl" className="m-4">
+            <Card.Section>
+              <Carousel
+                withIndicators
+                loop
+                classNames={{
+                  root: classes.carousel,
+                  controls: classes.carouselControls,
+                  indicator: classes.carouselIndicator,
+                }}
+                plugins={[autoplay.current]}
+              >
+                {page.carousel.map(({ image, text }) => (
+                  <Carousel.Slide key={image}>
+                    <div className="flex flex-col w-full h-96">
+                      <div className="relative w-full h-3/4">
+                        <Image
+                          component={NextImage}
+                          src={`${envClient.MINIO_PRODUCT_URL}/${paramsProduct_type}/${image}`}
+                          alt={image}
+                          fill
+                          style={{ objectFit: 'cover' }}
+                        />
+                      </div>
+                      <div className="w-full h-1/4 p-4 flex items-center justify-center">
+                        <Text fw={500} fz="lg">
+                          {text}
+                        </Text>
+                      </div>
+                    </div>
+                  </Carousel.Slide>
+                ))}
+              </Carousel>
+            </Card.Section>
+          </Card>
+        )}
       </main>
     </>
   )

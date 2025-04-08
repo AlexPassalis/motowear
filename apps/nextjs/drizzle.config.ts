@@ -6,7 +6,15 @@ export default defineConfig({
   dbCredentials: {
     url: readSecret('POSTGRES_URL'),
   },
-  schemaFilter: ['public', 'auth', 'product', 'order', 'review', 'metrics'],
+  schemaFilter: [
+    'public',
+    'auth',
+    'pages',
+    'products',
+    'orders',
+    'reviews',
+    'metrics',
+  ],
   schema: './src/lib/postgres/schema.ts',
   out: './src/lib/postgres/migrations',
   verbose: true,

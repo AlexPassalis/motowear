@@ -4,13 +4,13 @@ export const typeVariants = z.array(
   z.object({
     id: z.string(),
     product_type: z.string().nonempty(),
-    variant: z.string().nonempty(),
-    description: z.string().nonempty(),
     images: z.array(z.string()).nonempty(),
-    price: z.number(),
+    name: z.string().nonempty(),
+    description: z.string().nonempty(),
     brand: z.string(),
     color: z.string(),
     size: z.string(),
+    price: z.number(),
     price_before: z.number(),
   })
 )
@@ -51,7 +51,7 @@ export const typeCheckout = z.object({
 export type LocalStorageCartItem = {
   image: string
   procuct_type: string
-  variant: string
+  name: string
   color: string
   size: string
   price: number
@@ -64,7 +64,7 @@ export const typeCart = z
     z.object({
       image: z.string(),
       procuct_type: z.string(),
-      variant: z.string(),
+      name: z.string(),
       color: z.string(),
       size: z.string(),
       price: z.number(),
@@ -79,7 +79,7 @@ export type Brands = string[]
 export type Variants = {
   product_type: string
   id: string
-  variant: string
+  name: string
   description: string
   images: string[]
   price: number
@@ -88,3 +88,47 @@ export type Variants = {
   size: string
   price_before: number
 }[]
+
+export const typeProductPage = z.object({
+  product_type: z.string(),
+  size_chart: z.string(),
+  product_description: z.string(),
+  faq: z.array(
+    z.object({
+      question: z.string(),
+      answer: z.string(),
+    })
+  ),
+  carousel: z.array(
+    z.object({
+      text: z.string(),
+      image: z.string(),
+    })
+  ),
+})
+export type ProductPage = {
+  product_type: string
+  size_chart: string
+  product_description: string
+  faq: { question: string; answer: string }[]
+  carousel: { text: string; image: string }[]
+}
+
+export const typeReview = z.object({
+  id: z.string(),
+  product_type: z.string(),
+  rating: z.number(),
+  full_name: z.string(),
+  title: z.string(),
+  review: z.string(),
+  date: z.string(),
+})
+export type Review = {
+  id: string
+  product_type: string
+  rating: number
+  full_name: string
+  title: string
+  review: string
+  date: string
+}

@@ -1,4 +1,3 @@
-import { envServer } from '@/env'
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
@@ -9,6 +8,7 @@ const nextConfig: NextConfig = {
       '@mantine/hooks',
       '@mantine/carousel',
       '@mantine/form',
+      '@mantine/dates',
     ],
   },
   images: {
@@ -18,7 +18,7 @@ const nextConfig: NextConfig = {
         protocol: 'http',
         hostname: 'minio',
         port: '9000',
-        pathname: '/product/**',
+        pathname: '/motowear/**',
       },
       // {
       //   protocol: 'https',

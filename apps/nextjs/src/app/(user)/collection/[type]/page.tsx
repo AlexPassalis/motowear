@@ -39,7 +39,7 @@ export default async function CollectionPage({ params }: ProductPageProps) {
   )
 
   const uniqueVariants = Array.from(
-    new Set(postgresVariants.map(variant => variant.variant).filter(Boolean))
+    new Set(postgresVariants.map(variant => variant.name).filter(Boolean))
   )
 
   return (

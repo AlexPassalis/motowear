@@ -11,7 +11,7 @@ const minio = new Client({
   secretKey: readSecret('MINIO_ROOT_PASSWORD'),
 })
 
-const bucketName = 'product'
+const bucketName = 'motowear'
 
 export async function uploadFile(path: string, file: File) {
   const objectName = `${path}/${sanitizeFilename(

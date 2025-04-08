@@ -2,7 +2,6 @@ import Typesense from 'typesense'
 import { getVariantsProductType } from '@/utils/getPostgres'
 import { envServer } from '@/env'
 import { formatMessage } from '@/utils/formatMessage'
-import { v4 as id } from 'uuid'
 import { errorPostgres, errorTypesense } from '@/data/error'
 import { sendTelegramMessage } from '../telegram'
 import pLimit from 'p-limit'
@@ -45,7 +44,6 @@ export async function updateTypesense(product_type: string) {
 
   if (resolved[0].status === 'rejected') {
     const message = formatMessage(
-      id(),
       '@/lib/typesense/server.ts updateTypesense()',
       errorPostgres,
       resolved[0].reason
@@ -57,7 +55,6 @@ export async function updateTypesense(product_type: string) {
 
   if (resolved[1].status === 'rejected') {
     const message = formatMessage(
-      id(),
       '@/lib/typesense/server.ts updateTypesense() delete',
       errorTypesense,
       resolved[1].reason
@@ -69,18 +66,17 @@ export async function updateTypesense(product_type: string) {
 
   const upsertedVersions = [] as string[]
   for (const variant of resolved[0].value) {
-    if (!upsertedVersions.includes(variant.variant)) {
+    if (!upsertedVersions.includes(variant.name)) {
       const document = {
         id: variant.id,
         product_type: variant.product_type,
-        variant: variant.variant,
+        variant: variant.name,
         image: variant.images[0],
       }
       try {
         await typesense.collections(collectionName).documents().upsert(document)
       } catch (e) {
         const message = formatMessage(
-          id(),
           '@/lib/typesense/server.ts updateTypesense() upsert',
           errorTypesense,
           e
@@ -89,7 +85,7 @@ export async function updateTypesense(product_type: string) {
         sendTelegramMessage('ERROR', message)
         throw errorTypesense
       }
-      upsertedVersions.push(variant.variant)
+      upsertedVersions.push(variant.name)
     }
   }
 }

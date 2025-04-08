@@ -4,7 +4,6 @@ import { envServer } from '@/env'
 import { render } from '@react-email/components'
 import AirbnbReviewEmail from '@/lib/react-email/ReviewEmail'
 import { readSecret } from '@/utils/readSecret'
-import { v4 as id } from 'uuid'
 import { formatMessage } from '@/utils/formatMessage'
 import { errorNodemailer, errorReactEmail } from '@/data/error'
 import { sendTelegramMessage } from '@/lib/telegram/index'
@@ -25,7 +24,6 @@ export async function sendOrderEmail(email: string) {
     emailHtml = await render(<AirbnbReviewEmail />)
   } catch (e) {
     const message = formatMessage(
-      id(),
       '@/lib/nodemailer/sendOrderEmail',
       errorReactEmail,
       e
@@ -45,7 +43,6 @@ export async function sendOrderEmail(email: string) {
     await transporter.sendMail(options)
   } catch (e) {
     const message = formatMessage(
-      id(),
       '@/lib/nodemailer/sendOrderEmail',
       errorNodemailer,
       e
@@ -62,7 +59,6 @@ export async function sendReviewEmail(email: string) {
     emailHtml = await render(<AirbnbReviewEmail />)
   } catch (e) {
     const message = formatMessage(
-      id(),
       '@/lib/nodemailer/sendReviewEmail',
       errorReactEmail,
       e
@@ -81,7 +77,6 @@ export async function sendReviewEmail(email: string) {
     await transporter.sendMail(options)
   } catch (e) {
     const message = formatMessage(
-      id(),
       '@/lib/nodemailer/sendReviewEmail',
       errorNodemailer,
       e

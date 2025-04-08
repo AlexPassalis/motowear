@@ -1,6 +1,5 @@
 import { CronJob } from 'cron'
 import { formatMessage } from '@/utils/formatMessage'
-import { v4 as id } from 'uuid'
 import { sendTelegramMessage } from '@/lib/telegram/index'
 // import { sendReviewEmail } from '@/lib/nodemailer/index'
 
@@ -21,7 +20,6 @@ function establishCron() {
         console.log('Cron connected successfully.')
       } catch (e) {
         const message = formatMessage(
-          id(),
           '@/lib/cron/index.ts establishCron()',
           'Cron connection failed.',
           e

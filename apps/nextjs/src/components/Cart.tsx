@@ -1,5 +1,5 @@
 import { envClient } from '@/env'
-import { Button, Image, UnstyledButton } from '@mantine/core'
+import { Button, Card, Image, Progress, UnstyledButton } from '@mantine/core'
 import NextImage from 'next/image'
 import { Dispatch, SetStateAction } from 'react'
 import { AiOutlineClose } from 'react-icons/ai'
@@ -37,123 +37,185 @@ export function Cart({ cart, setCart, isCartOpen, setIsCartOpen }: CartProps) {
           </button>
         </div>
         {cart.length < 1 ? (
-          <h1 className="text-2xl">Το καλάθι σου είναι άδειο.</h1>
+          <h1 className="text-xl">Το καλάθι σου είναι άδειο.</h1>
         ) : (
-          <div className="flex-1 overflow-y-auto">
-            {cart.map((product, index) => (
-              <div
-                key={index}
-                className="flex w-full h-36 p-1 mb-2 rounded-lg border border-gray-200"
-              >
-                <Link
-                  href={`${ROUTE_PRODUCT}/${product.procuct_type}/${product.variant}`}
-                  className="relative w-1/3 h-full"
+          <>
+            <Card
+              withBorder
+              radius="md"
+              padding="md"
+              mb="xs"
+              bg="var(--mantine-color-body)"
+            >
+              <h1>Δωρεάν Μεταφορικά Έξοδα</h1>
+              <div>
+                <span
+                  className={`${
+                    Math.min(
+                      (cart.reduce(
+                        (acc, item) => acc + item.price * item.quantity,
+                        0
+                      ) /
+                        50) *
+                        100,
+                      100
+                    ) < 100
+                      ? 'text-red-600'
+                      : 'text-green-600'
+                  }`}
                 >
-                  <Image
-                    component={NextImage}
-                    src={`${envClient.MINIO_PRODUCT_URL}/${product.procuct_type}/${product.image}`}
-                    alt={`${product.procuct_type}/${product.variant}`}
-                    fill
-                    style={{ objectFit: 'contain' }}
-                    sizes="auto"
-                  />
-                </Link>
-                <div className="relative w-2/3 flex flex-col justify-center gap-0.5 p-1 pl-4">
-                  <FaTrashCan
-                    onClick={() =>
-                      setCart(prev => prev.filter((_, i) => i !== index))
-                    }
-                    className="absolute top-1 right-1 hover:cursor-pointer"
-                  />
-                  <h1>{product.procuct_type}</h1>
-                  <h1>{product.variant}</h1>
-                  {product?.color && (
-                    <div className="flex gap-1">
-                      <h2>Χρώμα: </h2>
-                      <div
-                        style={{ backgroundColor: product.color }}
-                        className="w-6 h-6 rounded-full"
-                      />
-                    </div>
+                  {cart.reduce(
+                    (acc, item) => acc + item.price * item.quantity,
+                    0
                   )}
-                  {product?.size && (
-                    <div className="flex gap-1">
-                      <h2>Μέγεθος: </h2>
-                      <p>{product.size}</p>
-                    </div>
-                  )}
-                  {product?.price_before ? (
-                    <>
-                      <div className="flex gap-2 items-center">
-                        <h2 className="text-sm text-gray-400 line-through decoration-red-500">
-                          {product.price_before * product.quantity}€
-                        </h2>
-                        <h2>{product.price * product.quantity}€</h2>
+                  €
+                </span>{' '}
+                <span>/ 50.00€</span>
+              </div>
+              <Progress
+                value={Math.min(
+                  (cart.reduce(
+                    (acc, item) => acc + item.price * item.quantity,
+                    0
+                  ) /
+                    50) *
+                    100,
+                  100
+                )}
+                color={`${
+                  Math.min(
+                    (cart.reduce(
+                      (acc, item) => acc + item.price * item.quantity,
+                      0
+                    ) /
+                      50) *
+                      100,
+                    100
+                  ) < 100
+                    ? 'red'
+                    : 'green'
+                }`}
+                mt="sm"
+                size="lg"
+                radius="xl"
+              />
+            </Card>
+            <div className="flex-1 overflow-y-auto">
+              {cart.map((product, index) => (
+                <div
+                  key={index}
+                  className="flex w-full h-36 mb-2 rounded-lg border border-gray-200"
+                >
+                  <Link
+                    href={`${ROUTE_PRODUCT}/${product.procuct_type}/${product.name}`}
+                    className="relative w-1/3 h-full rounded-lg overflow-hidden"
+                  >
+                    <Image
+                      component={NextImage}
+                      src={`${envClient.MINIO_PRODUCT_URL}/${product.procuct_type}/${product.image}`}
+                      alt={`${product.procuct_type}/${product.name}`}
+                      fill
+                      style={{ objectFit: 'cover' }}
+                      sizes="auto"
+                    />
+                  </Link>
+                  <div className="relative w-2/3 flex flex-col justify-center gap-0.5 p-2">
+                    <FaTrashCan
+                      onClick={() =>
+                        setCart(prev => prev.filter((_, i) => i !== index))
+                      }
+                      className="absolute top-2 right-2 hover:cursor-pointer"
+                    />
+                    <h1>{product.procuct_type}</h1>
+                    <h1>{product.name}</h1>
+                    {product?.color && (
+                      <div className="flex gap-1">
+                        <h2>Χρώμα: </h2>
+                        <div
+                          style={{ backgroundColor: product.color }}
+                          className="w-6 h-6 rounded-full"
+                        />
                       </div>
-                    </>
-                  ) : (
-                    <h2>{product.price * product.quantity}€</h2>
-                  )}
+                    )}
+                    {product?.size && (
+                      <div className="flex gap-1">
+                        <h2>Μέγεθος: </h2>
+                        <p>{product.size}</p>
+                      </div>
+                    )}
+                    {product?.price_before ? (
+                      <>
+                        <div className="flex gap-2 items-center">
+                          <h2 className="text-sm text-gray-400 line-through decoration-red-500">
+                            {product.price_before * product.quantity}€
+                          </h2>
+                          <h2>{product.price * product.quantity}€</h2>
+                        </div>
+                      </>
+                    ) : (
+                      <h2>{product.price * product.quantity}€</h2>
+                    )}
 
-                  <div className="absolute bottom-1 right-1 flex w-16 h-[28px] rounded-lg border-2 border-gray-200">
-                    <div
-                      onClick={() =>
-                        setCart(prev =>
-                          prev.map((item, i) =>
-                            i === index && item.quantity > 1
-                              ? { ...item, quantity: item.quantity - 1 }
-                              : item
+                    <div className="absolute bottom-2 right-2 flex w-16 h-[28px] rounded-lg border-2 border-gray-200">
+                      <div
+                        onClick={() =>
+                          setCart(prev =>
+                            prev.map((item, i) =>
+                              i === index && item.quantity > 1
+                                ? { ...item, quantity: item.quantity - 1 }
+                                : item
+                            )
                           )
-                        )
-                      }
-                      className="w-1/3"
-                    >
-                      <UnstyledButton
-                        size="compact-md"
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          display: 'flex',
-                          justifyContent: 'center',
-                          alignItems: 'center',
-                        }}
+                        }
+                        className="w-1/3"
                       >
-                        <FaMinus size={10} />
-                      </UnstyledButton>
-                    </div>
-                    <div className="flex w-1/3 items-center justify-center border-x-1 border-gray-200">
-                      <p>{product.quantity}</p>
-                    </div>
-                    <div
-                      onClick={() =>
-                        setCart(prev =>
-                          prev.map((item, i) =>
-                            i === index
-                              ? { ...item, quantity: item.quantity + 1 }
-                              : item
+                        <UnstyledButton
+                          size="compact-md"
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                          }}
+                        >
+                          <FaMinus size={10} />
+                        </UnstyledButton>
+                      </div>
+                      <div className="flex w-1/3 items-center justify-center border-x-1 border-gray-200">
+                        <p>{product.quantity}</p>
+                      </div>
+                      <div
+                        onClick={() =>
+                          setCart(prev =>
+                            prev.map((item, i) =>
+                              i === index
+                                ? { ...item, quantity: item.quantity + 1 }
+                                : item
+                            )
                           )
-                        )
-                      }
-                      className="w-1/3"
-                    >
-                      <UnstyledButton
-                        size="compact-sm"
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          display: 'flex',
-                          justifyContent: 'center',
-                          alignItems: 'center',
-                        }}
+                        }
+                        className="w-1/3"
                       >
-                        <FaPlus size={10} />
-                      </UnstyledButton>
+                        <UnstyledButton
+                          size="compact-sm"
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                          }}
+                        >
+                          <FaPlus size={10} />
+                        </UnstyledButton>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          </>
         )}
         {cart.length > 0 && (
           <Link href={ROUTE_CHECKOUT} className="mt-auto">

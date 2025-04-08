@@ -15,7 +15,7 @@ export function getFilteredLocalStorageCart(all_variants: Variants) {
     const currentVariant = all_variants.find(
       postgresVariant =>
         postgresVariant.product_type === localStorageVariant.procuct_type &&
-        postgresVariant.variant === localStorageVariant.variant &&
+        postgresVariant.name === localStorageVariant.name &&
         postgresVariant.images[0] === localStorageVariant.image &&
         postgresVariant.price === localStorageVariant.price &&
         postgresVariant.size === localStorageVariant.size &&

@@ -4,7 +4,6 @@ import { drizzle } from 'drizzle-orm/node-postgres'
 import * as schema from '@/lib/postgres/schema'
 import { sql } from 'drizzle-orm'
 import { formatMessage } from '@/utils/formatMessage'
-import { v4 as id } from 'uuid'
 import { sendTelegramMessage } from '@/lib/telegram/index'
 
 async function establishPostgres() {
@@ -36,7 +35,6 @@ async function postgresPing() {
     console.log('Postgres connected successfully.')
   } catch (e) {
     const message = formatMessage(
-      id(),
       '@/lib/postgres/index.ts postgresPing()',
       'Postgres connection failed.',
       e

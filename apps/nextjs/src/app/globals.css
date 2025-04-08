@@ -3,12 +3,16 @@
 :root {
   --background: #ffffff;
   --foreground: #000000;
+  --mantine-background: #f8f9fa;
+  --mantine-border: #dee2e6;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #ffffff;
     --foreground: #000000;
+    --mantine-background: #f8f9fa;
+    --mantine-border: #dee2e6;
   }
 }
 
@@ -18,6 +22,15 @@
   --font-proxima: var(--font-proxima-nova-extra-bold);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+}
+
+@layer utilities {
+  .mantine-background {
+    background-color: var(--mantine-background);
+  }
+  .mantine-border {
+    border-color: var(--mantine-border);
+  }
 }
 
 body {

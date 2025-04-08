@@ -1,4 +1,4 @@
-import classes from '@/components/css/FooterCentered.module.css'
+import classes from '@/css/FooterCentered.module.css'
 import { ActionIcon, Anchor, Group } from '@mantine/core'
 import { MdOutlineEmail } from 'react-icons/md'
 import { FaPhoneAlt } from 'react-icons/fa'
