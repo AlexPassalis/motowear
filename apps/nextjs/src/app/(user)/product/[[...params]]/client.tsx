@@ -1,6 +1,5 @@
 'use client'
 
-import classes from '@/css/FaqSimple.module.css'
 import { Dispatch, SetStateAction, useReducer, useRef, useState } from 'react'
 import { useCounter, useDisclosure } from '@mantine/hooks'
 import {
@@ -11,7 +10,6 @@ import {
   Image,
   Modal,
   Text,
-  Title,
   UnstyledButton,
 } from '@mantine/core'
 import NextImage from 'next/image'
@@ -302,7 +300,7 @@ function Main({
 
   const [reviews, setReviews] = useState(postgres_reviews.slice(0, 5))
 
-  const autoplay = useRef(Autoplay({ delay: 3000 }))
+  const autoplay = useRef(Autoplay({ delay: 2000 }))
 
   return (
     <>
@@ -349,8 +347,8 @@ function Main({
           ))}
         </Carousel>
 
-        <div className="flex flex-col gap-2 m-4">
-          <div className="flex gap-2 text-lg">
+        <div className="m-4 mb-8">
+          <div className="flex gap-2 text-2xl">
             <Link href={`${ROUTE_COLLECTION}/${paramsProduct_type}`}>
               {paramsProduct_type}
             </Link>
@@ -358,22 +356,47 @@ function Main({
             <h1>{state.selectedVariant}</h1>
             <div className="flex gap-2 items-center ml-auto">
               {state.price_before > 0 && (
-                <h2 className="text-base text-gray-400 line-through decoration-red-500">{`${state.price_before}€`}</h2>
+                <h2 className="text-lg text-gray-400 line-through decoration-red-500">{`${state.price_before}€`}</h2>
               )}
               <h2>{`${state.price}€`}</h2>
             </div>
           </div>
 
-          {state.description && <p className="my-2">{state.description}</p>}
+          {postgres_reviews.length > 0 && (
+            <div className="mt-1 mb-4 flex items-center">
+              {Array.from(
+                {
+                  length: Math.round(
+                    postgres_reviews.reduce(
+                      (sum, review) => sum + review.rating,
+                      0
+                    ) / postgres_reviews.length
+                  ),
+                },
+                (_, i) => (
+                  <IoIosStar key={i} className="text-yellow-500" />
+                )
+              )}
+              <span className="ml-2 proxima-nova text-sm">
+                ({postgres_reviews.length} κριτικές)
+              </span>
+            </div>
+          )}
+
+          {state.description && (
+            <p className="mb-4 proxima-nova">{state.description}</p>
+          )}
 
           {state.displayedBrands.length > 0 && (
-            <div>
+            <div className="mb-2">
               <h1 className="text-lg">Μάρκα</h1>
               <div
                 onClick={() => setBrandDropdown(prev => !prev)}
-                className={`flex items-center pb-0.5 border-1 border-white ${
-                  brandDropdown ? 'border-b-white' : 'border-b-gray-400'
-                } hover:border hover:rounded-lg hover:border-red-500`}
+                className={`flex items-center pb-0.5 border-2 border-white ${
+                  brandDropdown
+                    ? 'border-b-white'
+                    : 'border-b-[var(--mantine-border)]'
+                } hover:border-2 hover:rounded-lg hover:border-red-500`}
               >
                 {state.selectedBrand === '' ? (
                   <UnstyledButton
@@ -440,7 +463,7 @@ function Main({
                           </UnstyledButton>
                         </div>
                         {state.displayedBrands.length !== 1 && (
-                          <hr className="w-full border-t border-gray-200" />
+                          <hr className="w-full border-t-2 border-[var(--mantine-border)]" />
                         )}
                       </>
                     )}
@@ -472,7 +495,7 @@ function Main({
                             </div>
                           </div>
                           {index !== array.length - 1 && (
-                            <hr className="w-full border-t border-gray-200" />
+                            <hr className="w-full border-t-2 border-[var(--mantine-border)]" />
                           )}
                         </Fragment>
                       ))}
@@ -488,9 +511,11 @@ function Main({
               <>
                 <div
                   onClick={() => setVariantDropdown(prev => !prev)}
-                  className={`flex items-center pb-0.5 border-1 border-white ${
-                    variantDropdown ? 'border-b-white' : 'border-b-gray-400'
-                  } hover:border hover:rounded-lg hover:border-red-500`}
+                  className={`mb-2 flex items-center pb-0.5 border-2 border-white ${
+                    variantDropdown
+                      ? 'border-b-white'
+                      : 'border-b-[var(--mantine-border)]'
+                  } hover:border-2 hover:rounded-lg hover:border-red-500`}
                 >
                   <button
                     style={{
@@ -540,7 +565,7 @@ function Main({
                                   `${ROUTE_PRODUCT}/${paramsProduct_type}/${variant}`
                                 )
                               }}
-                              className="flex justify-center p-1 border rounded-lg hover:border-red-500"
+                              className="proxima-nova flex justify-center p-1 border rounded-lg hover:border-red-500"
                             >
                               <UnstyledButton
                                 style={{
@@ -554,7 +579,7 @@ function Main({
                               </UnstyledButton>
                             </div>
                             {index !== array.length - 1 && (
-                              <hr className="w-full border-t border-gray-200" />
+                              <hr className="w-full border-t-2 border-[var(--mantine-border)]" />
                             )}
                           </Fragment>
                         ))}
@@ -563,7 +588,7 @@ function Main({
                 </AnimatePresence>
               </>
             ) : (
-              <div className="flex items-center pb-0.5 border-1 border-white border-b-gray-400">
+              <div className="flex items-center pb-0.5 border-1 border-white border-b-[var(--mantine-border)]">
                 <button
                   style={{
                     height: '48px',
@@ -579,8 +604,8 @@ function Main({
           </div>
 
           {state.displayedColors.length > 0 && (
-            <div>
-              <h1 className="text-lg">Χρώμα</h1>
+            <div className="mb-2">
+              <h1 className="mb-1 text-lg">Χρώμα</h1>
               <div className="flex gap-2">
                 {state.displayedColors.map((color, index) => {
                   return color === state.selectedColor ? (
@@ -595,7 +620,7 @@ function Main({
                       className={`w-11 h-11 rounded-full p-0.5 border-2 ${
                         state.selectedColor === color
                           ? 'border-black'
-                          : 'border-gray-200'
+                          : 'border-[var(--mantine-border)]'
                       } hover:cursor-pointer`}
                     >
                       <div
@@ -622,13 +647,13 @@ function Main({
           )}
 
           {state.displayedSizes.length > 0 && (
-            <div>
+            <div className="mb-2">
               <div className="flex gap-2 items-center">
-                <h1 className="text-lg">Μέγεθος</h1>
+                <h1 className="mb-1 text-lg">Μέγεθος</h1>
                 {page.size_chart && (
                   <h2
                     onClick={() => openSizeChartModal()}
-                    className="text-sm text-blue-700 hover:cursor-pointer"
+                    className="proxima-nova text-sm text-blue-700 hover:cursor-pointer"
                   >
                     (μεγεθολόγιο)
                   </h2>
@@ -647,7 +672,7 @@ function Main({
                     className={`w-12 h-[42px] border-2 rounded-lg ${
                       state.selectedSize === size
                         ? 'border-black'
-                        : 'border-gray-200'
+                        : 'border-[var(--mantine-border)]'
                     }`}
                   >
                     <UnstyledButton
@@ -668,8 +693,8 @@ function Main({
             </div>
           )}
 
-          <div className="flex gap-2 w-full justify-center items-center mt-2">
-            <div className="flex w-24 h-[42px] rounded-lg border-2 border-gray-200">
+          <div className="mt-6 flex gap-2 w-full justify-center items-center">
+            <div className="flex w-24 h-[42px] rounded-lg border-2 border-[var(--mantine-border)]">
               <div onClick={() => handlers.decrement()} className="w-1/3">
                 <UnstyledButton
                   size="compact-sm"
@@ -684,7 +709,7 @@ function Main({
                   <FaMinus size={10} />
                 </UnstyledButton>
               </div>
-              <div className="flex w-1/3 items-center justify-center border-x-1 border-gray-200">
+              <div className="flex w-1/3 items-center justify-center border-x-1 border-[var(--mantine-border)]">
                 <p>{count}</p>
               </div>
               <div onClick={() => handlers.increment()} className="w-1/3">
@@ -749,94 +774,94 @@ function Main({
         </div>
 
         {page.product_description && (
-          <h2 className="m-4">{page.product_description}</h2>
+          <h2 className="mx-4 my-8 proxima-nova">{page.product_description}</h2>
         )}
 
         {page.faq.length > 0 && (
-          <Container size="sm" className={classes.wrapper}>
-            <Title ta="center" className={classes.title}>
-              FAQ
-            </Title>
+          <Container size="xs">
             <Accordion variant="separated">
               {page.faq.map((faq, index) => (
-                <Accordion.Item
-                  key={index}
-                  className={classes.item}
-                  value={index.toString()}
-                  mb="sm"
-                >
-                  <Accordion.Control>{faq.question}</Accordion.Control>
-                  <Accordion.Panel>{faq.answer}</Accordion.Panel>
-                </Accordion.Item>
+                <Fragment key={index}>
+                  {index === 0 && (
+                    <hr className="w-full border-b border-[var(--mantine-border)]" />
+                  )}
+                  <Accordion.Item
+                    value={index.toString()}
+                    bg="white"
+                    style={{ border: 'none' }}
+                  >
+                    <Accordion.Control>{faq.question}</Accordion.Control>
+                    <Accordion.Panel className="proxima-nova">
+                      {faq.answer}
+                    </Accordion.Panel>
+                  </Accordion.Item>
+                  <hr className="w-full border-b border-[var(--mantine-border)]" />
+                </Fragment>
               ))}
             </Accordion>
           </Container>
         )}
 
         {reviews.length > 0 && (
-          <div className="m-4">
-            <h1 className="mb-5 text-center text-3xl">Reviews</h1>
+          <div className="mx-4 my-8">
+            <h1 className="mb-2 text-center text-2xl">Reviews</h1>
             {reviews.map((review, index) => (
               <div
                 key={index}
-                className="p-2 mb-3 mantine-background border rounded-lg mantine-border"
+                className={`p-2 border-[var(--mantine-border)] border-b-2 ${
+                  index === 0 ? 'border-t-2' : ''
+                }`}
               >
-                <div className="flex justify-between items-center">
-                  <div className="flex gap-0.5">
+                <div className="mb-1 flex justify-between items-center">
+                  <div className="flex">
                     {Array.from({ length: review.rating }, (_, i) => (
                       <IoIosStar key={i} className="text-yellow-500" />
                     ))}
                   </div>
-                  <h2>{review.full_name}</h2>
-                  <h2>{review.date}</h2>
+                  <h2 className="mb-1 proxima-nova">{review.full_name}</h2>
+                  <h2 className="proxima-nova text-sm">{review.date}</h2>
                 </div>
-                <h2 className="my-1">{review.title}</h2>
-                <h2>{review.review}</h2>
+                <h2>{review.title}</h2>
+                <h2 className="proxima-nova">{review.review}</h2>
               </div>
             ))}
-            <div className="flex justify-center">
-              <Pagination
-                total={Math.ceil(postgres_reviews.length / 5)}
-                onChange={pageNumber =>
-                  setReviews(
-                    postgres_reviews.slice((pageNumber - 1) * 5, pageNumber * 5)
-                  )
-                }
-              />
-            </div>
+            <Pagination
+              total={Math.ceil(postgres_reviews.length / 5)}
+              onChange={pageNumber =>
+                setReviews(
+                  postgres_reviews.slice((pageNumber - 1) * 5, pageNumber * 5)
+                )
+              }
+              mt="xs"
+              style={{ display: 'flex', justifySelf: 'center' }}
+            />
           </div>
         )}
 
         {page.carousel.length > 0 && (
-          <Card radius="md" withBorder padding="xl" className="m-4">
+          <Card radius="md" withBorder padding="xl" className="m-4 mb-8">
             <Card.Section>
               <Carousel
                 withIndicators
                 loop
-                classNames={{
-                  root: classes.carousel,
-                  controls: classes.carouselControls,
-                  indicator: classes.carouselIndicator,
-                }}
                 plugins={[autoplay.current]}
+                height={500}
               >
                 {page.carousel.map(({ image, text }) => (
                   <Carousel.Slide key={image}>
-                    <div className="flex flex-col w-full h-96">
-                      <div className="relative w-full h-3/4">
-                        <Image
-                          component={NextImage}
-                          src={`${envClient.MINIO_PRODUCT_URL}/${paramsProduct_type}/${image}`}
-                          alt={image}
-                          fill
-                          style={{ objectFit: 'cover' }}
-                        />
-                      </div>
-                      <div className="w-full h-1/4 p-4 flex items-center justify-center">
-                        <Text fw={500} fz="lg">
-                          {text}
-                        </Text>
-                      </div>
+                    <div className="relative w-full h-3/4">
+                      <Image
+                        component={NextImage}
+                        src={`${envClient.MINIO_PRODUCT_URL}/${paramsProduct_type}/${image}`}
+                        alt={image}
+                        fill
+                        style={{ objectFit: 'cover' }}
+                      />
+                    </div>
+                    <div className="w-full h-1/4 p-4 flex items-center justify-center">
+                      <Text fw={500} fz="lg">
+                        {text}
+                      </Text>
                     </div>
                   </Carousel.Slide>
                 ))}

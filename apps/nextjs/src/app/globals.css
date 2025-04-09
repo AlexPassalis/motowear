@@ -11,32 +11,24 @@
   :root {
     --background: #ffffff;
     --foreground: #000000;
-    --mantine-background: #f8f9fa;
-    --mantine-border: #dee2e6;
   }
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-proxima: var(--font-proxima-nova-extra-bold);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@layer utilities {
-  .mantine-background {
-    background-color: var(--mantine-background);
-  }
-  .mantine-border {
-    border-color: var(--mantine-border);
-  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-proxima-nova-extra-bold), Arial, Helvetica, sans-serif;
+}
+
+.proxima-nova {
+  font-family: var(--font-proxima-nova), Arial, Helvetica, sans-serif;
 }
 
 /* Hide the native clear button for inputs with the .searchbox-no-clear class */

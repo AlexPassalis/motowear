@@ -15,12 +15,23 @@ import '@mantine/carousel/styles.css'
 
 import './globals.css'
 
+const proximaNova = localFont({
+  src: [
+    {
+      path: '../../public/fonts/Proxima Nova.ttf',
+      style: 'normal',
+      weight: '900',
+    },
+  ],
+  variable: '--font-proxima-nova',
+})
+
 const proximaNovaExtraBold = localFont({
   src: [
     {
       path: '../../public/fonts/Proxima Nova Extrabold.otf',
-      weight: '800',
       style: 'normal',
+      weight: '100',
     },
   ],
   variable: '--font-proxima-nova-extra-bold',
@@ -106,7 +117,7 @@ export default function RootLayout({
         <ColorSchemeScript />
       </head>
       <body
-        className={`${proximaNovaExtraBold.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${proximaNova.variable} ${proximaNovaExtraBold.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <MantineProvider theme={customTheme}>{children}</MantineProvider>
       </body>

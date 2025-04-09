@@ -14,6 +14,7 @@ import {
   Radio,
   LoadingOverlay,
   Box,
+  Accordion,
 } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import { useForm } from '@mantine/form'
@@ -132,6 +133,7 @@ export function CheckoutPageClient({ all_variants }: CheckoutPageProps) {
           className="sm:scale-110"
         />
       </header>
+
       <main className="relative p-4">
         {!orderComplete ? (
           <>
@@ -140,6 +142,71 @@ export function CheckoutPageClient({ all_variants }: CheckoutPageProps) {
               zIndex={1000}
               overlayProps={{ radius: 'xs', blur: 1 }}
             />
+
+            <Accordion variant="separated">
+              <Accordion.Item
+                value="value"
+                bg="white"
+                style={{ border: 'none' }}
+              >
+                <Accordion.Control
+                  style={{ textAlign: 'center', fontSize: '1rem' }}
+                >
+                  Σύνοψη παραγγελίας
+                </Accordion.Control>
+                <Accordion.Panel>
+                  {cart.map((product, index) => (
+                    <div
+                      key={index}
+                      className="flex w-full h-36 mb-2 rounded-lg border border-gray-200"
+                    >
+                      <div className="relative w-1/3 h-full rounded-lg overflow-hidden">
+                        <Image
+                          component={NextImage}
+                          src={`${envClient.MINIO_PRODUCT_URL}/${product.procuct_type}/${product.image}`}
+                          alt={`${product.procuct_type}/${product.name}`}
+                          fill
+                          style={{ objectFit: 'cover' }}
+                          sizes="auto"
+                        />
+                      </div>
+                      <div className="relative w-2/3 flex flex-col justify-center gap-0.5 p-2">
+                        <h1>{product.procuct_type}</h1>
+                        <h1>{product.name}</h1>
+                        {product?.color && (
+                          <div className="flex gap-1">
+                            <h2>Χρώμα: </h2>
+                            <div
+                              style={{ backgroundColor: product.color }}
+                              className="w-6 h-6 rounded-full"
+                            />
+                          </div>
+                        )}
+                        {product?.size && (
+                          <div className="flex gap-1">
+                            <h2>Μέγεθος: </h2>
+                            <p>{product.size}</p>
+                          </div>
+                        )}
+                        {product?.price_before ? (
+                          <>
+                            <div className="flex gap-2 items-center">
+                              <h2 className="text-sm text-gray-400 line-through decoration-red-500">
+                                {product.price_before * product.quantity}€
+                              </h2>
+                              <h2>{product.price * product.quantity}€</h2>
+                            </div>
+                          </>
+                        ) : (
+                          <h2>{product.price * product.quantity}€</h2>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </Accordion.Panel>
+              </Accordion.Item>
+            </Accordion>
+
             <form
               className="flex flex-col gap-8"
               onSubmit={form.onSubmit(async values => {
@@ -271,184 +338,132 @@ export function CheckoutPageClient({ all_variants }: CheckoutPageProps) {
                 </Radio.Group>
               </div>
 
-              <div>
-                <h1 className="text-xl">Σύνοψη παραγγελίας</h1>
-                {cart.map((product, index) => (
-                  <div
-                    key={index}
-                    className="flex w-full h-36 mb-2 rounded-lg border border-gray-200"
-                  >
-                    <div className="relative w-1/3 h-full rounded-lg overflow-hidden">
-                      <Image
-                        component={NextImage}
-                        src={`${envClient.MINIO_PRODUCT_URL}/${product.procuct_type}/${product.image}`}
-                        alt={`${product.procuct_type}/${product.name}`}
-                        fill
-                        style={{ objectFit: 'cover' }}
-                        sizes="auto"
-                      />
-                    </div>
-                    <div className="relative w-2/3 flex flex-col justify-center gap-0.5 p-2">
-                      <h1>{product.procuct_type}</h1>
-                      <h1>{product.name}</h1>
-                      {product?.color && (
-                        <div className="flex gap-1">
-                          <h2>Χρώμα: </h2>
-                          <div
-                            style={{ backgroundColor: product.color }}
-                            className="w-6 h-6 rounded-full"
-                          />
-                        </div>
-                      )}
-                      {product?.size && (
-                        <div className="flex gap-1">
-                          <h2>Μέγεθος: </h2>
-                          <p>{product.size}</p>
-                        </div>
-                      )}
-                      {product?.price_before ? (
-                        <>
-                          <div className="flex gap-2 items-center">
-                            <h2 className="text-sm text-gray-400 line-through decoration-red-500">
-                              {product.price_before * product.quantity}€
-                            </h2>
-                            <h2>{product.price * product.quantity}€</h2>
-                          </div>
-                        </>
-                      ) : (
-                        <h2>{product.price * product.quantity}€</h2>
-                      )}
-                    </div>
-                  </div>
-                ))}
-
-                <Box className="relative">
-                  <LoadingOverlay
-                    visible={couponLoadingOverlay}
-                    zIndex={1000}
-                    overlayProps={{ radius: 'xs', blur: 1 }}
+              <Box className="relative">
+                <LoadingOverlay
+                  visible={couponLoadingOverlay}
+                  zIndex={1000}
+                  overlayProps={{ radius: 'xs', blur: 1 }}
+                />
+                <div className="flex gap-2 items-end mb-2">
+                  <TextInput
+                    label="Κωδικός έκπτωσης"
+                    ref={couponCodeRef}
+                    className="flex-1"
                   />
-                  <div className="flex gap-2 items-end mb-2">
-                    <TextInput
-                      label="Κωδικός έκπτωσης"
-                      ref={couponCodeRef}
-                      className="flex-1"
-                    />
-                    <Button
-                      onClick={async () => {
-                        if (couponCodeRef.current) {
-                          try {
-                            openCouponLoadingOverlay()
-                            const res = await axios.post(
-                              `${envClient.API_USER_URL}/coupon_code`,
-                              {
-                                coupon_code: couponCodeRef.current.value,
-                              }
-                            )
-                            if (res.status !== 200) {
-                              router.push(
-                                `${ROUTE_ERROR}?message=${
-                                  res?.data?.message || errorUnexpected
-                                }`
-                              )
-                            }
-                            console.log(res.data)
-
-                            const { data: validatedResponse } = z
-                              .object({ couponArray: z.array(typeCoupon) })
-                              .safeParse(res?.data)
-                            if (!validatedResponse) {
-                              router.push(
-                                `${ROUTE_ERROR}?message=${errroInvalidResponse}-coupon_code`
-                              )
-                            }
-                            if (validatedResponse!.couponArray.length === 1) {
-                              setCoupon(validatedResponse!.couponArray[0])
-                            } else {
-                              setCoupon({})
-                            }
-                          } catch {
-                            router.push(`${ROUTE_ERROR}?message=${errorAxios}`)
-                          } finally {
-                            closeCouponLoadingOverlay()
-                          }
-                        }
-                      }}
-                      className="ml-auto flex-shrink-0"
-                    >
-                      Εφαρμογή
-                    </Button>
-                  </div>
-                  <div className="flex">
-                    <h2>Υποσύνολο</h2>
-                    <div className="ml-auto flex gap-2 items-center">
-                      {Object.keys(coupon).length === 3 && (
-                        <p className="text-sm text-gray-400 line-through decoration-red-500">
-                          {(subTotal * 0.76).toFixed(2)}€
-                        </p>
-                      )}
-                      <p>{(subTotal * 0.76).toFixed(2)}€</p>
-                    </div>
-                  </div>
-                  <div className="flex">
-                    <h2>ΦΠΑ</h2>
-                    <div className="ml-auto flex gap-2 items-center">
-                      {Object.keys(coupon).length === 3 && (
-                        <p className="text-sm text-gray-400 line-through decoration-red-500">
-                          {(subTotal * 0.24).toFixed(2)}€
-                        </p>
-                      )}
-                      <p>{(subTotal * 0.24).toFixed(2)}€</p>
-                    </div>
-                  </div>
-                  <div className="flex">
-                    <h2>Έξοδα αποστολής</h2>
-                    {!freeShipping ? (
-                      <p className="ml-auto">6.00€</p>
-                    ) : (
-                      <div className="ml-auto flex gap-2 items-center">
-                        <p className="text-gray-400 line-through decoration-red-500">
-                          6.00€
-                        </p>
-                        <p>0.00€</p>
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex">
-                    <h2>Επιβάρυνση</h2>
-                    <p className="ml-auto">
-                      {form.values.payment_method !== 'Αντικαταβολή'
-                        ? '0.00'
-                        : '3.00'}
-                      €
-                    </p>
-                  </div>
-                  <div className="flex">
-                    <h2>Σύνολο</h2>
-                    <p className="ml-auto">
-                      {(
-                        subTotal +
-                        (freeShipping ? 0 : 6) +
-                        (form.values.payment_method !== 'Αντικαταβολή' ? 0 : 3)
-                      ).toFixed(2)}
-                      €
-                    </p>
-                  </div>
                   <Button
-                    type="submit"
-                    disabled={cart.length < 1}
-                    mt="xl"
-                    color="red"
-                    size="md"
-                    radius="md"
-                    style={{ width: '100%' }}
+                    onClick={async () => {
+                      if (couponCodeRef.current) {
+                        try {
+                          openCouponLoadingOverlay()
+                          const res = await axios.post(
+                            `${envClient.API_USER_URL}/coupon_code`,
+                            {
+                              coupon_code: couponCodeRef.current.value,
+                            }
+                          )
+                          if (res.status !== 200) {
+                            router.push(
+                              `${ROUTE_ERROR}?message=${
+                                res?.data?.message || errorUnexpected
+                              }`
+                            )
+                          }
+                          console.log(res.data)
+
+                          const { data: validatedResponse } = z
+                            .object({ couponArray: z.array(typeCoupon) })
+                            .safeParse(res?.data)
+                          if (!validatedResponse) {
+                            router.push(
+                              `${ROUTE_ERROR}?message=${errroInvalidResponse}-coupon_code`
+                            )
+                          }
+                          if (validatedResponse!.couponArray.length === 1) {
+                            setCoupon(validatedResponse!.couponArray[0])
+                          } else {
+                            setCoupon({})
+                          }
+                        } catch {
+                          router.push(`${ROUTE_ERROR}?message=${errorAxios}`)
+                        } finally {
+                          closeCouponLoadingOverlay()
+                        }
+                      }
+                    }}
+                    className="ml-auto flex-shrink-0"
                   >
-                    {form.values.payment_method === 'Κάρτα'
-                      ? 'Πληρωμή'
-                      : 'Ολοκλήρωση Παραγγελίας'}
+                    Εφαρμογή
                   </Button>
-                </Box>
-              </div>
+                </div>
+                <div className="flex">
+                  <h2>Υποσύνολο</h2>
+                  <div className="ml-auto flex gap-2 items-center">
+                    {Object.keys(coupon).length === 3 && (
+                      <p className="text-sm text-gray-400 line-through decoration-red-500">
+                        {(subTotal * 0.76).toFixed(2)}€
+                      </p>
+                    )}
+                    <p>{(subTotal * 0.76).toFixed(2)}€</p>
+                  </div>
+                </div>
+                <div className="flex">
+                  <h2>ΦΠΑ</h2>
+                  <div className="ml-auto flex gap-2 items-center">
+                    {Object.keys(coupon).length === 3 && (
+                      <p className="text-sm text-gray-400 line-through decoration-red-500">
+                        {(subTotal * 0.24).toFixed(2)}€
+                      </p>
+                    )}
+                    <p>{(subTotal * 0.24).toFixed(2)}€</p>
+                  </div>
+                </div>
+                <div className="flex">
+                  <h2>Έξοδα αποστολής</h2>
+                  {!freeShipping ? (
+                    <p className="ml-auto">6.00€</p>
+                  ) : (
+                    <div className="ml-auto flex gap-2 items-center">
+                      <p className="text-gray-400 line-through decoration-red-500">
+                        6.00€
+                      </p>
+                      <p>0.00€</p>
+                    </div>
+                  )}
+                </div>
+                <div className="flex">
+                  <h2>Επιβάρυνση</h2>
+                  <p className="ml-auto">
+                    {form.values.payment_method !== 'Αντικαταβολή'
+                      ? '0.00'
+                      : '3.00'}
+                    €
+                  </p>
+                </div>
+                <div className="flex">
+                  <h2>Σύνολο</h2>
+                  <p className="ml-auto">
+                    {(
+                      subTotal +
+                      (freeShipping ? 0 : 6) +
+                      (form.values.payment_method !== 'Αντικαταβολή' ? 0 : 3)
+                    ).toFixed(2)}
+                    €
+                  </p>
+                </div>
+                <Button
+                  type="submit"
+                  disabled={cart.length < 1}
+                  mt="xl"
+                  color="red"
+                  size="md"
+                  radius="md"
+                  style={{ width: '100%' }}
+                >
+                  {form.values.payment_method === 'Κάρτα'
+                    ? 'Πληρωμή'
+                    : 'Ολοκλήρωση Παραγγελίας'}
+                </Button>
+              </Box>
             </form>
           </>
         ) : (
@@ -457,6 +472,7 @@ export function CheckoutPageClient({ all_variants }: CheckoutPageProps) {
           </div>
         )}
       </main>
+
       <Footer />
     </>
   )

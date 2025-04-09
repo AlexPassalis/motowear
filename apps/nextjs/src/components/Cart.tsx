@@ -37,7 +37,7 @@ export function Cart({ cart, setCart, isCartOpen, setIsCartOpen }: CartProps) {
           </button>
         </div>
         {cart.length < 1 ? (
-          <h1 className="text-xl">Το καλάθι σου είναι άδειο.</h1>
+          <h1 className="text-center text-xl">Το καλάθι σου είναι άδειο.</h1>
         ) : (
           <>
             <Card
@@ -47,8 +47,8 @@ export function Cart({ cart, setCart, isCartOpen, setIsCartOpen }: CartProps) {
               mb="xs"
               bg="var(--mantine-color-body)"
             >
-              <h1>Δωρεάν Μεταφορικά Έξοδα</h1>
-              <div>
+              <h1 className="text-center">Δωρεάν Μεταφορικά Έξοδα</h1>
+              <div className="text-center">
                 <span
                   className={`${
                     Math.min(
@@ -64,10 +64,9 @@ export function Cart({ cart, setCart, isCartOpen, setIsCartOpen }: CartProps) {
                       : 'text-green-600'
                   }`}
                 >
-                  {cart.reduce(
-                    (acc, item) => acc + item.price * item.quantity,
-                    0
-                  )}
+                  {cart
+                    .reduce((acc, item) => acc + item.price * item.quantity, 0)
+                    .toFixed(2)}
                   €
                 </span>{' '}
                 <span>/ 50.00€</span>
@@ -95,9 +94,9 @@ export function Cart({ cart, setCart, isCartOpen, setIsCartOpen }: CartProps) {
                     ? 'red'
                     : 'green'
                 }`}
-                mt="sm"
                 size="lg"
                 radius="xl"
+                mt="xs"
               />
             </Card>
             <div className="flex-1 overflow-y-auto">
