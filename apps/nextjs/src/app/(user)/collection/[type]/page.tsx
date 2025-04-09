@@ -47,9 +47,9 @@ export default async function CollectionPage({ params }: ProductPageProps) {
 
   return (
     <CollectionPageClient
+      paramsProduct_type={paramsProduct_type}
       product_types={resolved[1].value}
       all_variants={resolved[2].value}
-      paramsProduct_type={paramsProduct_type}
       uniqueVariants={uniqueVariants}
     />
   )

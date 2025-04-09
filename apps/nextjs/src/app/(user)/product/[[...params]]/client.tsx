@@ -334,7 +334,7 @@ function Main({
         centered
       ></Modal>
 
-      <main>
+      <main className="flex-1">
         <Carousel withIndicators height={500}>
           {state.images.map(img => (
             <Carousel.Slide key={img}>

@@ -18,7 +18,7 @@ export function ErrorPageClient({
 }: ErrorPageClientProps) {
   return (
     <HeaderProvider product_types={product_types} all_variants={all_variants}>
-      <main className="flex items-center justify-center h-screen text-black">
+      <main className="flex-1 flex items-center justify-center h-screen text-black">
         <div className="flex flex-col items-center gap-4 border border-neutral-300 rounded-lg bg-white px-4 py-2">
           <h1 className="text-3xl">Σφάλμα - 500</h1>
           <p className="text-xl">error: {message}</p>

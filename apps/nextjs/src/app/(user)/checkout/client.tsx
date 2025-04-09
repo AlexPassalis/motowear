@@ -27,7 +27,7 @@ import {
   typeCheckout,
   LocalStorageCartItem,
 } from '@/data/type'
-import { ROUTE_ERROR, ROUTE_HOME } from '@/data/routes'
+import { ROUTE_ERROR } from '@/data/routes'
 import { errorAxios, errorUnexpected, errorInvalidResponse } from '@/data/error'
 import { Footer } from '@/components/Footer'
 import { getFilteredLocalStorageCart } from '@/utils/localStorage'
@@ -139,7 +139,7 @@ export function CheckoutPageClient({ all_variants }: CheckoutPageProps) {
         />
       </header>
 
-      <main className="relative flex-1 p-4">
+      <main className="flex-1 relative p-4">
         {!orderCompleteResponse ? (
           <>
             <LoadingOverlay

@@ -75,7 +75,7 @@ export default function HeaderProvider({
           if (isSearchOpen) setIsSearchOpen(false)
           if (isCartOpen) setIsCartOpen(false)
         }}
-        className="z-10 w-full h-full"
+        className="min-h-screen flex flex-col z-10 w-full h-full"
       >
         <Header
           isMenuOpen={isMenuOpen}

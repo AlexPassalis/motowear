@@ -14,7 +14,7 @@ export function HomePageClient({
 }: HomePageClientProps) {
   return (
     <HeaderProvider product_types={product_types} all_variants={all_variants}>
-      <main>
+      <main className="flex-1">
         <h1>This is the Home Page</h1>
       </main>
     </HeaderProvider>
