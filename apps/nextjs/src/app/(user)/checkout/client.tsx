@@ -168,15 +168,15 @@ export function CheckoutPageClient({ all_variants }: CheckoutPageProps) {
                       <div className="relative w-1/3 h-full rounded-lg overflow-hidden">
                         <Image
                           component={NextImage}
-                          src={`${envClient.MINIO_PRODUCT_URL}/${product.procuct_type}/${product.image}`}
-                          alt={`${product.procuct_type}/${product.name}`}
+                          src={`${envClient.MINIO_PRODUCT_URL}/${product.product_type}/${product.image}`}
+                          alt={`${product.product_type}/${product.name}`}
                           fill
                           style={{ objectFit: 'cover' }}
                           sizes="auto"
                         />
                       </div>
                       <div className="relative w-2/3 flex flex-col justify-center gap-0.5 p-2">
-                        <h1>{product.procuct_type}</h1>
+                        <h1>{product.product_type}</h1>
                         <h1>{product.name}</h1>
                         {product?.color && (
                           <div className="flex gap-1">

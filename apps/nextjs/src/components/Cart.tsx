@@ -106,13 +106,13 @@ export function Cart({ cart, setCart, isCartOpen, setIsCartOpen }: CartProps) {
                   className="flex w-full h-36 mb-2 rounded-lg border border-gray-200"
                 >
                   <Link
-                    href={`${ROUTE_PRODUCT}/${product.procuct_type}/${product.name}`}
+                    href={`${ROUTE_PRODUCT}/${product.product_type}/${product.name}`}
                     className="relative w-1/3 h-full rounded-lg overflow-hidden"
                   >
                     <Image
                       component={NextImage}
-                      src={`${envClient.MINIO_PRODUCT_URL}/${product.procuct_type}/${product.image}`}
-                      alt={`${product.procuct_type}/${product.name}`}
+                      src={`${envClient.MINIO_PRODUCT_URL}/${product.product_type}/${product.image}`}
+                      alt={`${product.product_type}/${product.name}`}
                       fill
                       style={{ objectFit: 'cover' }}
                       sizes="auto"
@@ -125,7 +125,7 @@ export function Cart({ cart, setCart, isCartOpen, setIsCartOpen }: CartProps) {
                       }
                       className="absolute top-2 right-2 hover:cursor-pointer"
                     />
-                    <h1>{product.procuct_type}</h1>
+                    <h1>{product.product_type}</h1>
                     <h1>{product.name}</h1>
                     {product?.color && (
                       <div className="flex gap-1">

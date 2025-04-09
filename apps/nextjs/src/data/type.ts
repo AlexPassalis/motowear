@@ -50,7 +50,7 @@ export const typeCheckout = z.object({
 
 export type LocalStorageCartItem = {
   image: string
-  procuct_type: string
+  product_type: string
   name: string
   color: string
   size: string
@@ -63,7 +63,7 @@ export const typeCart = z
   .array(
     z.object({
       image: z.string(),
-      procuct_type: z.string(),
+      product_type: z.string(),
       name: z.string(),
       color: z.string(),
       size: z.string(),

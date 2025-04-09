@@ -38,9 +38,9 @@ export function Header({
       <div className="flex justify-start">
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="flex justify-center items-center h-10 w-10 sm:scale-110 rounded-md border border-gray-200 transition-colors hover:cursor-pointer group"
+          className="flex justify-center items-center h-10 w-10 xl:scale-110 rounded-md border border-gray-200 transition-colors hover:cursor-pointer group"
         >
-          <AiOutlineMenu className="transition-transform duration-200 ease-in-out group-hover:scale-150" />
+          <AiOutlineMenu className="transition-transform duration-200 ease-in-out group-hover:scale-110" />
         </button>
       </div>
 
@@ -52,17 +52,17 @@ export function Header({
             width={200}
             height={100}
             alt="Motowear logo"
-            className="sm:scale-110"
+            className="xl:scale-110"
           />
         </Link>
       </div>
 
-      <div className="flex justify-end gap-2 sm:gap-4">
+      <div className="flex justify-end gap-2 xl:gap-4">
         <button
           onClick={() => setIsSearchOpen(!isSearchOpen)}
-          className="flex justify-center items-center h-10 w-10 sm:scale-110 rounded-md border border-gray-200 transition-colors hover:cursor-pointer group"
+          className="flex justify-center items-center h-10 w-10 xl:scale-110 rounded-md border border-gray-200 transition-colors hover:cursor-pointer group"
         >
-          <HiMagnifyingGlass className="transition-transform duration-200 ease-in-out group-hover:scale-150" />
+          <HiMagnifyingGlass className="transition-transform duration-200 ease-in-out group-hover:scale-110" />
         </button>
 
         {cart.length > 0 ? (
@@ -77,17 +77,17 @@ export function Header({
           >
             <button
               onClick={() => setIsCartOpen(!isCartOpen)}
-              className="relative flex justify-center items-center h-10 w-10 sm:scale-110 rounded-md border border-gray-200 transition-colors hover:cursor-pointer group"
+              className="relative flex justify-center items-center h-10 w-10 xl:scale-110 rounded-md border border-gray-200 transition-colors hover:cursor-pointer group"
             >
-              <AiFillShopping className="transition-transform duration-200 ease-in-out group-hover:scale-150" />
+              <AiFillShopping className="transition-transform duration-200 ease-in-out group-hover:scale-110" />
             </button>
           </Indicator>
         ) : (
           <button
             onClick={() => setIsCartOpen(!isCartOpen)}
-            className="relative flex justify-center items-center h-10 w-10 sm:scale-110 rounded-md border border-gray-200 transition-colors hover:cursor-pointer group"
+            className="relative flex justify-center items-center h-10 w-10 xl:scale-110 rounded-md border border-gray-200 transition-colors hover:cursor-pointer group"
           >
-            <AiOutlineShopping className="transition-transform duration-200 ease-in-out group-hover:scale-150" />
+            <AiOutlineShopping className="transition-transform duration-200 ease-in-out group-hover:scale-110" />
           </button>
         )}
       </div>
