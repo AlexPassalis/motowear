@@ -28,6 +28,8 @@ import { Carousel } from '@mantine/carousel'
 import Autoplay from 'embla-carousel-autoplay'
 import { Pagination } from '@mantine/core'
 import { IoIosStar } from 'react-icons/io'
+import { TfiRulerAlt } from 'react-icons/tfi'
+import { FaCheck } from 'react-icons/fa'
 
 type ProductPageClientProps = {
   product_types: string[]
@@ -300,7 +302,7 @@ function Main({
 
   const [reviews, setReviews] = useState(postgres_reviews.slice(0, 5))
 
-  const autoplay = useRef(Autoplay({ delay: 2000 }))
+  const autoplay = useRef(Autoplay({ delay: 3000 }))
 
   return (
     <>
@@ -348,40 +350,42 @@ function Main({
         </Carousel>
 
         <div className="m-4 mb-8">
-          <div className="flex gap-2 text-2xl">
+          <div className="flex gap-2 text-xl">
             <Link href={`${ROUTE_COLLECTION}/${paramsProduct_type}`}>
               {paramsProduct_type}
             </Link>
             <p>/</p>
             <h1>{state.selectedVariant}</h1>
-            <div className="flex gap-2 items-center ml-auto">
-              {state.price_before > 0 && (
-                <h2 className="text-lg text-gray-400 line-through decoration-red-500">{`${state.price_before}€`}</h2>
-              )}
-              <h2>{`${state.price}€`}</h2>
-            </div>
           </div>
 
-          {postgres_reviews.length > 0 && (
-            <div className="mt-1 mb-4 flex items-center">
-              {Array.from(
-                {
-                  length: Math.round(
-                    postgres_reviews.reduce(
-                      (sum, review) => sum + review.rating,
-                      0
-                    ) / postgres_reviews.length
-                  ),
-                },
-                (_, i) => (
-                  <IoIosStar key={i} className="text-yellow-500" />
-                )
+          <div className="flex items-center mb-4">
+            {postgres_reviews.length > 0 && (
+              <div className="flex items-center">
+                {Array.from(
+                  {
+                    length: Math.round(
+                      postgres_reviews.reduce(
+                        (sum, review) => sum + review.rating,
+                        0
+                      ) / postgres_reviews.length
+                    ),
+                  },
+                  (_, i) => (
+                    <IoIosStar key={i} size={18} className="text-yellow-500" />
+                  )
+                )}
+                <span className="ml-2 proxima-nova text-sm">
+                  ({postgres_reviews.length} κριτικές)
+                </span>
+              </div>
+            )}
+            <div className="flex gap-2 ml-auto">
+              {state.price_before > 0 && (
+                <h2 className="text-xl text-[var(--mantine-border)] relative custom-strike">{`${state.price_before}€`}</h2>
               )}
-              <span className="ml-2 proxima-nova text-sm">
-                ({postgres_reviews.length} κριτικές)
-              </span>
+              <h2 className="text-xl">{`${state.price}€`}</h2>
             </div>
-          )}
+          </div>
 
           {state.description && (
             <p className="mb-4 proxima-nova">{state.description}</p>
@@ -406,6 +410,7 @@ function Main({
                       marginLeft: '8px',
                       cursor: 'pointer',
                     }}
+                    className="proxima-nova"
                   >
                     διάλεξε
                   </UnstyledButton>
@@ -449,15 +454,14 @@ function Main({
                               payload: { selectedBrand: '' },
                             })
                           }
-                          className="p-1 border rounded-lg hover:border-red-500"
+                          className="p-1 border border-white rounded-lg hover:border-red-500"
                         >
                           <UnstyledButton
                             style={{
                               width: '100%',
                               height: '48px',
-                              textAlign: 'center',
                             }}
-                            className="hover:cursor-pointer"
+                            className="proxima-nova"
                           >
                             καμία μάρκα
                           </UnstyledButton>
@@ -483,9 +487,9 @@ function Main({
                                 `${ROUTE_PRODUCT}/${paramsProduct_type}`
                               )
                             }}
-                            className="p-1 border rounded-lg hover:border-red-500"
+                            className="p-1 border border-white rounded-lg hover:border-red-500"
                           >
-                            <div className="relative mx-auto w-full max-w-96 h-12 hover:cursor-pointer">
+                            <div className="relative w-full max-w-96 h-12 hover:cursor-pointer">
                               <Image
                                 component={NextImage}
                                 src={`${envClient.MINIO_PRODUCT_URL}/brands/${brand}`}
@@ -525,6 +529,7 @@ function Main({
                       marginLeft: '8px',
                       cursor: 'pointer',
                     }}
+                    className="proxima-nova"
                   >
                     {state.selectedVariant}
                   </button>
@@ -565,13 +570,12 @@ function Main({
                                   `${ROUTE_PRODUCT}/${paramsProduct_type}/${variant}`
                                 )
                               }}
-                              className="proxima-nova flex justify-center p-1 border rounded-lg hover:border-red-500"
+                              className="proxima-nova flex justify-center p-1 border border-white rounded-lg hover:border-red-500"
                             >
                               <UnstyledButton
                                 style={{
                                   width: '100%',
-                                  height: '48px',
-                                  textAlign: 'center',
+                                  height: '36px',
                                 }}
                                 className="hover:cursor-pointer"
                               >
@@ -651,12 +655,15 @@ function Main({
               <div className="flex gap-2 items-center">
                 <h1 className="mb-1 text-lg">Μέγεθος</h1>
                 {page.size_chart && (
-                  <h2
+                  <div
+                    className="ml-auto flex gap-1 hover:cursor-pointer"
                     onClick={() => openSizeChartModal()}
-                    className="proxima-nova text-sm text-blue-700 hover:cursor-pointer"
                   >
-                    (μεγεθολόγιο)
-                  </h2>
+                    <TfiRulerAlt />
+                    <h2 className="proxima-nova hover:text-red-700">
+                      μεγεθολόγιο
+                    </h2>
+                  </div>
                 )}
               </div>
               <div className="flex gap-2">
@@ -804,7 +811,7 @@ function Main({
 
         {reviews.length > 0 && (
           <div className="mx-4 my-8">
-            <h1 className="mb-2 text-center text-2xl">Reviews</h1>
+            <h1 className="mb-2 text-center text-xl">Αξιολογήσεις</h1>
             {reviews.map((review, index) => (
               <div
                 key={index}
@@ -812,17 +819,21 @@ function Main({
                   index === 0 ? 'border-t-2' : ''
                 }`}
               >
-                <div className="mb-1 flex justify-between items-center">
-                  <div className="flex">
-                    {Array.from({ length: review.rating }, (_, i) => (
-                      <IoIosStar key={i} className="text-yellow-500" />
-                    ))}
-                  </div>
-                  <h2 className="mb-1 proxima-nova">{review.full_name}</h2>
-                  <h2 className="proxima-nova text-sm">{review.date}</h2>
+                <div className="flex mb-1">
+                  {Array.from({ length: review.rating }, (_, i) => (
+                    <IoIosStar key={i} size={18} className="text-yellow-500" />
+                  ))}
+                  <h2 className="proxima-nova ml-auto">{review.date}</h2>
                 </div>
-                <h2>{review.title}</h2>
-                <h2 className="proxima-nova">{review.review}</h2>
+                <div className="mb-1 flex items-center">
+                  <h2 className="proxima-nova">{review.full_name}</h2>
+                  <div className="ml-auto flex items-center">
+                    <FaCheck size={18} color="green" className="mr-1" />
+                    <p className="proxima-nova">επιβεβαιωμένη αγορά</p>
+                  </div>
+                </div>
+
+                <h2>{review.review}</h2>
               </div>
             ))}
             <Pagination
@@ -833,7 +844,7 @@ function Main({
                 )
               }
               mt="xs"
-              style={{ display: 'flex', justifySelf: 'center' }}
+              style={{ display: 'flex', justifyContent: 'center' }}
             />
           </div>
         )}

@@ -145,14 +145,19 @@ export function Cart({ cart, setCart, isCartOpen, setIsCartOpen }: CartProps) {
                     {product?.price_before ? (
                       <>
                         <div className="flex gap-2 items-center">
-                          <h2 className="text-sm text-gray-400 line-through decoration-red-500">
-                            {product.price_before * product.quantity}€
+                          <h2 className="text-[var(--mantine-border)] line-through decoration-red-500">
+                            {(product.price_before * product.quantity).toFixed(
+                              2
+                            )}
+                            €
                           </h2>
-                          <h2>{product.price * product.quantity}€</h2>
+                          <h2>
+                            {(product.price * product.quantity).toFixed(2)}€
+                          </h2>
                         </div>
                       </>
                     ) : (
-                      <h2>{product.price * product.quantity}€</h2>
+                      <h2>{(product.price * product.quantity).toFixed(2)}€</h2>
                     )}
 
                     <div className="absolute bottom-2 right-2 flex w-16 h-[28px] rounded-lg border-2 border-gray-200">
@@ -220,7 +225,10 @@ export function Cart({ cart, setCart, isCartOpen, setIsCartOpen }: CartProps) {
           <Link href={ROUTE_CHECKOUT} className="mt-auto">
             <Button color="red" style={{ width: '100%' }}>
               Ταμείο{' '}
-              {cart.reduce((acc, item) => acc + item.price * item.quantity, 0)}€
+              {cart
+                .reduce((acc, item) => acc + item.price * item.quantity, 0)
+                .toFixed(2)}
+              €
             </Button>
           </Link>
         )}

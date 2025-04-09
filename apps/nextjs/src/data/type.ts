@@ -119,7 +119,6 @@ export const typeReview = z.object({
   product_type: z.string(),
   rating: z.number(),
   full_name: z.string(),
-  title: z.string(),
   review: z.string(),
   date: z.string(),
 })
@@ -128,7 +127,6 @@ export type Review = {
   product_type: string
   rating: number
   full_name: string
-  title: string
   review: string
   date: string
 }

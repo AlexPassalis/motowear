@@ -88,7 +88,6 @@ export const review = reviewsSchema.table('review', {
   product_type: text('product_type').notNull(),
   rating: integer('rating').notNull(),
   full_name: text('full_name').notNull(),
-  title: text('title').notNull(),
   review: text('review').notNull(),
   date: date('date').notNull(),
 })

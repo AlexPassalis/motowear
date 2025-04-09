@@ -28,7 +28,7 @@ import {
   LocalStorageCartItem,
 } from '@/data/type'
 import { ROUTE_ERROR, ROUTE_HOME } from '@/data/routes'
-import { errorAxios, errorUnexpected, errroInvalidResponse } from '@/data/error'
+import { errorAxios, errorUnexpected, errorInvalidResponse } from '@/data/error'
 import { Footer } from '@/components/Footer'
 import { getFilteredLocalStorageCart } from '@/utils/localStorage'
 import axios from 'axios'
@@ -39,7 +39,11 @@ type CheckoutPageProps = {
 
 export function CheckoutPageClient({ all_variants }: CheckoutPageProps) {
   const router = useRouter()
-  const [orderComplete, setOrderComplete] = useState(false)
+  const [orderCompleteResponse, setOrderCompleteResponse] = useState<null | {
+    id: string
+    first_name: string
+    email: string
+  }>(null)
   const [saveInfo, setSaveInfo] = useState(true)
   const [cart, setCart] = useState<LocalStorageCartItem[]>([])
   const couponCodeRef = useRef<null | HTMLInputElement>(null)
@@ -122,7 +126,7 @@ export function CheckoutPageClient({ all_variants }: CheckoutPageProps) {
     freeShippingAmount
 
   return (
-    <>
+    <div className="min-h-screen flex flex-col">
       <header className="relative flex justify-center p-2 border-b border-b-gray-200">
         <Image
           component={NextImage}
@@ -134,8 +138,8 @@ export function CheckoutPageClient({ all_variants }: CheckoutPageProps) {
         />
       </header>
 
-      <main className="relative p-4">
-        {!orderComplete ? (
+      <main className="relative flex-1 p-4">
+        {!orderCompleteResponse ? (
           <>
             <LoadingOverlay
               visible={formLoadingOverlay}
@@ -191,14 +195,21 @@ export function CheckoutPageClient({ all_variants }: CheckoutPageProps) {
                         {product?.price_before ? (
                           <>
                             <div className="flex gap-2 items-center">
-                              <h2 className="text-sm text-gray-400 line-through decoration-red-500">
-                                {product.price_before * product.quantity}€
+                              <h2 className="text-[var(--mantine-border)] line-through decoration-red-500">
+                                {(
+                                  product.price_before * product.quantity
+                                ).toFixed(2)}
+                                €
                               </h2>
-                              <h2>{product.price * product.quantity}€</h2>
+                              <h2>
+                                {(product.price * product.quantity).toFixed(2)}€
+                              </h2>
                             </div>
                           </>
                         ) : (
-                          <h2>{product.price * product.quantity}€</h2>
+                          <h2>
+                            {(product.price * product.quantity).toFixed(2)}€
+                          </h2>
                         )}
                       </div>
                     </div>
@@ -227,8 +238,21 @@ export function CheckoutPageClient({ all_variants }: CheckoutPageProps) {
                       }`
                     )
                   }
-                  setOrderComplete(true)
                   localStorage.removeItem('cart')
+                  console.log(res.data)
+                  const { data: validatedResponse } = z
+                    .object({
+                      id: z.string(),
+                      first_name: z.string(),
+                      email: z.string().email(),
+                    })
+                    .safeParse(res.data)
+                  if (!validatedResponse) {
+                    router.push(
+                      `${ROUTE_ERROR}?message=${errorInvalidResponse}`
+                    )
+                  }
+                  setOrderCompleteResponse(validatedResponse!)
                 } catch {
                   router.push(`${ROUTE_ERROR}?message=${errorAxios}`)
                 } finally {
@@ -368,14 +392,13 @@ export function CheckoutPageClient({ all_variants }: CheckoutPageProps) {
                               }`
                             )
                           }
-                          console.log(res.data)
 
                           const { data: validatedResponse } = z
                             .object({ couponArray: z.array(typeCoupon) })
                             .safeParse(res?.data)
                           if (!validatedResponse) {
                             router.push(
-                              `${ROUTE_ERROR}?message=${errroInvalidResponse}-coupon_code`
+                              `${ROUTE_ERROR}?message=${errorInvalidResponse}-coupon_code`
                             )
                           }
                           if (validatedResponse!.couponArray.length === 1) {
@@ -399,7 +422,7 @@ export function CheckoutPageClient({ all_variants }: CheckoutPageProps) {
                   <h2>Υποσύνολο</h2>
                   <div className="ml-auto flex gap-2 items-center">
                     {Object.keys(coupon).length === 3 && (
-                      <p className="text-sm text-gray-400 line-through decoration-red-500">
+                      <p className="text-[var(--mantine-border)] line-through decoration-red-500">
                         {(subTotal * 0.76).toFixed(2)}€
                       </p>
                     )}
@@ -410,7 +433,7 @@ export function CheckoutPageClient({ all_variants }: CheckoutPageProps) {
                   <h2>ΦΠΑ</h2>
                   <div className="ml-auto flex gap-2 items-center">
                     {Object.keys(coupon).length === 3 && (
-                      <p className="text-sm text-gray-400 line-through decoration-red-500">
+                      <p className="text-[var(--mantine-border)] line-through decoration-red-500">
                         {(subTotal * 0.24).toFixed(2)}€
                       </p>
                     )}
@@ -423,7 +446,7 @@ export function CheckoutPageClient({ all_variants }: CheckoutPageProps) {
                     <p className="ml-auto">6.00€</p>
                   ) : (
                     <div className="ml-auto flex gap-2 items-center">
-                      <p className="text-gray-400 line-through decoration-red-500">
+                      <p className="text-[var(--mantine-border)] line-through decoration-red-500">
                         6.00€
                       </p>
                       <p>0.00€</p>
@@ -467,13 +490,19 @@ export function CheckoutPageClient({ all_variants }: CheckoutPageProps) {
             </form>
           </>
         ) : (
-          <div>
-            <h1>Η παραγγελία σου είναι επιτυχης.</h1>
-          </div>
+          <>
+            <p className="mb-2">{`Σας ευχαριστούμε ${orderCompleteResponse.first_name}!`}</p>
+            <p>Η παραγγελία σας με id :</p>
+            <span className="text-red-500">{orderCompleteResponse.id}</span>
+            <p className="mb-2">ήταν επιτυχής.</p>
+            <p>Θα παραλάβετε ενημερωτικό email στο :</p>
+            <span className="underline">{orderCompleteResponse.email}</span>
+            <p>εντός των επόμενων λεπτών.</p>
+          </>
         )}
       </main>
 
       <Footer />
-    </>
+    </div>
   )
 }
