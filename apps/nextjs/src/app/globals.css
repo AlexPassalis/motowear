@@ -45,15 +45,3 @@ mark {
   background-color: red;
   color: white;
 }
-
-/* Custom line-through */
-.custom-strike::after {
-  content: '';
-  position: absolute;
-  bottom: 0; /* start at the bottom left */
-  left: 0;
-  width: 100%;
-  border-top: 2px solid red; /* adjust thickness and color */
-  transform: rotate(-45deg);
-  transform-origin: bottom left;
-}

@@ -93,9 +93,10 @@ export function CheckoutPageClient({ all_variants }: CheckoutPageProps) {
     }
 
     const localStorageCart = getFilteredLocalStorageCart(all_variants)
-    if (localStorageCart.length < 1) {
-      router.push(ROUTE_HOME)
-    }
+    console.log('This is the localStorageCart :', localStorageCart)
+    // if (localStorageCart.length < 1) {
+    //   router.push(ROUTE_HOME)
+    // }
     setCart(localStorageCart)
     setTotal(
       localStorageCart.reduce(

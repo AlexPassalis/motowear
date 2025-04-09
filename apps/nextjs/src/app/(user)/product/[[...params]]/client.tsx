@@ -381,7 +381,7 @@ function Main({
             )}
             <div className="flex gap-2 ml-auto">
               {state.price_before > 0 && (
-                <h2 className="text-xl text-[var(--mantine-border)] relative custom-strike">{`${state.price_before}€`}</h2>
+                <h2 className="text-xl text-[var(--mantine-border)] line-through decoration-red-500">{`${state.price_before}€`}</h2>
               )}
               <h2 className="text-xl">{`${state.price}€`}</h2>
             </div>

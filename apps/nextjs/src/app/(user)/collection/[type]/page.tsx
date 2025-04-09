@@ -4,7 +4,7 @@ import { getProductTypesCached, getVariantsCached } from '@/app/(user)/cache'
 import { ROUTE_ERROR } from '@/data/routes'
 
 type ProductPageProps = {
-  params: Promise<{ type: string }>
+  params: Promise<{ type?: string }>
 }
 
 export default async function CollectionPage({ params }: ProductPageProps) {
@@ -22,25 +22,28 @@ export default async function CollectionPage({ params }: ProductPageProps) {
 
   const resolvedParams = (
     resolved[0] as PromiseFulfilledResult<{
-      params?: [type: string, version?: string]
+      type: string
     }>
   ).value
-  if (!resolvedParams.params || resolvedParams.params.length < 1) {
+  if (!resolvedParams?.type) {
     return notFound()
   }
-  const paramsProduct_type = decodeURIComponent(resolvedParams.params[0])
+  const paramsProduct_type = decodeURIComponent(resolvedParams.type)
 
   const postgresVariants = resolved[2].value.filter(
     variant => variant.product_type === paramsProduct_type
   )
-
-  const uniqueBrands = Array.from(
-    new Set(postgresVariants.map(variant => variant.brand).filter(Boolean))
-  )
-
-  const uniqueVariants = Array.from(
-    new Set(postgresVariants.map(variant => variant.name).filter(Boolean))
-  )
+  const uniqueVariants = postgresVariants
+    .filter(
+      (variant, index, self) =>
+        self.findIndex(v => v.name === variant.name) === index
+    )
+    .map(variant => {
+      return {
+        image: variant.images[0],
+        name: variant.name,
+      }
+    })
 
   return (
     <CollectionPageClient
@@ -48,7 +51,6 @@ export default async function CollectionPage({ params }: ProductPageProps) {
       all_variants={resolved[2].value}
       paramsProduct_type={paramsProduct_type}
       uniqueVariants={uniqueVariants}
-      uniqueBrands={uniqueBrands}
     />
   )
 }
