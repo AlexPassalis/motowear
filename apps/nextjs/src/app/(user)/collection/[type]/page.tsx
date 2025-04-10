@@ -42,8 +42,14 @@ export default async function CollectionPage({ params }: ProductPageProps) {
       return {
         image: variant.images[0],
         name: variant.name,
+        brand: variant.brand,
       }
     })
+    .sort((a, b) => a.name.localeCompare(b.name))
+
+  const uniqueBrands = [
+    ...new Set(uniqueVariants.map(variant => variant.brand)),
+  ]
 
   return (
     <CollectionPageClient
@@ -51,6 +57,7 @@ export default async function CollectionPage({ params }: ProductPageProps) {
       product_types={resolved[1].value}
       all_variants={resolved[2].value}
       uniqueVariants={uniqueVariants}
+      uniqueBrands={uniqueBrands}
     />
   )
 }

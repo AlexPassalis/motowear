@@ -26,7 +26,7 @@ export const product_pages = pagesSchema.table('product_pages', {
   product_description: text('product_description').notNull(),
   faq: jsonb('faq').$type<{ question: string; answer: string }[]>().notNull(),
   carousel: jsonb('carousel')
-    .$type<{ text: string; image: string }[]>()
+    .$type<{ title: string; text: string; image: string }[]>()
     .notNull(),
 })
 
@@ -78,7 +78,7 @@ export const order = ordersSchema.table('order', {
   checkout: jsonb('checkout').notNull(),
   cart: jsonb('cart').notNull(),
   coupon: jsonb('coupon'),
-  total: integer('total').notNull(),
+  total: Numeric('total', { precision: 7, scale: 2 }).notNull(),
 })
 
 export const reviewsSchema = pgSchema('reviews')

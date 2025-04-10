@@ -101,6 +101,7 @@ export const typeProductPage = z.object({
   ),
   carousel: z.array(
     z.object({
+      title: z.string(),
       text: z.string(),
       image: z.string(),
     })
@@ -111,7 +112,7 @@ export type ProductPage = {
   size_chart: string
   product_description: string
   faq: { question: string; answer: string }[]
-  carousel: { text: string; image: string }[]
+  carousel: { title: string; text: string; image: string }[]
 }
 
 export const typeReview = z.object({

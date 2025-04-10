@@ -355,7 +355,7 @@ function Main({
               ))}
             </Carousel>
             {page.product_description && (
-              <h2 className="m-4 proxima-nova hidden md:block xl:text-lg 2xl:hidden">
+              <h2 className="hidden md:block m-4 whitespace-pre-line proxima-nova text-lg xl:text-xl">
                 {page.product_description}
               </h2>
             )}
@@ -403,7 +403,7 @@ function Main({
             </div>
 
             {state.description && (
-              <p className="mb-4 proxima-nova text-lg xl:text-xl">
+              <p className="mb-4 whitespace-pre-line proxima-nova text-lg xl:text-xl">
                 {state.description}
               </p>
             )}
@@ -427,7 +427,10 @@ function Main({
                         marginLeft: '8px',
                         cursor: 'pointer',
                       }}
-                      className="proxima-nova text-lg xl:text-xl"
+                      className="proxima-nova"
+                      classNames={{
+                        root: '!text-lg xl:!text-xl',
+                      }}
                     >
                       διάλεξε
                     </UnstyledButton>
@@ -460,7 +463,7 @@ function Main({
                         duration: 0.025,
                         ease: 'easeInOut',
                       }}
-                      className="flex flex-col gap-1 max-h-48 overflow-y-auto p-1 border rounded-lg mt-0.5"
+                      className="flex flex-col gap-1 max-h-96 overflow-y-auto p-1 border rounded-lg mt-0.5"
                     >
                       {state.selectedBrand !== '' && (
                         <>
@@ -478,7 +481,10 @@ function Main({
                                 width: '100%',
                                 height: '48px',
                               }}
-                              className="proxima-nova text-lg xl:text-xl"
+                              className="proxima-nova"
+                              classNames={{
+                                root: '!text-lg xl:!text-xl',
+                              }}
                             >
                               καμία μάρκα
                             </UnstyledButton>
@@ -538,7 +544,7 @@ function Main({
                         : 'border-b-[var(--mantine-border)]'
                     } hover:border-2 hover:rounded-lg hover:border-red-500`}
                   >
-                    <button
+                    <UnstyledButton
                       style={{
                         height: '48px',
                         width: '100%',
@@ -546,10 +552,13 @@ function Main({
                         marginLeft: '8px',
                         cursor: 'pointer',
                       }}
-                      className="proxima-nova text-lg xl:text-xl"
+                      className="proxima-nova"
+                      classNames={{
+                        root: '!text-lg xl:!text-xl',
+                      }}
                     >
                       {state.selectedVariant}
-                    </button>
+                    </UnstyledButton>
                     <motion.span
                       className="ml-auto"
                       initial={{ rotate: 0 }}
@@ -569,7 +578,7 @@ function Main({
                           duration: 0.025,
                           ease: 'easeInOut',
                         }}
-                        className="flex flex-col gap-1 max-h-48 overflow-y-auto p-1 border rounded-lg mt-0.5"
+                        className="flex flex-col gap-1 max-h-96 overflow-y-auto p-1 border rounded-lg mt-0.5"
                       >
                         {state.displayedVariants
                           .filter(variant => variant !== state.selectedVariant)
@@ -592,9 +601,14 @@ function Main({
                                 <UnstyledButton
                                   style={{
                                     width: '100%',
-                                    height: '36px',
+                                    height: '24px',
+                                    display: 'flex',
+                                    alignItems: 'center',
                                   }}
-                                  className="hover:cursor-pointer text-lg xl:text-xl"
+                                  className="proxima-nova"
+                                  classNames={{
+                                    root: '!text-lg xl:!text-xl',
+                                  }}
                                 >
                                   {variant}
                                 </UnstyledButton>
@@ -677,7 +691,7 @@ function Main({
                       onClick={() => openSizeChartModal()}
                     >
                       <h2 className="proxima-nova xl:text-lg hover:text-red-500">
-                        μεγεθολόγιο
+                        Μεγεθολόγιο
                       </h2>
                       <TfiRulerAlt />
                     </div>
@@ -796,7 +810,7 @@ function Main({
               </Button>
             </div>
             {page.product_description && (
-              <h2 className="hidden 2xl:block mx-4 my-8 proxima-nova text-xl">
+              <h2 className="hidden 2xl:block mx-4 my-8 whitespace-pre-line proxima-nova text-xl">
                 {page.product_description}
               </h2>
             )}
@@ -813,8 +827,19 @@ function Main({
                         bg="white"
                         style={{ border: 'none' }}
                       >
-                        <Accordion.Control>{faq.question}</Accordion.Control>
-                        <Accordion.Panel className="proxima-nova">
+                        <Accordion.Control
+                          classNames={{
+                            control: '!text-lg xl:!text-xl',
+                          }}
+                        >
+                          {faq.question}
+                        </Accordion.Control>
+                        <Accordion.Panel
+                          classNames={{
+                            panel: '!whitespace-pre-line !text-lg xl:!text-xl',
+                          }}
+                          className="proxima-nova"
+                        >
                           {faq.answer}
                         </Accordion.Panel>
                       </Accordion.Item>
@@ -828,7 +853,7 @@ function Main({
         </div>
 
         {page.product_description && (
-          <h2 className="mx-4 my-8 proxima-nova md:hidden">
+          <h2 className="md:hidden mx-4 my-8 whitespace-pre-line proxima-nova text-lg xl:text-xl">
             {page.product_description}
           </h2>
         )}
@@ -846,8 +871,19 @@ function Main({
                     bg="white"
                     style={{ border: 'none' }}
                   >
-                    <Accordion.Control>{faq.question}</Accordion.Control>
-                    <Accordion.Panel className="proxima-nova">
+                    <Accordion.Control
+                      classNames={{
+                        control: '!text-lg',
+                      }}
+                    >
+                      {faq.question}
+                    </Accordion.Control>
+                    <Accordion.Panel
+                      classNames={{
+                        panel: '!whitespace-pre-line !text-lg xl:!text-xl',
+                      }}
+                      className="proxima-nova"
+                    >
                       {faq.answer}
                     </Accordion.Panel>
                   </Accordion.Item>
@@ -881,15 +917,18 @@ function Main({
                     ))}
                     <h2 className="proxima-nova ml-auto">{review.date}</h2>
                   </div>
-                  <div className="mb-1 flex items-center">
-                    <h2 className="proxima-nova">{review.full_name}</h2>
-                    <div className="ml-auto flex items-center">
+                  <div className="mb-1 flex justify-between flex-wrap items-center">
+                    <h2 className="mr-5 proxima-nova text-sm sm:text-base">
+                      {review.full_name}
+                    </h2>
+                    <div className="flex items-center">
                       <FaCheck size={18} color="green" className="mr-1" />
-                      <p className="proxima-nova">επιβεβαιωμένη αγορά</p>
+                      <p className="proxima-nova text-sm sm:text-base">
+                        επιβεβαιωμένη αγορά
+                      </p>
                     </div>
                   </div>
-
-                  <h2>{review.review}</h2>
+                  <h2 className="whitespace-pre-line">{review.review}</h2>
                 </div>
               ))}
               <Pagination
@@ -914,7 +953,7 @@ function Main({
             >
               <Card.Section>
                 <Carousel withIndicators loop plugins={[autoplay.current]}>
-                  {page.carousel.map(({ image, text }) => (
+                  {page.carousel.map(({ image, title, text }) => (
                     <Carousel.Slide key={image}>
                       <div className="relative aspect-square">
                         <Image
@@ -925,7 +964,22 @@ function Main({
                           style={{ objectFit: 'cover' }}
                         />
                         <div className="absolute bottom-0 left-0 right-0 bg-white bg-opacity-60 p-2">
-                          <Text className="text-white text-center">{text}</Text>
+                          <Text
+                            className="mb-2 text-white text-center"
+                            classNames={{
+                              root: '!text-xl xl:!text-2xl',
+                            }}
+                          >
+                            {title}
+                          </Text>
+                          <Text
+                            className="proxima-nova text-white"
+                            classNames={{
+                              root: '!whitespace-pre-line !text-lg xl:!text-xl',
+                            }}
+                          >
+                            {text}
+                          </Text>
                         </div>
                       </div>
                     </Carousel.Slide>
