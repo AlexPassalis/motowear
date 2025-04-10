@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { CheckoutPageClient } from '@/app/(user)/checkout/client'
 import { errorPostgres } from '@/data/error'
 import { ROUTE_ERROR } from '@/data/routes'

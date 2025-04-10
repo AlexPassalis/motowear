@@ -6,10 +6,6 @@ function getLocalStorageCart(): LocalStorageCartItem[] {
   return cart ? JSON.parse(cart) : []
 }
 
-export function setLocalStorageCart(cart: LocalStorageCartItem[]) {
-  localStorage.setItem('cart', JSON.stringify(cart))
-}
-
 export function getFilteredLocalStorageCart(all_variants: Variants) {
   return getLocalStorageCart().filter(localStorageVariant => {
     const currentVariant = all_variants.find(
@@ -28,4 +24,8 @@ export function getFilteredLocalStorageCart(all_variants: Variants) {
       return true
     }
   })
+}
+
+export function setLocalStorageCart(cart: LocalStorageCartItem[]) {
+  localStorage.setItem('cart', JSON.stringify(cart))
 }
