@@ -46,7 +46,7 @@ export async function sendTelegramMessage(
 async function telegramPing() {
   try {
     await global.global_telegram!.telegram.getMe()
-    console.log('Telegram connected successfully.')
+    console.info('Telegram connected successfully.')
   } catch (e) {
     const message = formatMessage(
       '@/lib/telegram/index.ts telegramPing()',

@@ -17,7 +17,7 @@ export async function updateTypesense(product_type: string) {
   try {
     await typesense.collections(collectionName).retrieve()
   } catch {
-    console.log(`Collection ${collectionName} not found. Creating it.`)
+    console.info(`Collection ${collectionName} not found. Creating it.`)
     const schema = {
       name: collectionName,
       fields: [
@@ -28,7 +28,7 @@ export async function updateTypesense(product_type: string) {
       ],
     }
     await typesense.collections().create(schema)
-    console.log(`Collection ${collectionName} created successfully.`)
+    console.info(`Collection ${collectionName} created successfully.`)
   }
 
   const limit = pLimit(10)

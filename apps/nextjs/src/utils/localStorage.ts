@@ -11,7 +11,6 @@ export function setLocalStorageCart(cart: LocalStorageCartItem[]) {
 }
 
 export function getFilteredLocalStorageCart(all_variants: Variants) {
-  console.log('These are the all_variants :', all_variants)
   return getLocalStorageCart().filter(localStorageVariant => {
     const currentVariant = all_variants.find(
       postgresVariant =>
@@ -23,7 +22,6 @@ export function getFilteredLocalStorageCart(all_variants: Variants) {
         postgresVariant.color === localStorageVariant.color &&
         postgresVariant.price_before === localStorageVariant.price_before
     )
-    console.log('This is the currentVariant :', currentVariant)
     if (!currentVariant) {
       return false
     } else {

@@ -17,7 +17,7 @@ function establishCron() {
           true, // start immediately
           'Europe/Athens'
         )
-        console.log('Cron connected successfully.')
+        console.info('Cron connected successfully.')
       } catch (e) {
         const message = formatMessage(
           '@/lib/cron/index.ts establishCron()',

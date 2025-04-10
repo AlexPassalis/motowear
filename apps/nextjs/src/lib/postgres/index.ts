@@ -32,7 +32,7 @@ async function establishPostgres() {
 async function postgresPing() {
   try {
     await global.global_postgres!.execute(sql`SELECT 1`)
-    console.log('Postgres connected successfully.')
+    console.info('Postgres connected successfully.')
   } catch (e) {
     const message = formatMessage(
       '@/lib/postgres/index.ts postgresPing()',

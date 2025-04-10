@@ -27,7 +27,7 @@ import {
   typeCheckout,
   LocalStorageCartItem,
 } from '@/data/type'
-import { ROUTE_ERROR } from '@/data/routes'
+import { ROUTE_ERROR, ROUTE_HOME } from '@/data/routes'
 import { errorAxios, errorUnexpected, errorInvalidResponse } from '@/data/error'
 import { Footer } from '@/components/Footer'
 import { getFilteredLocalStorageCart } from '@/utils/localStorage'
@@ -93,10 +93,9 @@ export function CheckoutPageClient({ all_variants }: CheckoutPageProps) {
     }
 
     const localStorageCart = getFilteredLocalStorageCart(all_variants)
-    console.log('This is the localStorageCart :', localStorageCart)
-    // if (localStorageCart.length < 1) {
-    //   router.push(ROUTE_HOME)
-    // }
+    if (localStorageCart.length < 1) {
+      router.push(ROUTE_HOME)
+    }
     setCart(localStorageCart)
     setTotal(
       localStorageCart.reduce(
@@ -240,7 +239,6 @@ export function CheckoutPageClient({ all_variants }: CheckoutPageProps) {
                     )
                   }
                   localStorage.removeItem('cart')
-                  console.log(res.data)
                   const { data: validatedResponse } = z
                     .object({
                       id: z.string(),
