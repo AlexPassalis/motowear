@@ -1,3 +1,5 @@
+import type { typeCartLocalStorage } from '@/lib/postgres/data/type'
+
 import { envClient } from '@/env'
 import { Button, Card, Image, Progress, UnstyledButton } from '@mantine/core'
 import NextImage from 'next/image'
@@ -8,13 +10,12 @@ import { FaPlus } from 'react-icons/fa'
 import { FaMinus } from 'react-icons/fa'
 import Link from 'next/link'
 import { ROUTE_CHECKOUT, ROUTE_PRODUCT } from '@/data/routes'
-import { LocalStorageCartItem } from '@/data/type'
 
 type CartProps = {
   isCartOpen: boolean
   setIsCartOpen: Dispatch<SetStateAction<boolean>>
-  cart: LocalStorageCartItem[]
-  setCart: Dispatch<SetStateAction<LocalStorageCartItem[]>>
+  cart: typeCartLocalStorage
+  setCart: Dispatch<SetStateAction<typeCartLocalStorage>>
 }
 
 export function Cart({ cart, setCart, isCartOpen, setIsCartOpen }: CartProps) {

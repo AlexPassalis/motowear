@@ -1,5 +1,11 @@
 'use client'
 
+import type {
+  typeProductPage,
+  typeReview,
+  typeVariant,
+} from '@/lib/postgres/data/type'
+
 import { Dispatch, SetStateAction, useReducer, useRef, useState } from 'react'
 import { useCounter, useDisclosure } from '@mantine/hooks'
 import {
@@ -19,26 +25,23 @@ import { envClient } from '@/env'
 import { IoIosArrowDown } from 'react-icons/io'
 import { Fragment } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { FaPlus } from 'react-icons/fa'
-import { FaMinus } from 'react-icons/fa'
 import HeaderProvider from '@/context/HeaderProvider'
 import { useHeaderContext } from '@/context/useHeaderContext'
-import type { ProductPage, Review, Variants } from '@/data/type'
 import { Carousel } from '@mantine/carousel'
 import Autoplay from 'embla-carousel-autoplay'
 import { Pagination } from '@mantine/core'
 import { IoIosStar } from 'react-icons/io'
 import { TfiRulerAlt } from 'react-icons/tfi'
-import { FaCheck } from 'react-icons/fa'
+import { FaPlus, FaMinus, FaCheck } from 'react-icons/fa'
 
 type ProductPageClientProps = {
   product_types: string[]
-  all_variants: Variants
-  page: ProductPage
-  postgres_reviews: Review[]
+  all_variants: typeVariant[]
+  page: typeProductPage
+  postgres_reviews: typeReview[]
   paramsProduct_type: string
-  paramsVariant: undefined | Variants[number]
-  postgresVariants: Variants
+  paramsVariant: undefined | typeVariant
+  postgresVariants: typeVariant[]
 }
 
 export function ProductPageClient({
@@ -64,6 +67,7 @@ export function ProductPageClient({
         <Main
           paramsProduct_type={paramsProduct_type}
           paramsVariant={paramsVariant}
+          all_variants={all_variants}
           postgresVariants={postgresVariants}
           page={page}
           postgres_reviews={postgres_reviews}
@@ -79,10 +83,11 @@ export function ProductPageClient({
 
 type MainProps = {
   paramsProduct_type: string
-  paramsVariant: undefined | Variants[number]
-  postgresVariants: Variants
-  page: ProductPage
-  postgres_reviews: Review[]
+  paramsVariant: undefined | typeVariant
+  all_variants: typeVariant[]
+  postgresVariants: typeVariant[]
+  page: typeProductPage
+  postgres_reviews: typeReview[]
   brandDropdown: boolean
   setBrandDropdown: Dispatch<SetStateAction<boolean>>
   variantDropdown: boolean
@@ -92,6 +97,7 @@ type MainProps = {
 function Main({
   paramsProduct_type,
   paramsVariant,
+  all_variants,
   postgresVariants,
   page,
   postgres_reviews,
@@ -297,6 +303,20 @@ function Main({
     sizeChartModal,
     { open: openSizeChartModal, close: closeSizeChartModal },
   ] = useDisclosure(false)
+
+  const upsellId = all_variants.find(
+    variant =>
+      variant.product_type === paramsProduct_type &&
+      variant.name === state.selectedVariant &&
+      variant.color === state.selectedColor &&
+      variant.size === state.selectedSize
+  )!.upsell
+
+  let upsellVariant
+  if (upsellId) {
+    upsellVariant = all_variants.find(variant => variant.id === upsellId)!
+  }
+
   const [upsellModal, { open: openUpsellModal, close: closeUpsellModal }] =
     useDisclosure(false)
 
@@ -331,9 +351,123 @@ function Main({
           closeUpsellModal()
           setIsCartOpen(true)
         }}
-        title="Upsell"
+        title="Αγόρασε το τώρα!!!"
         centered
-      ></Modal>
+      >
+        <>
+          {upsellVariant && (
+            <div className="flex flex-col">
+              <h1 className="mx-auto text-2xl mb-2">
+                {upsellVariant.product_type} {upsellVariant.name}
+              </h1>
+              <div className="relative aspect-square mb-2">
+                <Image
+                  component={NextImage}
+                  src={`${envClient.MINIO_PRODUCT_URL}/${upsellVariant.product_type}/${upsellVariant.images[0]}`}
+                  alt={upsellVariant.images[0]}
+                  fill
+                  style={{ objectFit: 'cover' }}
+                  priority
+                />
+              </div>
+              {upsellVariant.color && (
+                <div className="flex gap-2 items-center mb-1">
+                  <h2 className="text-xl">Χρώμα</h2>
+                  <div
+                    style={{ backgroundColor: upsellVariant.color }}
+                    className="w-6 h-6 rounded-full"
+                  />
+                </div>
+              )}
+              {upsellVariant.size && (
+                <div className="flex gap-2 items-center">
+                  <h2 className="text-xl">Μέγεθος</h2>
+                  <h2 className="text-lg">{upsellVariant.size}</h2>
+                </div>
+              )}
+              <div className="lg:mb-8 2xl:mb-0 mt-6 flex gap-2 w-full justify-center items-center">
+                <div className="flex w-24 h-[42px] rounded-lg border-2 border-[var(--mantine-border)]">
+                  <div onClick={() => handlers.decrement()} className="w-1/3">
+                    <UnstyledButton
+                      size="compact-sm"
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <FaMinus size={10} />
+                    </UnstyledButton>
+                  </div>
+                  <div className="flex w-1/3 items-center justify-center border-x-1 border-[var(--mantine-border)]">
+                    <p>{count}</p>
+                  </div>
+                  <div onClick={() => handlers.increment()} className="w-1/3">
+                    <UnstyledButton
+                      size="compact-md"
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <FaPlus size={10} />
+                    </UnstyledButton>
+                  </div>
+                </div>
+                <Button
+                  onClick={() => {
+                    closeUpsellModal()
+                    setIsCartOpen(true)
+                    setCart(prev => {
+                      const existingIndex = prev.findIndex(
+                        item =>
+                          item.product_type === paramsProduct_type &&
+                          item.name === state.selectedVariant &&
+                          item.color === state.selectedColor &&
+                          item.size === state.selectedSize
+                      )
+                      if (existingIndex !== -1) {
+                        const updatedCart = [...prev]
+                        updatedCart[existingIndex] = {
+                          ...updatedCart[existingIndex],
+                          quantity: updatedCart[existingIndex].quantity + count,
+                        }
+                        return updatedCart
+                      } else {
+                        return [
+                          ...prev,
+                          {
+                            image: state.images[0],
+                            product_type: paramsProduct_type,
+                            name: state.selectedVariant,
+                            color: state.selectedColor,
+                            size: state.selectedSize,
+                            price: state.price,
+                            price_before: state.price_before,
+                            quantity: count,
+                          },
+                        ]
+                      }
+                    })
+                    handlers.reset()
+                  }}
+                  color="red"
+                  size="md"
+                  radius="md"
+                  style={{ width: '100%' }}
+                >
+                  Προσθήκη στο Καλάθι
+                </Button>
+              </div>
+            </div>
+          )}
+        </>
+      </Modal>
 
       <main className="flex-1">
         <div className="md:flex">
@@ -623,17 +757,21 @@ function Main({
                   </AnimatePresence>
                 </>
               ) : (
-                <div className="flex items-center pb-0.5 border-1 border-white border-b-[var(--mantine-border)]">
-                  <button
+                <div className="flex items-center pb-0.5 border-2 border-white border-b-[var(--mantine-border)]">
+                  <UnstyledButton
                     style={{
                       height: '48px',
                       width: '100%',
                       textAlign: 'left',
                       marginLeft: '8px',
                     }}
+                    className="proxima-nova"
+                    classNames={{
+                      root: '!text-lg xl:!text-xl',
+                    }}
                   >
                     {state.selectedVariant}
-                  </button>
+                  </UnstyledButton>
                 </div>
               )}
             </div>
@@ -767,7 +905,11 @@ function Main({
               </div>
               <Button
                 onClick={() => {
-                  openUpsellModal()
+                  if (upsellId) {
+                    openUpsellModal()
+                  } else {
+                    setIsCartOpen(true)
+                  }
                   setCart(prev => {
                     const existingIndex = prev.findIndex(
                       item =>

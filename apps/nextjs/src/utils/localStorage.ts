@@ -1,12 +1,14 @@
-import type { LocalStorageCartItem } from '@/data/type'
-import type { Variants } from '@/data/type'
+import type {
+  typeCartLocalStorage,
+  typeVariant,
+} from '@/lib/postgres/data/type'
 
-function getLocalStorageCart(): LocalStorageCartItem[] {
+function getLocalStorageCart(): typeCartLocalStorage {
   const cart = localStorage.getItem('cart')
   return cart ? JSON.parse(cart) : []
 }
 
-export function getFilteredLocalStorageCart(all_variants: Variants) {
+export function getFilteredLocalStorageCart(all_variants: typeVariant[]) {
   return getLocalStorageCart().filter(localStorageVariant => {
     const currentVariant = all_variants.find(
       postgresVariant =>
@@ -26,6 +28,6 @@ export function getFilteredLocalStorageCart(all_variants: Variants) {
   })
 }
 
-export function setLocalStorageCart(cart: LocalStorageCartItem[]) {
+export function setLocalStorageCart(cart: typeCartLocalStorage) {
   localStorage.setItem('cart', JSON.stringify(cart))
 }

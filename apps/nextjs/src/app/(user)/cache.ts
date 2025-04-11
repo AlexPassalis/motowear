@@ -1,3 +1,10 @@
+import type { typeProductTypes } from '@/utils/getPostgres'
+import type {
+  typeProductPage,
+  typeReview,
+  typeVariant,
+} from '@/lib/postgres/data/type'
+
 import { errorRedis } from '@/data/error'
 import { redis } from '@/lib/redis'
 import { sendTelegramMessage } from '@/lib/telegram'
@@ -8,9 +15,8 @@ import {
   getReviews,
   getVariants,
 } from '@/utils/getPostgres'
-import type { ProductPage, ProductTypes, Review, Variants } from '@/data/type'
 
-export async function getProductTypesCached(): Promise<ProductTypes> {
+export async function getProductTypesCached(): Promise<typeProductTypes> {
   if (process.env.BUILD_TIME !== 'true') {
     let product_types
     try {
@@ -60,7 +66,7 @@ export async function getProductTypesCached(): Promise<ProductTypes> {
   }
 }
 
-export async function getVariantsCached(): Promise<Variants> {
+export async function getVariantsCached(): Promise<typeVariant[]> {
   if (process.env.BUILD_TIME !== 'true') {
     let variants
     try {
@@ -106,7 +112,7 @@ export async function getVariantsCached(): Promise<Variants> {
 }
 
 export async function getPagesCached(): Promise<
-  { productPages: ProductPage[] }[]
+  { productPages: typeProductPage[] }[]
 > {
   if (process.env.BUILD_TIME !== 'true') {
     let pages
@@ -152,7 +158,7 @@ export async function getPagesCached(): Promise<
   }
 }
 
-export async function getReviewsCached(): Promise<Review[]> {
+export async function getReviewsCached(): Promise<typeReview[]> {
   if (process.env.BUILD_TIME !== 'true') {
     let reviews
     try {

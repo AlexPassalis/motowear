@@ -1,11 +1,11 @@
 'use client'
 
+import type { typeVariant } from '@/lib/postgres/data/type'
 import HeaderProvider from '@/context/HeaderProvider'
-import type { Variants } from '@/data/type'
 
 type HomePageClientProps = {
   product_types: string[]
-  all_variants: Variants
+  all_variants: typeVariant[]
 }
 
 export function HomePageClient({

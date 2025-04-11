@@ -1,6 +1,12 @@
 import { errorPostgres } from '@/data/error'
 import { postgres } from '@/lib/postgres'
-import { product_pages, brand, variant, review } from '@/lib/postgres/schema'
+import {
+  product_pages,
+  brand,
+  variant,
+  review,
+  order,
+} from '@/lib/postgres/schema'
 import { sendTelegramMessage } from '@/lib/telegram'
 import { formatMessage } from '@/utils/formatMessage'
 import { eq } from 'drizzle-orm'
@@ -22,6 +28,7 @@ export async function getProductTypes() {
     throw errorPostgres
   }
 }
+export type typeProductTypes = Awaited<ReturnType<typeof getProductTypes>>
 
 export async function getVariants() {
   try {
@@ -84,6 +91,7 @@ export async function getBrands() {
     throw errorPostgres
   }
 }
+export type typeBrands = Awaited<ReturnType<typeof getBrands>>
 
 export async function getPages() {
   try {
@@ -155,6 +163,22 @@ export async function getProductReviews(product_type: string) {
   } catch (e) {
     const message = formatMessage(
       '@/utils/getPostgres.ts getProductTypePageSettings()',
+      errorPostgres,
+      e
+    )
+    console.error(message)
+    sendTelegramMessage('ERROR', message)
+    throw errorPostgres
+  }
+}
+
+export async function getOrders() {
+  try {
+    const array = await postgres.select().from(order)
+    return array
+  } catch (e) {
+    const message = formatMessage(
+      '@/utils/getPostgres.ts getOrderByOperators()',
       errorPostgres,
       e
     )

@@ -15,11 +15,14 @@ import {
   useEffect,
   useState,
 } from 'react'
-import { LocalStorageCartItem } from '@/data/type'
-import type { Variants } from '@/data/type'
+
+import type {
+  typeVariant,
+  typeCartLocalStorage,
+} from '@/lib/postgres/data/type'
 
 type HeaderContext = {
-  setCart: Dispatch<SetStateAction<LocalStorageCartItem[]>>
+  setCart: Dispatch<SetStateAction<typeCartLocalStorage>>
   setIsSearchOpen: Dispatch<SetStateAction<boolean>>
   setIsCartOpen: Dispatch<SetStateAction<boolean>>
 }
@@ -28,7 +31,7 @@ export const HeaderContext = createContext<HeaderContext | null>(null)
 
 type HeaderProviderProps = {
   product_types: string[]
-  all_variants: Variants
+  all_variants: typeVariant[]
   children: ReactNode
 }
 
@@ -41,7 +44,7 @@ export default function HeaderProvider({
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [isCartOpen, setIsCartOpen] = useState(false)
 
-  const [cart, setCart] = useState<LocalStorageCartItem[]>([])
+  const [cart, setCart] = useState<typeCartLocalStorage>([])
   useEffect(() => {
     setCart(getFilteredLocalStorageCart(all_variants))
   }, [all_variants])

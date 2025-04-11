@@ -33,6 +33,15 @@ export default async function CollectionPage({ params }: ProductPageProps) {
   const postgresVariants = resolved[2].value.filter(
     variant => variant.product_type === paramsProduct_type
   )
+
+  if (
+    !postgresVariants.find(
+      variant => variant.product_type === paramsProduct_type
+    )
+  ) {
+    return notFound()
+  }
+
   const uniqueVariants = postgresVariants
     .filter(
       (variant, index, self) =>

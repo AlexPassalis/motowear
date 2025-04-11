@@ -1,5 +1,11 @@
 'use client'
 
+import type {
+  typeVariant,
+  typeCartLocalStorage,
+} from '@/lib/postgres/data/type'
+import { zodCheckout, zodCoupon } from '@/lib/postgres/data/zod'
+import { envClient } from '@/env'
 import { useEffect, useRef, useState } from 'react'
 import NextImage from 'next/image'
 import { useRouter } from 'next/navigation'
@@ -20,13 +26,7 @@ import { useDisclosure } from '@mantine/hooks'
 import { useForm } from '@mantine/form'
 import { zodResolver } from 'mantine-form-zod-resolver'
 import { z } from 'zod'
-import { envClient } from '@/env'
-import {
-  Variants,
-  typeCoupon,
-  typeCheckout,
-  LocalStorageCartItem,
-} from '@/data/type'
+
 import { ROUTE_ERROR, ROUTE_HOME } from '@/data/routes'
 import { errorAxios, errorUnexpected, errorInvalidResponse } from '@/data/error'
 import { Footer } from '@/components/Footer'
@@ -34,7 +34,7 @@ import { getFilteredLocalStorageCart } from '@/utils/localStorage'
 import axios from 'axios'
 
 type CheckoutPageProps = {
-  all_variants: Variants
+  all_variants: typeVariant[]
 }
 
 export function CheckoutPageClient({ all_variants }: CheckoutPageProps) {
@@ -45,7 +45,7 @@ export function CheckoutPageClient({ all_variants }: CheckoutPageProps) {
     email: string
   }>(null)
   const [saveInfo, setSaveInfo] = useState(true)
-  const [cart, setCart] = useState<LocalStorageCartItem[]>([])
+  const [cart, setCart] = useState<typeCartLocalStorage>([])
   const couponCodeRef = useRef<null | HTMLInputElement>(null)
   const [
     couponLoadingOverlay,
@@ -83,7 +83,7 @@ export function CheckoutPageClient({ all_variants }: CheckoutPageProps) {
       receive_phone: true,
       payment_method: 'Κάρτα',
     },
-    validate: zodResolver(typeCheckout),
+    validate: zodResolver(zodCheckout),
   })
 
   useEffect(() => {
@@ -119,11 +119,8 @@ export function CheckoutPageClient({ all_variants }: CheckoutPageProps) {
     : coupon?.fixed
     ? total - coupon.fixed
     : total
-
   const freeShippingAmount = 50
-  const freeShipping =
-    cart.reduce((acc, item) => acc + item.price * item.quantity, 0) >
-    freeShippingAmount
+  const freeShipping = total > freeShippingAmount
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -231,6 +228,7 @@ export function CheckoutPageClient({ all_variants }: CheckoutPageProps) {
                       coupon: coupon,
                     }
                   )
+                  localStorage.removeItem('cart')
                   if (res.status !== 200) {
                     router.push(
                       `${ROUTE_ERROR}?message=${
@@ -238,7 +236,6 @@ export function CheckoutPageClient({ all_variants }: CheckoutPageProps) {
                       }`
                     )
                   }
-                  localStorage.removeItem('cart')
                   const { data: validatedResponse } = z
                     .object({
                       id: z.string(),
@@ -393,7 +390,7 @@ export function CheckoutPageClient({ all_variants }: CheckoutPageProps) {
                           }
 
                           const { data: validatedResponse } = z
-                            .object({ couponArray: z.array(typeCoupon) })
+                            .object({ couponArray: z.array(zodCoupon) })
                             .safeParse(res?.data)
                           if (!validatedResponse) {
                             router.push(
@@ -489,15 +486,15 @@ export function CheckoutPageClient({ all_variants }: CheckoutPageProps) {
             </form>
           </>
         ) : (
-          <>
-            <p className="mb-2">{`Σας ευχαριστούμε ${orderCompleteResponse.first_name}!`}</p>
+          <div className="flex flex-col h-full justify-center items-center">
+            <p className="mb-2 text-lg">{`Σας ευχαριστούμε ${orderCompleteResponse.first_name}!`}</p>
             <p>Η παραγγελία σας με id :</p>
             <span className="text-red-500">{orderCompleteResponse.id}</span>
             <p className="mb-2">ήταν επιτυχής.</p>
             <p>Θα παραλάβετε ενημερωτικό email στο :</p>
             <span className="underline">{orderCompleteResponse.email}</span>
             <p>εντός των επόμενων λεπτών.</p>
-          </>
+          </div>
         )}
       </main>
 

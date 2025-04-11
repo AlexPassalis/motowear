@@ -1,4 +1,4 @@
-import { sql } from 'drizzle-orm'
+import { sql, InferSelectModel } from 'drizzle-orm'
 import {
   pgSchema,
   text,
@@ -7,9 +7,13 @@ import {
   uuid,
   customType,
   jsonb,
+  boolean,
 } from 'drizzle-orm/pg-core'
+import { z } from 'zod'
 
 export { authSchema, user, account, verification, session } from './auth.schema'
+
+import { zodCart, zodCheckout } from './data/zod'
 
 const Numeric = customType<{ data: number }>({
   dataType: () => 'numeric',
@@ -35,6 +39,7 @@ export const brand = productsSchema.table('brand', {
   index: integer('index').notNull(),
   image: text('image').primaryKey(),
 })
+
 export const variant = productsSchema.table(
   'variant',
   {
@@ -44,20 +49,21 @@ export const variant = productsSchema.table(
         onDelete: 'cascade',
       }),
     index: integer('index').notNull(),
-    id: uuid().primaryKey(),
+    id: uuid('id').primaryKey(),
     images: text('images').array().notNull(),
     name: text('name').notNull(),
     description: text('description').notNull(),
-    brand: text('image')
+    brand: text('brand')
       .notNull()
       .references(() => brand.image),
     color: text('color').notNull(),
     size: text('size').notNull(),
     price: Numeric('price', { precision: 7, scale: 2 }).notNull(),
     price_before: Numeric('price_before', { precision: 7, scale: 2 }).notNull(),
+    upsell: uuid('upsell'),
   },
-  variants => ({
-    imagesMinLength: sql`CHECK (array_length(${variants.images}, 1) >= 1)`,
+  variant => ({
+    imagesMinLength: sql`CHECK (array_length(${variant.images}, 1) >= 1)`,
   })
 )
 
@@ -73,12 +79,19 @@ export const coupon = ordersSchema.table(
     validDiscount: sql`("percentage" > 0 OR "fixed" > 0)`,
   })
 )
+
 export const order = ordersSchema.table('order', {
-  id: uuid('id').primaryKey(),
-  checkout: jsonb('checkout').notNull(),
-  cart: jsonb('cart').notNull(),
-  coupon: jsonb('coupon'),
+  id: uuid('id').notNull().primaryKey(),
+  order_date: date('order_date').notNull(),
+  checkout: jsonb('checkout').$type<z.infer<typeof zodCheckout>>().notNull(),
+  cart: jsonb('cart').$type<z.infer<typeof zodCart>>().notNull(),
+  coupon: jsonb('coupon').$type<InferSelectModel<typeof coupon>>(),
   total: Numeric('total', { precision: 7, scale: 2 }).notNull(),
+  confirmation_email: boolean('confirmation_email').notNull(),
+  date_fulfilled: date('date_fulfilled'),
+  tracking_number: text('tracking_number'),
+  fulfilled_email: boolean('fulfilled_email').notNull(),
+  review_email: boolean('review_email').notNull(),
 })
 
 export const reviewsSchema = pgSchema('reviews')

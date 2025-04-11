@@ -1,8 +1,9 @@
 'use client'
 
+import type { typeVariant } from '@/lib/postgres/data/type'
+
 import HeaderProvider from '@/context/HeaderProvider'
 import { ROUTE_PRODUCT } from '@/data/routes'
-import type { Variants } from '@/data/type'
 import { envClient } from '@/env'
 import { SimpleGrid, Image, Pagination, UnstyledButton } from '@mantine/core'
 import NextImage from 'next/image'
@@ -14,7 +15,7 @@ import { IoIosArrowDown } from 'react-icons/io'
 type CollectionPageClientProps = {
   paramsProduct_type: string
   product_types: string[]
-  all_variants: Variants
+  all_variants: typeVariant[]
   uniqueVariants: { image: string; name: string; brand: string }[]
   uniqueBrands: string[]
 }

@@ -1,5 +1,7 @@
 'use client'
 
+import type { typeCartLocalStorage } from '@/lib/postgres/data/type'
+
 import { ROUTE_HOME } from '@/data/routes'
 import { Image } from '@mantine/core'
 import NextImage from 'next/image'
@@ -11,7 +13,6 @@ import {
   AiFillShopping,
 } from 'react-icons/ai'
 import { HiMagnifyingGlass } from 'react-icons/hi2'
-import type { LocalStorageCartItem } from '@/data/type'
 import { Indicator } from '@mantine/core'
 
 type HeaderProps = {
@@ -21,7 +22,7 @@ type HeaderProps = {
   setIsSearchOpen: Dispatch<SetStateAction<boolean>>
   isCartOpen: boolean
   setIsCartOpen: Dispatch<SetStateAction<boolean>>
-  cart: LocalStorageCartItem[]
+  cart: typeCartLocalStorage
 }
 
 export function Header({

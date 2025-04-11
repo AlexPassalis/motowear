@@ -43,17 +43,17 @@ export default async function ProductPage({ params }: ProductPageProps) {
   }
   const paramsProduct_type = decodeURIComponent(resolvedParams.params[0])
 
-  if (
-    !resolved[3].value[0].productPages.find(
-      page => page.product_type === paramsProduct_type
-    )
-  ) {
-    return notFound()
-  } // WILL NEED FIXING WHEN MORE PAGES ARE ADDED. (MAYBE NOT value[0] by then.)
-
   const postgresVariants = resolved[2].value.filter(
     variant => variant.product_type === paramsProduct_type
   )
+
+  if (
+    !postgresVariants.find(
+      variant => variant.product_type === paramsProduct_type
+    )
+  ) {
+    return notFound()
+  }
 
   const variant = resolvedParams.params?.[1]
   const paramsVariant = variant

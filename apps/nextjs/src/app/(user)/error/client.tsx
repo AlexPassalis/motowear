@@ -1,13 +1,14 @@
 'use client'
 
+import type { typeVariant } from '@/lib/postgres/data/type'
+
 import HeaderProvider from '@/context/HeaderProvider'
 import { ROUTE_HOME } from '@/data/routes'
-import type { Variants } from '@/data/type'
 import Link from 'next/link'
 
 type ErrorPageClientProps = {
   product_types: string[]
-  all_variants: Variants
+  all_variants: typeVariant[]
   message: string
 }
 
