@@ -5,6 +5,7 @@ import type {
   typeReview,
   typeVariant,
 } from '@/lib/postgres/data/type'
+import type { typeShipping } from '@/utils/getPostgres'
 
 import { Dispatch, SetStateAction, useReducer, useRef, useState } from 'react'
 import { useCounter, useDisclosure } from '@mantine/hooks'
@@ -39,6 +40,7 @@ type ProductPageClientProps = {
   all_variants: typeVariant[]
   page: typeProductPage
   postgres_reviews: typeReview[]
+  shipping: typeShipping
   paramsProduct_type: string
   paramsVariant: undefined | typeVariant
   postgresVariants: typeVariant[]
@@ -49,6 +51,7 @@ export function ProductPageClient({
   all_variants,
   page,
   postgres_reviews,
+  shipping,
   paramsProduct_type,
   paramsVariant,
   postgresVariants,
@@ -63,7 +66,11 @@ export function ProductPageClient({
         if (variantDropdown) setVariantDropdown(false)
       }}
     >
-      <HeaderProvider product_types={product_types} all_variants={all_variants}>
+      <HeaderProvider
+        product_types={product_types}
+        all_variants={all_variants}
+        shipping={shipping}
+      >
         <Main
           paramsProduct_type={paramsProduct_type}
           paramsVariant={paramsVariant}
@@ -110,56 +117,57 @@ function Main({
 
   const fallbackVariant = postgresVariants[0]
   const initialState = {
-    displayedBrands: [
-      ...new Set(
-        postgresVariants.map(product => product.brand).filter(Boolean)
+    displayedBrands: postgresVariants
+      .map(product => product.brand)
+      .filter(
+        (item, index, self) => index === self.findIndex(other => other === item)
       ),
-    ],
     selectedBrand: '',
-    displayedVariants: [
-      ...new Set(postgresVariants.map(product => product.name)),
-    ],
+    displayedVariants: postgresVariants
+      .map(product => product.name)
+      .filter(
+        (item, index, self) => index === self.findIndex(other => other === item)
+      ),
     selectedVariant: paramsVariant ? paramsVariant.name : fallbackVariant.name,
     displayedColors: paramsVariant
-      ? [
-          ...new Set(
-            postgresVariants
-              .filter(
-                variant => variant.name === paramsVariant.name && variant.color
-              )
-              .map(product => product.color)
+      ? postgresVariants
+          .filter(
+            variant => variant.name === paramsVariant.name && variant.color
+          )
+          .map(product => product.color)
+          .filter(
+            (item, index, self) =>
+              index === self.findIndex(other => other === item)
+          )
+      : postgresVariants
+          .filter(
+            variant => variant.name === fallbackVariant.name && variant.color
+          )
+          .map(product => product.color)
+          .filter(
+            (item, index, self) =>
+              index === self.findIndex(other => other === item)
           ),
-        ]
-      : [
-          ...new Set(
-            postgresVariants
-              .filter(
-                variant =>
-                  variant.name === fallbackVariant.name && variant.color
-              )
-              .map(product => product.color)
-          ),
-        ],
     selectedColor: paramsVariant ? paramsVariant.color : fallbackVariant.color,
     displayedSizes: paramsVariant
-      ? [
-          ...new Set(
-            postgresVariants
-              .filter(
-                variant => variant.name === paramsVariant.name && variant.size
-              )
-              .map(product => product.size)
+      ? postgresVariants
+          .filter(
+            variant => variant.name === paramsVariant.name && variant.size
+          )
+          .map(product => product.size)
+          .filter(
+            (item, index, self) =>
+              index === self.findIndex(other => other === item)
+          )
+      : postgresVariants
+          .filter(
+            variant => variant.name === fallbackVariant.name && variant.size
+          )
+          .map(product => product.size)
+          .filter(
+            (item, index, self) =>
+              index === self.findIndex(other => other === item)
           ),
-        ]
-      : [
-          ...new Set(
-            postgresVariants
-              .filter(
-                variant => variant.name === fallbackVariant.name && variant.size
-              )
-              .map(product => product.size)
-          ),
-        ],
     selectedSize: paramsVariant ? paramsVariant.size : fallbackVariant.size,
     images: paramsVariant ? paramsVariant.images : fallbackVariant.images,
     description: paramsVariant
@@ -181,30 +189,32 @@ function Main({
       case 'brand': {
         const selectedBrand = action.payload.selectedBrand
         if (selectedBrand) {
-          const displayedVariants = [
-            ...new Set(
-              postgresVariants
-                .filter(product => product.brand === selectedBrand)
-                .map(product => product.name)
-            ),
-          ]
-          const displayedColors = [
-            ...new Set(
-              postgresVariants
-                .filter(product => product.name === displayedVariants[0])
-                .map(product => product.color && product.color)
-            ),
-          ]
+          const displayedVariants = postgresVariants
+            .filter(product => product.brand === selectedBrand)
+            .map(product => product.name)
+            .filter(
+              (item, index, self) =>
+                index === self.findIndex(other => other === item)
+            )
+
+          const displayedColors = postgresVariants
+            .filter(product => product.name === displayedVariants[0])
+            .map(product => product.color && product.color)
+            .filter(
+              (item, index, self) =>
+                index === self.findIndex(other => other === item)
+            )
+
           const foundVariant = postgresVariants.find(
             product => product.brand === selectedBrand
           )!
-          const displayedSizes = [
-            ...new Set(
-              postgresVariants
-                .filter(product => product.name === displayedVariants[0])
-                .map(product => product.size && product.size)
-            ),
-          ]
+          const displayedSizes = postgresVariants
+            .filter(product => product.name === displayedVariants[0])
+            .map(product => product.size && product.size)
+            .filter(
+              (item, index, self) =>
+                index === self.findIndex(other => other === item)
+            )
 
           return {
             ...state,
@@ -230,23 +240,24 @@ function Main({
       }
       case 'variant': {
         const selectedVariant = action.payload.selectedVariant
-        const displayedColors = [
-          ...new Set(
-            postgresVariants
-              .filter(product => product.name === selectedVariant)
-              .map(product => product.color && product.color)
-          ),
-        ]
+        const displayedColors = postgresVariants
+          .filter(product => product.name === selectedVariant)
+          .map(product => product.color && product.color)
+          .filter(
+            (item, index, self) =>
+              index === self.findIndex(other => other === item)
+          )
+
         const foundVariant = postgresVariants.find(
           product => product.name === selectedVariant
         )!
-        const displayedSizes = [
-          ...new Set(
-            postgresVariants
-              .filter(product => product.name === selectedVariant)
-              .map(product => product.size && product.size)
-          ),
-        ]
+        const displayedSizes = postgresVariants
+          .filter(product => product.name === selectedVariant)
+          .map(product => product.size && product.size)
+          .filter(
+            (item, index, self) =>
+              index === self.findIndex(other => other === item)
+          )
 
         return {
           ...state,
@@ -296,7 +307,7 @@ function Main({
     }
   }
   const [state, dispatch] = useReducer(reducer, initialState)
-  console.log(state)
+  console.log('This is the state: ', state)
 
   const [count, handlers] = useCounter(0, { min: 1, max: 9 })
   const [
@@ -304,19 +315,33 @@ function Main({
     { open: openSizeChartModal, close: closeSizeChartModal },
   ] = useDisclosure(false)
 
-  const upsellId = all_variants.find(
+  const upsellProductVariant = all_variants.find(
     variant =>
       variant.product_type === paramsProduct_type &&
       variant.name === state.selectedVariant &&
       variant.color === state.selectedColor &&
       variant.size === state.selectedSize
-  )!.upsell
-
-  let upsellVariant
-  if (upsellId) {
-    upsellVariant = all_variants.find(variant => variant.id === upsellId)!
-  }
-
+  )?.upsell
+  const [upsellDisplayedVariants, setUpsellDisplayedVariants] = useState(
+    upsellProductVariant
+      ? all_variants.filter(
+          variant =>
+            variant.product_type === upsellProductVariant.product_type &&
+            variant.name === upsellProductVariant.name
+        )
+      : null
+  )
+  console.log('This is the upsellDisplayedVariants: ', upsellDisplayedVariants)
+  const [upsellSelectedVariant, setUpsellSelectedVariant] = useState(
+    upsellProductVariant
+      ? all_variants.filter(
+          variant =>
+            variant.product_type === upsellProductVariant.product_type &&
+            variant.name === upsellProductVariant.name
+        )[0]
+      : null
+  )
+  console.log('This is the upsellSelectedVariant: ', upsellSelectedVariant)
   const [upsellModal, { open: openUpsellModal, close: closeUpsellModal }] =
     useDisclosure(false)
 
@@ -351,121 +376,224 @@ function Main({
           closeUpsellModal()
           setIsCartOpen(true)
         }}
-        title="Αγόρασε το τώρα!!!"
+        title={`${page.upsell}`}
+        classNames={{
+          header: '!relative !flex',
+          title: '!mx-auto !text-xl',
+          close: '!absolute !top-4 !right-4',
+        }}
         centered
       >
         <>
-          {upsellVariant && (
-            <div className="flex flex-col">
-              <h1 className="mx-auto text-2xl mb-2">
-                {upsellVariant.product_type} {upsellVariant.name}
-              </h1>
-              <div className="relative aspect-square mb-2">
-                <Image
-                  component={NextImage}
-                  src={`${envClient.MINIO_PRODUCT_URL}/${upsellVariant.product_type}/${upsellVariant.images[0]}`}
-                  alt={upsellVariant.images[0]}
-                  fill
-                  style={{ objectFit: 'cover' }}
-                  priority
-                />
-              </div>
-              {upsellVariant.color && (
-                <div className="flex gap-2 items-center mb-1">
-                  <h2 className="text-xl">Χρώμα</h2>
-                  <div
-                    style={{ backgroundColor: upsellVariant.color }}
-                    className="w-6 h-6 rounded-full"
+          {upsellProductVariant &&
+            upsellDisplayedVariants &&
+            upsellSelectedVariant && (
+              <div className="flex flex-col">
+                <div className="flex mb-2">
+                  <h1 className="text-xl">
+                    {upsellProductVariant.product_type}{' '}
+                    {upsellProductVariant.name}
+                  </h1>
+                  <div className="flex gap-2 ml-auto">
+                    {upsellSelectedVariant.price_before > 0 && (
+                      <h2 className="text-xl text-[var(--mantine-border)] line-through decoration-red-500">{`${upsellSelectedVariant.price_before}€`}</h2>
+                    )}
+                    <h2 className="text-xl">{`${upsellSelectedVariant.price}€`}</h2>
+                  </div>
+                </div>
+                <div className="relative aspect-square w-3/4 mx-auto mb-2">
+                  <Image
+                    component={NextImage}
+                    src={`${envClient.MINIO_PRODUCT_URL}/${upsellSelectedVariant.product_type}/${upsellSelectedVariant.images[0]}`}
+                    alt={upsellSelectedVariant.images[0]}
+                    fill
+                    style={{ objectFit: 'cover' }}
+                    priority
                   />
                 </div>
-              )}
-              {upsellVariant.size && (
-                <div className="flex gap-2 items-center">
-                  <h2 className="text-xl">Μέγεθος</h2>
-                  <h2 className="text-lg">{upsellVariant.size}</h2>
-                </div>
-              )}
-              <div className="lg:mb-8 2xl:mb-0 mt-6 flex gap-2 w-full justify-center items-center">
-                <div className="flex w-24 h-[42px] rounded-lg border-2 border-[var(--mantine-border)]">
-                  <div onClick={() => handlers.decrement()} className="w-1/3">
-                    <UnstyledButton
-                      size="compact-sm"
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                      }}
-                    >
-                      <FaMinus size={10} />
-                    </UnstyledButton>
+
+                {upsellDisplayedVariants.map(variant => variant.color).length >
+                  0 && (
+                  <div className="mb-2">
+                    <h1 className="mb-1 text-lg">Χρώμα</h1>
+                    <div className="flex gap-2">
+                      {upsellDisplayedVariants
+                        .map(variant => variant.color)
+                        .map((color, index) => {
+                          return color === upsellSelectedVariant.color ? (
+                            <div
+                              key={index}
+                              onClick={() => {
+                                const displayedVariants = all_variants
+                                  .filter(
+                                    variant =>
+                                      variant.product_type ===
+                                        upsellProductVariant.product_type &&
+                                      variant.name === upsellProductVariant.name
+                                  )
+                                  .filter(variant => variant.color === color)
+                                  .filter(
+                                    (item, index, self) =>
+                                      index ===
+                                      self.findIndex(other => other === item)
+                                  )
+                                setUpsellDisplayedVariants(displayedVariants)
+                                setUpsellSelectedVariant(displayedVariants[0])
+                              }}
+                              className={`w-8 h-8 rounded-full p-0.5 border-2 ${
+                                state.selectedColor === color
+                                  ? 'border-black'
+                                  : 'border-[var(--mantine-border)]'
+                              } hover:cursor-pointer`}
+                            >
+                              <div
+                                style={{ backgroundColor: color }}
+                                className={'w-full h-full rounded-full'}
+                              />
+                            </div>
+                          ) : (
+                            <div
+                              key={index}
+                              onClick={() => {
+                                const displayedVariants =
+                                  upsellDisplayedVariants.filter(
+                                    variant => variant.color === color
+                                  )
+                                setUpsellDisplayedVariants(displayedVariants)
+                                setUpsellSelectedVariant(displayedVariants[0])
+                              }}
+                              style={{ backgroundColor: color }}
+                              className="w-8 h-8 rounded-full hover:cursor-pointer"
+                            />
+                          )
+                        })}
+                    </div>
                   </div>
-                  <div className="flex w-1/3 items-center justify-center border-x-1 border-[var(--mantine-border)]">
-                    <p>{count}</p>
+                )}
+
+                {upsellDisplayedVariants.map(variant => variant.size).length >
+                  0 && (
+                  <div className="mb-2">
+                    <h1 className="mb-1 text-lg">Μέγεθος</h1>
+                    <div className="flex gap-2">
+                      {upsellDisplayedVariants
+                        .map(variant => variant.size)
+                        .map((size, index) => (
+                          <div
+                            key={index}
+                            onClick={() =>
+                              setUpsellSelectedVariant(
+                                upsellDisplayedVariants.find(
+                                  variant => variant.size === size
+                                )!
+                              )
+                            }
+                            className={`w-9 h-[31.5px] border-2 rounded-lg ${
+                              state.selectedSize === size
+                                ? 'border-black'
+                                : 'border-[var(--mantine-border)]'
+                            }`}
+                          >
+                            <UnstyledButton
+                              style={{
+                                width: '100%',
+                                height: '100%',
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                              }}
+                            >
+                              {size}
+                            </UnstyledButton>
+                          </div>
+                        ))}
+                    </div>
                   </div>
-                  <div onClick={() => handlers.increment()} className="w-1/3">
-                    <UnstyledButton
-                      size="compact-md"
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                      }}
-                    >
-                      <FaPlus size={10} />
-                    </UnstyledButton>
+                )}
+
+                <div className="mt-4 flex gap-2 w-full justify-center items-center">
+                  <div className="flex w-24 h-[42px] rounded-lg border-2 border-[var(--mantine-border)]">
+                    <div onClick={() => handlers.decrement()} className="w-1/3">
+                      <UnstyledButton
+                        size="compact-sm"
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          display: 'flex',
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                        }}
+                      >
+                        <FaMinus size={10} />
+                      </UnstyledButton>
+                    </div>
+                    <div className="flex w-1/3 items-center justify-center border-x-1 border-[var(--mantine-border)]">
+                      <p>{count}</p>
+                    </div>
+                    <div onClick={() => handlers.increment()} className="w-1/3">
+                      <UnstyledButton
+                        size="compact-md"
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          display: 'flex',
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                        }}
+                      >
+                        <FaPlus size={10} />
+                      </UnstyledButton>
+                    </div>
                   </div>
-                </div>
-                <Button
-                  onClick={() => {
-                    closeUpsellModal()
-                    setIsCartOpen(true)
-                    setCart(prev => {
-                      const existingIndex = prev.findIndex(
-                        item =>
-                          item.product_type === paramsProduct_type &&
-                          item.name === state.selectedVariant &&
-                          item.color === state.selectedColor &&
-                          item.size === state.selectedSize
-                      )
-                      if (existingIndex !== -1) {
-                        const updatedCart = [...prev]
-                        updatedCart[existingIndex] = {
-                          ...updatedCart[existingIndex],
-                          quantity: updatedCart[existingIndex].quantity + count,
+                  <Button
+                    onClick={() => {
+                      closeUpsellModal()
+                      setIsCartOpen(true)
+                      setCart(prev => {
+                        const existingIndex = prev.findIndex(
+                          item =>
+                            item.product_type ===
+                              upsellSelectedVariant.product_type &&
+                            item.name === upsellSelectedVariant.name &&
+                            item.color === upsellSelectedVariant.color &&
+                            item.size === upsellSelectedVariant.size
+                        )
+                        if (existingIndex !== -1) {
+                          const updatedCart = [...prev]
+                          updatedCart[existingIndex] = {
+                            ...updatedCart[existingIndex],
+                            quantity:
+                              updatedCart[existingIndex].quantity + count,
+                          }
+                          return updatedCart
+                        } else {
+                          return [
+                            ...prev,
+                            {
+                              image: upsellSelectedVariant.images[0],
+                              product_type: upsellSelectedVariant.product_type,
+                              name: upsellSelectedVariant.name,
+                              color: upsellSelectedVariant.color,
+                              size: upsellSelectedVariant.size,
+                              price: upsellSelectedVariant.price,
+                              price_before: upsellSelectedVariant.price_before,
+                              quantity: count,
+                            },
+                          ]
                         }
-                        return updatedCart
-                      } else {
-                        return [
-                          ...prev,
-                          {
-                            image: state.images[0],
-                            product_type: paramsProduct_type,
-                            name: state.selectedVariant,
-                            color: state.selectedColor,
-                            size: state.selectedSize,
-                            price: state.price,
-                            price_before: state.price_before,
-                            quantity: count,
-                          },
-                        ]
-                      }
-                    })
-                    handlers.reset()
-                  }}
-                  color="red"
-                  size="md"
-                  radius="md"
-                  style={{ width: '100%' }}
-                >
-                  Προσθήκη στο Καλάθι
-                </Button>
+                      })
+                      handlers.reset()
+                    }}
+                    color="red"
+                    size="md"
+                    radius="md"
+                    style={{ width: '100%' }}
+                  >
+                    Προσθήκη στο Καλάθι
+                  </Button>
+                </div>
               </div>
-            </div>
-          )}
+            )}
         </>
       </Modal>
 
@@ -563,7 +691,7 @@ function Main({
                       }}
                       className="proxima-nova"
                       classNames={{
-                        root: '!text-lg xl:!text-xl',
+                        root: '!text-lg !xl:text-xl',
                       }}
                     >
                       διάλεξε
@@ -617,7 +745,7 @@ function Main({
                               }}
                               className="proxima-nova"
                               classNames={{
-                                root: '!text-lg xl:!text-xl',
+                                root: '!text-lg !xl:text-xl',
                               }}
                             >
                               καμία μάρκα
@@ -688,7 +816,7 @@ function Main({
                       }}
                       className="proxima-nova"
                       classNames={{
-                        root: '!text-lg xl:!text-xl',
+                        root: '!text-!lg text-xl',
                       }}
                     >
                       {state.selectedVariant}
@@ -741,7 +869,7 @@ function Main({
                                   }}
                                   className="proxima-nova"
                                   classNames={{
-                                    root: '!text-lg xl:!text-xl',
+                                    root: '!text-!lg text-xl',
                                   }}
                                 >
                                   {variant}
@@ -767,7 +895,7 @@ function Main({
                     }}
                     className="proxima-nova"
                     classNames={{
-                      root: '!text-lg xl:!text-xl',
+                      root: '!text-!lg text-xl',
                     }}
                   >
                     {state.selectedVariant}
@@ -905,7 +1033,7 @@ function Main({
               </div>
               <Button
                 onClick={() => {
-                  if (upsellId) {
+                  if (upsellProductVariant) {
                     openUpsellModal()
                   } else {
                     setIsCartOpen(true)
@@ -971,14 +1099,14 @@ function Main({
                       >
                         <Accordion.Control
                           classNames={{
-                            control: '!text-lg xl:!text-xl',
+                            control: '!text-!lg text-xl',
                           }}
                         >
                           {faq.question}
                         </Accordion.Control>
                         <Accordion.Panel
                           classNames={{
-                            panel: '!whitespace-pre-line !text-lg xl:!text-xl',
+                            panel: '!whitespace-pre-line !text-!lg text-xl',
                           }}
                           className="proxima-nova"
                         >
@@ -1022,7 +1150,7 @@ function Main({
                     </Accordion.Control>
                     <Accordion.Panel
                       classNames={{
-                        panel: '!whitespace-pre-line !text-lg xl:!text-xl',
+                        panel: '!whitespace-pre-line !text-!lg text-xl',
                       }}
                       className="proxima-nova"
                     >
@@ -1109,7 +1237,7 @@ function Main({
                           <Text
                             className="mb-2 text-white text-center"
                             classNames={{
-                              root: '!text-xl xl:!text-2xl',
+                              root: '!text-!xl text-2xl',
                             }}
                           >
                             {title}
@@ -1117,7 +1245,7 @@ function Main({
                           <Text
                             className="proxima-nova text-white"
                             classNames={{
-                              root: '!whitespace-pre-line !text-lg xl:!text-xl',
+                              root: '!whitespace-pre-line !text-!lg text-xl',
                             }}
                           >
                             {text}

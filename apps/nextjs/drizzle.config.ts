@@ -13,7 +13,7 @@ export default defineConfig({
     'products',
     'orders',
     'reviews',
-    'metrics',
+    'other',
   ],
   schema: './src/lib/postgres/schema.ts',
   out: './src/lib/postgres/migrations',

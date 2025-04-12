@@ -1,6 +1,10 @@
 import { notFound, redirect } from 'next/navigation'
 import { CollectionPageClient } from '@/app/(user)/collection/[type]/client'
-import { getProductTypesCached, getVariantsCached } from '@/app/(user)/cache'
+import {
+  getProductTypesCached,
+  getShippingCached,
+  getVariantsCached,
+} from '@/app/(user)/cache'
 import { ROUTE_ERROR } from '@/data/routes'
 
 type ProductPageProps = {
@@ -12,12 +16,16 @@ export default async function CollectionPage({ params }: ProductPageProps) {
     params,
     getProductTypesCached(),
     getVariantsCached(),
+    getShippingCached(),
   ])
   if (resolved[1].status === 'rejected') {
     redirect(`${ROUTE_ERROR}?message=${resolved[1].reason}`)
   }
   if (resolved[2].status === 'rejected') {
     redirect(`${ROUTE_ERROR}?message=${resolved[2].reason}`)
+  }
+  if (resolved[3].status === 'rejected') {
+    redirect(`${ROUTE_ERROR}?message=${resolved[3].reason}`)
   }
 
   const resolvedParams = (
@@ -56,15 +64,18 @@ export default async function CollectionPage({ params }: ProductPageProps) {
     })
     .sort((a, b) => a.name.localeCompare(b.name))
 
-  const uniqueBrands = [
-    ...new Set(uniqueVariants.map(variant => variant.brand)),
-  ]
+  const uniqueBrands = uniqueVariants
+    .map(variant => variant.brand)
+    .filter(
+      (item, index, self) => index === self.findIndex(other => other === item)
+    )
 
   return (
     <CollectionPageClient
       paramsProduct_type={paramsProduct_type}
       product_types={resolved[1].value}
       all_variants={resolved[2].value}
+      shipping={resolved[3].value}
       uniqueVariants={uniqueVariants}
       uniqueBrands={uniqueBrands}
     />

@@ -4,6 +4,8 @@ import type {
   typeVariant,
   typeCartLocalStorage,
 } from '@/lib/postgres/data/type'
+import type { typeShipping } from '@/utils/getPostgres'
+
 import { zodCheckout, zodCoupon } from '@/lib/postgres/data/zod'
 import { envClient } from '@/env'
 import { useEffect, useRef, useState } from 'react'
@@ -35,9 +37,13 @@ import axios from 'axios'
 
 type CheckoutPageProps = {
   all_variants: typeVariant[]
+  shipping: typeShipping
 }
 
-export function CheckoutPageClient({ all_variants }: CheckoutPageProps) {
+export function CheckoutPageClient({
+  all_variants,
+  shipping,
+}: CheckoutPageProps) {
   const router = useRouter()
   const [orderCompleteResponse, setOrderCompleteResponse] = useState<null | {
     id: string
@@ -119,8 +125,8 @@ export function CheckoutPageClient({ all_variants }: CheckoutPageProps) {
     : coupon?.fixed
     ? total - coupon.fixed
     : total
-  const freeShippingAmount = 50
-  const freeShipping = total > freeShippingAmount
+
+  const freeShipping = shipping.free ? subTotal >= shipping.free : false
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -208,6 +214,10 @@ export function CheckoutPageClient({ all_variants }: CheckoutPageProps) {
                             {(product.price * product.quantity).toFixed(2)}€
                           </h2>
                         )}
+                        <div className="absolute bottom-2 right-2 flex gap-1">
+                          <h2>Ποσότητα: </h2>
+                          <p>{product.quantity}</p>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -352,7 +362,11 @@ export function CheckoutPageClient({ all_variants }: CheckoutPageProps) {
                     <Radio
                       size="sm"
                       value="Αντικαταβολή"
-                      label="Αντικαταβολή (+3€ επιβάρυνση)"
+                      label={`Αντικαταβολή${
+                        shipping.surcharge
+                          ? ` +${shipping.surcharge}€ επιβάρυνση`
+                          : ''
+                      }`}
                     />
                   </Group>
                 </Radio.Group>
@@ -439,11 +453,11 @@ export function CheckoutPageClient({ all_variants }: CheckoutPageProps) {
                 <div className="flex">
                   <h2>Έξοδα αποστολής</h2>
                   {!freeShipping ? (
-                    <p className="ml-auto">6.00€</p>
+                    <p className="ml-auto">{shipping.expense!.toFixed(2)}€</p>
                   ) : (
                     <div className="ml-auto flex gap-2 items-center">
                       <p className="text-[var(--mantine-border)] line-through decoration-red-500">
-                        6.00€
+                        {shipping.expense!.toFixed(2)}€
                       </p>
                       <p>0.00€</p>
                     </div>
@@ -452,9 +466,11 @@ export function CheckoutPageClient({ all_variants }: CheckoutPageProps) {
                 <div className="flex">
                   <h2>Επιβάρυνση</h2>
                   <p className="ml-auto">
-                    {form.values.payment_method !== 'Αντικαταβολή'
-                      ? '0.00'
-                      : '3.00'}
+                    {(form.values.payment_method === 'Αντικαταβολή' &&
+                    shipping.surcharge
+                      ? shipping.surcharge
+                      : 0
+                    ).toFixed(2)}
                     €
                   </p>
                 </div>
@@ -463,8 +479,11 @@ export function CheckoutPageClient({ all_variants }: CheckoutPageProps) {
                   <p className="ml-auto">
                     {(
                       subTotal +
-                      (freeShipping ? 0 : 6) +
-                      (form.values.payment_method !== 'Αντικαταβολή' ? 0 : 3)
+                      (freeShipping ? 0 : shipping.expense!) +
+                      (form.values.payment_method === 'Αντικαταβολή' &&
+                      shipping.surcharge
+                        ? shipping.surcharge
+                        : 0)
                     ).toFixed(2)}
                     €
                   </p>

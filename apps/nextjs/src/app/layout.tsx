@@ -12,6 +12,7 @@ import {
 } from '@mantine/core'
 import '@mantine/dates/styles.css'
 import '@mantine/carousel/styles.css'
+import '@mantine/charts/styles.css'
 
 import './globals.css'
 

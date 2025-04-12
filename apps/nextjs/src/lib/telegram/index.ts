@@ -6,7 +6,7 @@ import { Telegraf } from 'telegraf'
 const chatIds = {
   ERROR: readSecret('TELEGRAM_ERROR_CHAT_ID'),
   AUTH: readSecret('TELEGRAM_AUTH_CHAT_ID'),
-  // ORDER: readSecret('TELEGRAM_ORDER_CHAT_ID'),
+  ORDER: readSecret('TELEGRAM_ORDER_CHAT_ID'),
   // REVIEW: readSecret('TELEGRAM_REVIEW_CHAT_ID'),
 }
 
@@ -39,7 +39,6 @@ export async function sendTelegramMessage(
       e
     )
     console.error(message)
-    sendTelegramMessage('ERROR', message)
   }
 }
 
@@ -54,7 +53,5 @@ async function telegramPing() {
       e
     )
     console.error(message)
-    sendTelegramMessage('ERROR', message)
-    process.exit(1)
   }
 }

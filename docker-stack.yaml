@@ -29,6 +29,8 @@ secrets:
     external: true
   TELEGRAM_AUTH_CHAT_ID:
     external: true
+  TELEGRAM_ORDER_CHAT_ID:
+    external: true
   NODEMAILER_AUTH_USER:
     external: true
   NODEMAILER_AUTH_PASS:
@@ -222,6 +224,7 @@ services:
       - TELEGRAM_BOT_TOKEN
       - TELEGRAM_ERROR_CHAT_ID
       - TELEGRAM_AUTH_CHAT_ID
+      - TELEGRAM_ORDER_CHAT_ID
       - NODEMAILER_AUTH_USER
       - NODEMAILER_AUTH_PASS
       - NODEMAILER_EMAIL

@@ -6,6 +6,8 @@ import {
   variant,
   review,
   order,
+  daily_session,
+  shipping,
 } from '@/lib/postgres/schema'
 import { sendTelegramMessage } from '@/lib/telegram'
 import { formatMessage } from '@/utils/formatMessage'
@@ -119,7 +121,7 @@ export async function getProductPage(product_type: string) {
     return array[0]
   } catch (e) {
     const message = formatMessage(
-      '@/utils/getPostgres.ts getProductTypePageSettings()',
+      '@/utils/getPostgres.ts getProductPage()',
       errorPostgres,
       e
     )
@@ -162,7 +164,7 @@ export async function getProductReviews(product_type: string) {
     /* eslint-disable @typescript-eslint/no-unused-vars */
   } catch (e) {
     const message = formatMessage(
-      '@/utils/getPostgres.ts getProductTypePageSettings()',
+      '@/utils/getPostgres.ts getProductReviews()',
       errorPostgres,
       e
     )
@@ -178,7 +180,7 @@ export async function getOrders() {
     return array
   } catch (e) {
     const message = formatMessage(
-      '@/utils/getPostgres.ts getOrderByOperators()',
+      '@/utils/getPostgres.ts getOrders()',
       errorPostgres,
       e
     )
@@ -187,3 +189,41 @@ export async function getOrders() {
     throw errorPostgres
   }
 }
+
+export async function getDailySessions() {
+  try {
+    const array = await postgres.select().from(daily_session)
+    return array
+  } catch (e) {
+    const message = formatMessage(
+      '@/utils/getPostgres.ts getDailySessions()',
+      errorPostgres,
+      e
+    )
+    console.error(message)
+    sendTelegramMessage('ERROR', message)
+    throw errorPostgres
+  }
+}
+export type typeDailySessions = Awaited<ReturnType<typeof getDailySessions>>
+
+export async function getShipping() {
+  try {
+    const array = await postgres.select().from(shipping)
+    return {
+      expense: array[0].expense,
+      free: array[0].free,
+      surcharge: array[0].surcharge,
+    }
+  } catch (e) {
+    const message = formatMessage(
+      '@/utils/getPostgres.ts getFreeShippingAmount()',
+      errorPostgres,
+      e
+    )
+    console.error(message)
+    sendTelegramMessage('ERROR', message)
+    throw errorPostgres
+  }
+}
+export type typeShipping = Awaited<ReturnType<typeof getShipping>>

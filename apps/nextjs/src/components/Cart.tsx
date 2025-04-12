@@ -1,4 +1,5 @@
 import type { typeCartLocalStorage } from '@/lib/postgres/data/type'
+import { typeShipping } from '@/utils/getPostgres'
 
 import { envClient } from '@/env'
 import { Button, Card, Image, Progress, UnstyledButton } from '@mantine/core'
@@ -14,14 +15,21 @@ import { ROUTE_CHECKOUT, ROUTE_PRODUCT } from '@/data/routes'
 type CartProps = {
   isCartOpen: boolean
   setIsCartOpen: Dispatch<SetStateAction<boolean>>
+  shipping: typeShipping
   cart: typeCartLocalStorage
   setCart: Dispatch<SetStateAction<typeCartLocalStorage>>
 }
 
-export function Cart({ cart, setCart, isCartOpen, setIsCartOpen }: CartProps) {
+export function Cart({
+  cart,
+  setCart,
+  shipping,
+  isCartOpen,
+  setIsCartOpen,
+}: CartProps) {
   return (
     <section
-      className={`z-20 fixed top-0 right-0 w-3/4 max-w-[365px] h-full bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${
+      className={`z-20 fixed top-0 right-0 w-full max-w-[365px] h-full bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${
         isCartOpen ? 'translate-x-0' : 'translate-x-full'
       }`}
     >
@@ -41,65 +49,71 @@ export function Cart({ cart, setCart, isCartOpen, setIsCartOpen }: CartProps) {
           <h1 className="text-center text-xl">Το καλάθι σου είναι άδειο.</h1>
         ) : (
           <>
-            <Card
-              withBorder
-              radius="md"
-              padding="md"
-              mb="xs"
-              bg="var(--mantine-color-body)"
-            >
-              <h1 className="text-center">Δωρεάν Μεταφορικά Έξοδα</h1>
-              <div className="text-center">
-                <span
-                  className={`${
+            {shipping.free && (
+              <Card
+                withBorder
+                radius="md"
+                padding="md"
+                mb="xs"
+                bg="var(--mantine-color-body)"
+              >
+                <h1 className="text-center">Δωρεάν Μεταφορικά Έξοδα</h1>
+                <div className="text-center">
+                  <span
+                    className={`${
+                      Math.min(
+                        (cart.reduce(
+                          (acc, item) => acc + item.price * item.quantity,
+                          0
+                        ) /
+                          shipping.free) *
+                          100,
+                        100
+                      ) < 100
+                        ? 'text-red-600'
+                        : 'text-green-600'
+                    }`}
+                  >
+                    {cart
+                      .reduce(
+                        (acc, item) => acc + item.price * item.quantity,
+                        0
+                      )
+                      .toFixed(2)}
+                    €
+                  </span>{' '}
+                  <span>/ {shipping.free.toFixed(2)}€</span>
+                </div>
+                <Progress
+                  value={Math.min(
+                    (cart.reduce(
+                      (acc, item) => acc + item.price * item.quantity,
+                      0
+                    ) /
+                      shipping.free) *
+                      100,
+                    100
+                  )}
+                  color={`${
                     Math.min(
                       (cart.reduce(
                         (acc, item) => acc + item.price * item.quantity,
                         0
                       ) /
-                        50) *
+                        shipping.free) *
                         100,
                       100
                     ) < 100
-                      ? 'text-red-600'
-                      : 'text-green-600'
+                      ? 'red'
+                      : 'green'
                   }`}
-                >
-                  {cart
-                    .reduce((acc, item) => acc + item.price * item.quantity, 0)
-                    .toFixed(2)}
-                  €
-                </span>{' '}
-                <span>/ 50.00€</span>
-              </div>
-              <Progress
-                value={Math.min(
-                  (cart.reduce(
-                    (acc, item) => acc + item.price * item.quantity,
-                    0
-                  ) /
-                    50) *
-                    100,
-                  100
-                )}
-                color={`${
-                  Math.min(
-                    (cart.reduce(
-                      (acc, item) => acc + item.price * item.quantity,
-                      0
-                    ) /
-                      50) *
-                      100,
-                    100
-                  ) < 100
-                    ? 'red'
-                    : 'green'
-                }`}
-                size="lg"
-                radius="xl"
-                mt="xs"
-              />
-            </Card>
+                  size="lg"
+                  radius="xl"
+                  mt="xs"
+                />
+              </Card>
+            )}
+
             <div className="flex-1 overflow-y-auto">
               {cart.map((product, index) => (
                 <div

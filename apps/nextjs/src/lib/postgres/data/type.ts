@@ -6,7 +6,14 @@ import {
   zodCheckout,
   zodCartItemLocalStorage,
   zodCartLocalStorage,
+  zodCart,
 } from './zod'
+
+export type typeUpsell = {
+  product_type: string
+  name: string
+}
+export type typeUpsells = typeUpsell[]
 
 export type typeCoupon = InferSelectModel<typeof coupon>
 export type typeProductPage = InferSelectModel<typeof product_pages>
@@ -22,3 +29,4 @@ export type typeOrder = InferSelectModel<typeof order>
 export type typeCheckout = z.infer<typeof zodCheckout>
 export type typeCartItemLocalStorage = z.infer<typeof zodCartItemLocalStorage>
 export type typeCartLocalStorage = z.infer<typeof zodCartLocalStorage>
+export type typeCart = z.infer<typeof zodCart>

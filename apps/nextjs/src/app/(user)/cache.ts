@@ -1,4 +1,4 @@
-import type { typeProductTypes } from '@/utils/getPostgres'
+import type { typeShipping, typeProductTypes } from '@/utils/getPostgres'
 import type {
   typeProductPage,
   typeReview,
@@ -13,6 +13,7 @@ import {
   getPages,
   getProductTypes,
   getReviews,
+  getShipping,
   getVariants,
 } from '@/utils/getPostgres'
 
@@ -200,5 +201,54 @@ export async function getReviewsCached(): Promise<typeReview[]> {
     return reviews
   } else {
     return []
+  }
+}
+
+export async function getShippingCached(): Promise<typeShipping> {
+  if (process.env.BUILD_TIME !== 'true') {
+    let shipping
+    try {
+      shipping = await redis.get('shipping')
+    } catch (e) {
+      const message = formatMessage(
+        '@/app/(user)/cache.ts getShippingCached() get',
+        errorRedis,
+        e
+      )
+      console.error(message)
+      sendTelegramMessage('ERROR', message)
+      throw errorRedis
+    }
+
+    if (shipping) {
+      return JSON.parse(shipping)
+    } else {
+      try {
+        shipping = await getShipping()
+      } catch (e) {
+        throw e
+      }
+    }
+
+    try {
+      await redis.set('shipping', JSON.stringify(shipping), 'EX', 3600)
+    } catch (e) {
+      const message = formatMessage(
+        '@/app/(user)/cache.ts getShippingCached() set',
+        errorRedis,
+        e
+      )
+      console.error(message)
+      sendTelegramMessage('ERROR', message)
+      throw errorRedis
+    }
+
+    return shipping
+  } else {
+    return {
+      expense: null,
+      free: null,
+      surcharge: null,
+    }
   }
 }

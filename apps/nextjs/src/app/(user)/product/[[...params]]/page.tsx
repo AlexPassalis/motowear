@@ -1,5 +1,6 @@
 import { ProductPageClient } from '@/app/(user)/product/[[...params]]/client'
 import {
+  getShippingCached,
   getPagesCached,
   getProductTypesCached,
   getReviewsCached,
@@ -19,6 +20,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
     getVariantsCached(),
     getPagesCached(),
     getReviewsCached(),
+    getShippingCached(),
   ])
   if (resolved[1].status === 'rejected') {
     redirect(`${ROUTE_ERROR}?message=${resolved[1].reason}`)
@@ -31,6 +33,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
   }
   if (resolved[4].status === 'rejected') {
     redirect(`${ROUTE_ERROR}?message=${resolved[4].reason}`)
+  }
+  if (resolved[5].status === 'rejected') {
+    redirect(`${ROUTE_ERROR}?message=${resolved[5].reason}`)
   }
 
   const resolvedParams = (
@@ -75,6 +80,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
       all_variants={resolved[2].value}
       page={page}
       postgres_reviews={postgres_reviews}
+      shipping={resolved[5].value}
       paramsProduct_type={paramsProduct_type}
       paramsVariant={paramsVariant}
       postgresVariants={postgresVariants}

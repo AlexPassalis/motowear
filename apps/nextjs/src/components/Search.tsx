@@ -64,7 +64,7 @@ function Instant() {
         classNames={{
           form: 'relative w-full',
           input:
-            'searchbox-no-clear w-full pr-10 pl-2 border rounded-lg text-center',
+            'searchbox-no-clear w-full pr-10 pl-2 border rounded-lg text-center !text-lg',
           reset:
             'block absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer',
           resetIcon: 'w-4 h-4',

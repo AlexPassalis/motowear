@@ -11,6 +11,8 @@ import {
 } from 'drizzle-orm/pg-core'
 import { z } from 'zod'
 
+import type { typeUpsell } from './data/type'
+
 export { authSchema, user, account, verification, session } from './auth.schema'
 
 import { zodCart, zodCheckout } from './data/zod'
@@ -32,6 +34,7 @@ export const product_pages = pagesSchema.table('product_pages', {
   carousel: jsonb('carousel')
     .$type<{ title: string; text: string; image: string }[]>()
     .notNull(),
+  upsell: text('upsell').notNull(),
 })
 
 export const productsSchema = pgSchema('products')
@@ -40,32 +43,26 @@ export const brand = productsSchema.table('brand', {
   image: text('image').primaryKey(),
 })
 
-export const variant = productsSchema.table(
-  'variant',
-  {
-    product_type: text('product_type')
-      .notNull()
-      .references(() => product_pages.product_type, {
-        onDelete: 'cascade',
-      }),
-    index: integer('index').notNull(),
-    id: uuid('id').primaryKey(),
-    images: text('images').array().notNull(),
-    name: text('name').notNull(),
-    description: text('description').notNull(),
-    brand: text('brand')
-      .notNull()
-      .references(() => brand.image),
-    color: text('color').notNull(),
-    size: text('size').notNull(),
-    price: Numeric('price', { precision: 7, scale: 2 }).notNull(),
-    price_before: Numeric('price_before', { precision: 7, scale: 2 }).notNull(),
-    upsell: uuid('upsell'),
-  },
-  variant => ({
-    imagesMinLength: sql`CHECK (array_length(${variant.images}, 1) >= 1)`,
-  })
-)
+export const variant = productsSchema.table('variant', {
+  product_type: text('product_type')
+    .notNull()
+    .references(() => product_pages.product_type, {
+      onDelete: 'cascade',
+    }),
+  index: integer('index').notNull(),
+  id: uuid('id').primaryKey(),
+  images: text('images').array().notNull(),
+  name: text('name').notNull(),
+  description: text('description').notNull(),
+  brand: text('brand')
+    .notNull()
+    .references(() => brand.image),
+  color: text('color').notNull(),
+  size: text('size').notNull(),
+  price: Numeric('price', { precision: 7, scale: 2 }).notNull(),
+  price_before: Numeric('price_before', { precision: 7, scale: 2 }).notNull(),
+  upsell: jsonb('upsell').$type<typeUpsell>(),
+})
 
 export const ordersSchema = pgSchema('orders')
 export const coupon = ordersSchema.table(
@@ -105,8 +102,14 @@ export const review = reviewsSchema.table('review', {
   date: date('date').notNull(),
 })
 
-export const metricsSchema = pgSchema('metrics')
-export const daily_session = metricsSchema.table('daily_session', {
-  day: date('day').primaryKey(),
-  count: integer('count').notNull(),
+export const otherSchema = pgSchema('other')
+export const daily_session = otherSchema.table('daily_session', {
+  date: date('date').primaryKey(),
+  sessions: integer('sessions').notNull(),
+})
+export const shipping = otherSchema.table('shipping', {
+  primary_key: text('primary_key').primaryKey(),
+  expense: Numeric('expense', { precision: 7, scale: 2 }),
+  free: Numeric('free', { precision: 7, scale: 2 }),
+  surcharge: Numeric('surcharge', { precision: 7, scale: 2 }),
 })

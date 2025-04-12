@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
       '@mantine/carousel',
       '@mantine/form',
       '@mantine/dates',
+      '@mantine/charts',
     ],
   },
   images: {

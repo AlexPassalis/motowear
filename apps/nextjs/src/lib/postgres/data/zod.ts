@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { createSelectSchema } from 'drizzle-zod'
-import { coupon, product_pages, review, variant } from '../schema'
+import { coupon, product_pages, review, shipping, variant } from '../schema'
 
 export const zodCheckout = z.object({
   email: z.string().email({ message: 'Λάθος email.' }),
@@ -57,6 +57,7 @@ export const zodVariant = createSelectSchema(variant)
   .omit({ index: true })
   .extend({
     id: z.string(),
+    images: z.array(z.string()).min(1),
   })
 export const zodVariants = z.array(zodVariant)
 export const zodCoupon = createSelectSchema(coupon)
@@ -64,3 +65,6 @@ export const zodReview = createSelectSchema(review)
 export const zodProductPage = createSelectSchema(product_pages)
 export const zodTypeReview = createSelectSchema(review)
 export const zodTypeReviews = z.array(zodTypeReview)
+export const zodShipping = createSelectSchema(shipping).omit({
+  primary_key: true,
+})

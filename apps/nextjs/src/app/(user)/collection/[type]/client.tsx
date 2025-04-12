@@ -1,6 +1,7 @@
 'use client'
 
 import type { typeVariant } from '@/lib/postgres/data/type'
+import { typeShipping } from '@/utils/getPostgres'
 
 import HeaderProvider from '@/context/HeaderProvider'
 import { ROUTE_PRODUCT } from '@/data/routes'
@@ -16,6 +17,7 @@ type CollectionPageClientProps = {
   paramsProduct_type: string
   product_types: string[]
   all_variants: typeVariant[]
+  shipping: typeShipping
   uniqueVariants: { image: string; name: string; brand: string }[]
   uniqueBrands: string[]
 }
@@ -24,6 +26,7 @@ export function CollectionPageClient({
   paramsProduct_type,
   product_types,
   all_variants,
+  shipping,
   uniqueVariants,
   uniqueBrands,
 }: CollectionPageClientProps) {
@@ -47,12 +50,16 @@ export function CollectionPageClient({
         if (brandDropdown) setBrandDropdown(false)
       }}
     >
-      <HeaderProvider product_types={product_types} all_variants={all_variants}>
+      <HeaderProvider
+        product_types={product_types}
+        all_variants={all_variants}
+        shipping={shipping}
+      >
         <main className="flex-1 flex flex-col">
           <h1 className="text-2xl text-center">{paramsProduct_type}</h1>
           {uniqueBrands.length > 0 && (
-            <div className="flex flex-col">
-              <h2 className="ml-2 text-xl xl:text-2xl">Μάρκα</h2>
+            <div className="ml-2 flex flex-col">
+              <h2 className="text-lg xl:text-xl">Μάρκα</h2>
               <div className="relative max-w-[250px]">
                 <div
                   onClick={() => setBrandDropdown(prev => !prev)}
@@ -72,7 +79,7 @@ export function CollectionPageClient({
                       }}
                       className="proxima-nova"
                       classNames={{
-                        root: '!text-lg xl:!text-xl',
+                        root: '!xl:text-gl',
                       }}
                     >
                       διάλεξε
@@ -121,7 +128,7 @@ export function CollectionPageClient({
                               }}
                               className="proxima-nova"
                               classNames={{
-                                root: '!text-lg xl:!text-xl',
+                                root: '!xl:text-lg',
                               }}
                             >
                               καμία μάρκα
@@ -162,7 +169,7 @@ export function CollectionPageClient({
           )}
 
           <div className="p-4">
-            <SimpleGrid cols={2} spacing="sm" mb="md">
+            <SimpleGrid cols={{ base: 2, md: 3, xl: 4 }} spacing="sm" mb="md">
               {visibleVariants.map(({ name, image }, index) => (
                 <Link
                   key={index}

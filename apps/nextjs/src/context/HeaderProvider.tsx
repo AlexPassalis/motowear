@@ -1,3 +1,9 @@
+import type {
+  typeVariant,
+  typeCartLocalStorage,
+} from '@/lib/postgres/data/type'
+import type { typeShipping } from '@/utils/getPostgres'
+
 import { Menu } from '@/components/Menu'
 import { Search } from '@/components/Search'
 import { Cart } from '@/components/Cart'
@@ -16,11 +22,6 @@ import {
   useState,
 } from 'react'
 
-import type {
-  typeVariant,
-  typeCartLocalStorage,
-} from '@/lib/postgres/data/type'
-
 type HeaderContext = {
   setCart: Dispatch<SetStateAction<typeCartLocalStorage>>
   setIsSearchOpen: Dispatch<SetStateAction<boolean>>
@@ -32,12 +33,14 @@ export const HeaderContext = createContext<HeaderContext | null>(null)
 type HeaderProviderProps = {
   product_types: string[]
   all_variants: typeVariant[]
+  shipping: typeShipping
   children: ReactNode
 }
 
 export default function HeaderProvider({
   product_types,
   all_variants,
+  shipping,
   children,
 }: HeaderProviderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -69,6 +72,7 @@ export default function HeaderProvider({
       <Cart
         cart={cart}
         setCart={setCart}
+        shipping={shipping}
         isCartOpen={isCartOpen}
         setIsCartOpen={setIsCartOpen}
       />

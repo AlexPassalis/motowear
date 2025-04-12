@@ -12,6 +12,7 @@
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
     "@mantine/carousel": "^7.17.2",
+    "@mantine/charts": "^7.17.4",
     "@mantine/core": "^7.17.2",
     "@mantine/dates": "^7.17.3",
     "@mantine/form": "^7.17.3",
@@ -44,6 +45,7 @@
     "react-dom": "^19.0.0",
     "react-icons": "^5.5.0",
     "react-instantsearch": "^7.15.4",
+    "recharts": "2",
     "telegraf": "^4.16.3",
     "typesense": "^2.0.3",
     "typesense-instantsearch-adapter": "^2.8.0",

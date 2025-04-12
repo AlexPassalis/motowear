@@ -9,3 +9,4 @@ export const ROUTE_CONTACT = '/contact' as const
 export const ROUTE_ADMIN_AUTH = '/admin/auth' as const
 export const ROUTE_ADMIN = '/admin' as const
 export const ROUTE_ADMIN_PRODUCT = '/admin/product' as const
+export const ROUTE_ADMIN_ORDER = '/admin/order' as const
