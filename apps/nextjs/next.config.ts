@@ -20,14 +20,13 @@ const nextConfig: NextConfig = {
         hostname: 'minio',
         port: '9000',
         pathname: '/motowear/**',
+        search: '',
       },
-      // {
-      //   protocol: 'https',
-      //   hostname: `${envServer.HOST}`,
-      //   pathname: '/api/admin/product/brand/image/**',
-      // },
     ],
   },
+  /* Remove next.js compression, so that nginx can do the compression using gzip 
+  and therefore prevent buffering (and use streaming instead). */
+  compress: false,
 }
 
 export default nextConfig

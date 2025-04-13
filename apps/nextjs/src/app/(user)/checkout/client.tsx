@@ -453,13 +453,18 @@ export function CheckoutPageClient({
                 <div className="flex">
                   <h2>Έξοδα αποστολής</h2>
                   {!freeShipping ? (
-                    <p className="ml-auto">{shipping.expense!.toFixed(2)}€</p>
+                    <p className="ml-auto">
+                      {shipping.expense ? shipping.expense.toFixed(2) : '0.00'}€
+                    </p>
                   ) : (
                     <div className="ml-auto flex gap-2 items-center">
                       <p className="text-[var(--mantine-border)] line-through decoration-red-500">
-                        {shipping.expense!.toFixed(2)}€
+                        {shipping.expense
+                          ? shipping.expense.toFixed(2)
+                          : '0.00'}
+                        €
                       </p>
-                      <p>0.00€</p>
+                      {shipping.expense && <p>0.00€</p>}
                     </div>
                   )}
                 </div>
@@ -479,7 +484,11 @@ export function CheckoutPageClient({
                   <p className="ml-auto">
                     {(
                       subTotal +
-                      (freeShipping ? 0 : shipping.expense!) +
+                      (freeShipping
+                        ? 0
+                        : shipping.expense
+                        ? shipping.expense
+                        : 0) +
                       (form.values.payment_method === 'Αντικαταβολή' &&
                       shipping.surcharge
                         ? shipping.surcharge

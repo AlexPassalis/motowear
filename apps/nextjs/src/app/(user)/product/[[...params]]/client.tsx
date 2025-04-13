@@ -419,6 +419,10 @@ function Main({
                     <div className="flex gap-2">
                       {upsellDisplayedVariants
                         .map(variant => variant.color)
+                        .filter(
+                          (item, index, self) =>
+                            index === self.findIndex(other => other === item)
+                        )
                         .map((color, index) => {
                           return color === upsellSelectedVariant.color ? (
                             <div
@@ -441,9 +445,9 @@ function Main({
                                 setUpsellSelectedVariant(displayedVariants[0])
                               }}
                               className={`w-8 h-8 rounded-full p-0.5 border-2 ${
-                                state.selectedColor === color
+                                upsellSelectedVariant.color === color
                                   ? 'border-black'
-                                  : 'border-[var(--mantine-border)]'
+                                  : 'border-white'
                               } hover:cursor-pointer`}
                             >
                               <div
@@ -478,6 +482,10 @@ function Main({
                     <div className="flex gap-2">
                       {upsellDisplayedVariants
                         .map(variant => variant.size)
+                        .filter(
+                          (item, index, self) =>
+                            index === self.findIndex(other => other === item)
+                        )
                         .map((size, index) => (
                           <div
                             key={index}
@@ -489,7 +497,7 @@ function Main({
                               )
                             }
                             className={`w-9 h-[31.5px] border-2 rounded-lg ${
-                              state.selectedSize === size
+                              upsellSelectedVariant.size === size
                                 ? 'border-black'
                                 : 'border-[var(--mantine-border)]'
                             }`}
@@ -816,7 +824,7 @@ function Main({
                       }}
                       className="proxima-nova"
                       classNames={{
-                        root: '!text-!lg text-xl',
+                        root: '!text-lg !xl:text-xl',
                       }}
                     >
                       {state.selectedVariant}
@@ -869,7 +877,7 @@ function Main({
                                   }}
                                   className="proxima-nova"
                                   classNames={{
-                                    root: '!text-!lg text-xl',
+                                    root: '!text-lg !xl:text-xl',
                                   }}
                                 >
                                   {variant}
@@ -895,7 +903,7 @@ function Main({
                     }}
                     className="proxima-nova"
                     classNames={{
-                      root: '!text-!lg text-xl',
+                      root: '!text-lg !xl:text-xl',
                     }}
                   >
                     {state.selectedVariant}
@@ -1099,14 +1107,14 @@ function Main({
                       >
                         <Accordion.Control
                           classNames={{
-                            control: '!text-!lg text-xl',
+                            control: '!text-lg !xl:text-xl',
                           }}
                         >
                           {faq.question}
                         </Accordion.Control>
                         <Accordion.Panel
                           classNames={{
-                            panel: '!whitespace-pre-line !text-!lg text-xl',
+                            panel: '!whitespace-pre-line !text-lg !xl:text-xl',
                           }}
                           className="proxima-nova"
                         >
@@ -1150,7 +1158,7 @@ function Main({
                     </Accordion.Control>
                     <Accordion.Panel
                       classNames={{
-                        panel: '!whitespace-pre-line !text-!lg text-xl',
+                        panel: '!whitespace-pre-line !text-lg !xl:text-xl',
                       }}
                       className="proxima-nova"
                     >
@@ -1237,7 +1245,7 @@ function Main({
                           <Text
                             className="mb-2 text-white text-center"
                             classNames={{
-                              root: '!text-!xl text-2xl',
+                              root: '!text-xl !xl:text-2xl',
                             }}
                           >
                             {title}
@@ -1245,7 +1253,7 @@ function Main({
                           <Text
                             className="proxima-nova text-white"
                             classNames={{
-                              root: '!whitespace-pre-line !text-!lg text-xl',
+                              root: '!whitespace-pre-line !text-lg !xl:text-xl',
                             }}
                           >
                             {text}

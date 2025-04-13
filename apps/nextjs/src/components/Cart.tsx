@@ -29,7 +29,7 @@ export function Cart({
 }: CartProps) {
   return (
     <section
-      className={`z-20 fixed top-0 right-0 w-full max-w-[365px] h-full bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${
+      className={`z-20 fixed top-0 right-0 w-full max-w-[400px] h-full bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${
         isCartOpen ? 'translate-x-0' : 'translate-x-full'
       }`}
     >
