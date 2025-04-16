@@ -3,7 +3,7 @@ import type {
   typeCartLocalStorage,
   typeCoupon,
 } from '@/lib/postgres/data/type'
-import type { typeShipping } from '@/utils/getPostgres'
+import type { typeProductTypes, typeShipping } from '@/utils/getPostgres'
 
 import { Menu } from '@/components/Menu'
 import { Search } from '@/components/Search'
@@ -48,7 +48,7 @@ type HeaderContext = {
 export const HeaderContext = createContext<HeaderContext | null>(null)
 
 type HeaderProviderProps = {
-  product_types: string[]
+  product_types: typeProductTypes
   all_variants: typeVariant[]
   shipping: typeShipping
   children: ReactNode

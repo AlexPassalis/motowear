@@ -9,11 +9,11 @@ import Link from 'next/link'
 import { ROUTE_HOME } from '@/data/routes'
 
 const links = [
-  { link: '#', label: 'Contact' },
-  { link: '#', label: 'Privacy' },
-  { link: '#', label: 'Blog' },
-  { link: '#', label: 'Store' },
-  { link: '#', label: 'Careers' },
+  { link: '/contact', label: 'Στοιχεία Επικοινωνίας' },
+  { link: '/privacy_policy', label: 'Πολιτική Απορρήτου' },
+  { link: '/return_policy', label: 'Πολιτική Επιστροφών' },
+  { link: '/shipping_policy', label: 'Πολιτική Μεταφορικών' },
+  { link: '/terms_of_service', label: 'Όροι & Προϋποθέσεις' },
 ]
 
 export function Footer() {
@@ -38,16 +38,40 @@ export function Footer() {
         <Group className={classes.links}>{items}</Group>
 
         <Group gap="xs" justify="flex-end" wrap="nowrap">
-          <ActionIcon size="lg" variant="default" radius="xl">
+          <ActionIcon
+            component="a"
+            href="mailto:motoweargr@gmail.com"
+            size="lg"
+            variant="default"
+            radius="xl"
+          >
             <MdOutlineEmail size={18} />
           </ActionIcon>
-          <ActionIcon size="lg" variant="default" radius="xl">
+          <ActionIcon
+            component="a"
+            href="tel:+306939133385"
+            size="lg"
+            variant="default"
+            radius="xl"
+          >
             <FaPhoneAlt size={18} />
           </ActionIcon>
-          <ActionIcon size="lg" variant="default" radius="xl">
+          <ActionIcon
+            component="a"
+            href="https://instagram.com/motowear.gr"
+            size="lg"
+            variant="default"
+            radius="xl"
+          >
             <FaInstagram size={18} />
           </ActionIcon>
-          <ActionIcon size="lg" variant="default" radius="xl">
+          <ActionIcon
+            component="a"
+            href="https://www.facebook.com/p/Moto-Wear-GR-100087815463903/"
+            size="lg"
+            variant="default"
+            radius="xl"
+          >
             <FaFacebookSquare size={18} />
           </ActionIcon>
         </Group>

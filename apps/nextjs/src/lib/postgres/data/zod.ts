@@ -54,6 +54,7 @@ export const zodCartItem = z.object({
   size: z.string(),
   price: z.number(),
   quantity: z.number(),
+  image: z.string(),
 })
 export const zodCart = z.array(zodCartItem)
 export const zodCartItemLocalStorage = zodCartItem.extend({

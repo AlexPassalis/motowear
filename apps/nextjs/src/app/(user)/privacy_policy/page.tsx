@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic'
 
-import { ContactPageClient } from '@/app/(user)/contact/client'
+import { PrivacyPolicyPageClient } from '@/app/(user)/privacy_policy/client'
 import {
   getProductTypesCached,
   getShippingCached,
@@ -9,7 +9,7 @@ import {
 import { redirect } from 'next/navigation'
 import { ROUTE_ERROR } from '@/data/routes'
 
-export default async function ContactPage() {
+export default async function PrivacyPolicyPage() {
   const resolved = await Promise.allSettled([
     getProductTypesCached(),
     getVariantsCached(),
@@ -26,7 +26,7 @@ export default async function ContactPage() {
   }
 
   return (
-    <ContactPageClient
+    <PrivacyPolicyPageClient
       product_types={resolved[0].value}
       all_variants={resolved[1].value}
       shipping={resolved[2].value}

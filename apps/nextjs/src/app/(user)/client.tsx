@@ -114,7 +114,7 @@ export function HomePageClient({
             <h1 className="mb-2 text-center text-xl xl:text-2xl">
               Κατηγορίες Προϊόντων
             </h1>
-            <hr className="w-full mx-4 border-t-2 border-[var(--mantine-border)] mb-2" />
+            <hr className="border-t-2 border-[var(--mantine-border)] my-6" />
             <div className="flex gap-2 justify-center">
               {home_page_variants
                 .map(variant => variant.product_type)
@@ -176,7 +176,7 @@ export function HomePageClient({
           </div>
         )}
         {home_page.faq.length > 0 && (
-          <Container size="xl" className="w-full mt-6">
+          <Container size="xl" className="mt-6">
             <Accordion variant="separated">
               {home_page.faq.map((faq, index) => (
                 <Fragment key={index}>

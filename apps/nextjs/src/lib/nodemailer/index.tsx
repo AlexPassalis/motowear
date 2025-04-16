@@ -7,6 +7,8 @@ import { readSecret } from '@/utils/readSecret'
 import { formatMessage } from '@/utils/formatMessage'
 import { errorNodemailer, errorReactEmail } from '@/data/error'
 import { sendTelegramMessage } from '@/lib/telegram/index'
+import OrderConfirmationEmail from '@/lib/react-email/OrderConfirmationEmail'
+import { typeCart, typeCheckout } from '../postgres/data/type'
 
 const transporter = nodemailer.createTransport({
   host: envServer.NODEMAILER_HOST,
@@ -18,13 +20,19 @@ const transporter = nodemailer.createTransport({
   },
 })
 
-export async function sendOrderEmail(email: string) {
+export async function sendOrderConfirmationEmail(
+  checkout: typeCheckout,
+  cart: typeCart,
+  email: string
+) {
   let emailHtml
   try {
-    emailHtml = await render(<AirbnbReviewEmail />)
+    emailHtml = await render(
+      <OrderConfirmationEmail checkout={checkout} cart={cart} /> // NEEDS FIXING ADD THE ORDER ID
+    )
   } catch (e) {
     const message = formatMessage(
-      '@/lib/nodemailer/sendOrderEmail',
+      '@/lib/nodemailer/index.tsx sendOrderConfirmationEmail()',
       errorReactEmail,
       e
     )
@@ -35,15 +43,14 @@ export async function sendOrderEmail(email: string) {
   const options = {
     from: readSecret('NODEMAILER_EMAIL'),
     to: email,
-    subject: 'motowear.com',
-    text: 'This is the text field',
+    subject: 'motowear.gr',
     html: emailHtml,
   }
   try {
     await transporter.sendMail(options)
   } catch (e) {
     const message = formatMessage(
-      '@/lib/nodemailer/sendOrderEmail',
+      '@/lib/nodemailer/index.tsx sendOrderConfirmationEmail()',
       errorNodemailer,
       e
     )
@@ -69,8 +76,7 @@ export async function sendReviewEmail(email: string) {
   const options = {
     from: readSecret('NODEMAILER_EMAIL'),
     to: email,
-    subject: 'motowear.com',
-    text: 'This is the text field',
+    subject: 'motowear.gr',
     html: emailHtml,
   }
   try {

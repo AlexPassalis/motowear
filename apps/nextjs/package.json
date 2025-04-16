@@ -3,6 +3,7 @@
   "name": "motowear",
   "scripts": {
     "dev": "next dev",
+    "react-email": "email dev --dir ./src/lib/react-email",
     "postgres:generate": "drizzle-kit generate",
     "postgres:migrate": "cross-env POSTGRES_MIGRATING=true drizzle-kit push",
     "lint": "next lint",
@@ -70,6 +71,7 @@
     "postcss": "^8.5.3",
     "postcss-preset-mantine": "^1.17.0",
     "postcss-simple-vars": "^7.0.1",
+    "react-email": "^4.0.7",
     "tailwindcss": "^4",
     "typescript": "^5"
   },
