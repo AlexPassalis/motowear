@@ -89,3 +89,15 @@ export async function updateTypesense(product_type: string) {
     }
   }
 }
+
+export async function deleteTypesense(product_type: string) {
+  const limit = pLimit(10)
+  await Promise.all([
+    limit(() =>
+      typesense
+        .collections(collectionName)
+        .documents()
+        .delete({ filter_by: `product_type:=${product_type}` })
+    ),
+  ])
+}

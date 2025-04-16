@@ -154,6 +154,7 @@ function Main({
           .filter(
             variant => variant.name === paramsVariant.name && variant.size
           )
+          .filter(variant => variant.color === paramsVariant.color)
           .map(product => product.size)
           .filter(
             (item, index, self) =>
@@ -163,6 +164,7 @@ function Main({
           .filter(
             variant => variant.name === fallbackVariant.name && variant.size
           )
+          .filter(variant => variant.color === fallbackVariant.color)
           .map(product => product.size)
           .filter(
             (item, index, self) =>
@@ -322,15 +324,13 @@ function Main({
       variant.color === state.selectedColor &&
       variant.size === state.selectedSize
   )?.upsell
-  const [upsellDisplayedVariants, setUpsellDisplayedVariants] = useState(
-    upsellProductVariant
-      ? all_variants.filter(
-          variant =>
-            variant.product_type === upsellProductVariant.product_type &&
-            variant.name === upsellProductVariant.name
-        )
-      : null
-  )
+  const upsellDisplayedVariants = upsellProductVariant
+    ? all_variants.filter(
+        variant =>
+          variant.product_type === upsellProductVariant.product_type &&
+          variant.name === upsellProductVariant.name
+      )
+    : null
   console.log('This is the upsellDisplayedVariants: ', upsellDisplayedVariants)
   const [upsellSelectedVariant, setUpsellSelectedVariant] = useState(
     upsellProductVariant
@@ -412,8 +412,12 @@ function Main({
                   />
                 </div>
 
-                {upsellDisplayedVariants.map(variant => variant.color).length >
-                  0 && (
+                {upsellDisplayedVariants
+                  .map(variant => variant.color)
+                  .filter(
+                    (item, index, self) =>
+                      index === self.findIndex(other => other === item)
+                  ).length > 0 && (
                   <div className="mb-2">
                     <h1 className="mb-1 text-lg">Χρώμα</h1>
                     <div className="flex gap-2">
@@ -441,14 +445,9 @@ function Main({
                                       index ===
                                       self.findIndex(other => other === item)
                                   )
-                                setUpsellDisplayedVariants(displayedVariants)
                                 setUpsellSelectedVariant(displayedVariants[0])
                               }}
-                              className={`w-8 h-8 rounded-full p-0.5 border-2 ${
-                                upsellSelectedVariant.color === color
-                                  ? 'border-black'
-                                  : 'border-white'
-                              } hover:cursor-pointer`}
+                              className="w-8 h-8 rounded-full p-0.5 border-2 border-black hover:cursor-pointer"
                             >
                               <div
                                 style={{ backgroundColor: color }}
@@ -459,11 +458,19 @@ function Main({
                             <div
                               key={index}
                               onClick={() => {
-                                const displayedVariants =
-                                  upsellDisplayedVariants.filter(
-                                    variant => variant.color === color
+                                const displayedVariants = all_variants
+                                  .filter(
+                                    variant =>
+                                      variant.product_type ===
+                                        upsellProductVariant.product_type &&
+                                      variant.name === upsellProductVariant.name
                                   )
-                                setUpsellDisplayedVariants(displayedVariants)
+                                  .filter(variant => variant.color === color)
+                                  .filter(
+                                    (item, index, self) =>
+                                      index ===
+                                      self.findIndex(other => other === item)
+                                  )
                                 setUpsellSelectedVariant(displayedVariants[0])
                               }}
                               style={{ backgroundColor: color }}
@@ -475,17 +482,20 @@ function Main({
                   </div>
                 )}
 
-                {upsellDisplayedVariants.map(variant => variant.size).length >
-                  0 && (
+                {upsellDisplayedVariants
+                  .filter(
+                    variant => variant.color === upsellSelectedVariant.color
+                  )
+                  .map(variant => variant.size).length > 0 && (
                   <div className="mb-2">
                     <h1 className="mb-1 text-lg">Μέγεθος</h1>
                     <div className="flex gap-2">
                       {upsellDisplayedVariants
-                        .map(variant => variant.size)
                         .filter(
-                          (item, index, self) =>
-                            index === self.findIndex(other => other === item)
+                          variant =>
+                            variant.color === upsellSelectedVariant.color
                         )
+                        .map(variant => variant.size)
                         .map((size, index) => (
                           <div
                             key={index}

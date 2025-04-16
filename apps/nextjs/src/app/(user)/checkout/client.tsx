@@ -3,6 +3,7 @@
 import type {
   typeVariant,
   typeCartLocalStorage,
+  typeCoupon,
 } from '@/lib/postgres/data/type'
 import type { typeShipping } from '@/utils/getPostgres'
 
@@ -32,7 +33,11 @@ import { z } from 'zod'
 import { ROUTE_ERROR, ROUTE_HOME } from '@/data/routes'
 import { errorAxios, errorUnexpected, errorInvalidResponse } from '@/data/error'
 import { Footer } from '@/components/Footer'
-import { getFilteredLocalStorageCart } from '@/utils/localStorage'
+import {
+  getFilteredLocalStorageCart,
+  getLocalStorageCoupon,
+  setLocalStorageCoupon,
+} from '@/utils/localStorage'
 import axios from 'axios'
 
 type CheckoutPageProps = {
@@ -46,27 +51,13 @@ export function CheckoutPageClient({
 }: CheckoutPageProps) {
   const router = useRouter()
   const [orderCompleteResponse, setOrderCompleteResponse] = useState<null | {
-    id: string
+    id: number
     first_name: string
     email: string
+    email_sent: boolean
   }>(null)
   const [saveInfo, setSaveInfo] = useState(true)
   const [cart, setCart] = useState<typeCartLocalStorage>([])
-  const couponCodeRef = useRef<null | HTMLInputElement>(null)
-  const [
-    couponLoadingOverlay,
-    { open: openCouponLoadingOverlay, close: closeCouponLoadingOverlay },
-  ] = useDisclosure(false)
-  const [coupon, setCoupon] = useState<{
-    coupon_code?: string
-    percentage?: null | number
-    fixed?: null | number
-  }>({})
-  const [total, setTotal] = useState(0)
-  const [
-    formLoadingOverlay,
-    { open: openFormLoadingOverlay, close: closeFormLoadingOverlay },
-  ] = useDisclosure(false)
 
   const form = useForm({
     mode: 'controlled',
@@ -103,12 +94,6 @@ export function CheckoutPageClient({
       router.push(ROUTE_HOME)
     }
     setCart(localStorageCart)
-    setTotal(
-      localStorageCart.reduce(
-        (acc, item) => acc + item.price * item.quantity,
-        0
-      )
-    )
   }, [all_variants])
 
   useEffect(() => {
@@ -120,17 +105,59 @@ export function CheckoutPageClient({
     }
   }, [saveInfo])
 
-  const subTotal = coupon?.percentage
-    ? total - total * coupon.percentage
+  const couponCodeRef = useRef<null | HTMLInputElement>(null)
+  const [
+    couponLoadingOverlay,
+    { open: openCouponLoadingOverlay, close: closeCouponLoadingOverlay },
+  ] = useDisclosure(false)
+  const [coupon, setCoupon] = useState<null | typeCoupon>(null)
+  const [hasMounted, setHasMounted] = useState(false)
+  useEffect(() => {
+    setCoupon(getLocalStorageCoupon())
+    setHasMounted(true)
+  }, [])
+  const baseCartTotal = cart.reduce(
+    (acc, item) => acc + item.price * item.quantity,
+    0
+  )
+  const cartTotal = coupon?.percentage
+    ? baseCartTotal - baseCartTotal * coupon.percentage
     : coupon?.fixed
-    ? total - coupon.fixed
-    : total
+    ? baseCartTotal - coupon.fixed
+    : baseCartTotal
 
-  const freeShipping = shipping.free ? subTotal >= shipping.free : false
+  const freeShipping = shipping.free ? cartTotal >= shipping.free : false
+  const shippingSurchargeTotal =
+    (freeShipping ? 0 : shipping.expense ?? 0) +
+    (form.getValues().payment_method !== 'Αντικαταβολή'
+      ? 0
+      : shipping.surcharge ?? 0)
+
+  const [total, setTotal] = useState(cartTotal + shippingSurchargeTotal)
+
+  useEffect(() => {
+    if (hasMounted) {
+      setLocalStorageCoupon(coupon)
+    }
+    setTotal(cartTotal + shippingSurchargeTotal)
+    if (coupon) {
+      if (couponCodeRef?.current) {
+        couponCodeRef.current.value = coupon.coupon_code
+      }
+    } else {
+      if (couponCodeRef?.current) {
+        couponCodeRef.current.value = ''
+      }
+    }
+  }, [coupon, cartTotal, shippingSurchargeTotal])
+  const [
+    formLoadingOverlay,
+    { open: openFormLoadingOverlay, close: closeFormLoadingOverlay },
+  ] = useDisclosure(false)
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="relative flex justify-center p-2 border-b border-b-gray-200">
+      <header className="relative flex justify-center p-2 border-b border-b-[var(--mantine-border)]">
         <Image
           component={NextImage}
           src="/motowear.png"
@@ -165,7 +192,7 @@ export function CheckoutPageClient({
                   {cart.map((product, index) => (
                     <div
                       key={index}
-                      className="flex w-full h-36 mb-2 rounded-lg border border-gray-200"
+                      className="flex w-full h-36 mb-2 rounded-lg border border-[var(--mantine-border)]"
                     >
                       <div className="relative w-1/3 h-full rounded-lg overflow-hidden">
                         <Image
@@ -221,6 +248,34 @@ export function CheckoutPageClient({
                       </div>
                     </div>
                   ))}
+                  {coupon && coupon.coupon_code === 'FREE-MPRELOK' && (
+                    <div className="flex w-full h-36 mb-2 rounded-lg border border-[var(--mantine-border)]">
+                      <div className="relative w-1/3 h-full rounded-lg overflow-hidden">
+                        <Image
+                          component={NextImage}
+                          src={`${envClient.MINIO_PRODUCT_URL}/Μπρελόκ/Πιστόνι`}
+                          alt="Πιστόνι"
+                          fill
+                          style={{ objectFit: 'cover' }}
+                          sizes="auto"
+                        />
+                      </div>
+                      <div className="relative w-2/3 flex flex-col gap-0.5 p-2">
+                        <h1>Μπρελόκ</h1>
+                        <h1>Πιστόνι</h1>
+                        <div className="flex gap-2 items-center">
+                          <h2 className="text-[var(--mantine-border)] line-through decoration-red-500">
+                            7.99€
+                          </h2>
+                          <h2>0.00€</h2>
+                        </div>
+                        <div className="absolute bottom-2 right-2 flex gap-1">
+                          <h2>Ποσότητα: </h2>
+                          <p>1</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </Accordion.Panel>
               </Accordion.Item>
             </Accordion>
@@ -239,6 +294,7 @@ export function CheckoutPageClient({
                     }
                   )
                   localStorage.removeItem('cart')
+                  localStorage.removeItem('coupon')
                   if (res.status !== 200) {
                     router.push(
                       `${ROUTE_ERROR}?message=${
@@ -248,9 +304,10 @@ export function CheckoutPageClient({
                   }
                   const { data: validatedResponse } = z
                     .object({
-                      id: z.string(),
+                      id: z.number(),
                       first_name: z.string(),
                       email: z.string().email(),
+                      email_sent: z.boolean(),
                     })
                     .safeParse(res.data)
                   if (!validatedResponse) {
@@ -262,6 +319,7 @@ export function CheckoutPageClient({
                 } catch {
                   router.push(`${ROUTE_ERROR}?message=${errorAxios}`)
                 } finally {
+                  localStorage.removeItem('cart')
                   closeFormLoadingOverlay()
                 }
               })}
@@ -354,11 +412,11 @@ export function CheckoutPageClient({
                     form.setFieldValue('payment_method', value)
                   }
                   error={form.errors.payment_method}
-                  className="p-2 border border-gray-200 rounded-lg"
+                  className="p-2 border border-[var(--mantine-border)] rounded-lg"
                 >
                   <Group gap="sm">
                     <Radio size="sm" value="Κάρτα" label="Τραπεζική Κάρτα" />
-                    <hr className="w-full border-t border-gray-200" />
+                    <hr className="w-full border-t-2 border-[var(--mantine-border)]" />
                     <Radio
                       size="sm"
                       value="Αντικαταβολή"
@@ -414,7 +472,7 @@ export function CheckoutPageClient({
                           if (validatedResponse!.couponArray.length === 1) {
                             setCoupon(validatedResponse!.couponArray[0])
                           } else {
-                            setCoupon({})
+                            setCoupon(null)
                           }
                         } catch {
                           router.push(`${ROUTE_ERROR}?message=${errorAxios}`)
@@ -431,23 +489,23 @@ export function CheckoutPageClient({
                 <div className="flex">
                   <h2>Υποσύνολο</h2>
                   <div className="ml-auto flex gap-2 items-center">
-                    {Object.keys(coupon).length === 3 && (
+                    {coupon && (
                       <p className="text-[var(--mantine-border)] line-through decoration-red-500">
-                        {(subTotal * 0.76).toFixed(2)}€
+                        {(cartTotal * 0.76).toFixed(2)}€
                       </p>
                     )}
-                    <p>{(subTotal * 0.76).toFixed(2)}€</p>
+                    <p>{(cartTotal * 0.76).toFixed(2)}€</p>
                   </div>
                 </div>
                 <div className="flex">
                   <h2>ΦΠΑ</h2>
                   <div className="ml-auto flex gap-2 items-center">
-                    {Object.keys(coupon).length === 3 && (
+                    {coupon && (
                       <p className="text-[var(--mantine-border)] line-through decoration-red-500">
-                        {(subTotal * 0.24).toFixed(2)}€
+                        {(cartTotal * 0.24).toFixed(2)}€
                       </p>
                     )}
-                    <p>{(subTotal * 0.24).toFixed(2)}€</p>
+                    <p>{(cartTotal * 0.24).toFixed(2)}€</p>
                   </div>
                 </div>
                 <div className="flex">
@@ -481,21 +539,7 @@ export function CheckoutPageClient({
                 </div>
                 <div className="flex">
                   <h2>Σύνολο</h2>
-                  <p className="ml-auto">
-                    {(
-                      subTotal +
-                      (freeShipping
-                        ? 0
-                        : shipping.expense
-                        ? shipping.expense
-                        : 0) +
-                      (form.values.payment_method === 'Αντικαταβολή' &&
-                      shipping.surcharge
-                        ? shipping.surcharge
-                        : 0)
-                    ).toFixed(2)}
-                    €
-                  </p>
+                  <p className="ml-auto">{total}€</p>
                 </div>
                 <Button
                   type="submit"
@@ -519,9 +563,22 @@ export function CheckoutPageClient({
             <p>Η παραγγελία σας με id :</p>
             <span className="text-red-500">{orderCompleteResponse.id}</span>
             <p className="mb-2">ήταν επιτυχής.</p>
-            <p>Θα παραλάβετε ενημερωτικό email στο :</p>
-            <span className="underline">{orderCompleteResponse.email}</span>
-            <p>εντός των επόμενων λεπτών.</p>
+            {orderCompleteResponse.email_sent ? (
+              <>
+                <p>Θα παραλάβετε ενημερωτικό email στο :</p>
+                <span className="underline">{orderCompleteResponse.email}</span>
+                <p>εντός των επόμενων λεπτών.</p>
+              </>
+            ) : (
+              <>
+                <p>
+                  Υπήρξε κάποιο λάθος με την αποστολή του ενημερωτικού email στο
+                  :
+                </p>
+                <span className="underline">{orderCompleteResponse.email}</span>
+                <p>Πάρτε τηλέφωνο στο ...</p> {/* NEEDS FIXING */}
+              </>
+            )}
           </div>
         )}
       </main>

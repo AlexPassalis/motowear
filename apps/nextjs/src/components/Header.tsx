@@ -39,7 +39,7 @@ export function Header({
       <div className="flex justify-start">
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="flex justify-center items-center h-10 w-10 xl:scale-110 rounded-md border border-gray-200 transition-colors hover:cursor-pointer group"
+          className="flex justify-center items-center h-10 w-10 xl:scale-110 rounded-md border border-[var(--mantine-border)] transition-colors hover:cursor-pointer group"
         >
           <AiOutlineMenu className="transition-transform duration-200 ease-in-out group-hover:scale-110" />
         </button>
@@ -61,7 +61,7 @@ export function Header({
       <div className="flex justify-end gap-2 xl:gap-4">
         <button
           onClick={() => setIsSearchOpen(!isSearchOpen)}
-          className="flex justify-center items-center h-10 w-10 xl:scale-110 rounded-md border border-gray-200 transition-colors hover:cursor-pointer group"
+          className="flex justify-center items-center h-10 w-10 xl:scale-110 rounded-md border border-[var(--mantine-border)] transition-colors hover:cursor-pointer group"
         >
           <HiMagnifyingGlass className="transition-transform duration-200 ease-in-out group-hover:scale-110" />
         </button>
@@ -78,7 +78,7 @@ export function Header({
           >
             <button
               onClick={() => setIsCartOpen(!isCartOpen)}
-              className="relative flex justify-center items-center h-10 w-10 xl:scale-110 rounded-md border border-gray-200 transition-colors hover:cursor-pointer group"
+              className="relative flex justify-center items-center h-10 w-10 xl:scale-110 rounded-md border border-[var(--mantine-border)] transition-colors hover:cursor-pointer group"
             >
               <AiFillShopping className="transition-transform duration-200 ease-in-out group-hover:scale-110" />
             </button>
@@ -86,7 +86,7 @@ export function Header({
         ) : (
           <button
             onClick={() => setIsCartOpen(!isCartOpen)}
-            className="relative flex justify-center items-center h-10 w-10 xl:scale-110 rounded-md border border-gray-200 transition-colors hover:cursor-pointer group"
+            className="relative flex justify-center items-center h-10 w-10 xl:scale-110 rounded-md border border-[var(--mantine-border)] transition-colors hover:cursor-pointer group"
           >
             <AiOutlineShopping className="transition-transform duration-200 ease-in-out group-hover:scale-110" />
           </button>

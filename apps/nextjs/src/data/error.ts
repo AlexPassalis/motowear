@@ -11,6 +11,7 @@ export const errorTelegram = 'telegram' as const
 export const errorReactEmail = 'react-email' as const
 export const errorNodemailer = 'nodemailer' as const
 export const errorCron = 'cron' as const
+export const errorStripe = 'stripe' as const
 
 export const errorInvalidTableName = 'invalid-table-name' as const
 

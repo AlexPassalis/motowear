@@ -17,10 +17,10 @@ export function Menu({ product_types, isMenuOpen, setIsMenuOpen }: MenuProps) {
       }`}
     >
       <div className="flex flex-col gap-2 p-4">
-        <div className="flex justify-between items-center w-full border-b-2 pb-2 border-gray-200">
+        <div className="flex justify-between items-center w-full border-b-2 pb-2 border-[var(--mantine-border)]">
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="flex ml-auto justify-center items-center h-10 w-10 rounded-md border border-gray-200 transition-colors hover:cursor-pointer group"
+            className="flex ml-auto justify-center items-center h-10 w-10 rounded-md border border-[var(--mantine-border)] transition-colors hover:cursor-pointer group"
           >
             <AiOutlineClose className="transition-transform duration-200 ease-in-out group-hover:scale-150" />
           </button>
@@ -41,7 +41,7 @@ export function Menu({ product_types, isMenuOpen, setIsMenuOpen }: MenuProps) {
                   </Link>
                 </li>
                 {index !== array.length - 1 && (
-                  <hr className="w-full border-t border-gray-200" />
+                  <hr className="w-full border-t border-[var(--mantine-border)]" />
                 )}
               </Fragment>
             ))}

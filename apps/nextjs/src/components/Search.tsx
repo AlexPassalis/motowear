@@ -30,13 +30,13 @@ export function Search({ isSearchOpen, setIsSearchOpen }: SearchProps) {
       }`}
     >
       <div className="flex flex-col gap-2 h-full p-4">
-        <div className="flex justify-between items-center w-full border-b-2 pb-2 border-gray-200">
+        <div className="flex justify-between items-center w-full border-b-2 pb-2 border-[var(--mantine-border)]">
           <h1 className="absolute left-1/2 transform -translate-x-1/2 text-2xl">
             Αναζήτηση
           </h1>
           <button
             onClick={() => setIsSearchOpen(!isSearchOpen)}
-            className="flex ml-auto justify-center items-center h-10 w-10 rounded-md border border-gray-200 transition-colors hover:cursor-pointer group"
+            className="flex ml-auto justify-center items-center h-10 w-10 rounded-md border border-[var(--mantine-border)] transition-colors hover:cursor-pointer group"
           >
             <AiOutlineClose className="transition-transform duration-200 ease-in-out group-hover:scale-150" />
           </button>
@@ -92,7 +92,7 @@ function SearchHit({ hit }: { hit: Hit }) {
         setIsSearchOpen(prev => !prev)
         refine('')
       }}
-      className="flex justify-center w-full p-1 mb-2 rounded-lg border border-gray-200 hover:border-red-500"
+      className="flex justify-center w-full p-1 mb-2 rounded-lg border border-[var(--mantine-border)] hover:border-red-500"
     >
       <Link
         href={`${ROUTE_PRODUCT}/${hit.product_type}/${hit.variant}`}

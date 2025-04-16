@@ -8,10 +8,13 @@ import {
   order,
   daily_session,
   shipping,
+  home_page,
+  coupon,
+  email,
 } from '@/lib/postgres/schema'
 import { sendTelegramMessage } from '@/lib/telegram'
 import { formatMessage } from '@/utils/formatMessage'
-import { eq } from 'drizzle-orm'
+import { or, eq, and, gte, lte } from 'drizzle-orm'
 
 export async function getProductTypes() {
   try {
@@ -210,11 +213,9 @@ export type typeDailySessions = Awaited<ReturnType<typeof getDailySessions>>
 export async function getShipping() {
   try {
     const array = await postgres.select().from(shipping)
-    return {
-      expense: array[0].expense,
-      free: array[0].free,
-      surcharge: array[0].surcharge,
-    }
+    /* eslint-disable @typescript-eslint/no-unused-vars */
+    return array.map(({ primary_key, ...rest }) => rest)[0]
+    /* eslint-disable @typescript-eslint/no-unused-vars */
   } catch (e) {
     const message = formatMessage(
       '@/utils/getPostgres.ts getFreeShippingAmount()',
@@ -227,3 +228,117 @@ export async function getShipping() {
   }
 }
 export type typeShipping = Awaited<ReturnType<typeof getShipping>>
+
+export async function getHomePage() {
+  try {
+    const array = await postgres.select().from(home_page)
+    /* eslint-disable @typescript-eslint/no-unused-vars */
+    return array.map(({ primary_key, ...rest }) => rest)[0]
+    /* eslint-disable @typescript-eslint/no-unused-vars */
+  } catch (e) {
+    const message = formatMessage(
+      '@/utils/getPostgres.ts getHomePage()',
+      errorPostgres,
+      e
+    )
+    console.error(message)
+    sendTelegramMessage('ERROR', message)
+    throw errorPostgres
+  }
+}
+export type typeHomePage = Awaited<ReturnType<typeof getHomePage>>
+
+export async function getHomePageVariants() {
+  try {
+    const array = await postgres
+      .select()
+      .from(variant)
+      .where(
+        or(
+          eq(variant.index, 3),
+          eq(variant.index, 4),
+          eq(variant.index, 5),
+          eq(variant.index, 6)
+        )
+      )
+    /* eslint-disable @typescript-eslint/no-unused-vars */
+    return array.map(({ product_type, name, images, ...rest }) => ({
+      product_type,
+      name,
+      image: images[0],
+    }))
+    /* eslint-disable @typescript-eslint/no-unused-vars */
+  } catch (e) {
+    const message = formatMessage(
+      '@/utils/getPostgres.ts getHomePageVariants()',
+      errorPostgres,
+      e
+    )
+    console.error(message)
+    sendTelegramMessage('ERROR', message)
+    throw errorPostgres
+  }
+}
+export type typeHomePageVariants = Awaited<
+  ReturnType<typeof getHomePageVariants>
+>
+
+export async function getHomePageReviews() {
+  try {
+    const array = await postgres
+      .select()
+      .from(review)
+      .where(and(gte(review.index, 0), lte(review.index, 9)))
+    // Fisher-Yates shuffle algorithm
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[array[i], array[j]] = [array[j], array[i]]
+    }
+    return array
+  } catch (e) {
+    const message = formatMessage(
+      '@/utils/getPostgres.ts getHomePageReviews()',
+      errorPostgres,
+      e
+    )
+    console.error(message)
+    sendTelegramMessage('ERROR', message)
+    throw errorPostgres
+  }
+}
+export type typeHomePageReviews = Awaited<ReturnType<typeof getHomePageReviews>>
+
+export async function getCoupons() {
+  try {
+    const array = await postgres.select().from(coupon)
+    return array
+  } catch (e) {
+    const message = formatMessage(
+      '@/utils/getPostgres.ts getCoupons()',
+      errorPostgres,
+      e
+    )
+    console.error(message)
+    sendTelegramMessage('ERROR', message)
+    throw errorPostgres
+  }
+}
+export type typeCoupons = Awaited<ReturnType<typeof getCoupons>>
+
+export async function getEmails() {
+  try {
+    const array = await postgres.select().from(email)
+    return array.map(obj => obj.email)
+    return array
+  } catch (e) {
+    const message = formatMessage(
+      '@/utils/getPostgres.ts getEmails()',
+      errorPostgres,
+      e
+    )
+    console.error(message)
+    sendTelegramMessage('ERROR', message)
+    throw errorPostgres
+  }
+}
+export type typeEmails = Awaited<ReturnType<typeof getEmails>>

@@ -1,4 +1,10 @@
-import type { typeShipping, typeProductTypes } from '@/utils/getPostgres'
+import type {
+  typeShipping,
+  typeProductTypes,
+  typeHomePage,
+  typeHomePageVariants,
+  typeHomePageReviews,
+} from '@/utils/getPostgres'
 import type {
   typeProductPage,
   typeReview,
@@ -10,6 +16,9 @@ import { redis } from '@/lib/redis'
 import { sendTelegramMessage } from '@/lib/telegram'
 import { formatMessage } from '@/utils/formatMessage'
 import {
+  getHomePage,
+  getHomePageReviews,
+  getHomePageVariants,
   getPages,
   getProductTypes,
   getReviews,
@@ -250,5 +259,156 @@ export async function getShippingCached(): Promise<typeShipping> {
       free: null,
       surcharge: null,
     }
+  }
+}
+
+export async function getHomePageCached(): Promise<typeHomePage> {
+  if (process.env.BUILD_TIME !== 'true') {
+    let home_page
+    try {
+      home_page = await redis.get('home_page')
+    } catch (e) {
+      const message = formatMessage(
+        '@/app/(user)/cache.ts getHomePageCached() get',
+        errorRedis,
+        e
+      )
+      console.error(message)
+      sendTelegramMessage('ERROR', message)
+      throw errorRedis
+    }
+
+    if (home_page) {
+      return JSON.parse(home_page)
+    } else {
+      try {
+        home_page = await getHomePage()
+      } catch (e) {
+        throw e
+      }
+    }
+
+    try {
+      await redis.set('home_page', JSON.stringify(home_page), 'EX', 3600)
+    } catch (e) {
+      const message = formatMessage(
+        '@/app/(user)/cache.ts getHomePageCached() set',
+        errorRedis,
+        e
+      )
+      console.error(message)
+      sendTelegramMessage('ERROR', message)
+      throw errorRedis
+    }
+
+    return home_page
+  } else {
+    return {
+      big_image: '',
+      smaller_images: [],
+      quotes: [],
+      faq: [],
+      coupon: { coupon_code: '', percentage: null, fixed: null },
+    }
+  }
+}
+
+export async function getHomePageVariantsCached(): Promise<typeHomePageVariants> {
+  if (process.env.BUILD_TIME !== 'true') {
+    let home_page_variants
+    try {
+      home_page_variants = await redis.get('home_page_variants')
+    } catch (e) {
+      const message = formatMessage(
+        '@/app/(user)/cache.ts getHomePageVariantsCached() get',
+        errorRedis,
+        e
+      )
+      console.error(message)
+      sendTelegramMessage('ERROR', message)
+      throw errorRedis
+    }
+
+    if (home_page_variants) {
+      return JSON.parse(home_page_variants)
+    } else {
+      try {
+        home_page_variants = await getHomePageVariants()
+      } catch (e) {
+        throw e
+      }
+    }
+
+    try {
+      await redis.set(
+        'home_page_variants',
+        JSON.stringify(home_page_variants),
+        'EX',
+        3600
+      )
+    } catch (e) {
+      const message = formatMessage(
+        '@/app/(user)/cache.ts getHomePageVariantsCached() set',
+        errorRedis,
+        e
+      )
+      console.error(message)
+      sendTelegramMessage('ERROR', message)
+      throw errorRedis
+    }
+
+    return home_page_variants
+  } else {
+    return []
+  }
+}
+
+export async function getHomePageReviewsCache(): Promise<typeHomePageReviews> {
+  if (process.env.BUILD_TIME !== 'true') {
+    let home_page_reviews
+    try {
+      home_page_reviews = await redis.get('home_page_reviews')
+    } catch (e) {
+      const message = formatMessage(
+        '@/app/(user)/cache.ts getHomePageReviewsCache() get',
+        errorRedis,
+        e
+      )
+      console.error(message)
+      sendTelegramMessage('ERROR', message)
+      throw errorRedis
+    }
+
+    if (home_page_reviews) {
+      return JSON.parse(home_page_reviews)
+    } else {
+      try {
+        home_page_reviews = await getHomePageReviews()
+      } catch (e) {
+        throw e
+      }
+    }
+
+    try {
+      await redis.set(
+        'home_page_reviews',
+        JSON.stringify(home_page_reviews),
+        'EX',
+        3600
+      )
+    } catch (e) {
+      const message = formatMessage(
+        '@/app/(user)/cache.ts getHomePageReviewsCache() set',
+        errorRedis,
+        e
+      )
+      console.error(message)
+      sendTelegramMessage('ERROR', message)
+      throw errorRedis
+    }
+
+    return home_page_reviews
+  } else {
+    return []
   }
 }

@@ -8,6 +8,7 @@ import {
   customType,
   jsonb,
   boolean,
+  timestamp,
 } from 'drizzle-orm/pg-core'
 import { z } from 'zod'
 
@@ -24,8 +25,18 @@ const Numeric = customType<{ data: number }>({
 })
 
 export const pagesSchema = pgSchema('pages')
-// export const home_page = pagesSchema.table('home_page', {})
-// export const collection_pages = pagesSchema.table('collection_pages', {})
+export const home_page = pagesSchema.table('home_page', {
+  primary_key: text('primary_key').primaryKey(),
+  big_image: text('big_image').notNull(),
+  smaller_images: jsonb('smaller_images')
+    .$type<{ image: string; url: string }[]>()
+    .notNull(),
+  quotes: jsonb('quotes')
+    .$type<{ quote: string; author: string }[]>()
+    .notNull(),
+  faq: jsonb('faq').$type<{ question: string; answer: string }[]>().notNull(),
+  coupon: jsonb('coupon').$type<InferSelectModel<typeof coupon>>(),
+})
 export const product_pages = pagesSchema.table('product_pages', {
   product_type: text('product_type').primaryKey(),
   size_chart: text('size_chart').notNull(),
@@ -56,7 +67,8 @@ export const variant = productsSchema.table('variant', {
   description: text('description').notNull(),
   brand: text('brand')
     .notNull()
-    .references(() => brand.image),
+    .default('')
+    .references(() => brand.image, { onDelete: 'set default' }),
   color: text('color').notNull(),
   size: text('size').notNull(),
   price: Numeric('price', { precision: 7, scale: 2 }).notNull(),
@@ -65,25 +77,29 @@ export const variant = productsSchema.table('variant', {
 })
 
 export const ordersSchema = pgSchema('orders')
-export const coupon = ordersSchema.table(
-  'coupon',
-  {
-    coupon_code: text('code').primaryKey(),
-    percentage: Numeric('percentage', { precision: 3, scale: 2 }),
-    fixed: integer('fixed'),
-  },
-  () => ({
-    validDiscount: sql`("percentage" > 0 OR "fixed" > 0)`,
-  })
-)
-
+export const orderIdSeq = ordersSchema.sequence('order_id_seq', {
+  increment: 1,
+  startWith: 1000,
+  minValue: 1000,
+  maxValue: 100000000,
+  cycle: true, // Will throw an error because id is a primary key.
+  cache: 10,
+})
+export const coupon = ordersSchema.table('coupon', {
+  coupon_code: text('code').primaryKey(),
+  percentage: Numeric('percentage', { precision: 3, scale: 2 }),
+  fixed: integer('fixed'),
+})
 export const order = ordersSchema.table('order', {
-  id: uuid('id').notNull().primaryKey(),
-  order_date: date('order_date').notNull(),
+  id: integer('id')
+    .default(sql`nextval('orders.order_id_seq')`)
+    .primaryKey(),
+  order_date: timestamp('order_date').notNull(),
   checkout: jsonb('checkout').$type<z.infer<typeof zodCheckout>>().notNull(),
   cart: jsonb('cart').$type<z.infer<typeof zodCart>>().notNull(),
   coupon: jsonb('coupon').$type<InferSelectModel<typeof coupon>>(),
   total: Numeric('total', { precision: 7, scale: 2 }).notNull(),
+  paid: boolean('paid'),
   confirmation_email: boolean('confirmation_email').notNull(),
   date_fulfilled: date('date_fulfilled'),
   tracking_number: text('tracking_number'),
@@ -112,4 +128,7 @@ export const shipping = otherSchema.table('shipping', {
   expense: Numeric('expense', { precision: 7, scale: 2 }),
   free: Numeric('free', { precision: 7, scale: 2 }),
   surcharge: Numeric('surcharge', { precision: 7, scale: 2 }),
+})
+export const email = otherSchema.table('email', {
+  email: text('email').primaryKey(),
 })

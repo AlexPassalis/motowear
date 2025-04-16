@@ -12,7 +12,7 @@ export function formatMessage(
   }`
 }
 
-export function formatOrderMessage(id: string, total: number, cart: typeCart) {
+export function formatOrderMessage(id: number, total: number, cart: typeCart) {
   const cartItems = cart
     .map(
       item =>

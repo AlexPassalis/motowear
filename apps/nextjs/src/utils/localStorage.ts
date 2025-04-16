@@ -1,5 +1,6 @@
 import type {
   typeCartLocalStorage,
+  typeCoupon,
   typeVariant,
 } from '@/lib/postgres/data/type'
 
@@ -30,4 +31,13 @@ export function getFilteredLocalStorageCart(all_variants: typeVariant[]) {
 
 export function setLocalStorageCart(cart: typeCartLocalStorage) {
   localStorage.setItem('cart', JSON.stringify(cart))
+}
+
+export function getLocalStorageCoupon(): null | typeCoupon {
+  const coupon = localStorage.getItem('coupon')
+  return coupon ? JSON.parse(coupon) : null
+}
+
+export function setLocalStorageCoupon(coupon: null | typeCoupon) {
+  localStorage.setItem('coupon', JSON.stringify(coupon))
 }
