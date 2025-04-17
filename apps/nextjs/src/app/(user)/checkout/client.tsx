@@ -11,7 +11,7 @@ import { zodCheckout, zodCoupon } from '@/lib/postgres/data/zod'
 import { envClient } from '@/env'
 import { useEffect, useRef, useState } from 'react'
 import NextImage from 'next/image'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import {
   Button,
   Checkbox,
@@ -56,6 +56,7 @@ export function CheckoutPageClient({
     email: string
     email_sent: boolean
   }>(null)
+
   const [saveInfo, setSaveInfo] = useState(true)
   const [cart, setCart] = useState<typeCartLocalStorage>([])
 
@@ -154,6 +155,42 @@ export function CheckoutPageClient({
     formLoadingOverlay,
     { open: openFormLoadingOverlay, close: closeFormLoadingOverlay },
   ] = useDisclosure(false)
+
+  const pathname = usePathname()
+  const prevPath = useRef(pathname)
+  useEffect(() => {
+    if (orderCompleteResponse) {
+      return
+    }
+
+    if (!form.values.receive_email) return
+    const parsed = z.string().email().safeParse(form.values.email)
+    if (!parsed.success) return
+
+    const sendAbandon = () => {
+      void axios
+        .post(`${envClient.API_USER_URL}/abandon_cart`, {
+          email: parsed.data,
+          cart,
+        })
+        .catch(() => {})
+    }
+    window.addEventListener('beforeunload', sendAbandon)
+    if (prevPath.current !== pathname) {
+      sendAbandon()
+    }
+    prevPath.current = pathname
+
+    return () => {
+      window.removeEventListener('beforeunload', sendAbandon)
+    }
+  }, [
+    pathname,
+    cart,
+    form.values.email,
+    form.values.receive_email,
+    orderCompleteResponse,
+  ])
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -314,8 +351,9 @@ export function CheckoutPageClient({
                     router.push(
                       `${ROUTE_ERROR}?message=${errorInvalidResponse}`
                     )
+                    return
                   }
-                  setOrderCompleteResponse(validatedResponse!)
+                  setOrderCompleteResponse(validatedResponse)
                 } catch {
                   router.push(`${ROUTE_ERROR}?message=${errorAxios}`)
                 } finally {
@@ -328,8 +366,8 @@ export function CheckoutPageClient({
                 <h1 className="text-xl">Στοιχεία επικοινωνίας</h1>
                 <TextInput
                   label="Email"
-                  key={form.key('email')}
                   {...form.getInputProps('email')}
+                  key={form.key('email')}
                 />
                 <Checkbox
                   mt="xs"

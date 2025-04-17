@@ -51,7 +51,7 @@ export function Header({
             component={NextImage}
             src="/motowear.png"
             width={200}
-            height={100}
+            height={50}
             alt="Motowear logo"
             className="xl:scale-110"
           />

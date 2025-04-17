@@ -132,3 +132,11 @@ export const shipping = otherSchema.table('shipping', {
 export const email = otherSchema.table('email', {
   email: text('email').primaryKey(),
 })
+export const phone = otherSchema.table('phone', {
+  phone: integer('phone').primaryKey(),
+})
+export const abandoned_cart = otherSchema.table('abandoned_cart', {
+  email: text('email').primaryKey(),
+  cart: jsonb('cart').$type<z.infer<typeof zodCart>>().notNull(),
+  date: timestamp('date').notNull(),
+})

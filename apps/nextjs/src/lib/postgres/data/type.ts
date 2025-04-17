@@ -1,5 +1,12 @@
 import { InferSelectModel } from 'drizzle-orm'
-import { coupon, order, product_pages, review, variant } from '../schema'
+import {
+  abandoned_cart,
+  coupon,
+  order,
+  product_pages,
+  review,
+  variant,
+} from '../schema'
 
 import { z } from 'zod'
 import {
@@ -30,3 +37,5 @@ export type typeCheckout = z.infer<typeof zodCheckout>
 export type typeCartItemLocalStorage = z.infer<typeof zodCartItemLocalStorage>
 export type typeCartLocalStorage = z.infer<typeof zodCartLocalStorage>
 export type typeCart = z.infer<typeof zodCart>
+
+export type typeEmail = InferSelectModel<typeof abandoned_cart>['email']

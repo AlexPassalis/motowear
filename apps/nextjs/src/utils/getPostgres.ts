@@ -329,7 +329,6 @@ export async function getEmails() {
   try {
     const array = await postgres.select().from(email)
     return array.map(obj => obj.email)
-    return array
   } catch (e) {
     const message = formatMessage(
       '@/utils/getPostgres.ts getEmails()',
@@ -342,3 +341,37 @@ export async function getEmails() {
   }
 }
 export type typeEmails = Awaited<ReturnType<typeof getEmails>>
+
+export async function getOrder(order_id: string) {
+  try {
+    const array = await postgres
+      .select()
+      .from(order)
+      .where(eq(order.id, Number(order_id)))
+    return array
+  } catch (e) {
+    const message = formatMessage(
+      '@/utils/getPostgres.ts getOrder()',
+      errorPostgres,
+      e
+    )
+    console.error(message)
+    sendTelegramMessage('ERROR', message)
+    throw errorPostgres
+  }
+}
+
+export async function unsubscribe(customer_email: string) {
+  try {
+    return await postgres.delete(email).where(eq(email.email, customer_email))
+  } catch (e) {
+    const message = formatMessage(
+      '@/utils/getPostgres.ts unsubscribe()',
+      errorPostgres,
+      e
+    )
+    console.error(message)
+    sendTelegramMessage('ERROR', message)
+    throw errorPostgres
+  }
+}

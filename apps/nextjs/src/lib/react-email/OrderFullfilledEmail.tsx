@@ -1,4 +1,5 @@
 import * as React from 'react'
+import type { typeOrder, typeCart } from '@/lib/postgres/data/type'
 import {
   Body,
   Column,
@@ -13,25 +14,22 @@ import {
   Section,
   Tailwind,
   Text,
+  Link,
 } from '@react-email/components'
-import type {
-  typeCart,
-  typeCheckout,
-  typeOrder,
-} from '@/lib/postgres/data/type'
+import { envServer } from '@/env'
 
 interface EmailProps {
+  tracking_number: typeOrder['tracking_number']
   order_id: typeOrder['id']
   cart: typeCart
-  checkout: typeCheckout
 }
 
-export function OrderConfirmationEmail({
+export function OrderFullfilledEmail({
+  tracking_number,
   order_id,
   cart,
-  checkout,
 }: EmailProps) {
-  const previewText = `Ευχαριστούμε για την αγορά σας!`
+  const previewText = `Η παραγγελία σας βρίσκεται καθ' οδόν!`
 
   return (
     <Html>
@@ -53,9 +51,30 @@ export function OrderConfirmationEmail({
               {previewText}
             </Heading>
             <Text className="text-black text-[14px] leading-[24px] mb-4">
-              Ετοιμάζουμε την παραγγελία σας για αποστολή.
-              <br />
-              Θα σας ειδοποιήσουμε όταν αποσταλεί.
+              Παρακολουθήστε την αποστολή για να δείτε την κατάσταση παράδοσης
+              της.
+            </Text>
+            <Section className="text-center my-4">
+              <Link
+                target="_blank"
+                rel="noopener noreferrer"
+                href={`${envServer.ELTA_COURIER_URL}/${tracking_number}`}
+                style={{
+                  backgroundColor: '#dc2626',
+                  color: '#ffffff',
+                  padding: '12px 24px',
+                  borderRadius: '6px',
+                  textDecoration: 'none',
+                  display: 'inline-block',
+                  fontWeight: 'bold',
+                }}
+              >
+                Παρακολούθηση Αποστολής
+              </Link>
+            </Section>
+            <Text className="text-black text-[14px] leading-[24px] mb-4">
+              <strong>Αριθμός παρακολούθησης:</strong>{' '}
+              <span className="underline text-red-600">{tracking_number}</span>
             </Text>
             <Text className="text-black text-[14px] leading-[24px] mb-4">
               <strong>Αριθμός παραγγελίας:</strong>{' '}
@@ -94,7 +113,6 @@ export function OrderConfirmationEmail({
                           }}
                         />
                       </Column>
-
                       <Column className="w-2/3 p-2 relative">
                         <Text style={tight}>{product.product_type}</Text>
                         <Text style={tight}>{product.name}</Text>
@@ -123,34 +141,6 @@ export function OrderConfirmationEmail({
               })}
             </Section>
             <Hr className="border border-solid border-[#eaeaea] my-[26px] mx-0 w-full" />
-            <Section>
-              <Text className="text-black text-[14px] leading-[24px] font-bold">
-                Στοιχεία Αποστολής:
-              </Text>
-              <Text className="text-black text-[14px] leading-[24px] mb-0">
-                {checkout.first_name} {checkout.last_name}
-              </Text>
-              <Text className="text-black text-[14px] leading-[24px] mb-0">
-                {checkout.address}
-                {checkout.extra ? `, ${checkout.extra}` : ''}
-              </Text>
-              <Text className="text-black text-[14px] leading-[24px] mb-0">
-                {checkout.post_code}, {checkout.city}
-              </Text>
-              <Text className="text-black text-[14px] leading-[24px] mb-0">
-                {checkout.country}
-              </Text>
-              <Text className="text-black text-[14px] leading-[24px] mb-0">
-                Τηλέφωνο: {checkout.phone}
-              </Text>
-              <Text className="text-black text-[14px] leading-[24px] mb-0">
-                Email: {checkout.email}
-              </Text>
-              <Text className="text-black text-[14px] leading-[24px] mb-4">
-                Μέθοδος πληρωμής: {checkout.payment_method}
-              </Text>
-            </Section>
-            <Hr className="border border-solid border-[#eaeaea] my-[26px] mx-0 w-full" />
             <Text className="text-[#666666] text-[12px] leading-[24px]">
               Για οποιαδήποτε απορία σχετικά με την παραγγελία σας, μπορείτε να
               επικοινωνήσετε μαζί μας στο τηλέφωνο{' '}
@@ -173,7 +163,8 @@ export function OrderConfirmationEmail({
   )
 }
 
-OrderConfirmationEmail.PreviewProps = {
+OrderFullfilledEmail.PreviewProps = {
+  tracking_number: '123456789',
   order_id: '1000',
   cart: [
     {
@@ -195,20 +186,6 @@ OrderConfirmationEmail.PreviewProps = {
       image: 'sport-hoodie.jpg',
     },
   ],
-  checkout: {
-    email: 'customer@example.com',
-    receive_email: true,
-    country: 'Ελλάδα',
-    first_name: 'Γιώργος',
-    last_name: 'Παπαδόπουλος',
-    address: 'Οδός Ερμού 123',
-    extra: 'Διαμ. 5',
-    post_code: '12345',
-    city: 'Αθήνα',
-    phone: 6946327759,
-    receive_phone: true,
-    payment_method: 'Αντικαταβολή',
-  },
 }
 
-export default OrderConfirmationEmail
+export default OrderFullfilledEmail

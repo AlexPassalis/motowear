@@ -111,36 +111,38 @@ export function HomePageClient({
         )}
         {displayedVariants.length > 0 && (
           <div className="flex flex-col mt-6">
-            <h1 className="mb-2 text-center text-xl xl:text-2xl">
-              Κατηγορίες Προϊόντων
-            </h1>
-            <hr className="border-t-2 border-[var(--mantine-border)] my-6" />
-            <div className="flex gap-2 justify-center">
-              {home_page_variants
-                .map(variant => variant.product_type)
-                .filter(
-                  (item, index, self) =>
-                    index === self.findIndex(other => other === item)
-                )
-                .map((product_type, index) => (
-                  <Button
-                    key={index}
-                    variant={`${
-                      displayedVariants[0].product_type === product_type
-                        ? 'filled'
-                        : 'outline'
-                    }`}
-                    onClick={() =>
-                      setDisplayedVariants(
-                        home_page_variants.filter(
-                          variant => variant.product_type === product_type
+            <div className="px-[0.75rem]">
+              <h1 className="text-center text-xl xl:text-2xl">
+                Κατηγορίες Προϊόντων
+              </h1>
+              <hr className="my-2 border-t-2 border-[var(--mantine-border)]" />
+              <div className="flex gap-2 justify-center">
+                {home_page_variants
+                  .map(variant => variant.product_type)
+                  .filter(
+                    (item, index, self) =>
+                      index === self.findIndex(other => other === item)
+                  )
+                  .map((product_type, index) => (
+                    <Button
+                      key={index}
+                      variant={`${
+                        displayedVariants[0].product_type === product_type
+                          ? 'filled'
+                          : 'outline'
+                      }`}
+                      onClick={() =>
+                        setDisplayedVariants(
+                          home_page_variants.filter(
+                            variant => variant.product_type === product_type
+                          )
                         )
-                      )
-                    }
-                  >
-                    {product_type}
-                  </Button>
-                ))}
+                      }
+                    >
+                      {product_type}
+                    </Button>
+                  ))}
+              </div>
             </div>
             <div className="p-[0.75rem]">
               <SimpleGrid cols={{ base: 2, md: 3, xl: 4 }} spacing="sm">
