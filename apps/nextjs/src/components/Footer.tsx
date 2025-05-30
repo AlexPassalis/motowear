@@ -17,7 +17,7 @@ const links = [
 ]
 
 export function Footer() {
-  const items = links.map(link => (
+  const items = links.map((link) => (
     <Anchor c="dimmed" key={link.label} href={link.link} lh={1} size="xs">
       {link.label}
     </Anchor>
@@ -42,43 +42,55 @@ export function Footer() {
           {items}
         </Group>
 
-        <Group gap="xs" justify="flex-end" wrap="nowrap">
-          <ActionIcon
-            component="a"
-            href="mailto:motoweargr@gmail.com"
-            size="lg"
-            variant="default"
-            radius="xl"
+        <Group
+          justify="flex-end"
+          wrap="nowrap"
+          classNames={{ root: '!flex !flex-col' }}
+        >
+          <div className="flex gap-2">
+            <ActionIcon
+              component="a"
+              href="mailto:motoweargr@gmail.com"
+              size="lg"
+              variant="default"
+              radius="xl"
+            >
+              <MdOutlineEmail size={18} />
+            </ActionIcon>
+            <ActionIcon
+              component="a"
+              href="tel:+306939133385"
+              size="lg"
+              variant="default"
+              radius="xl"
+            >
+              <FaPhoneAlt size={18} />
+            </ActionIcon>
+            <ActionIcon
+              component="a"
+              href="https://instagram.com/motowear.gr"
+              size="lg"
+              variant="default"
+              radius="xl"
+            >
+              <FaInstagram size={18} />
+            </ActionIcon>
+            <ActionIcon
+              component="a"
+              href="https://www.facebook.com/p/Moto-Wear-GR-100087815463903/"
+              size="lg"
+              variant="default"
+              radius="xl"
+            >
+              <FaFacebookSquare size={18} />
+            </ActionIcon>
+          </div>
+          <Link
+            href="https://alexpassalis.dev/bio"
+            className="text-xs text-blue-600 hover:underline"
           >
-            <MdOutlineEmail size={18} />
-          </ActionIcon>
-          <ActionIcon
-            component="a"
-            href="tel:+306939133385"
-            size="lg"
-            variant="default"
-            radius="xl"
-          >
-            <FaPhoneAlt size={18} />
-          </ActionIcon>
-          <ActionIcon
-            component="a"
-            href="https://instagram.com/motowear.gr"
-            size="lg"
-            variant="default"
-            radius="xl"
-          >
-            <FaInstagram size={18} />
-          </ActionIcon>
-          <ActionIcon
-            component="a"
-            href="https://www.facebook.com/p/Moto-Wear-GR-100087815463903/"
-            size="lg"
-            variant="default"
-            radius="xl"
-          >
-            <FaFacebookSquare size={18} />
-          </ActionIcon>
+            Developed by Alex Passalis
+          </Link>
         </Group>
       </div>
     </footer>

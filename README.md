@@ -19,5 +19,5 @@ _(container orchestration and load balancing)_
 ### Additional
 
 - git-crypt for file encryption
-- tailwindcss + https://mantine.dev/ for the UI (https://tailwindcss.com/) (https://mantine.dev/)
-- GitHub actions for CI/CD to VPS
+- tailwindcss + Mantine for the UI (https://tailwindcss.com/) (https://mantine.dev/)
+- GitHub Actions for CI/CD to VPS
