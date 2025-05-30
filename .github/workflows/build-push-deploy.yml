@@ -1,0 +1,139 @@
+name: Build Push Deploy
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  Build-and-Push:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Clone repository into GitHub Actions runner (ubuntu VM)
+        uses: actions/checkout@v3
+
+      - name: Decrypt git-crypted files
+        uses: sliteteam/github-action-git-crypt-unlock@1.3.0
+        env:
+          GIT_CRYPT_KEY: ${{ secrets.GIT_CRYPT_KEY }}
+
+      - name: Set up Docker Buildx (build tool)
+        uses: docker/setup-buildx-action@v2
+
+      - name: Convert repository owner name to lowercase
+        run: |
+          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          echo "OWNER=$OWNER" >> $GITHUB_ENV
+
+      - name: Define image URL's
+        run: |
+          # echo "IMAGE_POSTGRES=ghcr.io/$OWNER/image-motowear-postgres" >> $GITHUB_ENV
+          # echo "IMAGE_TYPESENSE=ghcr.io/$OWNER/image-motowear-typesense" >> $GITHUB_ENV
+          echo "IMAGE_NEXTJS=ghcr.io/$OWNER/image-motowear-nextjs" >> $GITHUB_ENV
+          echo "IMAGE_NGINX=ghcr.io/$OWNER/image-motowear-nginx" >> $GITHUB_ENV
+
+      # - name: image-postgres (build and tag)
+      #   run: |
+      #     docker build \
+      #     -t $IMAGE_POSTGRES:latest \
+      #     -f ./apps/postgres/Dockerfile \
+      #     ./apps/postgres
+
+      #     docker tag \
+      #     $IMAGE_POSTGRES:latest \
+      #     $IMAGE_POSTGRES:${{ github.sha }}
+
+      # - name: image-typesense (build and tag)
+      #   run: |
+      #     docker build \
+      #     -t $IMAGE_TYPESENSE:latest \
+      #     -f ./apps/typesense/Dockerfile \
+      #     ./apps/typesense
+
+      #     docker tag \
+      #     $IMAGE_TYPESENSE:latest \
+      #     $IMAGE_TYPESENSE:${{ github.sha }}
+
+      - name: image-nextjs (build and tag)
+        run: |
+          docker build \
+          -t $IMAGE_NEXTJS:latest \
+          -f ./apps/nextjs/Dockerfile \
+          ./apps/nextjs
+
+          docker tag \
+          $IMAGE_NEXTJS:latest \
+          $IMAGE_NEXTJS:${{ github.sha }}
+
+      - name: image-nginx (build and tag)
+        run: |
+          docker build \
+          -t $IMAGE_NGINX:latest \
+          -f ./apps/nginx/Dockerfile \
+          ./apps/nginx
+
+          docker tag \
+          $IMAGE_NGINX:latest \
+          $IMAGE_NGINX:${{ github.sha }}
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_PAT }}
+
+      - name: Push images to GHCR
+        run: |
+          # docker push $IMAGE_POSTGRES:latest
+          # docker push $IMAGE_POSTGRES:${{ github.sha }}
+
+          # docker push $IMAGE_TYPESENSE:latest
+          # docker push $IMAGE_TYPESENSE:${{ github.sha }}
+
+          docker push $IMAGE_NEXTJS:latest
+          docker push $IMAGE_NEXTJS:${{ github.sha }}
+
+          docker push $IMAGE_NGINX:latest
+          docker push $IMAGE_NGINX:${{ github.sha }}
+
+  Deploy:
+    needs: Build-and-Push
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Clone repository into GitHub Actions runner (ubuntu VM)
+        uses: actions/checkout@master
+
+      - name: Decrypt git-crypted files
+        uses: sliteteam/github-action-git-crypt-unlock@1.3.0
+        env:
+          GIT_CRYPT_KEY: ${{ secrets.GIT_CRYPT_KEY }}
+
+      - name: Copy-paste files from github repository to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+          username: ${{ secrets.VPS_USER }}
+          host: ${{ secrets.VPS_IP }}
+          passphrase: ${{ secrets.VPS_PASSPHRASE }}
+          source: './docker-stack.yaml,./apps/postgres/.env'
+          target: '/home/${{ secrets.VPS_USER }}/motowear/'
+
+      - name: Docker stack deploy
+        uses: appleboy/ssh-action@v1.2.1
+        with:
+          key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+          username: ${{ secrets.VPS_USER }}
+          host: ${{ secrets.VPS_IP }}
+          passphrase: ${{ secrets.VPS_PASSPHRASE }}
+          script: |
+            cd /home/${{ secrets.VPS_USER }}/motowear
+            echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            # docker network create -d overlay network-motowear
+            docker stack deploy -c ./docker-stack.yaml --detach=false --resolve-image always --with-registry-auth stack-motowear
+            docker system prune -af
+            docker logout ghcr.io

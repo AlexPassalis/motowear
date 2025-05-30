@@ -1,0 +1,290 @@
+networks:
+  network-motowear:
+    external: true
+
+volumes:
+  postgres:
+  redis:
+  minio:
+  typesense:
+
+secrets:
+  POSTGRES_DB:
+    external: true
+  POSTGRES_USER:
+    external: true
+  POSTGRES_PASSWORD:
+    external: true
+  MINIO_ROOT_USER:
+    external: true
+  MINIO_ROOT_PASSWORD:
+    external: true
+  POSTGRES_URL:
+    external: true
+  BETTER_AUTH_SECRET:
+    external: true
+  TELEGRAM_BOT_TOKEN:
+    external: true
+  TELEGRAM_ERROR_CHAT_ID:
+    external: true
+  TELEGRAM_AUTH_CHAT_ID:
+    external: true
+  TELEGRAM_ORDER_CHAT_ID:
+    external: true
+  TELEGRAM_REVIEW_CHAT_ID:
+    external: true
+  NODEMAILER_AUTH_USER:
+    external: true
+  NODEMAILER_AUTH_PASS:
+    external: true
+  NODEMAILER_EMAIL:
+    external: true
+  VIVA_CLIENT_ID_DEMO:
+    external: true
+  VIVA_CLIENT_SECRET_DEMO:
+    external: true
+  VIVA_WEBHOOK_VERIFICATION_KEY_DEMO:
+    external: true
+  AFTERSALES_ACCOUNT_API_TOKEN:
+    external: true
+  AFTERSALES_PLATFORM_UUID:
+    external: true
+  AFTERSALES_SIGN_SECRET_PHRASE:
+    external: true
+
+services:
+  dozzle:
+    deploy:
+      restart_policy:
+        condition: any
+      update_config:
+        order: start-first
+        failure_action: rollback
+    image: amir20/dozzle:pr-3710
+    networks:
+      - network-motowear
+    environment:
+      - DOZZLE_NO_ANALYTICS=true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    ports:
+      - '8080:8080'
+    healthcheck:
+      start_period: 30s
+      start_interval: 5s
+      test: ['CMD', '/dozzle', 'healthcheck']
+      interval: 10s
+      timeout: 5s
+      retries: 2
+
+  postgres:
+    deploy:
+      restart_policy:
+        condition: any
+      update_config:
+        order: start-first
+        failure_action: rollback
+    image: ghcr.io/alexpassalis/image-motowear-postgres:latest
+    networks:
+      - network-motowear
+    env_file:
+      - ./apps/postgres/.env
+    secrets:
+      - POSTGRES_DB
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+    environment:
+      POSTGRES_DB_FILE: /run/secrets/POSTGRES_DB
+      POSTGRES_USER_FILE: /run/secrets/POSTGRES_USER
+      POSTGRES_PASSWORD_FILE: /run/secrets/POSTGRES_PASSWORD
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    healthcheck:
+      start_period: 30s
+      start_interval: 5s
+      test:
+        [
+          'CMD-SHELL',
+          'pg_isready -d $$(cat /run/secrets/POSTGRES_DB) -U $$(cat /run/secrets/POSTGRES_USER)',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 2
+
+  pgweb:
+    deploy:
+      restart_policy:
+        condition: any
+      update_config:
+        order: start-first
+        failure_action: rollback
+    image: sosedoff/pgweb:0.16.2
+    networks:
+      - network-motowear
+    secrets:
+      - POSTGRES_URL
+    entrypoint: ['/bin/sh']
+    command:
+      - -c
+      - 'pgweb --url "$$(cat /run/secrets/POSTGRES_URL)?sslmode=disable" --bind 0.0.0.0 --listen 8081'
+    ports:
+      - '8081:8081'
+    healthcheck:
+      start_period: 30s
+      start_interval: 5s
+      test: ['CMD', 'nc', '-vz', '127.0.0.1', '8081']
+      interval: 10s
+      timeout: 5s
+      retries: 2
+
+  redis:
+    deploy:
+      restart_policy:
+        condition: any
+      update_config:
+        order: start-first
+        failure_action: rollback
+    image: redis:7-alpine
+    networks:
+      - network-motowear
+    volumes:
+      - redis:/data
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'redis-cli -h localhost -p 6379 ping | grep PONG || exit 1',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  minio:
+    deploy:
+      restart_policy:
+        condition: any
+      update_config:
+        order: start-first
+        failure_action: rollback
+    image: minio/minio:RELEASE.2025-03-12T18-04-18Z-cpuv1
+    networks:
+      - network-motowear
+    secrets:
+      - MINIO_ROOT_USER
+      - MINIO_ROOT_PASSWORD
+    environment:
+      - MINIO_ROOT_USER_FILE=/run/secrets/MINIO_ROOT_USER
+      - MINIO_ROOT_PASSWORD_FILE=/run/secrets/MINIO_ROOT_PASSWORD
+    command: ['server', '/data', '--console-address', ':9001']
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    volumes:
+      - minio:/data
+    healthcheck:
+      start_period: 30s
+      start_interval: 5s
+      test:
+        [
+          'CMD-SHELL',
+          'curl -f http://localhost:9000/minio/health/live || exit 1',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 2
+
+  typesense:
+    deploy:
+      restart_policy:
+        condition: any
+      update_config:
+        order: start-first
+        failure_action: rollback
+    image: ghcr.io/alexpassalis/image-motowear-typesense:latest
+    networks:
+      - network-motowear
+    command: '--data-dir /data --api-key=typesense_admin_api_key --enable-cors'
+    volumes:
+      - typesense:/data
+    healthcheck:
+      start_period: 30s
+      start_interval: 5s
+      test:
+        [
+          'CMD-SHELL',
+          'curl -f http://localhost:8108/health | grep ok || exit 1',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 2
+
+  nextjs:
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: any
+      update_config:
+        order: start-first
+        failure_action: rollback
+    image: ghcr.io/alexpassalis/image-motowear-nextjs:latest
+    networks:
+      - network-motowear
+    secrets:
+      - POSTGRES_URL
+      - BETTER_AUTH_SECRET
+      - MINIO_ROOT_USER
+      - MINIO_ROOT_PASSWORD
+      - TELEGRAM_BOT_TOKEN
+      - TELEGRAM_ERROR_CHAT_ID
+      - TELEGRAM_AUTH_CHAT_ID
+      - TELEGRAM_ORDER_CHAT_ID
+      - TELEGRAM_REVIEW_CHAT_ID
+      - NODEMAILER_AUTH_USER
+      - NODEMAILER_AUTH_PASS
+      - NODEMAILER_EMAIL
+      - VIVA_CLIENT_ID_DEMO
+      - VIVA_CLIENT_SECRET_DEMO
+      - VIVA_WEBHOOK_VERIFICATION_KEY_DEMO
+      - AFTERSALES_ACCOUNT_API_TOKEN
+      - AFTERSALES_PLATFORM_UUID
+      - AFTERSALES_SIGN_SECRET_PHRASE
+    environment:
+      INSTANCE_ID: '{{.Task.Slot}}'
+      HOSTNAME: 0.0.0.0
+      PORT: 3000
+    healthcheck:
+      start_period: 30s
+      start_interval: 5s
+      test:
+        [
+          'CMD-SHELL',
+          'curl -f http://localhost:3000/api/nextjs | grep ok || exit 1',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 2
+
+  nginx:
+    deploy:
+      restart_policy:
+        condition: any
+      update_config:
+        order: stop-first
+        failure_action: rollback
+    image: ghcr.io/alexpassalis/image-motowear-nginx:latest
+    networks:
+      - network-motowear
+    ports:
+      - target: 443
+        published: 443
+        protocol: tcp
+        mode: host
+    healthcheck:
+      start_period: 30s
+      start_interval: 5s
+      test:
+        ['CMD-SHELL', 'curl -kf https://localhost/nginx | grep ok || exit 1']
+      interval: 10s
+      timeout: 5s
+      retries: 2

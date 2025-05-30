@@ -1,0 +1,47 @@
+@import 'tailwindcss';
+
+:root {
+  --background: #ffffff;
+  --foreground: #000000;
+  --mantine-background: #f8f9fa;
+  --mantine-border: #dee2e6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #ffffff;
+    --foreground: #000000;
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-proxima-nova-extra-bold), Arial, Helvetica, sans-serif;
+}
+
+.proxima-nova {
+  font-family: var(--font-proxima-nova), Arial, Helvetica, sans-serif;
+}
+
+/* Hide the native clear button for inputs with the .searchbox-no-clear class */
+input.searchbox-no-clear[type='search']::-webkit-search-decoration,
+input.searchbox-no-clear[type='search']::-webkit-search-cancel-button,
+input.searchbox-no-clear[type='search']::-webkit-search-results-button,
+input.searchbox-no-clear[type='search']::-webkit-search-results-decoration {
+  -webkit-appearance: none !important;
+  display: none !important;
+}
+
+/* Typesense Highlight component */
+mark {
+  background-color: red;
+  color: white;
+}
