@@ -134,7 +134,7 @@ export function CheckoutPageClient({
   }, [])
   const baseCartTotal = cart.reduce(
     (acc, item) => acc + item.price * item.quantity,
-    0
+    0,
   )
   const cartTotal = coupon?.percentage
     ? baseCartTotal - baseCartTotal * coupon.percentage
@@ -288,7 +288,7 @@ export function CheckoutPageClient({
                                 </h2>
                                 <h2>
                                   {(product.price * product.quantity).toFixed(
-                                    2
+                                    2,
                                   )}
                                   €
                                 </h2>
@@ -349,7 +349,7 @@ export function CheckoutPageClient({
                       checkout: values,
                       cart: cart,
                       coupon: coupon,
-                    }
+                    },
                   )
                   if (res.status === 209) {
                     const { error: err, data: validatedResponse } = z
@@ -357,7 +357,7 @@ export function CheckoutPageClient({
                       .safeParse(res.data)
                     if (err) {
                       router.push(
-                        `${ROUTE_ERROR}?message=${errorInvalidResponse}`
+                        `${ROUTE_ERROR}?message=${errorInvalidResponse}`,
                       )
                       return
                     }
@@ -372,7 +372,7 @@ export function CheckoutPageClient({
                       .safeParse(res.data)
                     if (err) {
                       router.push(
-                        `${ROUTE_ERROR}?message=${errorInvalidResponse}`
+                        `${ROUTE_ERROR}?message=${errorInvalidResponse}`,
                       )
                       return
                     }
@@ -558,7 +558,7 @@ export function CheckoutPageClient({
                               ) : (
                                 <h2>
                                   {(product.price * product.quantity).toFixed(
-                                    2
+                                    2,
                                   )}
                                   €
                                 </h2>
@@ -652,13 +652,13 @@ export function CheckoutPageClient({
                               `${envClient.API_USER_URL}/coupon_code`,
                               {
                                 coupon_code: couponCodeRef.current.value,
-                              }
+                              },
                             )
                             if (res.status !== 200) {
                               router.push(
                                 `${ROUTE_ERROR}?message=${
                                   res?.data?.message || errorUnexpected
-                                }`
+                                }`,
                               )
                             }
 
@@ -667,7 +667,7 @@ export function CheckoutPageClient({
                               .safeParse(res?.data)
                             if (!validatedResponse) {
                               router.push(
-                                `${ROUTE_ERROR}?message=${errorInvalidResponse}-coupon_code`
+                                `${ROUTE_ERROR}?message=${errorInvalidResponse}-coupon_code`,
                               )
                             }
                             if (validatedResponse!.couponArray.length === 1) {
