@@ -32,7 +32,7 @@ export async function generateMetadata({
   const paramsProduct_type = decodeURIComponent(resolvedParams.type)
 
   const description = resolved[1].value.find(
-    (page) => page.product_type === paramsProduct_type
+    (page) => page.product_type === paramsProduct_type,
   )!.product_description
 
   return {
@@ -70,12 +70,12 @@ export default async function CollectionPage({ params }: ProductPageProps) {
   const paramsProduct_type = decodeURIComponent(resolvedParams.type)
 
   const postgresVariants = resolved[2].value.filter(
-    (variant) => variant.product_type === paramsProduct_type
+    (variant) => variant.product_type === paramsProduct_type,
   )
 
   if (
     !postgresVariants.find(
-      (variant) => variant.product_type === paramsProduct_type
+      (variant) => variant.product_type === paramsProduct_type,
     )
   ) {
     return notFound()
@@ -84,7 +84,9 @@ export default async function CollectionPage({ params }: ProductPageProps) {
   const uniqueVariants = postgresVariants
     .filter(
       (variant, index, self) =>
-        self.findIndex((v) => v.name === variant.name) === index
+        self.findIndex(
+          (v) => v.name === variant.name && v.color === variant.color,
+        ) === index,
     )
     .map((variant) => {
       return {
@@ -98,7 +100,8 @@ export default async function CollectionPage({ params }: ProductPageProps) {
   const uniqueBrands = uniqueVariants
     .map((variant) => variant.brand)
     .filter(
-      (item, index, self) => index === self.findIndex((other) => other === item)
+      (item, index, self) =>
+        index === self.findIndex((other) => other === item),
     )
 
   return (
