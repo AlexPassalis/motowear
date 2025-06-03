@@ -9,7 +9,7 @@ import { memo, Fragment, Dispatch, SetStateAction } from 'react'
 import { ProductVariantRow } from '@/app/admin/product/[product_type]/client/ProductVariantRow'
 
 export const ProductVariantRowWrapper = memo(
-  ProductVariantRowWrapperNotMemoised
+  ProductVariantRowWrapperNotMemoised,
 )
 
 type ProductVariantRowWrapperProps = {

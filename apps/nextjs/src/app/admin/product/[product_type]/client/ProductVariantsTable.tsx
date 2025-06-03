@@ -82,14 +82,10 @@ export function ProductVariantsTable({
   const totalPages = Math.max(1, Math.ceil(variants.length / pageSize))
 
   const [pageNumber, setPageNumber] = useState(1)
-  const [isShowAll, setIsShowAll] = useState(false)
   const visibleVariants = useMemo(() => {
-    if (isShowAll) {
-      return variants
-    }
     const start = (pageNumber - 1) * pageSize
     return variants.slice(start, start + pageSize)
-  }, [variants, pageNumber, isShowAll])
+  }, [variants, pageNumber])
 
   const setVariantsCb = useCallback(setVariants, [setVariants])
   const setModalStateCb = useCallback(setModalState, [setModalState])
@@ -116,7 +112,7 @@ export function ProductVariantsTable({
       setModalStateCb,
       openModalCb,
       setOnRequestCb,
-    ]
+    ],
   )
 
   return (
@@ -273,7 +269,7 @@ export function ProductVariantsTable({
           </Droppable>
 
           <Table.Tfoot>
-            {!isShowAll && (
+            {
               <Table.Tr>
                 <Table.Td colSpan={12}>
                   <div className="flex justify-center items-center gap-2">
@@ -282,20 +278,12 @@ export function ProductVariantsTable({
                       value={pageNumber}
                       onChange={(pageNum) => setPageNumber(pageNum)}
                     />
-                    <Button
-                      onClick={() => setIsShowAll(true)}
-                      type="button"
-                      disabled={onRequest}
-                      color="blue"
-                    >
-                      {onRequest ? 'Wait ...' : 'Show All'}
-                    </Button>
                   </div>
                 </Table.Td>
               </Table.Tr>
-            )}
+            }
 
-            {(pageNumber === totalPages || isShowAll) && (
+            {pageNumber === totalPages && (
               <Table.Tr>
                 <Table.Td colSpan={12}>
                   <div className="flex justify-center items-center gap-2">
@@ -375,7 +363,7 @@ export function ProductVariantsTable({
                           `${envClient.API_ADMIN_URL}/product/product_type/variant`,
                           {
                             variants: validatedVariants,
-                          }
+                          },
                         )
                         if (res.status === 200) {
                           window.location.reload()
@@ -383,7 +371,7 @@ export function ProductVariantsTable({
                           alert(
                             `Error creating New Versions: ${
                               res.data?.message || errorUnexpected
-                            }`
+                            }`,
                           )
                           console.error(res)
                         }
@@ -398,8 +386,8 @@ export function ProductVariantsTable({
                       JSON.stringify(variants) ===
                         JSON.stringify(
                           variantsPostgres.filter(
-                            (variant) => variant.product_type === product_type
-                          )
+                            (variant) => variant.product_type === product_type,
+                          ),
                         ) || onRequest
                     }
                     color="green"

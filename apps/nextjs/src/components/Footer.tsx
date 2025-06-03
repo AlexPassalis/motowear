@@ -87,7 +87,7 @@ export function Footer() {
           </div>
           <Link
             href="https://alexpassalis.dev/bio"
-            className="text-xs text-blue-600 hover:underline"
+            className="text-xs text-red-600 hover:underline"
           >
             Developed by Alex Passalis
           </Link>
