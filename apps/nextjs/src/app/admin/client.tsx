@@ -77,7 +77,7 @@ export function AdminPageClient({
         new Date(day.date) <= dateRange[1]!
       ) {
         const existingEntry = data.find(
-          (item) => item.date === format(day.date, 'yyyy-MM-dd')
+          (item) => item.date === format(day.date, 'yyyy-MM-dd'),
         )
         if (existingEntry) {
           existingEntry.sessions = day.sessions || 0
@@ -146,7 +146,7 @@ export function AdminPageClient({
                 ? (
                     visibleData.reduce(
                       (acc, item) => acc + item.conversion,
-                      0
+                      0,
                     ) / visibleData.length
                   ).toFixed(2)
                 : 0}
@@ -242,7 +242,7 @@ export function AdminPageClient({
                   `${envClient.API_ADMIN_URL}/other/shipping`,
                   {
                     shipping: validatedShipping,
-                  }
+                  },
                 )
                 if (res.status === 200) {
                   window.location.reload()
@@ -250,7 +250,7 @@ export function AdminPageClient({
                   alert(
                     `Error creating New Versions: ${
                       res.data?.message || errorUnexpected
-                    }`
+                    }`,
                   )
                   console.error(res)
                 }
@@ -285,8 +285,8 @@ export function AdminPageClient({
                     prev.map((coupon, i) =>
                       i === index
                         ? { ...coupon, coupon_code: e.target.value }
-                        : coupon
-                    )
+                        : coupon,
+                    ),
                   )
                 }
                 label="coupon_code"
@@ -301,8 +301,8 @@ export function AdminPageClient({
                             ...coupon,
                             percentage: value ? Number(value) / 100 : null,
                           }
-                        : coupon
-                    )
+                        : coupon,
+                    ),
                   )
                 }
                 label="percentage"
@@ -318,8 +318,8 @@ export function AdminPageClient({
                             ...coupon,
                             fixed: value ? Number(value) : null,
                           }
-                        : coupon
-                    )
+                        : coupon,
+                    ),
                   )
                 }
                 allowNegative
@@ -336,7 +336,7 @@ export function AdminPageClient({
                       `${envClient.API_ADMIN_URL}/order/coupon/delete`,
                       {
                         data: { coupon_code: coupon.coupon_code },
-                      }
+                      },
                     )
                     if (res.status === 200) {
                       window.location.reload()
@@ -344,7 +344,7 @@ export function AdminPageClient({
                       alert(
                         `Error deleting coupon: ${
                           res.data?.message || errorUnexpected
-                        }`
+                        }`,
                       )
                       console.error(res)
                     }
@@ -399,7 +399,7 @@ export function AdminPageClient({
                   `${envClient.API_ADMIN_URL}/order/coupon`,
                   {
                     coupons: validatedCoupons,
-                  }
+                  },
                 )
                 if (res.status === 200) {
                   window.location.reload()
@@ -407,7 +407,7 @@ export function AdminPageClient({
                   alert(
                     `Error creating New coupons: ${
                       res.data?.message || errorUnexpected
-                    }`
+                    }`,
                   )
                   console.error(res)
                 }
