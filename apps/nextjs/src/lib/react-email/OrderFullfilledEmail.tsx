@@ -43,7 +43,7 @@ export function OrderFullfilledEmail({
                 src="cid:motowear_logo"
                 width={300}
                 height={75}
-                alt="Motowear logo"
+                alt="motowear.gr"
                 className="my-0 mx-auto block"
               />
             </Section>

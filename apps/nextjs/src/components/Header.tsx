@@ -52,7 +52,7 @@ export function Header({
             src="/motowear.png"
             width={200}
             height={50}
-            alt="Motowear logo"
+            alt="motowear.gr"
             className="xl:scale-110"
           />
         </Link>

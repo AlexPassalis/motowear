@@ -29,7 +29,7 @@ export function Footer() {
         <Link href={ROUTE_HOME}>
           <Image
             src="/motowear.png"
-            alt="Motowear logo"
+            alt="motowear.gr"
             width={200}
             height={100}
           />

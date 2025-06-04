@@ -209,7 +209,7 @@ export function CheckoutPageClient({
           src="/motowear.png"
           width={200}
           height={100}
-          alt="Motowear logo"
+          alt="motowear.gr"
           className="sm:scale-110"
         />
       </header>
