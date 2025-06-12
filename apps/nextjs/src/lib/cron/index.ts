@@ -204,5 +204,6 @@ function establishCron() {
   }
 }
 
-export const cron = establishCron()
-  
+if (process.env.BUILD_TIME !== 'true') {
+  establishCron()
+}

@@ -1,5 +1,6 @@
 import { ROUTE_COLLECTION } from '@/data/routes'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { Dispatch, Fragment, SetStateAction } from 'react'
 import { AiOutlineClose } from 'react-icons/ai'
 
@@ -10,6 +11,8 @@ type MenuProps = {
 }
 
 export function Menu({ product_types, isMenuOpen, setIsMenuOpen }: MenuProps) {
+  const pathname = usePathname()
+
   return (
     <section
       className={`fixed top-0 left-0 w-3/4 max-w-[365px] h-full overflow-y-auto bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${
@@ -36,6 +39,15 @@ export function Menu({ product_types, isMenuOpen, setIsMenuOpen }: MenuProps) {
                 <li>
                   <Link
                     href={`${ROUTE_COLLECTION}/${productType}`}
+                    onClick={(e) => {
+                      if (
+                        `${ROUTE_COLLECTION}/${productType}` ===
+                        decodeURIComponent(pathname!)
+                      ) {
+                        e.preventDefault()
+                        setIsMenuOpen(!isMenuOpen)
+                      }
+                    }}
                     className="text-xl hover:text-red-500"
                   >
                     {productType}

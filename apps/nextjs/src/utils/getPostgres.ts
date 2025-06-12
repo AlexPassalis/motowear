@@ -15,7 +15,7 @@ import {
 } from '@/lib/postgres/schema'
 import { sendTelegramMessage } from '@/lib/telegram'
 import { formatMessage } from '@/utils/formatMessage'
-import { or, eq, and, gte, lte, desc } from 'drizzle-orm'
+import { eq, and, gte, lte, desc } from 'drizzle-orm'
 
 export async function getProductTypes() {
   try {
