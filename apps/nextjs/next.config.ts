@@ -14,7 +14,7 @@ const nextConfig: NextConfig = {
     ],
   },
   images: {
-    minimumCacheTTL: 3600, // Set TTL to 1 hour (3600 seconds) for Clouflare
+    minimumCacheTTL: 31536000, // Set TTL to 1 year for Cloudflare
     remotePatterns: [
       {
         protocol: 'http',

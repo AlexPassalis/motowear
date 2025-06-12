@@ -204,14 +204,16 @@ export function CheckoutPageClient({
   return (
     <div className="min-h-screen flex flex-col">
       <header className="relative flex justify-center p-2 border-b border-b-[var(--mantine-border)]">
-        <Image
-          component={NextImage}
-          src="/motowear.png"
-          width={200}
-          height={100}
-          alt="motowear.gr"
-          className="sm:scale-110"
-        />
+        <div className="flex justify-center">
+          <Image
+            component={NextImage}
+            src="/motowear.png"
+            width={200}
+            height={100}
+            alt="motowear.gr"
+            className="sm:scale-110"
+          />
+        </div>
       </header>
 
       <main className="flex-1 relative p-4">
