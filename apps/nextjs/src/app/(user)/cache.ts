@@ -12,7 +12,7 @@ import type {
 } from '@/lib/postgres/data/type'
 
 import { errorRedis } from '@/data/error'
-import { redis } from '@/lib/redis'
+import { redis } from '@/lib/redis/index'
 import { sendTelegramMessage } from '@/lib/telegram'
 import { formatMessage } from '@/utils/formatMessage'
 import {
@@ -35,7 +35,7 @@ export async function getProductTypesCached(): Promise<typeProductTypes> {
       const message = formatMessage(
         '@/app/(user)/cache.ts getProductTypesCached() get',
         errorRedis,
-        e
+        e,
       )
       console.error(message)
       sendTelegramMessage('ERROR', message)
@@ -57,13 +57,13 @@ export async function getProductTypesCached(): Promise<typeProductTypes> {
         'product_types',
         JSON.stringify(product_types),
         'EX',
-        3600
+        3600,
       )
     } catch (e) {
       const message = formatMessage(
         '@/app/(user)/cache.ts getProductTypesCached() set',
         errorRedis,
-        e
+        e,
       )
       console.error(message)
       sendTelegramMessage('ERROR', message)
@@ -85,7 +85,7 @@ export async function getVariantsCached(): Promise<typeVariant[]> {
       const message = formatMessage(
         '@/app/(user)/cache.ts getVariantsCached() get',
         errorRedis,
-        e
+        e,
       )
       console.error(message)
       sendTelegramMessage('ERROR', message)
@@ -108,7 +108,7 @@ export async function getVariantsCached(): Promise<typeVariant[]> {
       const message = formatMessage(
         '@/app/(user)/cache.ts getVariantsCached() set',
         errorRedis,
-        e
+        e,
       )
       console.error(message)
       sendTelegramMessage('ERROR', message)
@@ -130,7 +130,7 @@ export async function getPagesCached(): Promise<typeProductPage[]> {
       const message = formatMessage(
         '@/app/(user)/cache.ts getPagesCached() get',
         errorRedis,
-        e
+        e,
       )
       console.error(message)
       sendTelegramMessage('ERROR', message)
@@ -153,7 +153,7 @@ export async function getPagesCached(): Promise<typeProductPage[]> {
       const message = formatMessage(
         '@/app/(user)/cache.ts getPagesCached() set',
         errorRedis,
-        e
+        e,
       )
       console.error(message)
       sendTelegramMessage('ERROR', message)
@@ -175,7 +175,7 @@ export async function getReviewsCached(): Promise<typeReview[]> {
       const message = formatMessage(
         '@/app/(user)/cache.ts getReviewsCached() get',
         errorRedis,
-        e
+        e,
       )
       console.error(message)
       sendTelegramMessage('ERROR', message)
@@ -198,7 +198,7 @@ export async function getReviewsCached(): Promise<typeReview[]> {
       const message = formatMessage(
         '@/app/(user)/cache.ts getReviewsCached() set',
         errorRedis,
-        e
+        e,
       )
       console.error(message)
       sendTelegramMessage('ERROR', message)
@@ -220,7 +220,7 @@ export async function getShippingCached(): Promise<typeShipping> {
       const message = formatMessage(
         '@/app/(user)/cache.ts getShippingCached() get',
         errorRedis,
-        e
+        e,
       )
       console.error(message)
       sendTelegramMessage('ERROR', message)
@@ -243,7 +243,7 @@ export async function getShippingCached(): Promise<typeShipping> {
       const message = formatMessage(
         '@/app/(user)/cache.ts getShippingCached() set',
         errorRedis,
-        e
+        e,
       )
       console.error(message)
       sendTelegramMessage('ERROR', message)
@@ -269,7 +269,7 @@ export async function getHomePageCached(): Promise<typeHomePage> {
       const message = formatMessage(
         '@/app/(user)/cache.ts getHomePageCached() get',
         errorRedis,
-        e
+        e,
       )
       console.error(message)
       sendTelegramMessage('ERROR', message)
@@ -292,7 +292,7 @@ export async function getHomePageCached(): Promise<typeHomePage> {
       const message = formatMessage(
         '@/app/(user)/cache.ts getHomePageCached() set',
         errorRedis,
-        e
+        e,
       )
       console.error(message)
       sendTelegramMessage('ERROR', message)
@@ -320,7 +320,7 @@ export async function getHomePageVariantsCached(): Promise<typeHomePageVariants>
       const message = formatMessage(
         '@/app/(user)/cache.ts getHomePageVariantsCached() get',
         errorRedis,
-        e
+        e,
       )
       console.error(message)
       sendTelegramMessage('ERROR', message)
@@ -342,13 +342,13 @@ export async function getHomePageVariantsCached(): Promise<typeHomePageVariants>
         'home_page_variants',
         JSON.stringify(home_page_variants),
         'EX',
-        3600
+        3600,
       )
     } catch (e) {
       const message = formatMessage(
         '@/app/(user)/cache.ts getHomePageVariantsCached() set',
         errorRedis,
-        e
+        e,
       )
       console.error(message)
       sendTelegramMessage('ERROR', message)
@@ -370,7 +370,7 @@ export async function getHomePageReviewsCache(): Promise<typeHomePageReviews> {
       const message = formatMessage(
         '@/app/(user)/cache.ts getHomePageReviewsCache() get',
         errorRedis,
-        e
+        e,
       )
       console.error(message)
       sendTelegramMessage('ERROR', message)
@@ -392,13 +392,13 @@ export async function getHomePageReviewsCache(): Promise<typeHomePageReviews> {
         'home_page_reviews',
         JSON.stringify(home_page_reviews),
         'EX',
-        3600
+        3600,
       )
     } catch (e) {
       const message = formatMessage(
         '@/app/(user)/cache.ts getHomePageReviewsCache() set',
         errorRedis,
-        e
+        e,
       )
       console.error(message)
       sendTelegramMessage('ERROR', message)

@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
     const message = formatMessage(
       '@/app/api/product/product_type/variant/route.ts POST',
       errorInvalidBody,
-      e
+      e,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)
@@ -65,15 +65,15 @@ export async function POST(req: NextRequest) {
                   price_before: v.price_before,
                   upsell: v.upsell,
                 },
-              })
-        )
-      )
+              }),
+        ),
+      ),
     )
   } catch (e) {
     const message = formatMessage(
       '@/app/api/product/product_type/variant/route.ts POST',
       errorPostgres,
-      e
+      e,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)
@@ -99,7 +99,7 @@ export async function POST(req: NextRequest) {
     const message = formatMessage(
       '@/app/api/product/product_type/variant/route.ts POST',
       errorRedis,
-      e
+      e,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)
@@ -124,7 +124,7 @@ export async function DELETE(req: NextRequest) {
     const message = formatMessage(
       '@/app/api/product/product_type/variant/route.ts DELETE',
       errorInvalidBody,
-      e
+      e,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)
@@ -137,7 +137,7 @@ export async function DELETE(req: NextRequest) {
     const message = formatMessage(
       '@/app/api/product/product_type/variant/route.ts DELETE',
       errorPostgres,
-      e
+      e,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)
@@ -163,7 +163,7 @@ export async function DELETE(req: NextRequest) {
     const message = formatMessage(
       '@/app/api/product/product_type/variant/route.ts DELETE',
       errorRedis,
-      e
+      e,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)

@@ -7,7 +7,7 @@ import { sendTelegramMessage } from '@/lib/telegram'
 import { NextRequest, NextResponse } from 'next/server'
 import { shipping } from '@/lib/postgres/schema'
 import { z } from 'zod'
-import { redis } from '@/lib/redis'
+import { redis } from '@/lib/redis/index'
 import { isSessionAPI } from '@/lib/better-auth/isSession'
 import { headers } from 'next/headers'
 
@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     const message = formatMessage(
       '@/app/api/admin/other/shipping/route.ts POST',
       errorInvalidBody,
-      error
+      error,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)
@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
     const message = formatMessage(
       '@/app/api/admin/other/shipping/route.ts POST',
       errorPostgres,
-      e
+      e,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)
@@ -64,13 +64,13 @@ export async function POST(req: NextRequest) {
         free: validatedBody.shipping.free,
       }),
       'EX',
-      3600
+      3600,
     )
   } catch (e) {
     const message = formatMessage(
       '@/app/api/admin/other/shipping/route.ts POST',
       errorRedis,
-      e
+      e,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)

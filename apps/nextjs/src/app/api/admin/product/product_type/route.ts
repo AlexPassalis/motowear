@@ -16,7 +16,7 @@ import { updateTypesense } from '@/lib/typesense/server'
 import { product_pages } from '@/lib/postgres/schema'
 import { formatMessage } from '@/utils/formatMessage'
 import { sendTelegramMessage } from '@/lib/telegram'
-import { redis } from '@/lib/redis'
+import { redis } from '@/lib/redis/index'
 import {
   getHomePageReviews,
   getHomePageVariants,
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
     const message = formatMessage(
       '@/app/api/product/product_type/route.ts POST',
       errorInvalidBody,
-      e
+      e,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)
@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
     const message = formatMessage(
       '@/app/api/product/product_type/route.ts POST',
       errorPostgres,
-      e
+      e,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)
@@ -78,14 +78,14 @@ export async function POST(req: NextRequest) {
       'product_types',
       JSON.stringify(product_types_postgres),
       'EX',
-      3600
+      3600,
     )
     await redis.set('pages', JSON.stringify(pages_postgres), 'EX', 3600)
   } catch (e) {
     const message = formatMessage(
       '@/app/api/product/product_type/route.ts POST',
       errorRedis,
-      e
+      e,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)
@@ -152,19 +152,19 @@ export async function DELETE(req: NextRequest) {
       'home_page_variants',
       JSON.stringify(home_page_variants),
       'EX',
-      3600
+      3600,
     )
     await redis.set(
       'home_page_reviews',
       JSON.stringify(home_page_reviews),
       'EX',
-      3600
+      3600,
     )
   } catch (e) {
     const message = formatMessage(
       '@/app/api/admin/product/product_type/route.ts DELETE',
       errorRedis,
-      e
+      e,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)

@@ -155,8 +155,6 @@ function establishCron() {
       sendTelegramMessage('ERROR', message)
       process.exit(1)
     }
-
-    return global.global_cron_send_order_review_email
   }
 
   if (!global.global_cron_send_abandon_cart_email) {
@@ -180,8 +178,6 @@ function establishCron() {
       sendTelegramMessage('ERROR', message)
       process.exit(1)
     }
-
-    return global.global_cron_send_abandon_cart_email
   }
 
   if (!global.global_cron_delete_not_paid_orders) {
@@ -205,9 +201,8 @@ function establishCron() {
       sendTelegramMessage('ERROR', message)
       process.exit(1)
     }
-
-    return global.global_cron_delete_not_paid_orders
   }
 }
 
 export const cron = establishCron()
+  

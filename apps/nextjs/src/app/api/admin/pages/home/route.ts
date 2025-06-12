@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     const message = formatMessage(
       '@/app/api/admin/pages/home/image/route.ts POST',
       errorInvalidBody,
-      e
+      e,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
     const message = formatMessage(
       '@/app/api/admin/pages/home/image/route.ts POST',
       errorPostgres,
-      e
+      e,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)
@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
     const message = formatMessage(
       '@/app/api/admin/pages/home/image/route.ts POST',
       errorRedis,
-      e
+      e,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)

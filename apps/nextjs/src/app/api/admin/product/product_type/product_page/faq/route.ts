@@ -26,7 +26,7 @@ export async function DELETE(req: NextRequest) {
     const message = formatMessage(
       '@/app/api/admin/product/product_type/product_page/faq/route.ts DELETE',
       errorInvalidBody,
-      e
+      e,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)
@@ -46,13 +46,13 @@ export async function DELETE(req: NextRequest) {
             AND ${product_pages}.faq @> ${JSON.stringify([
         { question: validatedBody.question },
       ])}
-        `
+        `,
     )
   } catch (e) {
     const message = formatMessage(
       '@/app/api/admin/product/product_type/product_page/faq/route.ts DELETE',
       errorPostgres,
-      e
+      e,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)
@@ -72,7 +72,7 @@ export async function DELETE(req: NextRequest) {
     const message = formatMessage(
       '@/app/api/admin/product/product_type/product_page/faq/route.ts DELETE',
       errorRedis,
-      e
+      e,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)
