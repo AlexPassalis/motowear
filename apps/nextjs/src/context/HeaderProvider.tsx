@@ -159,8 +159,8 @@ export default function HeaderProvider({
       >
         <LoadingOverlay
           visible={loadingOverlay}
-          zIndex={1000}
           overlayProps={{ radius: 'xs', blur: 1 }}
+          zIndex={1100}
         />
         <form
           className="flex flex-col"
@@ -266,7 +266,8 @@ export default function HeaderProvider({
           if (isSearchOpen) setIsSearchOpen(false)
           if (isCartOpen) setIsCartOpen(false)
         }}
-        className="min-h-screen flex flex-col z-10 w-full h-full"
+        className="min-h-screen flex flex-col w-full h-full"
+        style={{ zIndex: 50 }}
       >
         <Header
           isMenuOpen={isMenuOpen}

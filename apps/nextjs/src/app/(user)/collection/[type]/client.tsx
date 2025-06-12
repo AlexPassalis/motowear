@@ -127,7 +127,8 @@ export function CollectionPageClient({
                         duration: 0.025,
                         ease: 'easeInOut',
                       }}
-                      className="absolute left-0 top-full z-10 mt-0.5 w-full max-w-[408px] bg-white flex flex-col gap-1 max-h-96 overflow-y-auto p-1 border rounded-lg"
+                      className="absolute left-0 top-full mt-0.5 w-full max-w-[408px] bg-white flex flex-col gap-1 max-h-96 overflow-y-auto p-1 border rounded-lg"
+                      style={{ zIndex: 50 }}
                     >
                       {selectedBrand !== '' && (
                         <>
@@ -192,7 +193,7 @@ export function CollectionPageClient({
                   <div className="relative aspect-square rounded-lg">
                     <LoadingOverlay
                       visible={loadingImages.has(index)}
-                      zIndex={500}
+                      zIndex={50}
                       overlayProps={{ radius: 'sm', blur: 2 }}
                     />
                     <Image

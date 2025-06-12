@@ -50,7 +50,7 @@ export function Cart({
   const router = useRouter()
   const cartTotal = cart.reduce(
     (acc, item) => acc + item.price * item.quantity,
-    0
+    0,
   )
   const [total, setTotal] = useState(cartTotal)
   const couponCodeRef = useRef<null | HTMLInputElement>(null)
@@ -61,7 +61,7 @@ export function Cart({
           ? cartTotal - cartTotal * coupon.percentage
           : coupon?.fixed
           ? cartTotal - coupon.fixed
-          : cartTotal
+          : cartTotal,
       )
     } else {
       setTotal(cartTotal)
@@ -74,9 +74,10 @@ export function Cart({
 
   return (
     <section
-      className={`z-20 fixed top-0 right-0 w-full max-w-[400px] h-full bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${
+      className={`fixed top-0 right-0 w-full max-w-[400px] h-full bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${
         isCartOpen ? 'translate-x-0' : 'translate-x-full'
       }`}
+      style={{ zIndex: 100 }}
     >
       <div className="flex flex-col h-full p-4 min-h-0">
         <div className="flex justify-between items-center w-full border-b-2 pb-2 mb-2 border-[var(--mantine-border)]">
@@ -219,7 +220,7 @@ export function Cart({
                         <div className="flex gap-2 items-center">
                           <h2 className="text-[var(--mantine-border)] line-through decoration-red-500">
                             {(product.price_before * product.quantity).toFixed(
-                              2
+                              2,
                             )}
                             €
                           </h2>
@@ -239,8 +240,8 @@ export function Cart({
                             prev.map((item, i) =>
                               i === index && item.quantity > 1
                                 ? { ...item, quantity: item.quantity - 1 }
-                                : item
-                            )
+                                : item,
+                            ),
                           )
                         }
                         className="w-1/3"
@@ -267,8 +268,8 @@ export function Cart({
                             prev.map((item, i) =>
                               i === index
                                 ? { ...item, quantity: item.quantity + 1 }
-                                : item
-                            )
+                                : item,
+                            ),
                           )
                         }
                         className="w-1/3"
@@ -297,7 +298,7 @@ export function Cart({
           <Box className="mt-auto relative">
             <LoadingOverlay
               visible={couponLoadingOverlay}
-              zIndex={1000}
+              zIndex={150}
               overlayProps={{ radius: 'xs', blur: 1 }}
             />
 
@@ -344,13 +345,13 @@ export function Cart({
                         `${envClient.API_USER_URL}/coupon_code`,
                         {
                           coupon_code: couponCodeRef.current.value,
-                        }
+                        },
                       )
                       if (res.status !== 200) {
                         router.push(
                           `${ROUTE_ERROR}?message=${
                             res?.data?.message || errorUnexpected
-                          }`
+                          }`,
                         )
                       }
 
@@ -359,7 +360,7 @@ export function Cart({
                         .safeParse(res?.data)
                       if (!validatedResponse) {
                         router.push(
-                          `${ROUTE_ERROR}?message=${errorInvalidResponse}-coupon_code`
+                          `${ROUTE_ERROR}?message=${errorInvalidResponse}-coupon_code`,
                         )
                       }
                       if (couponCodeRef?.current?.value) {

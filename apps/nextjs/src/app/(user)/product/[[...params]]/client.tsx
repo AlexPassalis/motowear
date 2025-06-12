@@ -130,14 +130,14 @@ function Main({
       .filter(Boolean)
       .filter(
         (item, index, self) =>
-          index === self.findIndex((other) => other === item)
+          index === self.findIndex((other) => other === item),
       ),
     selectedBrand: '',
     displayedVariants: postgresVariants
       .map((product) => product.name)
       .filter(
         (item, index, self) =>
-          index === self.findIndex((other) => other === item)
+          index === self.findIndex((other) => other === item),
       )
       .sort((a, b) => a.localeCompare(b)),
     selectedVariant: paramsVariant ? paramsVariant.name : fallbackVariant.name,
@@ -148,7 +148,7 @@ function Main({
           .filter(Boolean)
           .filter(
             (item, index, self) =>
-              index === self.findIndex((other) => other === item)
+              index === self.findIndex((other) => other === item),
           )
       : postgresVariants
           .filter((variant) => variant.name === fallbackVariant.name)
@@ -156,7 +156,7 @@ function Main({
           .filter(Boolean)
           .filter(
             (item, index, self) =>
-              index === self.findIndex((other) => other === item)
+              index === self.findIndex((other) => other === item),
           ),
     selectedColor: paramsVariant ? paramsVariant.color : fallbackVariant.color,
     displayedSizes: paramsVariant
@@ -167,7 +167,7 @@ function Main({
           .filter(Boolean)
           .filter(
             (item, index, self) =>
-              index === self.findIndex((other) => other === item)
+              index === self.findIndex((other) => other === item),
           )
       : postgresVariants
           .filter((variant) => variant.name === fallbackVariant.name)
@@ -176,7 +176,7 @@ function Main({
           .filter(Boolean)
           .filter(
             (item, index, self) =>
-              index === self.findIndex((other) => other === item)
+              index === self.findIndex((other) => other === item),
           ),
     selectedSize: paramsVariant ? paramsVariant.size : fallbackVariant.size,
     images: paramsVariant ? paramsVariant.images : fallbackVariant.images,
@@ -203,12 +203,12 @@ function Main({
             .filter(
               (product) =>
                 product.name === 'Δεν βρίσκω την μηχανή μου (custom σχέδιο)' ||
-                product.brand === selectedBrand
+                product.brand === selectedBrand,
             )
             .map((product) => product.name)
             .filter(
               (item, index, self) =>
-                index === self.findIndex((other) => other === item)
+                index === self.findIndex((other) => other === item),
             )
             .sort((a, b) => a.localeCompare(b))
 
@@ -218,11 +218,11 @@ function Main({
             .filter(Boolean)
             .filter(
               (item, index, self) =>
-                index === self.findIndex((other) => other === item)
+                index === self.findIndex((other) => other === item),
             )
 
           const foundVariant = postgresVariants.find(
-            (product) => product.brand === selectedBrand
+            (product) => product.brand === selectedBrand,
           )!
           const displayedSizes = postgresVariants
             .filter((product) => product.name === displayedVariants[0])
@@ -230,7 +230,7 @@ function Main({
             .filter(Boolean)
             .filter(
               (item, index, self) =>
-                index === self.findIndex((other) => other === item)
+                index === self.findIndex((other) => other === item),
             )
 
           return {
@@ -263,11 +263,11 @@ function Main({
           .filter(Boolean)
           .filter(
             (item, index, self) =>
-              index === self.findIndex((other) => other === item)
+              index === self.findIndex((other) => other === item),
           )
 
         const foundVariant = postgresVariants.find(
-          (product) => product.name === selectedVariant
+          (product) => product.name === selectedVariant,
         )!
         const displayedSizes = postgresVariants
           .filter((product) => product.name === selectedVariant)
@@ -276,7 +276,7 @@ function Main({
           .filter(Boolean)
           .filter(
             (item, index, self) =>
-              index === self.findIndex((other) => other === item)
+              index === self.findIndex((other) => other === item),
           )
 
         return {
@@ -297,7 +297,7 @@ function Main({
         const foundVariant = postgresVariants.find(
           (product) =>
             product.name === state.selectedVariant &&
-            product.color === selectedColor
+            product.color === selectedColor,
         )!
         const displayedSizes = postgresVariants
           .filter((product) => product.name === state.selectedVariant)
@@ -339,14 +339,14 @@ function Main({
       variant.product_type === paramsProduct_type &&
       variant.name === state.selectedVariant &&
       variant.color === state.selectedColor &&
-      variant.size === state.selectedSize
+      variant.size === state.selectedSize,
   )?.upsell
   const upsellDisplayedVariants = upsellProductVariant
     ? all_variants
         .filter(
           (variant) =>
             variant.product_type === upsellProductVariant.product_type &&
-            variant.name === upsellProductVariant.name
+            variant.name === upsellProductVariant.name,
         )
         .sort((a, b) => a.name.localeCompare(b.name))
     : null
@@ -356,10 +356,10 @@ function Main({
           .filter(
             (variant) =>
               variant.product_type === upsellProductVariant.product_type &&
-              variant.name === upsellProductVariant.name
+              variant.name === upsellProductVariant.name,
           )
           .sort((a, b) => a.name.localeCompare(b.name))[0]
-      : null
+      : null,
   )
   const [upsellModal, { open: openUpsellModal, close: closeUpsellModal }] =
     useDisclosure(false)
@@ -434,7 +434,7 @@ function Main({
                   .map((variant) => variant.color)
                   .filter(
                     (item, index, self) =>
-                      index === self.findIndex((other) => other === item)
+                      index === self.findIndex((other) => other === item),
                   ).length > 0 && (
                   <div className="mb-2">
                     <h1 className="mb-1 text-lg">Χρώμα</h1>
@@ -443,7 +443,7 @@ function Main({
                         .map((variant) => variant.color)
                         .filter(
                           (item, index, self) =>
-                            index === self.findIndex((other) => other === item)
+                            index === self.findIndex((other) => other === item),
                         )
                         .map((color, index) => {
                           return color === upsellSelectedVariant.color ? (
@@ -455,13 +455,14 @@ function Main({
                                     (variant) =>
                                       variant.product_type ===
                                         upsellProductVariant.product_type &&
-                                      variant.name === upsellProductVariant.name
+                                      variant.name ===
+                                        upsellProductVariant.name,
                                   )
                                   .filter((variant) => variant.color === color)
                                   .filter(
                                     (item, index, self) =>
                                       index ===
-                                      self.findIndex((other) => other === item)
+                                      self.findIndex((other) => other === item),
                                   )
                                 setUpsellSelectedVariant(displayedVariants[0])
                               }}
@@ -481,13 +482,14 @@ function Main({
                                     (variant) =>
                                       variant.product_type ===
                                         upsellProductVariant.product_type &&
-                                      variant.name === upsellProductVariant.name
+                                      variant.name ===
+                                        upsellProductVariant.name,
                                   )
                                   .filter((variant) => variant.color === color)
                                   .filter(
                                     (item, index, self) =>
                                       index ===
-                                      self.findIndex((other) => other === item)
+                                      self.findIndex((other) => other === item),
                                   )
                                 setUpsellSelectedVariant(displayedVariants[0])
                               }}
@@ -504,7 +506,7 @@ function Main({
 
                 {upsellDisplayedVariants
                   .filter(
-                    (variant) => variant.color === upsellSelectedVariant.color
+                    (variant) => variant.color === upsellSelectedVariant.color,
                   )
                   .map((variant) => variant.size).length > 0 && (
                   <div className="mb-2">
@@ -513,7 +515,7 @@ function Main({
                       {upsellDisplayedVariants
                         .filter(
                           (variant) =>
-                            variant.color === upsellSelectedVariant.color
+                            variant.color === upsellSelectedVariant.color,
                         )
                         .map((variant) => variant.size)
                         .map((size, index) => (
@@ -522,8 +524,8 @@ function Main({
                             onClick={() =>
                               setUpsellSelectedVariant(
                                 upsellDisplayedVariants.find(
-                                  (variant) => variant.size === size
-                                )!
+                                  (variant) => variant.size === size,
+                                )!,
                               )
                             }
                             className={`w-9 h-[31.5px] border-2 rounded-lg ${
@@ -594,7 +596,7 @@ function Main({
                               upsellSelectedVariant.product_type &&
                             item.name === upsellSelectedVariant.name &&
                             item.color === upsellSelectedVariant.color &&
-                            item.size === upsellSelectedVariant.size
+                            item.size === upsellSelectedVariant.size,
                         )
                         if (existingIndex !== -1) {
                           const updatedCart = [...prev]
@@ -677,8 +679,8 @@ function Main({
                       length: Math.round(
                         postgres_reviews.reduce(
                           (sum, review) => sum + review.rating,
-                          0
-                        ) / postgres_reviews.length
+                          0,
+                        ) / postgres_reviews.length,
                       ),
                     },
                     (_, i) => (
@@ -687,7 +689,7 @@ function Main({
                         size={18}
                         className="text-yellow-500"
                       />
-                    )
+                    ),
                   )}
                   <span className="ml-2 proxima-nova text-sm xl:text-base">
                     ({postgres_reviews.length} κριτικές)
@@ -806,7 +808,7 @@ function Main({
                                 window.history.pushState(
                                   {},
                                   '',
-                                  `${ROUTE_PRODUCT}/${paramsProduct_type}`
+                                  `${ROUTE_PRODUCT}/${paramsProduct_type}`,
                                 )
                               }}
                               className="p-1 border border-white rounded-lg hover:border-red-500"
@@ -885,7 +887,7 @@ function Main({
                       >
                         {state.displayedVariants
                           .filter(
-                            (variant) => variant !== state.selectedVariant
+                            (variant) => variant !== state.selectedVariant,
                           )
                           .map((variant, index, array) => (
                             <Fragment key={index}>
@@ -898,7 +900,7 @@ function Main({
                                   window.history.pushState(
                                     {},
                                     '',
-                                    `${ROUTE_PRODUCT}/${paramsProduct_type}/${variant}`
+                                    `${ROUTE_PRODUCT}/${paramsProduct_type}/${variant}`,
                                   )
                                 }}
                                 className="proxima-nova flex justify-center p-1 border border-white rounded-lg hover:border-red-500"
@@ -1215,13 +1217,13 @@ function Main({
                       customRef.current!.value.trim().length
                     if (textAreaValueLength < 3) {
                       setCustomError(
-                        'Πρέπει να πληκτρολογήσετε τουλάχιστον 3 χαρακτήρες!'
+                        'Πρέπει να πληκτρολογήσετε τουλάχιστον 3 χαρακτήρες!',
                       )
                       return
                     }
                     if (textAreaValueLength > 50) {
                       setCustomError(
-                        'Μπορείτε να πληκτρολογήσετε μέχρι 50 χαρακτήρες!'
+                        'Μπορείτε να πληκτρολογήσετε μέχρι 50 χαρακτήρες!',
                       )
                       return
                     }
@@ -1239,7 +1241,7 @@ function Main({
                         item.product_type === paramsProduct_type &&
                         item.name === state.selectedVariant &&
                         item.color === state.selectedColor &&
-                        item.size === state.selectedSize
+                        item.size === state.selectedSize,
                     )
                     if (existingIndex !== -1) {
                       const updatedCart = [...prev]
@@ -1406,7 +1408,10 @@ function Main({
                 total={Math.ceil(postgres_reviews.length / 5)}
                 onChange={(pageNumber) =>
                   setReviews(
-                    postgres_reviews.slice((pageNumber - 1) * 5, pageNumber * 5)
+                    postgres_reviews.slice(
+                      (pageNumber - 1) * 5,
+                      pageNumber * 5,
+                    ),
                   )
                 }
                 mt="xs"

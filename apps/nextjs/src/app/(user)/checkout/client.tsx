@@ -221,7 +221,7 @@ export function CheckoutPageClient({
           <>
             <LoadingOverlay
               visible={formLoadingOverlay}
-              zIndex={1000}
+              zIndex={50}
               overlayProps={{ radius: 'xs', blur: 1 }}
             />
 
@@ -636,7 +636,7 @@ export function CheckoutPageClient({
                 <Box className="relative">
                   <LoadingOverlay
                     visible={couponLoadingOverlay}
-                    zIndex={1000}
+                    zIndex={50}
                     overlayProps={{ radius: 'xs', blur: 1 }}
                   />
                   <div className="flex gap-2 items-end mb-2">

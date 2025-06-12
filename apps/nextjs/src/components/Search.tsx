@@ -25,9 +25,10 @@ type SearchProps = {
 export function Search({ isSearchOpen, setIsSearchOpen }: SearchProps) {
   return (
     <section
-      className={`z-20 fixed top-0 left-0 w-full h-3/4 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${
+      className={`fixed top-0 left-0 w-full h-3/4 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${
         isSearchOpen ? 'translate-y-0' : '-translate-y-full'
       }`}
+      style={{ zIndex: 100 }}
     >
       <div className="flex flex-col h-full gap-2 p-4">
         <div className="flex justify-between items-center w-full border-b-2 pb-2 border-[var(--mantine-border)]">

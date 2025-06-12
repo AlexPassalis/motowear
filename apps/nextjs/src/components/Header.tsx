@@ -84,7 +84,7 @@ export function Header({
             inline
             label={cart.length}
             size={15}
-            zIndex={10}
+            zIndex={50}
           >
             <button
               onClick={() => setIsCartOpen(!isCartOpen)}

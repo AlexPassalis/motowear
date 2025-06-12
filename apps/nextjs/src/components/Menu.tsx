@@ -12,9 +12,10 @@ type MenuProps = {
 export function Menu({ product_types, isMenuOpen, setIsMenuOpen }: MenuProps) {
   return (
     <section
-      className={`z-20 fixed top-0 left-0 w-3/4 max-w-[365px] h-full overflow-y-auto bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${
+      className={`fixed top-0 left-0 w-3/4 max-w-[365px] h-full overflow-y-auto bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${
         isMenuOpen ? 'translate-x-0' : '-translate-x-full'
       }`}
+      style={{ zIndex: 100 }}
     >
       <div className="flex flex-col gap-2 p-4">
         <div className="flex justify-between items-center w-full border-b-2 pb-2 border-[var(--mantine-border)]">
