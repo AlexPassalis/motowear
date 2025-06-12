@@ -41,5 +41,5 @@ async function redisPing() {
   }
 }
 
-export const postgres =
+export const redis =
   process.env.BUILD_TIME !== 'true' ? await establishRedis() : ({} as Redis)
