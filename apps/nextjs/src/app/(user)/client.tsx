@@ -50,8 +50,8 @@ export function HomePageClient({
 
   const [displayedVariants, setDisplayedVariants] = useState(
     home_page_variants.filter(
-      (variant) => variant.product_type === home_page_variants[0].product_type
-    )
+      (variant) => variant.product_type === home_page_variants[0].product_type,
+    ),
   )
   const [visibleReviews, setVisibleReviews] = useState(home_page_reviews)
 
@@ -141,7 +141,7 @@ export function HomePageClient({
                   .map((variant) => variant.product_type)
                   .filter(
                     (item, index, self) =>
-                      index === self.findIndex((other) => other === item)
+                      index === self.findIndex((other) => other === item),
                   )
                   .map((product_type, index) => (
                     <Button
@@ -154,8 +154,8 @@ export function HomePageClient({
                       onClick={() =>
                         setDisplayedVariants(
                           home_page_variants.filter(
-                            (variant) => variant.product_type === product_type
-                          )
+                            (variant) => variant.product_type === product_type,
+                          ),
                         )
                       }
                     >
@@ -183,7 +183,7 @@ export function HomePageClient({
                       </div>
                       <p className="text-center">{name}</p>
                     </Link>
-                  )
+                  ),
                 )}
               </SimpleGrid>
             </div>
@@ -279,8 +279,8 @@ export function HomePageClient({
                   setVisibleReviews(
                     home_page_reviews.slice(
                       (pageNumber - 1) * 10,
-                      pageNumber * 10
-                    )
+                      pageNumber * 10,
+                    ),
                   )
                 }
                 mt="xs"

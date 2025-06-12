@@ -15,7 +15,7 @@ import {
 } from '@/lib/postgres/schema'
 import { sendTelegramMessage } from '@/lib/telegram'
 import { formatMessage } from '@/utils/formatMessage'
-import { or, eq, and, gte, lte } from 'drizzle-orm'
+import { or, eq, and, gte, lte, desc } from 'drizzle-orm'
 
 export async function getProductTypes() {
   try {
@@ -27,7 +27,7 @@ export async function getProductTypes() {
     const message = formatMessage(
       '@/utils/getPostgres.ts getProductTypes()',
       errorPostgres,
-      e
+      e,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)
@@ -48,7 +48,7 @@ export async function getVariants() {
     const message = formatMessage(
       '@/utils/getPostgres.ts getVariants()',
       errorPostgres,
-      e
+      e,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)
@@ -71,7 +71,7 @@ export async function getVariantsProductType(product_type: string) {
     const message = formatMessage(
       '@/utils/getPostgres.ts getVariantsProductType()',
       errorPostgres,
-      e
+      e,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)
@@ -90,7 +90,7 @@ export async function getBrands() {
     const message = formatMessage(
       '@/utils/getPostgres.ts getBrands()',
       errorPostgres,
-      e
+      e,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)
@@ -107,7 +107,7 @@ export async function getPages() {
     const message = formatMessage(
       '@/utils/getPostgres.ts getPages()',
       errorPostgres,
-      e
+      e,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)
@@ -127,7 +127,7 @@ export async function getProductPage(product_type: string) {
     const message = formatMessage(
       '@/utils/getPostgres.ts getProductPage()',
       errorPostgres,
-      e
+      e,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)
@@ -147,7 +147,7 @@ export async function getReviews() {
     const message = formatMessage(
       '@/utils/getPostgres.ts getReviews()',
       errorPostgres,
-      e
+      e,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)
@@ -170,7 +170,7 @@ export async function getProductReviews(product_type: string) {
     const message = formatMessage(
       '@/utils/getPostgres.ts getProductReviews()',
       errorPostgres,
-      e
+      e,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)
@@ -186,7 +186,7 @@ export async function getOrders() {
     const message = formatMessage(
       '@/utils/getPostgres.ts getOrders()',
       errorPostgres,
-      e
+      e,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)
@@ -202,7 +202,7 @@ export async function getDailySessions() {
     const message = formatMessage(
       '@/utils/getPostgres.ts getDailySessions()',
       errorPostgres,
-      e
+      e,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)
@@ -221,7 +221,7 @@ export async function getShipping() {
     const message = formatMessage(
       '@/utils/getPostgres.ts getFreeShippingAmount()',
       errorPostgres,
-      e
+      e,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)
@@ -240,7 +240,7 @@ export async function getHomePage() {
     const message = formatMessage(
       '@/utils/getPostgres.ts getHomePage()',
       errorPostgres,
-      e
+      e,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)
@@ -252,16 +252,10 @@ export type typeHomePage = Awaited<ReturnType<typeof getHomePage>>
 export async function getHomePageVariants() {
   try {
     const array = await postgres
-      .select()
+      .selectDistinctOn([variant.product_type, variant.name])
       .from(variant)
-      .where(
-        or(
-          eq(variant.index, 3),
-          eq(variant.index, 4),
-          eq(variant.index, 5),
-          eq(variant.index, 6)
-        )
-      )
+      .orderBy(variant.product_type, variant.name)
+      .limit(6)
     /* eslint-disable @typescript-eslint/no-unused-vars */
     return array.map(({ product_type, name, images, ...rest }) => ({
       product_type,
@@ -273,7 +267,7 @@ export async function getHomePageVariants() {
     const message = formatMessage(
       '@/utils/getPostgres.ts getHomePageVariants()',
       errorPostgres,
-      e
+      e,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)
@@ -290,6 +284,7 @@ export async function getHomePageReviews() {
       .select()
       .from(review)
       .where(and(gte(review.index, 0), lte(review.index, 9)))
+      .orderBy(desc(review.rating))
     // Fisher-Yates shuffle algorithm
     for (let i = array.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1))
@@ -300,7 +295,7 @@ export async function getHomePageReviews() {
     const message = formatMessage(
       '@/utils/getPostgres.ts getHomePageReviews()',
       errorPostgres,
-      e
+      e,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)
@@ -317,7 +312,7 @@ export async function getCoupons() {
     const message = formatMessage(
       '@/utils/getPostgres.ts getCoupons()',
       errorPostgres,
-      e
+      e,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)
@@ -334,7 +329,7 @@ export async function getEmails() {
     const message = formatMessage(
       '@/utils/getPostgres.ts getEmails()',
       errorPostgres,
-      e
+      e,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)
@@ -351,7 +346,7 @@ export async function getPhones() {
     const message = formatMessage(
       '@/utils/getPostgres.ts getPhones()',
       errorPostgres,
-      e
+      e,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)
@@ -369,15 +364,15 @@ export async function getOrder(order_id: string) {
         and(
           eq(order.id, Number(order_id)),
           eq(order.review_email, true),
-          eq(order.review_submitted, false)
-        )
+          eq(order.review_submitted, false),
+        ),
       )
     return array
   } catch (e) {
     const message = formatMessage(
       '@/utils/getPostgres.ts getOrder()',
       errorPostgres,
-      e
+      e,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)
@@ -396,7 +391,7 @@ export async function getOrderByOrderCode(order_code: string) {
     const message = formatMessage(
       '@/utils/getPostgres.ts getOrderByOrderCode()',
       errorPostgres,
-      e
+      e,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)
@@ -414,7 +409,7 @@ export async function unsubscribe(customer_email: string) {
     const message = formatMessage(
       '@/utils/getPostgres.ts unsubscribe()',
       errorPostgres,
-      e
+      e,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)
