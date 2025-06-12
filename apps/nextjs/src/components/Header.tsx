@@ -14,6 +14,7 @@ import {
 } from 'react-icons/ai'
 import { HiMagnifyingGlass } from 'react-icons/hi2'
 import { Indicator } from '@mantine/core'
+import { usePathname } from 'next/navigation'
 
 type HeaderProps = {
   isMenuOpen: boolean
@@ -34,6 +35,8 @@ export function Header({
   setIsCartOpen,
   cart,
 }: HeaderProps) {
+  const pathname = usePathname()
+
   return (
     <header className="relative flex justify-between items-center w-full p-2">
       <div className="flex justify-start">
@@ -46,7 +49,14 @@ export function Header({
       </div>
 
       <div className="flex justify-center">
-        <Link href={ROUTE_HOME}>
+        <Link
+          href={ROUTE_HOME}
+          onClick={(e) => {
+            if (pathname === ROUTE_HOME) {
+              e.preventDefault()
+            }
+          }}
+        >
           <Image
             component={NextImage}
             src="/motowear.png"

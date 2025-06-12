@@ -3,13 +3,15 @@
 import type { typeVariant } from '@/lib/postgres/data/type'
 import { typeShipping } from '@/utils/getPostgres'
 
+import { LoadingOverlay } from '@mantine/core'
+
 import HeaderProvider from '@/context/HeaderProvider'
 import { ROUTE_PRODUCT } from '@/data/routes'
 import { envClient } from '@/env'
 import { SimpleGrid, Pagination, UnstyledButton } from '@mantine/core'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Fragment, useEffect, useState } from 'react'
+import { Fragment, useEffect, useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { IoIosArrowDown } from 'react-icons/io'
 
@@ -38,10 +40,24 @@ export function CollectionPageClient({
 
   const [pageNumber, setPageNumber] = useState(1)
 
-  const filtered = selectedBrand
-    ? uniqueVariants.filter((v) => v.brand === selectedBrand)
-    : uniqueVariants
-  const paginated = filtered.slice((pageNumber - 1) * 20, pageNumber * 20)
+  const filtered = useMemo(() => {
+    return selectedBrand
+      ? uniqueVariants.filter((v) => v.brand === selectedBrand)
+      : uniqueVariants
+  }, [selectedBrand, uniqueVariants])
+
+  const paginated = useMemo(() => {
+    return filtered.slice((pageNumber - 1) * 20, pageNumber * 20)
+  }, [filtered, pageNumber])
+
+  const [loadingImages, setLoadingImages] = useState<Set<number>>(new Set())
+  useEffect(() => {
+    const newLoadingSet = new Set<number>()
+    for (let i = 0; i < paginated.length; i++) {
+      newLoadingSet.add(i)
+    }
+    setLoadingImages(newLoadingSet)
+  }, [paginated])
 
   return (
     <div
@@ -174,6 +190,11 @@ export function CollectionPageClient({
                   className="border border-[var(--mantine-border)] rounded-lg overflow-hidden"
                 >
                   <div className="relative aspect-square rounded-lg">
+                    <LoadingOverlay
+                      visible={loadingImages.has(index)}
+                      zIndex={500}
+                      overlayProps={{ radius: 'sm', blur: 2 }}
+                    />
                     <Image
                       src={`${envClient.MINIO_PRODUCT_URL}/${paramsProduct_type}/${image}`}
                       alt={name}
@@ -181,6 +202,13 @@ export function CollectionPageClient({
                       style={{ objectFit: 'cover' }}
                       priority={index < 8}
                       fetchPriority={index < 8 ? 'high' : 'auto'}
+                      onLoad={() =>
+                        setLoadingImages((prev) => {
+                          const newSet = new Set(prev)
+                          newSet.delete(index)
+                          return newSet
+                        })
+                      }
                     />
                   </div>
                   <p className="text-center">{name}</p>

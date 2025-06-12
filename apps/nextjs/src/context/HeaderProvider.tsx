@@ -183,7 +183,7 @@ export default function HeaderProvider({
                   .safeParse(res.data)
                 if (err) {
                   router.push(
-                    `${ROUTE_ERROR}?message=${errorInvalidResponse}-email`
+                    `${ROUTE_ERROR}?message=${errorInvalidResponse}-email`,
                   )
                 } else {
                   setEmailResponse(validatedResponse.coupon)
