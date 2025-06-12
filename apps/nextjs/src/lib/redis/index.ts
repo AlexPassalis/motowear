@@ -17,10 +17,9 @@ async function establishRedis() {
       global.global_redis!.quit()
       console.info('Redis connection closed.')
     })
-    if (process.env.BUILD_TIME !== 'true') {
-      await redisPing()
-    }
+    await redisPing()
   }
+
   return global.global_redis
 }
 
@@ -34,7 +33,7 @@ async function redisPing() {
     const message = formatMessage(
       '@/lib/redis/redis.ts redisPing()',
       'Redis connection failed.',
-      e
+      e,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)
@@ -42,4 +41,5 @@ async function redisPing() {
   }
 }
 
-export const redis = await establishRedis()
+export const postgres =
+  process.env.BUILD_TIME !== 'true' ? await establishRedis() : ({} as Redis)

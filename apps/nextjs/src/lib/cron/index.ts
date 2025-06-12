@@ -26,14 +26,14 @@ async function cronSendOrderReviewEmail() {
       .where(
         and(
           eq(order.review_email, false),
-          eq(order.date_fulfilled, fourteenDaysAgoStart)
-        )
+          eq(order.date_fulfilled, fourteenDaysAgoStart),
+        ),
       )
   } catch (err) {
     const message = formatMessage(
       '@/lib/cron/index sendOrderReviewEmail',
       errorCron,
-      err
+      err,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)
@@ -46,7 +46,7 @@ async function cronSendOrderReviewEmail() {
       await sendOrderReviewEmail(
         orderItem.checkout.first_name,
         orderItem.id,
-        orderItem.checkout.email
+        orderItem.checkout.email,
       )
 
       try {
@@ -58,12 +58,12 @@ async function cronSendOrderReviewEmail() {
         const message = formatMessage(
           `@/lib/cron/index cronSendOrderReviewEmail() order_id: #${order.id}`,
           errorPostgres,
-          err
+          err,
         )
         console.error(message)
         sendTelegramMessage('ERROR', message)
       }
-    })
+    }),
   )
 
   await Promise.all(sendEmailPromises)
@@ -83,7 +83,7 @@ async function cronSendAbandonCartEmail() {
     const message = formatMessage(
       '@/lib/cron/index cronSendAbandonCartEmail',
       errorCron,
-      err
+      err,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)
@@ -103,12 +103,12 @@ async function cronSendAbandonCartEmail() {
         const message = formatMessage(
           `@/lib/cron/index cronSendAbandonCartEmail() email: ${abandoned_cart.email}`,
           errorPostgres,
-          err
+          err,
         )
         console.error(message)
         sendTelegramMessage('ERROR', message)
       }
-    })
+    }),
   )
 
   await Promise.all(sendEmailPromises)
@@ -116,17 +116,17 @@ async function cronSendAbandonCartEmail() {
 
 async function cronDeleteNotPaidOrders() {
   const today = toZonedTime(new Date(), 'Europe/Athens')
-  const threeDaysAgo = subDays(today, 3)
+  const oneDayAgo = subDays(today, 1)
 
   try {
     await postgres
       .delete(order)
-      .where(and(eq(order.paid, false), lt(order.order_date, threeDaysAgo)))
+      .where(and(eq(order.paid, false), lt(order.order_date, oneDayAgo)))
   } catch (err) {
     const message = formatMessage(
       '@/lib/cron/index cronDeleteNotPaidOrders',
       errorCron,
-      err
+      err,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)
@@ -134,73 +134,79 @@ async function cronDeleteNotPaidOrders() {
 }
 
 function establishCron() {
-  if (process.env.INSTANCE_ID === '1') {
-    if (!global.global_cron) {
-      try {
-        global.global_cron = new CronJob(
-          '0 0 * * * *', // Run at minute 0, second 0 of every hour
-          cronSendOrderReviewEmail,
-          null, // onComplete
-          true, // start immediately
-          'Europe/Athens'
-        )
-        console.info('Cron INSTANCE_ID = 1 connected successfully.')
-      } catch (e) {
-        const message = formatMessage(
-          '@/lib/cron/index.ts establishCron() INSTANCE_ID = 1',
-          'Cron connection failed.',
-          e
-        )
-        console.error(message)
-        sendTelegramMessage('ERROR', message)
-        process.exit(1)
-      }
+  if (!global.global_cron_send_order_review_email) {
+    try {
+      global.global_cron_send_order_review_email = new CronJob(
+        '0 0 * * * *', // Run at minute 0, second 0 of every hour
+        cronSendOrderReviewEmail,
+        null, // onComplete
+        true, // start immediately
+        'Europe/Athens',
+      )
+
+      console.info('Cron sendOrderReviewEmail connected successfully.')
+    } catch (e) {
+      const message = formatMessage(
+        '@/lib/cron/index.ts establishCron()',
+        'Cron sendOrderReviewEmail connection failed.',
+        e,
+      )
+      console.error(message)
+      sendTelegramMessage('ERROR', message)
+      process.exit(1)
     }
-    return global.global_cron
-  } else if (process.env.INSTANCE_ID === '2') {
-    if (!global.global_cron) {
-      try {
-        global.global_cron = new CronJob(
-          '0 30 * * * *', // Run at minute 30, second 0 of every hour
-          cronSendAbandonCartEmail,
-          null, // onComplete
-          true, // start immediately
-          'Europe/Athens'
-        )
-        console.info('Cron INSTANCE_ID = 2 connected successfully.')
-      } catch (e) {
-        const message = formatMessage(
-          '@/lib/cron/index.ts establishCron() INSTANCE_ID = 2',
-          'Cron connection failed.',
-          e
-        )
-        console.error(message)
-        sendTelegramMessage('ERROR', message)
-        process.exit(1)
-      }
+
+    return global.global_cron_send_order_review_email
+  }
+
+  if (!global.global_cron_send_abandon_cart_email) {
+    try {
+      global.global_cron_send_abandon_cart_email = new CronJob(
+        '0 30 * * * *', // Run at minute 30, second 0 of every hour
+        cronSendAbandonCartEmail,
+        null, // onComplete
+        true, // start immediately
+        'Europe/Athens',
+      )
+
+      console.info('Cron sendAbandonCartEmail connected successfully.')
+    } catch (e) {
+      const message = formatMessage(
+        '@/lib/cron/index.ts establishCron()',
+        'Cron sendAbandonCartEmail connection failed.',
+        e,
+      )
+      console.error(message)
+      sendTelegramMessage('ERROR', message)
+      process.exit(1)
     }
-  } else if (process.env.INSTANCE_ID === '3') {
-    if (!global.global_cron) {
-      try {
-        global.global_cron = new CronJob(
-          '0 45 0,12 * * *', // at second 0, minute 45 of hour 0 and 12 every day
-          cronDeleteNotPaidOrders,
-          null, // onComplete
-          true, // start immediately
-          'Europe/Athens'
-        )
-        console.info('Cron INSTANCE_ID = 3 connected successfully.')
-      } catch (e) {
-        const message = formatMessage(
-          '@/lib/cron/index.ts establishCron() INSTANCE_ID = 3',
-          'Cron connection failed.',
-          e
-        )
-        console.error(message)
-        sendTelegramMessage('ERROR', message)
-        process.exit(1)
-      }
+
+    return global.global_cron_send_abandon_cart_email
+  }
+
+  if (!global.global_cron_delete_not_paid_orders) {
+    try {
+      global.global_cron_delete_not_paid_orders = new CronJob(
+        '0 45 0,12 * * *', // at second 0, minute 45 of hour 0 and 12 every day
+        cronDeleteNotPaidOrders,
+        null, // onComplete
+        true, // start immediately
+        'Europe/Athens',
+      )
+
+      console.info('Cron deleteNotPaidOrders connected successfully.')
+    } catch (e) {
+      const message = formatMessage(
+        '@/lib/cron/index.ts establishCron()',
+        'Cron deleteNotPaidOrders connection failed.',
+        e,
+      )
+      console.error(message)
+      sendTelegramMessage('ERROR', message)
+      process.exit(1)
     }
+
+    return global.global_cron_delete_not_paid_orders
   }
 }
 

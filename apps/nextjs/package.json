@@ -5,7 +5,7 @@
     "dev": "next dev",
     "react-email": "email dev --dir ./src/lib/react-email",
     "postgres:generate": "drizzle-kit generate",
-    "postgres:migrate": "cross-env POSTGRES_MIGRATING=true drizzle-kit push",
+    "postgres:migrate": "drizzle-kit push",
     "lint": "next lint",
     "build": "cross-env NODE_ENV=production BUILD_TIME=true next build",
     "start": "next start"
