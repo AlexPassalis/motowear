@@ -361,7 +361,7 @@ export async function getHomePageVariantsCached(): Promise<typeHomePageVariants>
   }
 }
 
-export async function getHomePageReviewsCache(): Promise<typeHomePageReviews> {
+export async function getHomePageReviewsCached(): Promise<typeHomePageReviews> {
   if (process.env.BUILD_TIME !== 'true') {
     let home_page_reviews
     try {

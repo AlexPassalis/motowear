@@ -6,7 +6,7 @@ import {
   getProductTypesCached,
   getShippingCached,
   getHomePageVariantsCached,
-  getHomePageReviewsCache,
+  getHomePageReviewsCached,
 } from '@/app/(user)/cache'
 import { HomePageClient } from '@/app/(user)/client'
 import { redirect } from 'next/navigation'
@@ -16,7 +16,7 @@ export default async function HomePage() {
   const resolved = await Promise.allSettled([
     getHomePageCached(),
     getHomePageVariantsCached(),
-    getHomePageReviewsCache(),
+    getHomePageReviewsCached(),
     getProductTypesCached(),
     getVariantsCached(),
     getShippingCached(),

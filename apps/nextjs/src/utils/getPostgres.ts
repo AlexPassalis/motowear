@@ -15,7 +15,7 @@ import {
 } from '@/lib/postgres/schema'
 import { sendTelegramMessage } from '@/lib/telegram'
 import { formatMessage } from '@/utils/formatMessage'
-import { eq, and, gte, lte, desc } from 'drizzle-orm'
+import { or, eq, and, gte, lte } from 'drizzle-orm'
 
 export async function getProductTypes() {
   try {
@@ -252,17 +252,22 @@ export type typeHomePage = Awaited<ReturnType<typeof getHomePage>>
 export async function getHomePageVariants() {
   try {
     const array = await postgres
-      .selectDistinctOn([variant.product_type, variant.name])
+      .select()
       .from(variant)
-      .orderBy(variant.product_type, variant.name)
-      .limit(6)
-    /* eslint-disable @typescript-eslint/no-unused-vars */
-    return array.map(({ product_type, name, images, ...rest }) => ({
+      .where(
+        or(
+          eq(variant.index, 0),
+          eq(variant.index, 1),
+          eq(variant.index, 2),
+          eq(variant.index, 3),
+        ),
+      )
+
+    return array.map(({ product_type, name, images }) => ({
       product_type,
       name,
       image: images[0],
     }))
-    /* eslint-disable @typescript-eslint/no-unused-vars */
   } catch (e) {
     const message = formatMessage(
       '@/utils/getPostgres.ts getHomePageVariants()',
@@ -284,7 +289,6 @@ export async function getHomePageReviews() {
       .select()
       .from(review)
       .where(and(gte(review.index, 0), lte(review.index, 9)))
-      .orderBy(desc(review.rating))
     // Fisher-Yates shuffle algorithm
     for (let i = array.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1))
