@@ -11,7 +11,7 @@ import type {
   typeVariant,
 } from '@/lib/postgres/data/type'
 
-import { errorRedis } from '@/data/error'
+import { errorPostgres, errorRedis } from '@/data/error'
 import { redis } from '@/lib/redis/index'
 import { sendTelegramMessage } from '@/lib/telegram'
 import { formatMessage } from '@/utils/formatMessage'
@@ -29,6 +29,7 @@ import {
 export async function getProductTypesCached(): Promise<typeProductTypes> {
   if (process.env.BUILD_TIME !== 'true') {
     let product_types
+
     try {
       product_types = await redis.get('product_types')
     } catch (e) {
@@ -39,7 +40,6 @@ export async function getProductTypesCached(): Promise<typeProductTypes> {
       )
       console.error(message)
       sendTelegramMessage('ERROR', message)
-      throw errorRedis
     }
 
     if (product_types) {
@@ -48,27 +48,28 @@ export async function getProductTypesCached(): Promise<typeProductTypes> {
       try {
         product_types = await getProductTypes()
       } catch (e) {
-        throw e
+        const message = formatMessage(
+          '@/app/(user)/cache.ts getProductTypes()',
+          errorPostgres,
+          e,
+        )
+        console.error(message)
+        sendTelegramMessage('ERROR', message)
+        throw errorPostgres
       }
     }
 
-    try {
-      await redis.set(
-        'product_types',
-        JSON.stringify(product_types),
-        'EX',
-        3600,
-      )
-    } catch (e) {
-      const message = formatMessage(
-        '@/app/(user)/cache.ts getProductTypesCached() set',
-        errorRedis,
-        e,
-      )
-      console.error(message)
-      sendTelegramMessage('ERROR', message)
-      throw errorRedis
-    }
+    void redis
+      .set('product_types', JSON.stringify(product_types), 'EX', 3600)
+      .catch((e) => {
+        const message = formatMessage(
+          '@/app/(user)/cache.ts getProductTypesCached() set',
+          errorRedis,
+          e,
+        )
+        console.error(message)
+        sendTelegramMessage('ERROR', message)
+      })
 
     return product_types
   } else {
@@ -79,6 +80,7 @@ export async function getProductTypesCached(): Promise<typeProductTypes> {
 export async function getVariantsCached(): Promise<typeVariant[]> {
   if (process.env.BUILD_TIME !== 'true') {
     let variants
+
     try {
       variants = await redis.get('variants')
     } catch (e) {
@@ -89,7 +91,6 @@ export async function getVariantsCached(): Promise<typeVariant[]> {
       )
       console.error(message)
       sendTelegramMessage('ERROR', message)
-      throw errorRedis
     }
 
     if (variants) {
@@ -98,22 +99,28 @@ export async function getVariantsCached(): Promise<typeVariant[]> {
       try {
         variants = await getVariants()
       } catch (e) {
-        throw e
+        const message = formatMessage(
+          '@/app/(user)/cache.ts getVariants()',
+          errorPostgres,
+          e,
+        )
+        console.error(message)
+        sendTelegramMessage('ERROR', message)
+        throw errorPostgres
       }
     }
 
-    try {
-      await redis.set('variants', JSON.stringify(variants), 'EX', 3600)
-    } catch (e) {
-      const message = formatMessage(
-        '@/app/(user)/cache.ts getVariantsCached() set',
-        errorRedis,
-        e,
-      )
-      console.error(message)
-      sendTelegramMessage('ERROR', message)
-      throw errorRedis
-    }
+    void redis
+      .set('variants', JSON.stringify(variants), 'EX', 3600)
+      .catch((e) => {
+        const message = formatMessage(
+          '@/app/(user)/cache.ts getVariantsCached() set',
+          errorRedis,
+          e,
+        )
+        console.error(message)
+        sendTelegramMessage('ERROR', message)
+      })
 
     return variants
   } else {
@@ -124,6 +131,7 @@ export async function getVariantsCached(): Promise<typeVariant[]> {
 export async function getPagesCached(): Promise<typeProductPage[]> {
   if (process.env.BUILD_TIME !== 'true') {
     let pages
+
     try {
       pages = await redis.get('pages')
     } catch (e) {
@@ -134,7 +142,6 @@ export async function getPagesCached(): Promise<typeProductPage[]> {
       )
       console.error(message)
       sendTelegramMessage('ERROR', message)
-      throw errorRedis
     }
 
     if (pages) {
@@ -143,13 +150,18 @@ export async function getPagesCached(): Promise<typeProductPage[]> {
       try {
         pages = await getPages()
       } catch (e) {
-        throw e
+        const message = formatMessage(
+          '@/app/(user)/cache.ts getPages()',
+          errorPostgres,
+          e,
+        )
+        console.error(message)
+        sendTelegramMessage('ERROR', message)
+        throw errorPostgres
       }
     }
 
-    try {
-      await redis.set('pages', JSON.stringify(pages), 'EX', 3600)
-    } catch (e) {
+    void redis.set('pages', JSON.stringify(pages), 'EX', 3600).catch((e) => {
       const message = formatMessage(
         '@/app/(user)/cache.ts getPagesCached() set',
         errorRedis,
@@ -157,8 +169,7 @@ export async function getPagesCached(): Promise<typeProductPage[]> {
       )
       console.error(message)
       sendTelegramMessage('ERROR', message)
-      throw errorRedis
-    }
+    })
 
     return pages
   } else {
@@ -169,6 +180,7 @@ export async function getPagesCached(): Promise<typeProductPage[]> {
 export async function getReviewsCached(): Promise<typeReview[]> {
   if (process.env.BUILD_TIME !== 'true') {
     let reviews
+
     try {
       reviews = await redis.get('reviews')
     } catch (e) {
@@ -179,7 +191,6 @@ export async function getReviewsCached(): Promise<typeReview[]> {
       )
       console.error(message)
       sendTelegramMessage('ERROR', message)
-      throw errorRedis
     }
 
     if (reviews) {
@@ -188,22 +199,28 @@ export async function getReviewsCached(): Promise<typeReview[]> {
       try {
         reviews = await getReviews()
       } catch (e) {
-        throw e
+        const message = formatMessage(
+          '@/app/(user)/cache.ts getReviews()',
+          errorPostgres,
+          e,
+        )
+        console.error(message)
+        sendTelegramMessage('ERROR', message)
+        throw errorPostgres
       }
     }
 
-    try {
-      await redis.set('reviews', JSON.stringify(reviews), 'EX', 3600)
-    } catch (e) {
-      const message = formatMessage(
-        '@/app/(user)/cache.ts getReviewsCached() set',
-        errorRedis,
-        e,
-      )
-      console.error(message)
-      sendTelegramMessage('ERROR', message)
-      throw errorRedis
-    }
+    void redis
+      .set('reviews', JSON.stringify(reviews), 'EX', 3600)
+      .catch((e) => {
+        const message = formatMessage(
+          '@/app/(user)/cache.ts getReviewsCached() set',
+          errorRedis,
+          e,
+        )
+        console.error(message)
+        sendTelegramMessage('ERROR', message)
+      })
 
     return reviews
   } else {
@@ -214,6 +231,7 @@ export async function getReviewsCached(): Promise<typeReview[]> {
 export async function getShippingCached(): Promise<typeShipping> {
   if (process.env.BUILD_TIME !== 'true') {
     let shipping
+
     try {
       shipping = await redis.get('shipping')
     } catch (e) {
@@ -224,7 +242,6 @@ export async function getShippingCached(): Promise<typeShipping> {
       )
       console.error(message)
       sendTelegramMessage('ERROR', message)
-      throw errorRedis
     }
 
     if (shipping) {
@@ -233,22 +250,28 @@ export async function getShippingCached(): Promise<typeShipping> {
       try {
         shipping = await getShipping()
       } catch (e) {
-        throw e
+        const message = formatMessage(
+          '@/app/(user)/cache.ts getFreeShippingAmount()',
+          errorPostgres,
+          e,
+        )
+        console.error(message)
+        sendTelegramMessage('ERROR', message)
+        throw errorPostgres
       }
     }
 
-    try {
-      await redis.set('shipping', JSON.stringify(shipping), 'EX', 3600)
-    } catch (e) {
-      const message = formatMessage(
-        '@/app/(user)/cache.ts getShippingCached() set',
-        errorRedis,
-        e,
-      )
-      console.error(message)
-      sendTelegramMessage('ERROR', message)
-      throw errorRedis
-    }
+    void redis
+      .set('shipping', JSON.stringify(shipping), 'EX', 3600)
+      .catch((e) => {
+        const message = formatMessage(
+          '@/app/(user)/cache.ts getShippingCached() set',
+          errorRedis,
+          e,
+        )
+        console.error(message)
+        sendTelegramMessage('ERROR', message)
+      })
 
     return shipping
   } else {
@@ -263,6 +286,7 @@ export async function getShippingCached(): Promise<typeShipping> {
 export async function getHomePageCached(): Promise<typeHomePage> {
   if (process.env.BUILD_TIME !== 'true') {
     let home_page
+
     try {
       home_page = await redis.get('home_page')
     } catch (e) {
@@ -273,7 +297,6 @@ export async function getHomePageCached(): Promise<typeHomePage> {
       )
       console.error(message)
       sendTelegramMessage('ERROR', message)
-      throw errorRedis
     }
 
     if (home_page) {
@@ -282,22 +305,28 @@ export async function getHomePageCached(): Promise<typeHomePage> {
       try {
         home_page = await getHomePage()
       } catch (e) {
-        throw e
+        const message = formatMessage(
+          '@/app/(user)/cache.ts getHomePage()',
+          errorPostgres,
+          e,
+        )
+        console.error(message)
+        sendTelegramMessage('ERROR', message)
+        throw errorPostgres
       }
     }
 
-    try {
-      await redis.set('home_page', JSON.stringify(home_page), 'EX', 3600)
-    } catch (e) {
-      const message = formatMessage(
-        '@/app/(user)/cache.ts getHomePageCached() set',
-        errorRedis,
-        e,
-      )
-      console.error(message)
-      sendTelegramMessage('ERROR', message)
-      throw errorRedis
-    }
+    await redis
+      .set('home_page', JSON.stringify(home_page), 'EX', 3600)
+      .catch((e) => {
+        const message = formatMessage(
+          '@/app/(user)/cache.ts getHomePageCached() set',
+          errorRedis,
+          e,
+        )
+        console.error(message)
+        sendTelegramMessage('ERROR', message)
+      })
 
     return home_page
   } else {
@@ -314,6 +343,7 @@ export async function getHomePageCached(): Promise<typeHomePage> {
 export async function getHomePageVariantsCached(): Promise<typeHomePageVariants> {
   if (process.env.BUILD_TIME !== 'true') {
     let home_page_variants
+
     try {
       home_page_variants = await redis.get('home_page_variants')
     } catch (e) {
@@ -324,7 +354,6 @@ export async function getHomePageVariantsCached(): Promise<typeHomePageVariants>
       )
       console.error(message)
       sendTelegramMessage('ERROR', message)
-      throw errorRedis
     }
 
     if (home_page_variants) {
@@ -333,27 +362,28 @@ export async function getHomePageVariantsCached(): Promise<typeHomePageVariants>
       try {
         home_page_variants = await getHomePageVariants()
       } catch (e) {
-        throw e
+        const message = formatMessage(
+          '@/app/(user)/cache.ts getHomePageVariants()',
+          errorPostgres,
+          e,
+        )
+        console.error(message)
+        sendTelegramMessage('ERROR', message)
+        throw errorPostgres
       }
     }
 
-    try {
-      await redis.set(
-        'home_page_variants',
-        JSON.stringify(home_page_variants),
-        'EX',
-        3600,
-      )
-    } catch (e) {
-      const message = formatMessage(
-        '@/app/(user)/cache.ts getHomePageVariantsCached() set',
-        errorRedis,
-        e,
-      )
-      console.error(message)
-      sendTelegramMessage('ERROR', message)
-      throw errorRedis
-    }
+    void redis
+      .set('home_page_variants', JSON.stringify(home_page_variants), 'EX', 3600)
+      .catch((e) => {
+        const message = formatMessage(
+          '@/app/(user)/cache.ts getHomePageVariantsCached() set',
+          errorRedis,
+          e,
+        )
+        console.error(message)
+        sendTelegramMessage('ERROR', message)
+      })
 
     return home_page_variants
   } else {
@@ -364,6 +394,7 @@ export async function getHomePageVariantsCached(): Promise<typeHomePageVariants>
 export async function getHomePageReviewsCached(): Promise<typeHomePageReviews> {
   if (process.env.BUILD_TIME !== 'true') {
     let home_page_reviews
+
     try {
       home_page_reviews = await redis.get('home_page_reviews')
     } catch (e) {
@@ -374,7 +405,6 @@ export async function getHomePageReviewsCached(): Promise<typeHomePageReviews> {
       )
       console.error(message)
       sendTelegramMessage('ERROR', message)
-      throw errorRedis
     }
 
     if (home_page_reviews) {
@@ -383,27 +413,28 @@ export async function getHomePageReviewsCached(): Promise<typeHomePageReviews> {
       try {
         home_page_reviews = await getHomePageReviews()
       } catch (e) {
-        throw e
+        const message = formatMessage(
+          '@/app/(user)/cache.ts getHomePageReviews()',
+          errorPostgres,
+          e,
+        )
+        console.error(message)
+        sendTelegramMessage('ERROR', message)
+        throw errorPostgres
       }
     }
 
-    try {
-      await redis.set(
-        'home_page_reviews',
-        JSON.stringify(home_page_reviews),
-        'EX',
-        3600,
-      )
-    } catch (e) {
-      const message = formatMessage(
-        '@/app/(user)/cache.ts getHomePageReviewsCache() set',
-        errorRedis,
-        e,
-      )
-      console.error(message)
-      sendTelegramMessage('ERROR', message)
-      throw errorRedis
-    }
+    void redis
+      .set('home_page_reviews', JSON.stringify(home_page_reviews), 'EX', 3600)
+      .catch((e) => {
+        const message = formatMessage(
+          '@/app/(user)/cache.ts getHomePageReviewsCache() set',
+          errorRedis,
+          e,
+        )
+        console.error(message)
+        sendTelegramMessage('ERROR', message)
+      })
 
     return home_page_reviews
   } else {
