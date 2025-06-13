@@ -91,15 +91,23 @@ export async function getHomePage() {
 export type typeHomePage = Awaited<ReturnType<typeof getHomePage>>
 
 export async function getHomePageVariants() {
-  return await postgres
-    .selectDistinctOn([variant.product_type, variant.name], {
-      product_type: variant.product_type,
-      name: variant.name,
-      image: sql`${variant.images}[1]` as SQL<string>,
-    })
-    .from(variant)
-    .orderBy(variant.product_type, variant.name, variant.index)
-    .limit(4)
+  const product_types = await getProductTypes()
+  const arrays = await Promise.all(
+    product_types.map((product_type) =>
+      postgres
+        .selectDistinctOn([variant.name], {
+          product_type: variant.product_type,
+          name: variant.name,
+          image: sql`${variant.images}[1]` as SQL<string>,
+        })
+        .from(variant)
+        .where(eq(variant.product_type, product_type))
+        .orderBy(variant.name, variant.index)
+        .limit(4),
+    ),
+  )
+
+  return arrays.flat()
 }
 export type typeHomePageVariants = Awaited<
   ReturnType<typeof getHomePageVariants>

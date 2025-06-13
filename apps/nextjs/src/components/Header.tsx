@@ -56,6 +56,7 @@ export function Header({
               e.preventDefault()
             }
           }}
+          className={pathname === ROUTE_HOME ? 'cursor-default' : undefined}
         >
           <Image
             component={NextImage}

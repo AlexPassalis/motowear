@@ -68,6 +68,7 @@ export function CheckoutPageClient({
   }>(orderDetails ? orderDetails : null)
   useEffect(() => {
     if (orderCompleteResponse) {
+      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' })
       localStorage.removeItem('cart')
       localStorage.removeItem('coupon')
     }
@@ -204,7 +205,17 @@ export function CheckoutPageClient({
   return (
     <div className="min-h-screen flex flex-col">
       <header className="relative flex justify-center p-2 border-b border-b-[var(--mantine-border)]">
-        <div className="flex justify-center">
+        <Link
+          href={ROUTE_HOME}
+          onClick={(e) => {
+            if (!orderCompleteResponse) {
+              e.preventDefault()
+            }
+          }}
+          className={`flex justify-center ${
+            !orderCompleteResponse ? 'cursor-default' : ''
+          }`}
+        >
           <Image
             component={NextImage}
             src="/motowear.png"
@@ -213,7 +224,7 @@ export function CheckoutPageClient({
             alt="motowear.gr"
             className="sm:scale-110"
           />
-        </div>
+        </Link>
       </header>
 
       <main className="flex-1 relative p-4">
