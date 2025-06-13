@@ -99,6 +99,7 @@ export default async function CollectionPage({ params }: ProductPageProps) {
 
   const uniqueBrands = uniqueVariants
     .map((variant) => variant.brand)
+    .filter(Boolean) // remove empty strings ('')
     .filter(
       (item, index, self) =>
         index === self.findIndex((other) => other === item),
