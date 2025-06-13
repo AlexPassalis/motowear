@@ -11,7 +11,7 @@ import { Cart } from '@/components/Cart'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import {
-  getFilteredLocalStorageCart,
+  getLocalStorageCart,
   getLocalStorageCoupon,
   setLocalStorageCart,
   setLocalStorageCoupon,
@@ -69,7 +69,7 @@ export default function HeaderProvider({
 
   const [cart, setCart] = useState<typeCartLocalStorage>([])
   useEffect(() => {
-    setCart(getFilteredLocalStorageCart(all_variants))
+    setCart(getLocalStorageCart())
     setHasMounted(true)
   }, [all_variants])
   useEffect(() => {

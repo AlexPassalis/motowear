@@ -34,7 +34,7 @@ import { ROUTE_ERROR, ROUTE_HOME } from '@/data/routes'
 import { errorAxios, errorUnexpected, errorInvalidResponse } from '@/data/error'
 import { Footer } from '@/components/Footer'
 import {
-  getFilteredLocalStorageCart,
+  getLocalStorageCart,
   getLocalStorageCoupon,
   setLocalStorageCoupon,
 } from '@/utils/localStorage'
@@ -105,7 +105,7 @@ export function CheckoutPageClient({
     if (checkout) {
       form.setValues(JSON.parse(checkout))
     }
-    const localStorageCart = getFilteredLocalStorageCart(all_variants)
+    const localStorageCart = getLocalStorageCart()
     if (!orderCompleteResponse && localStorageCart.length < 1) {
       router.push(ROUTE_HOME)
     }
@@ -644,6 +644,7 @@ export function CheckoutPageClient({
                       label="Κωδικός έκπτωσης"
                       ref={couponCodeRef}
                       className="flex-1 mt-2"
+                      styles={{ input: { fontSize: 16 } }} 
                     />
                     <Button
                       onClick={async () => {

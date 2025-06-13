@@ -57,7 +57,7 @@ export function ProductType({
                     data: {
                       product_type: modalState,
                     },
-                  }
+                  },
                 )
                 if (res.status === 200) {
                   window.location.reload()
@@ -65,7 +65,7 @@ export function ProductType({
                   alert(
                     `Error deleting ${modalState}: ${
                       res.data?.message || errorUnexpected
-                    }`
+                    }`,
                   )
                   console.error(res)
                 }
@@ -137,10 +137,10 @@ export function ProductType({
                             : URL.createObjectURL(
                                 imagesNewFiles[
                                   imagesNewFiles.findIndex(
-                                    file =>
-                                      sanitizeFilename(file.name) === image
+                                    (file) =>
+                                      sanitizeFilename(file.name) === image,
                                   )
-                                ]
+                                ],
                               )
                         }
                         alt={image}
@@ -171,7 +171,7 @@ export function ProductType({
                           `${envClient.API_ADMIN_URL}/product/product_type/image/delete`,
                           {
                             data: { product_type: product_type, image: image },
-                          }
+                          },
                         )
                         if (res.status === 200) {
                           window.location.reload()
@@ -179,7 +179,7 @@ export function ProductType({
                           alert(
                             `Error deleting ${image}: ${
                               res.data?.message || errorUnexpected
-                            }`
+                            }`,
                           )
                           console.error(res)
                         }
@@ -189,9 +189,9 @@ export function ProductType({
                       }
                       setOnRequest(false)
                     } else {
-                      setImagesNew(prev => prev.filter(b => b !== image))
-                      setImagesNewFiles(prev =>
-                        prev.filter(f => f.name !== image)
+                      setImagesNew((prev) => prev.filter((b) => b !== image))
+                      setImagesNewFiles((prev) =>
+                        prev.filter((f) => f.name !== image),
                       )
                     }
                   }}
@@ -219,20 +219,20 @@ export function ProductType({
 
         <div className="flex justify-center gap-2 w-full mt-auto">
           <FileButton
-            onChange={files => {
-              const newFiles = files.filter(file => {
+            onChange={(files) => {
+              const newFiles = files.filter((file) => {
                 return !imagesMinio.includes(sanitizeFilename(file.name))
               })
-              setImagesNew(prev => [
+              setImagesNew((prev) => [
                 ...prev,
-                ...newFiles.map(file => sanitizeFilename(file.name)),
+                ...newFiles.map((file) => sanitizeFilename(file.name)),
               ])
-              setImagesNewFiles(prev => [...prev, ...newFiles])
+              setImagesNewFiles((prev) => [...prev, ...newFiles])
             }}
             accept="image/png,image/jpeg"
             multiple
           >
-            {props => (
+            {(props) => (
               <Button
                 {...props}
                 type="button"
@@ -264,9 +264,9 @@ export function ProductType({
               try {
                 formData.append(
                   'product_type',
-                  JSON.stringify(validatedProductType)
+                  JSON.stringify(validatedProductType),
                 )
-                validatedImagesNewFiles.forEach(image => {
+                validatedImagesNewFiles.forEach((image) => {
                   formData.append('imagesNewFiles', image, image.name)
                 })
               } catch (e) {
@@ -282,7 +282,7 @@ export function ProductType({
                   formData,
                   {
                     headers: { 'Content-Type': 'multipart/form-data' },
-                  }
+                  },
                 )
                 if (res.status === 200) {
                   window.location.reload()
@@ -290,7 +290,7 @@ export function ProductType({
                   alert(
                     `Error creating brands: ${
                       res.data?.message || errorUnexpected
-                    }`
+                    }`,
                   )
                   console.error(res)
                 }
