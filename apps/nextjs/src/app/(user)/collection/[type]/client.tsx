@@ -210,6 +210,13 @@ export function CollectionPageClient({
                           return newSet
                         })
                       }
+                      onError={() =>
+                        setLoadingImages((prev) => {
+                          const newSet = new Set(prev)
+                          newSet.delete(index)
+                          return newSet
+                        })
+                      }
                     />
                   </div>
                   <p className="text-center">{name}</p>
