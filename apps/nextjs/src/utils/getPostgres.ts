@@ -92,14 +92,14 @@ export type typeHomePage = Awaited<ReturnType<typeof getHomePage>>
 
 export async function getHomePageVariants() {
   return await postgres
-    .select({
+    .selectDistinctOn([variant.product_type, variant.name], {
       product_type: variant.product_type,
       name: variant.name,
       image: sql`${variant.images}[1]` as SQL<string>,
     })
     .from(variant)
-    .where(and(gte(variant.index, 0), lte(variant.index, 3)))
-    .orderBy(variant.index)
+    .orderBy(variant.product_type, variant.name, variant.index)
+    .limit(4)
 }
 export type typeHomePageVariants = Awaited<
   ReturnType<typeof getHomePageVariants>

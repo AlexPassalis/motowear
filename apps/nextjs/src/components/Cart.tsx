@@ -335,6 +335,7 @@ export function Cart({
                 label="Κωδικός έκπτωσης"
                 ref={couponCodeRef}
                 className="flex-1"
+                styles={{ input: { fontSize: 16 } }}
               />
               <Button
                 onClick={async () => {

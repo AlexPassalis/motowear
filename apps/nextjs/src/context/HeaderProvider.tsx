@@ -230,6 +230,7 @@ export default function HeaderProvider({
             label="Email"
             key={form.key('email')}
             {...form.getInputProps('email')}
+            styles={{ input: { fontSize: 16 } }}
           />
 
           <Button type="submit" mt="lg" color="red" size="md" radius="md">

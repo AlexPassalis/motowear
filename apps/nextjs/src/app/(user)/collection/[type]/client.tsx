@@ -1,19 +1,16 @@
 'use client'
 
 import type { typeVariant } from '@/lib/postgres/data/type'
-import { typeShipping } from '@/utils/getPostgres'
-
-import { LoadingOverlay } from '@mantine/core'
+import type { typeShipping } from '@/utils/getPostgres'
 
 import HeaderProvider from '@/context/HeaderProvider'
-import { ROUTE_PRODUCT } from '@/data/routes'
 import { envClient } from '@/env'
 import { SimpleGrid, Pagination, UnstyledButton } from '@mantine/core'
 import Image from 'next/image'
-import Link from 'next/link'
-import { Fragment, useEffect, useMemo, useState } from 'react'
+import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { IoIosArrowDown } from 'react-icons/io'
+import { Cart } from '@/app/(user)/collection/[type]/Cart'
 
 type CollectionPageClientProps = {
   paramsProduct_type: string
@@ -58,6 +55,16 @@ export function CollectionPageClient({
     }
     setLoadingImages(newLoadingSet)
   }, [paginated])
+
+  const onImageLoad = useCallback(
+    (index: number) =>
+      setLoadingImages((prev) => {
+        const next = new Set(prev)
+        next.delete(index)
+        return next
+      }),
+    [setLoadingImages],
+  )
 
   return (
     <div
@@ -184,44 +191,19 @@ export function CollectionPageClient({
 
           <div className="p-4">
             <SimpleGrid cols={{ base: 2, md: 3, xl: 4 }} spacing="sm" mb="md">
-              {paginated.map(({ name, image }, index) => (
-                <Link
-                  key={index}
-                  href={`${ROUTE_PRODUCT}/${paramsProduct_type}/${name}`}
-                  className="border border-[var(--mantine-border)] rounded-lg overflow-hidden"
-                >
-                  <div className="relative aspect-square rounded-lg">
-                    <LoadingOverlay
-                      visible={loadingImages.has(index)}
-                      zIndex={50}
-                      overlayProps={{ radius: 'sm', blur: 2 }}
-                    />
-                    <Image
-                      src={`${envClient.MINIO_PRODUCT_URL}/${paramsProduct_type}/${image}`}
-                      alt={name}
-                      fill
-                      style={{ objectFit: 'cover' }}
-                      priority={index < 8}
-                      fetchPriority={index < 8 ? 'high' : 'auto'}
-                      onLoad={() =>
-                        setLoadingImages((prev) => {
-                          const newSet = new Set(prev)
-                          newSet.delete(index)
-                          return newSet
-                        })
-                      }
-                      onError={() =>
-                        setLoadingImages((prev) => {
-                          const newSet = new Set(prev)
-                          newSet.delete(index)
-                          return newSet
-                        })
-                      }
-                    />
-                  </div>
-                  <p className="text-center">{name}</p>
-                </Link>
-              ))}
+              {paginated.map(({ name, image }, index) => {
+                return (
+                  <Cart
+                    key={`${selectedBrand}-${index}`}
+                    paramsProduct_type={paramsProduct_type}
+                    isLoading={loadingImages.has(index)}
+                    index={index}
+                    name={name}
+                    image={image}
+                    onImageLoad={onImageLoad}
+                  />
+                )
+              })}
             </SimpleGrid>
             <Pagination
               total={Math.ceil(filtered.length / 20)}

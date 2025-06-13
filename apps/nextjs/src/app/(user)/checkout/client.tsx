@@ -401,15 +401,16 @@ export function CheckoutPageClient({
                 <div>
                   <h1 className="text-xl">Στοιχεία επικοινωνίας</h1>
                   <TextInput
+                    key={form.key('email')}
                     label="Email"
                     {...form.getInputProps('email')}
-                    key={form.key('email')}
+                    styles={{ input: { fontSize: 16 } }}
                   />
                   <Checkbox
+                    key={form.key('receive_email')}
+                    label="Θέλω να λαμβάνω email με ειδήσεις και προσφορές"
                     mt="xs"
                     size="sm"
-                    label="Θέλω να λαμβάνω email με ειδήσεις και προσφορές"
-                    key={form.key('receive_email')}
                     {...form.getInputProps('receive_email', {
                       type: 'checkbox',
                     })}
@@ -420,64 +421,73 @@ export function CheckoutPageClient({
                   <h1 className="text-xl mt-4">Παράδωση</h1>
                   <div className="flex flex-col gap-2">
                     <Select
+                      key={form.key('country')}
                       label="Χώρα"
-                      defaultValue={'Ελλάδα'}
                       data={['Ελλάδα', 'Κύπρος']}
+                      defaultValue={'Ελλάδα'}
                       allowDeselect={false}
+                      styles={{ input: { fontSize: 16 } }}
                     />
                     <TextInput
-                      label="Όνομα"
                       key={form.key('first_name')}
+                      label="Όνομα"
                       {...form.getInputProps('first_name')}
+                      styles={{ input: { fontSize: 16 } }}
                     />
                     <TextInput
-                      label="Επίθετο"
                       key={form.key('last_name')}
+                      label="Επίθετο"
                       {...form.getInputProps('last_name')}
+                      styles={{ input: { fontSize: 16 } }}
                     />
                     <TextInput
-                      label="Διεύθηνση"
                       key={form.key('address')}
+                      label="Διεύθηνση"
                       {...form.getInputProps('address')}
+                      styles={{ input: { fontSize: 16 } }}
                     />
                     <TextInput
-                      label="Διαμέρισμα, σουίτα κ.λπ. (προαιρετικά)"
                       key={form.key('extra')}
+                      label="Διαμέρισμα, σουίτα κ.λπ. (προαιρετικά)"
                       {...form.getInputProps('extra')}
+                      styles={{ input: { fontSize: 16 } }}
                     />
                     <TextInput
-                      label="Ταχυδρομικός κώδικας"
                       key={form.key('post_code')}
+                      label="Ταχυδρομικός κώδικας"
                       {...form.getInputProps('post_code')}
+                      styles={{ input: { fontSize: 16 } }}
                     />
                     <TextInput
-                      label="Πόλη"
                       key={form.key('city')}
+                      label="Πόλη"
                       {...form.getInputProps('city')}
+                      styles={{ input: { fontSize: 16 } }}
                     />
                     <NumberInput
+                      key={form.key('phone')}
                       label="Τηλέφωνο"
                       hideControls
-                      key={form.key('phone')}
                       {...form.getInputProps('phone')}
                       onChange={(value) => {
                         form.setFieldValue('phone', String(value))
                       }}
+                      styles={{ input: { fontSize: 16 } }}
                     />
                   </div>
                   <Checkbox
+                    key={form.key('receive_phone')}
                     mt="xs"
                     size="sm"
                     label="Θέλω να λαμβάνω μηνύματα με ειδήσεις και προσφορές"
-                    key={form.key('receive_phone')}
                     {...form.getInputProps('receive_phone', {
                       type: 'checkbox',
                     })}
                   />
                   <Checkbox
+                    label="Αποθήκευση αυτών των πληροφοριών για την επόμενη φορά"
                     mt="xs"
                     size="sm"
-                    label="Αποθήκευση αυτών των πληροφοριών για την επόμενη φορά"
                     type="checkbox"
                     checked={saveInfo}
                     onChange={(e) => setSaveInfo(e.target.checked)}
@@ -611,7 +621,6 @@ export function CheckoutPageClient({
                   onChange={(value) =>
                     form.setFieldValue('payment_method', value)
                   }
-                  error={form.errors.payment_method}
                   className="p-2 border border-[var(--mantine-border)] rounded-lg"
                 >
                   <Group gap="sm">
@@ -644,7 +653,7 @@ export function CheckoutPageClient({
                       label="Κωδικός έκπτωσης"
                       ref={couponCodeRef}
                       className="flex-1 mt-2"
-                      styles={{ input: { fontSize: 16 } }} 
+                      styles={{ input: { fontSize: 16 } }}
                     />
                     <Button
                       onClick={async () => {
