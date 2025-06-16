@@ -1,4 +1,4 @@
-### The official website of [motowear.gr](https://motowear.gr) (is currently being setup on [alexpassalis.com](https://alexpassalis.com))
+### The official website of [motowear.gr](https://motowear.gr) (is currently being setup on [motowear.gr.com](https://motowear.gr.com))
 
 ---
 
