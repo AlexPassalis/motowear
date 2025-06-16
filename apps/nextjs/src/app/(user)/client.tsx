@@ -9,6 +9,7 @@ import {
   Accordion,
   Button,
   Container,
+  LoadingOverlay,
   Pagination,
   SimpleGrid,
 } from '@mantine/core'
@@ -199,12 +200,16 @@ export function HomePageClient({
                       className="border border-[var(--mantine-border)] rounded-lg overflow-hidden"
                     >
                       <div className="relative aspect-square rounded-lg">
+                        <LoadingOverlay
+                          visible={loadingImages.has(index)}
+                          zIndex={50}
+                          overlayProps={{ radius: 'sm', blur: 2 }}
+                        />
                         <Image
                           src={`${envClient.MINIO_PRODUCT_URL}/${product_type}/${image}`}
                           alt={name}
                           fill
                           style={{ objectFit: 'cover' }}
-                          isLoading={loadingImages.has(index)}
                           onLoad={() =>
                             setLoadingImages((prev) => {
                               const next = new Set(prev)

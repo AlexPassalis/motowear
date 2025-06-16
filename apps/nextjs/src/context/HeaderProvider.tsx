@@ -94,10 +94,12 @@ export default function HeaderProvider({
 
   const [emailSubmitted, setEmailSubmitted] = useState<null | string>(null)
   useEffect(() => {
-    setEmailSubmitted(localStorage.getItem('email_submitted'))
-    if (emailSubmitted === null || emailSubmitted === '1') {
-      const timer = setTimeout(() => openEmailModal(), 15000) // 15 sec
-      return () => clearTimeout(timer)
+    if (hasMounted) {
+      setEmailSubmitted(localStorage.getItem('email_submitted'))
+      if (emailSubmitted === null || emailSubmitted === '1') {
+        const timer = setTimeout(() => openEmailModal(), 15000) // 15 sec
+        return () => clearTimeout(timer)
+      }
     }
   }, [])
   useEffect(() => {
