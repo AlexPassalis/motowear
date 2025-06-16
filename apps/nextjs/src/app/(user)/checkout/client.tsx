@@ -641,6 +641,7 @@ export function CheckoutPageClient({
                       styles={{ body: { alignItems: 'center' } }}
                       label={
                         <Image
+                          component={NextImage}
                           src="/viva.png"
                           alt="viva wallet payment"
                           className="max-w-[750px]"
