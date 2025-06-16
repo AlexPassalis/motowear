@@ -638,7 +638,14 @@ export function CheckoutPageClient({
                     <Radio
                       size="sm"
                       value="Κάρτα"
-                      label="Πληρωμή με Κάρτα ή IRIS Payments (Viva Wallet)"
+                      styles={{ body: { alignItems: 'center' } }}
+                      label={
+                        <Image
+                          src="/viva.png"
+                          alt="viva wallet payment"
+                          className="max-w-[750px]"
+                        />
+                      }
                     />
                     <hr className="w-full border-t-2 border-[var(--mantine-border)]" />
                     <Radio
