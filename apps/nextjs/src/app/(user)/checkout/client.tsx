@@ -644,6 +644,8 @@ export function CheckoutPageClient({
                           component={NextImage}
                           src="/viva.png"
                           alt="viva wallet payment"
+                          width={1341}
+                          height={156}
                           className="max-w-[750px]"
                         />
                       }

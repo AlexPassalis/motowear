@@ -39,7 +39,7 @@ export function AdminOrderPageClient({
   const [onRequest, setOnRequest] = useState(false)
   const [orders, setOrders] = useState(postgres_orders)
   const [visibleOrders, setVisibleOrders] = useState(
-    postgres_orders.slice(0, 20)
+    postgres_orders.slice(0, 20),
   )
   const [modalState, setModalState] = useState<{
     type: '' | 'Checkout' | 'Cart' | 'Delete'
@@ -87,7 +87,7 @@ export function AdminOrderPageClient({
                           }
                         }
                         return order
-                      })
+                      }),
                     )
                   }}
                   classNames={{ input: '!text-center' }}
@@ -111,7 +111,7 @@ export function AdminOrderPageClient({
                           }
                         }
                         return order
-                      })
+                      }),
                     )
                   }}
                   allowDeselect={false}
@@ -136,7 +136,7 @@ export function AdminOrderPageClient({
                           }
                         }
                         return order
-                      })
+                      }),
                     )
                   }}
                   allowDeselect={false}
@@ -160,7 +160,7 @@ export function AdminOrderPageClient({
                           }
                         }
                         return order
-                      })
+                      }),
                     )
                   }}
                   classNames={{ input: '!text-center' }}
@@ -183,7 +183,7 @@ export function AdminOrderPageClient({
                           }
                         }
                         return order
-                      })
+                      }),
                     )
                   }}
                   classNames={{ input: '!text-center' }}
@@ -206,7 +206,7 @@ export function AdminOrderPageClient({
                           }
                         }
                         return order
-                      })
+                      }),
                     )
                   }}
                   classNames={{ input: '!text-center' }}
@@ -229,7 +229,7 @@ export function AdminOrderPageClient({
                           }
                         }
                         return order
-                      })
+                      }),
                     )
                   }}
                   classNames={{ input: '!text-center' }}
@@ -252,7 +252,7 @@ export function AdminOrderPageClient({
                           }
                         }
                         return order
-                      })
+                      }),
                     )
                   }}
                   classNames={{ input: '!text-center' }}
@@ -275,7 +275,7 @@ export function AdminOrderPageClient({
                           }
                         }
                         return order
-                      })
+                      }),
                     )
                   }}
                   classNames={{ input: '!text-center' }}
@@ -300,7 +300,7 @@ export function AdminOrderPageClient({
                           }
                         }
                         return order
-                      })
+                      }),
                     )
                   }}
                   classNames={{ input: '!text-center' }}
@@ -324,7 +324,7 @@ export function AdminOrderPageClient({
                           }
                         }
                         return order
-                      })
+                      }),
                     )
                   }}
                   allowDeselect={false}
@@ -350,7 +350,7 @@ export function AdminOrderPageClient({
                           }
                         }
                         return order
-                      })
+                      }),
                     )
                   }}
                   allowDeselect={false}
@@ -384,12 +384,12 @@ export function AdminOrderPageClient({
                                               ...cartItem,
                                               product_type: e.target.value,
                                             }
-                                          : cartItem
+                                          : cartItem,
                                     ),
                                   }
                                 }
                                 return order
-                              })
+                              }),
                             )
                           }}
                           classNames={{ input: '!text-center' }}
@@ -412,12 +412,12 @@ export function AdminOrderPageClient({
                                               ...cartItem,
                                               name: e.target.value,
                                             }
-                                          : cartItem
+                                          : cartItem,
                                     ),
                                   }
                                 }
                                 return order
-                              })
+                              }),
                             )
                           }}
                           classNames={{ input: '!text-center' }}
@@ -440,12 +440,12 @@ export function AdminOrderPageClient({
                                               ...cartItem,
                                               color: e.target.value,
                                             }
-                                          : cartItem
+                                          : cartItem,
                                     ),
                                   }
                                 }
                                 return order
-                              })
+                              }),
                             )
                           }}
                           classNames={{ input: '!text-center' }}
@@ -468,12 +468,12 @@ export function AdminOrderPageClient({
                                               ...cartItem,
                                               size: e.target.value,
                                             }
-                                          : cartItem
+                                          : cartItem,
                                     ),
                                   }
                                 }
                                 return order
-                              })
+                              }),
                             )
                           }}
                           classNames={{ input: '!text-center' }}
@@ -499,12 +499,12 @@ export function AdminOrderPageClient({
                                               ...cartItem,
                                               price: Number(e),
                                             }
-                                          : cartItem
+                                          : cartItem,
                                     ),
                                   }
                                 }
                                 return order
-                              })
+                              }),
                             )
                           }}
                           classNames={{ input: '!text-center' }}
@@ -529,12 +529,12 @@ export function AdminOrderPageClient({
                                               ...cartItem,
                                               quantity: Number(e),
                                             }
-                                          : cartItem
+                                          : cartItem,
                                     ),
                                   }
                                 }
                                 return order
-                              })
+                              }),
                             )
                           }}
                           classNames={{ input: '!text-center' }}
@@ -563,7 +563,7 @@ export function AdminOrderPageClient({
                         data: {
                           id: modalState.id,
                         },
-                      }
+                      },
                     )
                     if (res.status === 200) {
                       window.location.reload()
@@ -571,7 +571,7 @@ export function AdminOrderPageClient({
                       alert(
                         `Error deleting ${order.id}: ${
                           res.data?.message || errorUnexpected
-                        }`
+                        }`,
                       )
                       console.error(res)
                     }
@@ -627,7 +627,7 @@ export function AdminOrderPageClient({
               <Table.Th
                 onClick={() =>
                   setVisibleOrders((prev) =>
-                    prev.filter((order) => !order.date_fulfilled)
+                    prev.filter((order) => !order.date_fulfilled),
                   )
                 }
                 style={{ textAlign: 'center' }}
@@ -651,7 +651,7 @@ export function AdminOrderPageClient({
                 key={order.id}
                 className={cx({
                   [classes.rowSelected]: selection.some(
-                    (ord) => ord.id === order.id
+                    (ord) => ord.id === order.id,
                   ),
                 })}
                 style={{
@@ -668,7 +668,7 @@ export function AdminOrderPageClient({
                             orders.find((ord) => ord.id === order.id)!,
                           ])
                         : setSelection((prev) =>
-                            prev.filter((ord) => ord.id !== order.id)
+                            prev.filter((ord) => ord.id !== order.id),
                           )
                     }
                   />
@@ -680,7 +680,7 @@ export function AdminOrderPageClient({
                   {formatInTimeZone(
                     order.order_date,
                     'UTC',
-                    'dd/MM/yyyy HH:mm:ss'
+                    'dd/MM/yyyy HH:mm:ss',
                   )}
                 </Table.Td>
                 <Table.Td style={{ textAlign: 'center' }}>
@@ -743,7 +743,7 @@ export function AdminOrderPageClient({
                     ? formatInTimeZone(
                         order.date_fulfilled,
                         'UTC',
-                        'dd/MM/yyyy HH:mm:ss'
+                        'dd/MM/yyyy HH:mm:ss',
                       )
                     : '-'}
                 </Table.Td>
@@ -824,7 +824,7 @@ export function AdminOrderPageClient({
                           `${envClient.API_ADMIN_URL}/order`,
                           {
                             orders: validatedOrders,
-                          }
+                          },
                         )
                         if (res.status === 200) {
                           window.location.reload()
@@ -832,7 +832,7 @@ export function AdminOrderPageClient({
                           alert(
                             `Error creating New Orders: ${
                               res.data?.message || errorUnexpected
-                            }`
+                            }`,
                           )
                           console.error(res)
                         }
@@ -866,7 +866,7 @@ export function AdminOrderPageClient({
                       const pdfDoc = await PDFDocument.create()
                       pdfDoc.registerFontkit(fontkit)
                       const fontBytes = await fetch(
-                        '/fonts/NotoSans-Regular.ttf'
+                        '/fonts/NotoSans-Regular.ttf',
                       ).then((r) => r.arrayBuffer())
                       const greekFont = await pdfDoc.embedFont(fontBytes, {
                         subset: false,
@@ -891,7 +891,7 @@ export function AdminOrderPageClient({
                         })
                         const w = greekFont.widthOfTextAtSize(
                           title,
-                          headingSize
+                          headingSize,
                         )
                         page.drawLine({
                           start: { x: margin, y: y - 2 },
@@ -917,7 +917,7 @@ export function AdminOrderPageClient({
                           }
                           page.drawText(
                             `${size.padEnd(6)} ${color.padEnd(7)} ${name}`,
-                            { x: margin, y, size: fontSize, font: greekFont }
+                            { x: margin, y, size: fontSize, font: greekFont },
                           )
                           y -= lineHeight
                         }
@@ -927,7 +927,7 @@ export function AdminOrderPageClient({
                       const blobUrl = URL.createObjectURL(
                         new Blob([await pdfDoc.save()], {
                           type: 'application/pdf',
-                        })
+                        }),
                       )
                       window.open(blobUrl, '_blank')
                       setTimeout(() => URL.revokeObjectURL(blobUrl), 60000)
@@ -943,7 +943,7 @@ export function AdminOrderPageClient({
                   total={Math.ceil(visibleOrders.length / 20)}
                   onChange={(pageNumber) =>
                     setVisibleOrders(
-                      orders.slice((pageNumber - 1) * 20, pageNumber * 20)
+                      orders.slice((pageNumber - 1) * 20, pageNumber * 20),
                     )
                   }
                   style={{

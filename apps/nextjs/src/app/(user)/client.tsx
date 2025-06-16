@@ -23,7 +23,7 @@ import {
 import Link from 'next/link'
 import { ImQuotesLeft } from 'react-icons/im'
 import { Carousel } from '@mantine/carousel'
-import { Fragment, useRef, useState } from 'react'
+import { Fragment, useEffect, useRef, useState } from 'react'
 import { ROUTE_COLLECTION, ROUTE_PRODUCT } from '@/data/routes'
 import Autoplay from 'embla-carousel-autoplay'
 import { IoIosStar } from 'react-icons/io'
@@ -53,6 +53,16 @@ export function HomePageClient({
       (variant) => variant.product_type === home_page_variants[0].product_type,
     ),
   )
+
+  const [loadingImages, setLoadingImages] = useState<Set<number>>(new Set())
+  useEffect(() => {
+    const newLoadingSet = new Set<number>()
+    for (let i = 0; i < displayedVariants.length; i++) {
+      newLoadingSet.add(i)
+    }
+    setLoadingImages(newLoadingSet)
+  }, [displayedVariants])
+
   const [visibleReviews, setVisibleReviews] = useState(home_page_reviews)
 
   return (
@@ -62,7 +72,15 @@ export function HomePageClient({
       shipping={shipping}
     >
       <main className="flex-1">
-        <Link href={`${home_page.big_image.url}`}>
+        <Link
+          href={home_page.big_image.url}
+          onClick={(e) => {
+            if (!home_page.big_image.url) {
+              e.preventDefault()
+            }
+          }}
+          className={`${!home_page.big_image.url ? 'cursor-default' : ''}`}
+        >
           <div className="relative aspect-[1/1.4] md:aspect-[2/1]">
             <Image
               src={`${envClient.MINIO_PRODUCT_URL}/home_page/${home_page.big_image.phone}`}
@@ -93,7 +111,14 @@ export function HomePageClient({
                 <Link
                   key={index}
                   href={url}
-                  className="border border-[var(--mantine-border)] overflow-hidden"
+                  onClick={(e) => {
+                    if (!url) {
+                      e.preventDefault()
+                    }
+                  }}
+                  className={`border border-[var(--mantine-border)] overflow-hidden ${
+                    !url ? 'cursor-default' : ''
+                  }`}
                 >
                   <div className="relative aspect-square">
                     <Image
@@ -169,7 +194,7 @@ export function HomePageClient({
                 {displayedVariants.map(
                   ({ product_type, name, image }, index) => (
                     <Link
-                      key={index}
+                      key={`${product_type}-${name}`}
                       href={`${ROUTE_PRODUCT}/${product_type}/${name}`}
                       className="border border-[var(--mantine-border)] rounded-lg overflow-hidden"
                     >
@@ -179,6 +204,14 @@ export function HomePageClient({
                           alt={name}
                           fill
                           style={{ objectFit: 'cover' }}
+                          isLoading={loadingImages.has(index)}
+                          onLoad={() =>
+                            setLoadingImages((prev) => {
+                              const next = new Set(prev)
+                              next.delete(index)
+                              return next
+                            })
+                          }
                         />
                       </div>
                       <p className="text-center">{name}</p>

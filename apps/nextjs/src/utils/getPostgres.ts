@@ -14,7 +14,7 @@ import {
   email,
   phone,
 } from '@/lib/postgres/schema'
-import { eq, and, gte, lte, sql, not } from 'drizzle-orm'
+import { eq, and, gte, lte, sql, not, or, isNull } from 'drizzle-orm'
 
 export async function getProductTypes() {
   return (
@@ -169,7 +169,7 @@ export async function getOrders() {
   return await postgres
     .select()
     .from(order)
-    .where(not(eq(order.paid, false)))
+    .where(or(eq(order.paid, true), isNull(order.paid)))
 }
 
 export async function getDailySessions() {
