@@ -421,7 +421,7 @@ export function CheckoutPageClient({
                     key={form.key('receive_email')}
                     label="Θέλω να λαμβάνω email με ειδήσεις και προσφορές"
                     mt="xs"
-                    size="sm"
+                    size="xs"
                     {...form.getInputProps('receive_email', {
                       type: 'checkbox',
                     })}
@@ -430,7 +430,7 @@ export function CheckoutPageClient({
 
                 <div>
                   <h1 className="text-xl mt-4">Παράδωση</h1>
-                  <div className="flex flex-col gap-2">
+                  <div className="flex flex-col gap-3">
                     <Select
                       key={form.key('country')}
                       label="Χώρα"
@@ -453,7 +453,7 @@ export function CheckoutPageClient({
                     />
                     <TextInput
                       key={form.key('address')}
-                      label="Διεύθηνση"
+                      label="Διεύθυνση"
                       {...form.getInputProps('address')}
                       styles={{ input: { fontSize: 16 } }}
                     />
@@ -489,7 +489,7 @@ export function CheckoutPageClient({
                   <Checkbox
                     key={form.key('receive_phone')}
                     mt="xs"
-                    size="sm"
+                    size="xs"
                     label="Θέλω να λαμβάνω μηνύματα με ειδήσεις και προσφορές"
                     {...form.getInputProps('receive_phone', {
                       type: 'checkbox',
@@ -498,7 +498,7 @@ export function CheckoutPageClient({
                   <Checkbox
                     label="Αποθήκευση αυτών των πληροφοριών για την επόμενη φορά"
                     mt="xs"
-                    size="sm"
+                    size="xs"
                     type="checkbox"
                     checked={saveInfo}
                     onChange={(e) => setSaveInfo(e.target.checked)}
@@ -634,31 +634,40 @@ export function CheckoutPageClient({
                   }
                   className="p-2 border border-[var(--mantine-border)] rounded-lg"
                 >
-                  <Group gap="sm">
+                  <Group gap="xs">
                     <Radio
                       size="sm"
                       value="Κάρτα"
                       styles={{ body: { alignItems: 'center' } }}
                       label={
-                        <Image
-                          component={NextImage}
-                          src="/viva.png"
-                          alt="viva wallet payment"
-                          width={1341}
-                          height={156}
-                          className="max-w-[750px]"
-                        />
+                        <div>
+                          <Image
+                            component={NextImage}
+                            src="/viva.png"
+                            alt="viva wallet payment"
+                            width={1341}
+                            height={156}
+                            className="max-w-[750px]"
+                          />
+                          <h3 className="mt-1">
+                            Κάρτα, Iris, Google Pay ... (viva.com)
+                          </h3>
+                        </div>
                       }
                     />
-                    <hr className="w-full border-t-2 border-[var(--mantine-border)]" />
+                    <hr className="w-full border-[var(--mantine-border)]" />
                     <Radio
                       size="sm"
                       value="Αντικαταβολή"
-                      label={`Αντικαταβολή${
-                        shipping.surcharge
-                          ? ` +${shipping.surcharge}€ επιβάρυνση`
-                          : ''
-                      }`}
+                      styles={{ body: { alignItems: 'center' } }}
+                      label={
+                        <span>
+                          Μετρητά κατά την παράδοση. <br /> Δεν συνιστάται
+                          {shipping.surcharge
+                            ? ` (+${shipping.surcharge}€ επιβάρυνση)`
+                            : ''}
+                        </span>
+                      }
                     />
                   </Group>
                 </Radio.Group>
@@ -838,7 +847,7 @@ export function CheckoutPageClient({
             </p>
             <p className="mb-8 text-center">
               Θα λάβετε ενημέρωση με τον αριθμό tracking της κούριερ μόλις φύγει
-              από εμάς, και έπειτα θα σας ενημερώσει η Κούριερ όταν το δέμα σας
+              από εμάς, και έπειτα θα σας ενημερώσει η κούριερ όταν το δέμα σας
               φτάσει στον προορισμό.
             </p>
             <p className="text-center">
