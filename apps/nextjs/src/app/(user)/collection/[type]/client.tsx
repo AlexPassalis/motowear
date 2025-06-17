@@ -79,7 +79,7 @@ export function CollectionPageClient({
       >
         <main className="flex-1 flex flex-col">
           <h1 className="text-2xl text-center">{paramsProduct_type}</h1>
-          {paginated.length > 0 && (
+          {uniqueBrands.length > 0 && (
             <div className="ml-2 flex flex-col">
               <h2 className="text-lg xl:text-xl">Μάρκα</h2>
               <div className="relative max-w-[408px]">
