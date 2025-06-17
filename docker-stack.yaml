@@ -249,7 +249,6 @@ services:
       - AFTERSALES_PLATFORM_UUID
       - AFTERSALES_SIGN_SECRET_PHRASE
     environment:
-      INSTANCE_ID: '{{.Task.Slot}}'
       HOSTNAME: 0.0.0.0
       PORT: 3000
     healthcheck:
