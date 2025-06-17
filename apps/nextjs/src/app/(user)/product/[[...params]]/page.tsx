@@ -57,9 +57,10 @@ export async function generateMetadata({
   }
 
   const variant = resolvedParams.params?.[1]
+    ? decodeURIComponent(resolvedParams.params?.[1])
+    : undefined
   const paramsVariant = variant
-    ? postgresVariants.find((v) => v.name === decodeURIComponent(variant)) ??
-      undefined
+    ? postgresVariants.find((v) => v.name === variant) ?? undefined
     : undefined
 
   const page = resolved[3].value.find(
@@ -132,7 +133,6 @@ export default async function ProductPage({
   const postgresVariants = resolved[3].value.filter(
     (variant) => variant.product_type === paramsProduct_type,
   )
-
   if (
     !postgresVariants.find(
       (variant) => variant.product_type === paramsProduct_type,
@@ -142,9 +142,19 @@ export default async function ProductPage({
   }
 
   const variant = resolvedParams.params?.[1]
+    ? decodeURIComponent(resolvedParams.params?.[1])
+    : undefined
+  const resolvedSearchParamsColor = (
+    resolved[1] as PromiseFulfilledResult<{
+      color?: string
+    }>
+  ).value?.color
   const paramsVariant = variant
-    ? postgresVariants.find((v) => v.name === decodeURIComponent(variant)) ??
-      undefined
+    ? postgresVariants.find((v) =>
+        resolvedSearchParamsColor
+          ? v.name === variant && v.color === resolvedSearchParamsColor
+          : v.name === variant,
+      ) ?? undefined
     : undefined
 
   const page = resolved[4].value.find(
@@ -154,12 +164,6 @@ export default async function ProductPage({
   const postgres_reviews = resolved[5].value.filter(
     (review) => review.product_type === paramsProduct_type,
   )
-
-  const resolvedSearchParamsColor = (
-    resolved[1] as PromiseFulfilledResult<{
-      color?: string
-    }>
-  ).value?.color
 
   return (
     <ProductPageClient
@@ -171,7 +175,6 @@ export default async function ProductPage({
       paramsProduct_type={paramsProduct_type}
       paramsVariant={paramsVariant}
       postgresVariants={postgresVariants}
-      searchParamsColor={resolvedSearchParamsColor}
     />
   )
 }

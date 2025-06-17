@@ -605,7 +605,6 @@ export function AdminOrderPageClient({
                 Orders
               </Table.Th>
             </Table.Tr>
-
             <Table.Tr>
               <Table.Th />
               <Table.Th style={{ textAlign: 'center' }}>Id</Table.Th>
@@ -621,9 +620,6 @@ export function AdminOrderPageClient({
                 Shipping Surcharge
               </Table.Th>
               <Table.Th style={{ textAlign: 'center' }}>Order Code</Table.Th>
-              <Table.Th style={{ textAlign: 'center' }}>
-                Confirmation Email
-              </Table.Th>
               <Table.Th
                 onClick={() =>
                   setVisibleOrders((prev) =>
@@ -712,27 +708,22 @@ export function AdminOrderPageClient({
                       : `-${order.coupon.fixed}`
                     : '-'}
                 </Table.Td>
-
                 <Table.Td style={{ textAlign: 'center' }}>
                   {order.total}€
                 </Table.Td>
-
                 <Table.Td style={{ textAlign: 'center' }}>
                   {order.shippping_expense
                     ? `${order.shippping_expense}€`
                     : '-'}
                 </Table.Td>
-
                 <Table.Td style={{ textAlign: 'center' }}>
                   {order.shipping_surcharge
                     ? `${order.shipping_surcharge}€`
                     : '-'}
                 </Table.Td>
-
                 <Table.Td style={{ textAlign: 'center' }}>
                   {order?.order_code ? order.order_code : '-'}
                 </Table.Td>
-
                 <Table.Td
                   style={{
                     textAlign: 'center',
@@ -800,7 +791,6 @@ export function AdminOrderPageClient({
               </Table.Tr>
             ))}
           </Table.Tbody>
-
           <Table.Tfoot>
             <Table.Tr>
               <Table.Td colSpan={15} style={{ textAlign: 'center' }}>
