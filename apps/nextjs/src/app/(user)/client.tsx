@@ -64,6 +64,7 @@ export function HomePageClient({
     setLoadingImages(newLoadingSet)
   }, [displayedVariants])
 
+  const reviewsPageSize = 5
   const [visibleReviews, setVisibleReviews] = useState(home_page_reviews)
 
   return (
@@ -162,7 +163,7 @@ export function HomePageClient({
                 Κατηγορίες Προϊόντων
               </h1>
               <hr className="my-2 border-t-2 border-[var(--mantine-border)] max-w-[500px] mx-auto" />
-              <div className="flex gap-2 justify-center">
+              <div className="flex flex-wrap gap-2 justify-center">
                 {home_page_variants
                   .map((variant) => variant.product_type)
                   .filter(
@@ -312,12 +313,12 @@ export function HomePageClient({
                 </div>
               ))}
               <Pagination
-                total={Math.ceil(home_page_reviews.length / 10)}
+                total={Math.ceil(home_page_reviews.length / reviewsPageSize)}
                 onChange={(pageNumber) =>
                   setVisibleReviews(
                     home_page_reviews.slice(
-                      (pageNumber - 1) * 10,
-                      pageNumber * 10,
+                      (pageNumber - 1) * reviewsPageSize,
+                      pageNumber * reviewsPageSize,
                     ),
                   )
                 }

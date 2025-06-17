@@ -90,9 +90,10 @@ export default async function CollectionPage({ params }: ProductPageProps) {
     )
     .map((variant) => {
       return {
-        image: variant.images[0],
         name: variant.name,
+        color: variant.color,
         brand: variant.brand,
+        image: variant.images[0],
       }
     })
     .sort((a, b) => a.name.localeCompare(b.name))

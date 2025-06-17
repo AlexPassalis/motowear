@@ -17,7 +17,12 @@ type CollectionPageClientProps = {
   product_types: string[]
   all_variants: typeVariant[]
   shipping: typeShipping
-  uniqueVariants: { image: string; name: string; brand: string }[]
+  uniqueVariants: {
+    name: string
+    color: string
+    brand: string
+    image: string
+  }[]
   uniqueBrands: string[]
 }
 
@@ -191,7 +196,7 @@ export function CollectionPageClient({
 
           <div className="p-4">
             <SimpleGrid cols={{ base: 2, md: 3, xl: 4 }} spacing="sm" mb="md">
-              {paginated.map(({ name, image }, index) => {
+              {paginated.map(({ name, color, image }, index) => {
                 return (
                   <Cart
                     key={`${selectedBrand}-${index}`}
@@ -199,6 +204,7 @@ export function CollectionPageClient({
                     isLoading={loadingImages.has(index)}
                     index={index}
                     name={name}
+                    color={color}
                     image={image}
                     onImageLoad={onImageLoad}
                   />

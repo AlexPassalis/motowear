@@ -12,6 +12,7 @@ import { Metadata } from 'next'
 
 type ProductPageProps = {
   params: Promise<{ params?: [type: string, version?: string] }>
+  searchParams: Promise<{ color?: string }>
 }
 
 export async function generateMetadata({
@@ -44,12 +45,12 @@ export async function generateMetadata({
   const paramsProduct_type = decodeURIComponent(resolvedParams.params[0])
 
   const postgresVariants = resolved[2].value.filter(
-    (variant) => variant.product_type === paramsProduct_type
+    (variant) => variant.product_type === paramsProduct_type,
   )
 
   if (
     !postgresVariants.find(
-      (variant) => variant.product_type === paramsProduct_type
+      (variant) => variant.product_type === paramsProduct_type,
     )
   ) {
     return notFound()
@@ -62,12 +63,12 @@ export async function generateMetadata({
     : undefined
 
   const page = resolved[3].value.find(
-    (page) => page.product_type === paramsProduct_type
+    (page) => page.product_type === paramsProduct_type,
   )!
 
   const canonicalPath = paramsVariant
     ? `/product/${encodeURIComponent(paramsProduct_type)}/${encodeURIComponent(
-        paramsVariant.name
+        paramsVariant.name,
       )}`
     : `/product/${encodeURIComponent(paramsProduct_type)}`
 
@@ -89,18 +90,19 @@ export async function generateMetadata({
   }
 }
 
-export default async function ProductPage({ params }: ProductPageProps) {
+export default async function ProductPage({
+  params,
+  searchParams,
+}: ProductPageProps) {
   const resolved = await Promise.allSettled([
     params,
+    searchParams,
     getProductTypesCached(),
     getVariantsCached(),
     getPagesCached(),
     getReviewsCached(),
     getShippingCached(),
   ])
-  if (resolved[1].status === 'rejected') {
-    redirect(`${ROUTE_ERROR}?message=${resolved[1].reason}`)
-  }
   if (resolved[2].status === 'rejected') {
     redirect(`${ROUTE_ERROR}?message=${resolved[2].reason}`)
   }
@@ -113,6 +115,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
   if (resolved[5].status === 'rejected') {
     redirect(`${ROUTE_ERROR}?message=${resolved[5].reason}`)
   }
+  if (resolved[6].status === 'rejected') {
+    redirect(`${ROUTE_ERROR}?message=${resolved[6].reason}`)
+  }
 
   const resolvedParams = (
     resolved[0] as PromiseFulfilledResult<{
@@ -124,13 +129,13 @@ export default async function ProductPage({ params }: ProductPageProps) {
   }
   const paramsProduct_type = decodeURIComponent(resolvedParams.params[0])
 
-  const postgresVariants = resolved[2].value.filter(
-    (variant) => variant.product_type === paramsProduct_type
+  const postgresVariants = resolved[3].value.filter(
+    (variant) => variant.product_type === paramsProduct_type,
   )
 
   if (
     !postgresVariants.find(
-      (variant) => variant.product_type === paramsProduct_type
+      (variant) => variant.product_type === paramsProduct_type,
     )
   ) {
     return notFound()
@@ -142,24 +147,31 @@ export default async function ProductPage({ params }: ProductPageProps) {
       undefined
     : undefined
 
-  const page = resolved[3].value.find(
-    (page) => page.product_type === paramsProduct_type
+  const page = resolved[4].value.find(
+    (page) => page.product_type === paramsProduct_type,
   )!
 
-  const postgres_reviews = resolved[4].value.filter(
-    (review) => review.product_type === paramsProduct_type
+  const postgres_reviews = resolved[5].value.filter(
+    (review) => review.product_type === paramsProduct_type,
   )
+
+  const resolvedSearchParamsColor = (
+    resolved[1] as PromiseFulfilledResult<{
+      color?: string
+    }>
+  ).value?.color
 
   return (
     <ProductPageClient
-      product_types={resolved[1].value}
-      all_variants={resolved[2].value}
+      product_types={resolved[2].value}
+      all_variants={resolved[3].value}
       page={page}
       postgres_reviews={postgres_reviews}
-      shipping={resolved[5].value}
+      shipping={resolved[6].value}
       paramsProduct_type={paramsProduct_type}
       paramsVariant={paramsVariant}
       postgresVariants={postgresVariants}
+      searchParamsColor={resolvedSearchParamsColor}
     />
   )
 }

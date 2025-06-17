@@ -44,6 +44,7 @@ type ProductPageClientProps = {
   paramsProduct_type: string
   paramsVariant: undefined | typeVariant
   postgresVariants: typeVariant[]
+  searchParamsColor: string | undefined
 }
 
 export function ProductPageClient({
@@ -55,6 +56,7 @@ export function ProductPageClient({
   paramsProduct_type,
   paramsVariant,
   postgresVariants,
+  searchParamsColor,
 }: ProductPageClientProps) {
   const [brandDropdown, setBrandDropdown] = useState(false)
   const [variantDropdown, setVariantDropdown] = useState(false)
@@ -76,6 +78,7 @@ export function ProductPageClient({
         <Main
           paramsProduct_type={paramsProduct_type}
           paramsVariant={paramsVariant}
+          searchParamsColor={searchParamsColor}
           all_variants={all_variants}
           postgresVariants={postgresVariants}
           page={page}
@@ -95,6 +98,7 @@ export function ProductPageClient({
 type MainProps = {
   paramsProduct_type: string
   paramsVariant: undefined | typeVariant
+  searchParamsColor: string | undefined
   all_variants: typeVariant[]
   postgresVariants: typeVariant[]
   page: typeProductPage
@@ -110,6 +114,7 @@ type MainProps = {
 function Main({
   paramsProduct_type,
   paramsVariant,
+  searchParamsColor,
   all_variants,
   postgresVariants,
   page,
@@ -158,7 +163,11 @@ function Main({
             (item, index, self) =>
               index === self.findIndex((other) => other === item),
           ),
-    selectedColor: paramsVariant ? paramsVariant.color : fallbackVariant.color,
+    selectedColor: searchParamsColor
+      ? searchParamsColor
+      : paramsVariant
+      ? paramsVariant.color
+      : fallbackVariant.color,
     displayedSizes: paramsVariant
       ? postgresVariants
           .filter((variant) => variant.name === paramsVariant.name)
@@ -942,6 +951,7 @@ function Main({
                       width: '100%',
                       textAlign: 'left',
                       marginLeft: '8px',
+                      cursor: 'default',
                     }}
                     className="proxima-nova"
                     classNames={{
@@ -980,12 +990,17 @@ function Main({
                     return color === state.selectedColor ? (
                       <div
                         key={index}
-                        onClick={() =>
+                        onClick={() => {
                           dispatch({
                             type: 'color',
                             payload: { selectedColor: color },
                           })
-                        }
+                          window.history.pushState(
+                            {},
+                            '',
+                            `${ROUTE_PRODUCT}/${paramsProduct_type}/${state.selectedVariant}?color=${color}`,
+                          )
+                        }}
                         className={`w-11 h-11 rounded-full p-0.5 border-2 ${
                           state.selectedColor === color
                             ? 'border-black'
@@ -1000,12 +1015,17 @@ function Main({
                     ) : (
                       <div
                         key={index}
-                        onClick={() =>
+                        onClick={() => {
                           dispatch({
                             type: 'color',
                             payload: { selectedColor: color },
                           })
-                        }
+                          window.history.pushState(
+                            {},
+                            '',
+                            `${ROUTE_PRODUCT}/${paramsProduct_type}/${state.selectedVariant}?color=${color}`,
+                          )
+                        }}
                         style={{ backgroundColor: color }}
                         className={`w-11 h-11 rounded-full hover:cursor-pointer ${
                           color === 'White' ? 'border border-black' : ''

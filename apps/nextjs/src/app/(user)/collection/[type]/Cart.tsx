@@ -12,6 +12,7 @@ type CartProps = {
   isLoading: boolean
   index: number
   name: string
+  color: string
   image: string
   onImageLoad: (index: number) => void
 }
@@ -21,12 +22,15 @@ function CartNotMemoised({
   isLoading,
   index,
   name,
+  color,
   image,
   onImageLoad,
 }: CartProps) {
   return (
     <Link
-      href={`${ROUTE_PRODUCT}/${paramsProduct_type}/${name}`}
+      href={`${ROUTE_PRODUCT}/${paramsProduct_type}/${name}${
+        color ? `?color=${color}` : ''
+      }`}
       className="border border-[var(--mantine-border)] rounded-lg overflow-hidden"
     >
       <div className="relative aspect-square rounded-lg">

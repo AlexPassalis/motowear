@@ -60,6 +60,7 @@ export async function getReviews() {
     })
     .from(review)
     .orderBy(review.index)
+    .limit(25)
 }
 
 export async function getShipping() {
@@ -183,12 +184,12 @@ export async function getCoupons() {
 export type typeCoupons = Awaited<ReturnType<typeof getCoupons>>
 
 export async function getEmails() {
-  return await postgres.select({ email: email.email }).from(email)
+  return (await postgres.select().from(email)).map((obj) => obj.email)
 }
 export type typeEmails = Awaited<ReturnType<typeof getEmails>>
 
 export async function getPhones() {
-  return await postgres.select({ phone: phone.phone }).from(phone)
+  return (await postgres.select().from(phone)).map((obj) => obj.phone)
 }
 export type typePhones = Awaited<ReturnType<typeof getPhones>>
 
