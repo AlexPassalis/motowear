@@ -710,7 +710,7 @@ function Main({
               </p>
             )}
 
-            {state.displayedBrands.length > 0 && (
+            {state.displayedBrands.length > 1 && (
               <div className="mb-2">
                 <h1 className="text-xl xl:text-2xl">Μάρκα</h1>
                 <div
@@ -832,128 +832,106 @@ function Main({
               </div>
             )}
 
-            <div className="mb-2">
-              <h1 className="text-xl xl:text-2xl">Μοντέλο</h1>
-              {state.displayedVariants.length > 1 ? (
-                <>
-                  <div
-                    onClick={() => setVariantDropdown((prev) => !prev)}
-                    className={`mb-2 flex items-center pb-0.5 border-2 border-white ${
-                      variantDropdown
-                        ? 'border-b-white'
-                        : 'border-b-[var(--mantine-border)]'
-                    } hover:border-2 hover:rounded-lg hover:border-red-500`}
-                  >
-                    <UnstyledButton
-                      style={{
-                        height: '48px',
-                        width: '100%',
-                        textAlign: 'left',
-                        marginLeft: '8px',
-                        cursor: 'pointer',
-                      }}
-                      className="proxima-nova"
-                      classNames={{
-                        root: `!text-lg !xl:text-xl ${
-                          state.selectedVariant ===
-                          'Δεν βρίσκω την μηχανή μου (custom σχέδιο)'
-                            ? '!italic'
-                            : ''
-                        }`,
-                      }}
-                    >
-                      {state.selectedVariant}
-                    </UnstyledButton>
-                    <motion.span
-                      className="ml-auto"
-                      initial={{ rotate: 0 }}
-                      animate={{ rotate: variantDropdown ? 180 : 0 }}
-                      transition={{ duration: 0.025, ease: 'easeInOut' }}
-                    >
-                      <IoIosArrowDown />
-                    </motion.span>
-                  </div>
-                  <AnimatePresence>
-                    {variantDropdown && (
-                      <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        transition={{
-                          duration: 0.025,
-                          ease: 'easeInOut',
-                        }}
-                        className="flex flex-col gap-1 max-h-96 overflow-y-auto p-1 border rounded-lg mt-0.5"
-                      >
-                        {state.displayedVariants
-                          .filter(
-                            (variant) => variant !== state.selectedVariant,
-                          )
-                          .map((variant, index, array) => (
-                            <Fragment key={index}>
-                              <div
-                                onClick={() => {
-                                  dispatch({
-                                    type: 'variant',
-                                    payload: { selectedVariant: variant },
-                                  })
-                                  window.history.pushState(
-                                    {},
-                                    '',
-                                    `${ROUTE_PRODUCT}/${paramsProduct_type}/${variant}`,
-                                  )
-                                }}
-                                className="proxima-nova flex justify-center p-1 border border-white rounded-lg hover:border-red-500"
-                              >
-                                <UnstyledButton
-                                  style={{
-                                    width: '100%',
-                                    height: '24px',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                  }}
-                                  className="proxima-nova"
-                                  classNames={{
-                                    root: `!text-lg !xl:text-xl ${
-                                      variant ===
-                                      'Δεν βρίσκω την μηχανή μου (custom σχέδιο)'
-                                        ? '!italic'
-                                        : ''
-                                    }`,
-                                  }}
-                                >
-                                  {variant}
-                                </UnstyledButton>
-                              </div>
-                              {index !== array.length - 1 && (
-                                <hr className="w-full border-t-2 border-[var(--mantine-border)]" />
-                              )}
-                            </Fragment>
-                          ))}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </>
-              ) : (
-                <div className="flex items-center pb-0.5 border-2 border-white border-b-[var(--mantine-border)]">
+            {state.displayedVariants.length > 1 && (
+              <div className="mb-2">
+                <h1 className="text-xl xl:text-2xl">Μοντέλο</h1>
+                <div
+                  onClick={() => setVariantDropdown((prev) => !prev)}
+                  className={`mb-2 flex items-center pb-0.5 border-2 border-white ${
+                    variantDropdown
+                      ? 'border-b-white'
+                      : 'border-b-[var(--mantine-border)]'
+                  } hover:border-2 hover:rounded-lg hover:border-red-500`}
+                >
                   <UnstyledButton
                     style={{
                       height: '48px',
                       width: '100%',
                       textAlign: 'left',
                       marginLeft: '8px',
-                      cursor: 'default',
+                      cursor: 'pointer',
                     }}
                     className="proxima-nova"
                     classNames={{
-                      root: '!text-lg !xl:text-xl',
+                      root: `!text-lg !xl:text-xl ${
+                        state.selectedVariant ===
+                        'Δεν βρίσκω την μηχανή μου (custom σχέδιο)'
+                          ? '!italic'
+                          : ''
+                      }`,
                     }}
                   >
                     {state.selectedVariant}
                   </UnstyledButton>
+                  <motion.span
+                    className="ml-auto"
+                    initial={{ rotate: 0 }}
+                    animate={{ rotate: variantDropdown ? 180 : 0 }}
+                    transition={{ duration: 0.025, ease: 'easeInOut' }}
+                  >
+                    <IoIosArrowDown />
+                  </motion.span>
                 </div>
-              )}
-            </div>
+                <AnimatePresence>
+                  {variantDropdown && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{
+                        duration: 0.025,
+                        ease: 'easeInOut',
+                      }}
+                      className="flex flex-col gap-1 max-h-96 overflow-y-auto p-1 border rounded-lg mt-0.5"
+                    >
+                      {state.displayedVariants
+                        .filter((variant) => variant !== state.selectedVariant)
+                        .map((variant, index, array) => (
+                          <Fragment key={index}>
+                            <div
+                              onClick={() => {
+                                dispatch({
+                                  type: 'variant',
+                                  payload: { selectedVariant: variant },
+                                })
+                                window.history.pushState(
+                                  {},
+                                  '',
+                                  `${ROUTE_PRODUCT}/${paramsProduct_type}/${variant}`,
+                                )
+                              }}
+                              className="proxima-nova flex justify-center p-1 border border-white rounded-lg hover:border-red-500"
+                            >
+                              <UnstyledButton
+                                style={{
+                                  width: '100%',
+                                  height: '24px',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                }}
+                                className="proxima-nova"
+                                classNames={{
+                                  root: `!text-lg !xl:text-xl ${
+                                    variant ===
+                                    'Δεν βρίσκω την μηχανή μου (custom σχέδιο)'
+                                      ? '!italic'
+                                      : ''
+                                  }`,
+                                }}
+                              >
+                                {variant}
+                              </UnstyledButton>
+                            </div>
+                            {index !== array.length - 1 && (
+                              <hr className="w-full border-t-2 border-[var(--mantine-border)]" />
+                            )}
+                          </Fragment>
+                        ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
 
             {state.selectedVariant ===
               'Δεν βρίσκω την μηχανή μου (custom σχέδιο)' && (
@@ -973,7 +951,7 @@ function Main({
               />
             )}
 
-            {state.displayedColors.length > 0 && (
+            {state.displayedColors.length > 1 && (
               <div className="mb-2">
                 <h1 className="mb-1 text-xl xl:text-2xl">Χρώμα</h1>
                 <div className="flex gap-2">
@@ -1028,159 +1006,93 @@ function Main({
               </div>
             )}
 
-            {state.displayedSizes.length > 0 &&
-            paramsProduct_type === 'Θήκη Κινητού' ? (
+            {state.displayedSizes.length > 1 && (
               <div>
-                <h1 className="mb-1 text-xl xl:text-2xl">Συσκευή</h1>
-                {state.displayedSizes.length > 1 ? (
-                  <>
-                    <div
-                      onClick={() => setSizeDropdown((prev) => !prev)}
-                      className={`mb-2 flex items-center pb-0.5 border-2 border-white ${
-                        sizeDropdown
-                          ? 'border-b-white'
-                          : 'border-b-[var(--mantine-border)]'
-                      } hover:border-2 hover:rounded-lg hover:border-red-500`}
-                    >
-                      <UnstyledButton
-                        style={{
-                          height: '48px',
-                          width: '100%',
-                          textAlign: 'left',
-                          marginLeft: '8px',
-                          cursor: 'pointer',
-                        }}
-                        className="proxima-nova"
-                        classNames={{
-                          root: '!text-lg !xl:text-xl',
-                        }}
-                      >
-                        {state.selectedSize}
-                      </UnstyledButton>
-                      <motion.span
-                        className="ml-auto"
-                        initial={{ rotate: 0 }}
-                        animate={{ rotate: sizeDropdown ? 180 : 0 }}
-                        transition={{ duration: 0.025, ease: 'easeInOut' }}
-                      >
-                        <IoIosArrowDown />
-                      </motion.span>
-                    </div>
-                    <AnimatePresence>
-                      {sizeDropdown && (
-                        <motion.div
-                          initial={{ opacity: 0, y: -10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -10 }}
-                          transition={{
-                            duration: 0.025,
-                            ease: 'easeInOut',
-                          }}
-                          className="flex flex-col gap-1 max-h-96 overflow-y-auto p-1 border rounded-lg mt-0.5"
-                        >
-                          {state.displayedSizes
-                            .filter((size) => size !== state.selectedSize)
-                            .map((size, index, array) => (
-                              <Fragment key={index}>
-                                <div
-                                  onClick={() => {
-                                    dispatch({
-                                      type: 'size',
-                                      payload: { selectedSize: size },
-                                    })
-                                  }}
-                                  className="proxima-nova flex justify-center p-1 border border-white rounded-lg hover:border-red-500"
-                                >
-                                  <UnstyledButton
-                                    style={{
-                                      width: '100%',
-                                      height: '24px',
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                    }}
-                                    className="proxima-nova"
-                                    classNames={{
-                                      root: '!text-lg !xl:text-xl',
-                                    }}
-                                  >
-                                    {size}
-                                  </UnstyledButton>
-                                </div>
-                                {index !== array.length - 1 && (
-                                  <hr className="w-full border-t-2 border-[var(--mantine-border)]" />
-                                )}
-                              </Fragment>
-                            ))}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </>
-                ) : (
-                  <div className="flex items-center pb-0.5 border-2 border-white border-b-[var(--mantine-border)]">
-                    <UnstyledButton
-                      style={{
-                        height: '48px',
-                        width: '100%',
-                        textAlign: 'left',
-                        marginLeft: '8px',
+                <h1 className="mb-1 text-xl xl:text-2xl">
+                  {paramsProduct_type === 'Θήκη Κινητού'
+                    ? 'Μοντέλο'
+                    : 'Συσκευή'}
+                </h1>
+                <div
+                  onClick={() => setSizeDropdown((prev) => !prev)}
+                  className={`mb-2 flex items-center pb-0.5 border-2 border-white ${
+                    sizeDropdown
+                      ? 'border-b-white'
+                      : 'border-b-[var(--mantine-border)]'
+                  } hover:border-2 hover:rounded-lg hover:border-red-500`}
+                >
+                  <UnstyledButton
+                    style={{
+                      height: '48px',
+                      width: '100%',
+                      textAlign: 'left',
+                      marginLeft: '8px',
+                      cursor: 'pointer',
+                    }}
+                    className="proxima-nova"
+                    classNames={{
+                      root: '!text-lg !xl:text-xl',
+                    }}
+                  >
+                    {state.selectedSize}
+                  </UnstyledButton>
+                  <motion.span
+                    className="ml-auto"
+                    initial={{ rotate: 0 }}
+                    animate={{ rotate: sizeDropdown ? 180 : 0 }}
+                    transition={{ duration: 0.025, ease: 'easeInOut' }}
+                  >
+                    <IoIosArrowDown />
+                  </motion.span>
+                </div>
+                <AnimatePresence>
+                  {sizeDropdown && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{
+                        duration: 0.025,
+                        ease: 'easeInOut',
                       }}
-                      className="proxima-nova"
-                      classNames={{
-                        root: '!text-lg !xl:text-xl',
-                      }}
+                      className="flex flex-col gap-1 max-h-96 overflow-y-auto p-1 border rounded-lg mt-0.5"
                     >
-                      {state.selectedSize}
-                    </UnstyledButton>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="mb-2">
-                <div className="flex gap-2 items-center">
-                  <h1 className="mb-1 text-xl xl:text-2xl">Μέγεθος</h1>
-                  {page.size_chart && (
-                    <div
-                      className="ml-auto flex gap-1 hover:cursor-pointer"
-                      onClick={() => openSizeChartModal()}
-                    >
-                      <h2 className="proxima-nova xl:text-lg hover:text-red-500">
-                        Μεγεθολόγιο
-                      </h2>
-                      <TfiRulerAlt />
-                    </div>
+                      {state.displayedSizes
+                        .filter((size) => size !== state.selectedSize)
+                        .map((size, index, array) => (
+                          <Fragment key={index}>
+                            <div
+                              onClick={() => {
+                                dispatch({
+                                  type: 'size',
+                                  payload: { selectedSize: size },
+                                })
+                              }}
+                              className="proxima-nova flex justify-center p-1 border border-white rounded-lg hover:border-red-500"
+                            >
+                              <UnstyledButton
+                                style={{
+                                  width: '100%',
+                                  height: '24px',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                }}
+                                className="proxima-nova"
+                                classNames={{
+                                  root: '!text-lg !xl:text-xl',
+                                }}
+                              >
+                                {size}
+                              </UnstyledButton>
+                            </div>
+                            {index !== array.length - 1 && (
+                              <hr className="w-full border-t-2 border-[var(--mantine-border)]" />
+                            )}
+                          </Fragment>
+                        ))}
+                    </motion.div>
                   )}
-                </div>
-                <div className="flex gap-2">
-                  {state.displayedSizes.map((size, index) => (
-                    <div
-                      key={index}
-                      onClick={() =>
-                        dispatch({
-                          type: 'size',
-                          payload: { selectedSize: size },
-                        })
-                      }
-                      className={`w-12 h-[42px] border-2 rounded-lg ${
-                        state.selectedSize === size
-                          ? 'border-black'
-                          : 'border-[var(--mantine-border)]'
-                      }`}
-                    >
-                      <UnstyledButton
-                        size="md"
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          display: 'flex',
-                          justifyContent: 'center',
-                          alignItems: 'center',
-                        }}
-                      >
-                        {size}
-                      </UnstyledButton>
-                    </div>
-                  ))}
-                </div>
+                </AnimatePresence>
               </div>
             )}
 
