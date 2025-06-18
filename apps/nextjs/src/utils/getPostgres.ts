@@ -49,18 +49,34 @@ export async function getPages() {
 }
 
 export async function getReviews() {
-  return await postgres
-    .select({
-      id: review.id,
-      product_type: review.product_type,
-      rating: review.rating,
-      full_name: review.full_name,
-      review: review.review,
-      date: review.date,
-    })
-    .from(review)
-    .orderBy(review.index)
-    .limit(25)
+  const [selected, notSelected] = await Promise.all([
+    postgres
+      .select({
+        product_type: review.product_type,
+        rating: review.rating,
+        full_name: review.full_name,
+        review: review.review,
+        date: review.date,
+      })
+      .from(review)
+      .where(eq(review.product_type, 'Μπλουζάκι'))
+      .orderBy(review.index)
+      .limit(5),
+    postgres
+      .select({
+        product_type: review.product_type,
+        rating: review.rating,
+        full_name: review.full_name,
+        review: review.review,
+        date: review.date,
+      })
+      .from(review)
+      .where(not(eq(review.product_type, 'Μπλουζάκι')))
+      .orderBy(review.index)
+      .limit(20),
+  ])
+
+  return [...selected, ...notSelected]
 }
 
 export async function getShipping() {
