@@ -52,6 +52,7 @@ export async function getReviews() {
   const [selected, notSelected] = await Promise.all([
     postgres
       .select({
+        id: review.id,
         product_type: review.product_type,
         rating: review.rating,
         full_name: review.full_name,
@@ -64,6 +65,7 @@ export async function getReviews() {
       .limit(5),
     postgres
       .select({
+        id: review.id,
         product_type: review.product_type,
         rating: review.rating,
         full_name: review.full_name,
