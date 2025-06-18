@@ -1006,13 +1006,10 @@ function Main({
               </div>
             )}
 
-            {state.displayedSizes.length > 1 && (
+            {state.displayedSizes.length > 1 &&
+            paramsProduct_type === 'Θήκη Κινητού' ? (
               <div>
-                <h1 className="mb-1 text-xl xl:text-2xl">
-                  {paramsProduct_type === 'Θήκη Κινητού'
-                    ? 'Μοντέλο'
-                    : 'Συσκευή'}
-                </h1>
+                <h1 className="mb-1 text-xl xl:text-2xl">Συσκευή</h1>
                 <div
                   onClick={() => setSizeDropdown((prev) => !prev)}
                   className={`mb-2 flex items-center pb-0.5 border-2 border-white ${
@@ -1093,6 +1090,54 @@ function Main({
                     </motion.div>
                   )}
                 </AnimatePresence>
+              </div>
+            ) : (
+              <div className="mb-2">
+                <div className="flex gap-2 items-center">
+                  <h1 className="mb-1 text-xl xl:text-2xl">Μέγεθος</h1>
+                  {page.size_chart && (
+                    <div
+                      className="ml-auto flex gap-1 hover:cursor-pointer"
+                      onClick={() => openSizeChartModal()}
+                    >
+                      <h2 className="proxima-nova xl:text-lg hover:text-red-500">
+                        Μεγεθολόγιο
+                      </h2>
+                      <TfiRulerAlt />
+                    </div>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  {state.displayedSizes.map((size, index) => (
+                    <div
+                      key={index}
+                      onClick={() =>
+                        dispatch({
+                          type: 'size',
+                          payload: { selectedSize: size },
+                        })
+                      }
+                      className={`w-12 h-[42px] border-2 rounded-lg ${
+                        state.selectedSize === size
+                          ? 'border-black'
+                          : 'border-[var(--mantine-border)]'
+                      }`}
+                    >
+                      <UnstyledButton
+                        size="md"
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          display: 'flex',
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                        }}
+                      >
+                        {size}
+                      </UnstyledButton>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
 
