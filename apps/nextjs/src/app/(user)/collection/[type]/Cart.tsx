@@ -29,7 +29,7 @@ function CartNotMemoised({
   return (
     <Link
       href={`${ROUTE_PRODUCT}/${paramsProduct_type}/${name}${
-        color ? `?color=${color}` : ''
+        color ? `?color=${encodeURIComponent(color)}` : ''
       }`}
       className="border border-[var(--mantine-border)] rounded-lg overflow-hidden"
     >

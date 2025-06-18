@@ -65,7 +65,9 @@ export function HomePageClient({
   }, [displayedVariants])
 
   const reviewsPageSize = 5
-  const [visibleReviews, setVisibleReviews] = useState(home_page_reviews)
+  const [visibleReviews, setVisibleReviews] = useState(
+    home_page_reviews.slice(0, reviewsPageSize),
+  )
 
   return (
     <HeaderProvider
