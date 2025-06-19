@@ -42,8 +42,8 @@ jobs:
       #   run: |
       #     docker build \
       #     -t $IMAGE_POSTGRES:latest \
-      #     -f ./apps/postgres/Dockerfile \
-      #     ./apps/postgres
+      #     -f ./services/postgres/Dockerfile \
+      #     ./services/postgres
 
       #     docker tag \
       #     $IMAGE_POSTGRES:latest \
@@ -53,8 +53,8 @@ jobs:
       #   run: |
       #     docker build \
       #     -t $IMAGE_TYPESENSE:latest \
-      #     -f ./apps/typesense/Dockerfile \
-      #     ./apps/typesense
+      #     -f ./services/typesense/Dockerfile \
+      #     ./services/typesense
 
       #     docker tag \
       #     $IMAGE_TYPESENSE:latest \
@@ -64,8 +64,8 @@ jobs:
         run: |
           docker build \
           -t $IMAGE_NEXTJS:latest \
-          -f ./apps/nextjs/Dockerfile \
-          ./apps/nextjs
+          -f ./services/nextjs/Dockerfile \
+          ./services/nextjs
 
           docker tag \
           $IMAGE_NEXTJS:latest \
@@ -75,8 +75,8 @@ jobs:
         run: |
           docker build \
           -t $IMAGE_NGINX:latest \
-          -f ./apps/nginx/Dockerfile \
-          ./apps/nginx
+          -f ./services/nginx/Dockerfile \
+          ./services/nginx
 
           docker tag \
           $IMAGE_NGINX:latest \
@@ -123,7 +123,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           host: ${{ secrets.VPS_IP }}
           passphrase: ${{ secrets.VPS_PASSPHRASE }}
-          source: './docker-stack.yaml,./apps/postgres/.env'
+          source: './docker-stack.yaml'
           target: '/home/${{ secrets.VPS_USER }}/motowear/'
 
       - name: Docker stack deploy

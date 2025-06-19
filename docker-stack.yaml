@@ -87,13 +87,13 @@ services:
     image: ghcr.io/alexpassalis/image-motowear-postgres:latest
     networks:
       - network-motowear
-    env_file:
-      - ./apps/postgres/.env
     secrets:
       - POSTGRES_DB
       - POSTGRES_USER
       - POSTGRES_PASSWORD
     environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
       POSTGRES_DB_FILE: /run/secrets/POSTGRES_DB
       POSTGRES_USER_FILE: /run/secrets/POSTGRES_USER
       POSTGRES_PASSWORD_FILE: /run/secrets/POSTGRES_PASSWORD
@@ -174,8 +174,8 @@ services:
       - MINIO_ROOT_USER
       - MINIO_ROOT_PASSWORD
     environment:
-      - MINIO_ROOT_USER_FILE=/run/secrets/MINIO_ROOT_USER
-      - MINIO_ROOT_PASSWORD_FILE=/run/secrets/MINIO_ROOT_PASSWORD
+      MINIO_ROOT_USER_FILE: /run/secrets/MINIO_ROOT_USER
+      MINIO_ROOT_PASSWORD_FILE: /run/secrets/MINIO_ROOT_PASSWORD
     command: ['server', '/data', '--console-address', ':9001']
     ports:
       - '9000:9000'

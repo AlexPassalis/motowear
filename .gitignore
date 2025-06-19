@@ -1,0 +1,17 @@
+### Everywhere ###
+node_modules/
+secrets/
+SQL/
+docker-stack-dev.yaml
+hashPassword.js
+SETUP.md
+Makefile
+SSH-motowear.md
+
+### services/nextjs ###
+.next/
+migrations/
+postgresErrorCodes.txt
+
+### services/nginx ###
+nginx-development.conf

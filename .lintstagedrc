@@ -1,0 +1,3 @@
+{
+  "services/nextjs/src/**/*": ["pnpm -F ./services/nextjs run lint --file"]
+}
