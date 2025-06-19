@@ -723,7 +723,7 @@ function Main({
               </p>
             )}
 
-            {state.displayedBrands.length > 0 && (
+            {state.displayedBrands.length > 1 && (
               <div className="mb-2">
                 <h1 className="text-xl xl:text-2xl">Μάρκα</h1>
                 <div
@@ -845,7 +845,7 @@ function Main({
               </div>
             )}
 
-            {state.displayedVariants.length > 0 && (
+            {state.displayedVariants.length > 1 && (
               <div id="variant" className="mb-2">
                 <div className="flex gap-2 items-center">
                   <h1 className="text-xl xl:text-2xl">Μοντέλο</h1>
