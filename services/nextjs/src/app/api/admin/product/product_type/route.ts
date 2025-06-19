@@ -18,7 +18,6 @@ import { formatMessage } from '@/utils/formatMessage'
 import { sendTelegramMessage } from '@/lib/telegram'
 import { redis } from '@/lib/redis/index'
 import {
-  getHomePageReviews,
   getHomePageVariants,
   getPages,
   getProductTypes,
@@ -133,13 +132,11 @@ export async function DELETE(req: NextRequest) {
   let variants
   let pages
   let home_page_variants
-  let home_page_reviews
   try {
     product_types = await getProductTypes()
     variants = await getVariants()
     pages = await getPages()
     home_page_variants = await getHomePageVariants()
-    home_page_reviews = await getHomePageReviews()
   } catch (e) {
     return NextResponse.json({ message: e }, { status: 500 })
   }
@@ -151,12 +148,6 @@ export async function DELETE(req: NextRequest) {
     await redis.set(
       'home_page_variants',
       JSON.stringify(home_page_variants),
-      'EX',
-      3600,
-    )
-    await redis.set(
-      'home_page_reviews',
-      JSON.stringify(home_page_reviews),
       'EX',
       3600,
     )
