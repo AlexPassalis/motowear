@@ -533,6 +533,7 @@ function Main({
                                   (variant) =>
                                     variant.color ===
                                       upsellSelectedVariant.color &&
+                                    variant.size &&
                                     variant.size === size,
                                 )!,
                               )

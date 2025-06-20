@@ -108,7 +108,7 @@ export type typeHomePageVariants = Awaited<
 >
 
 export async function getReviews() {
-  return await postgres.select().from(review)
+  return await postgres.select().from(review).orderBy(desc(review.date))
 }
 
 // ### ADMIN QUERIES FROM NOW ON ###
