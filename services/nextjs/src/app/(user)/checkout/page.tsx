@@ -7,7 +7,7 @@ import { redirect } from 'next/navigation'
 import { getOrderByOrderCode } from '@/utils/getPostgres'
 
 type CheckoutPageProps = {
-  searchParams: Promise<{ abandon_cart?: string; s?: string; eventId?: string }>
+  searchParams: Promise<{ abandon_cart?: string; s?: string }>
 }
 
 export default async function CheckoutPage({
@@ -29,20 +29,18 @@ export default async function CheckoutPage({
     resolved[0] as PromiseFulfilledResult<{
       abandon_cart?: string
       s?: string
-      eventId?: string
     }>
   ).value
 
   const isAbandonCart = resolvedSearchParams?.abandon_cart === 'true'
-  const eventId =
-    typeof resolvedSearchParams.eventId === 'string'
-      ? resolvedSearchParams.eventId
+
+  const orderCode =
+    typeof resolvedSearchParams.s === 'string'
+      ? resolvedSearchParams.s
       : undefined
-
   let orderDetails
-  if (eventId) {
+  if (orderCode) {
     const orderCode = resolvedSearchParams.s!
-
     try {
       const order = await getOrderByOrderCode(orderCode)
       orderDetails = {

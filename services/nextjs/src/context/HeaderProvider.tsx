@@ -94,17 +94,15 @@ export default function HeaderProvider({
 
   const [emailSubmitted, setEmailSubmitted] = useState<null | string>(null)
   useEffect(() => {
-    if (hasMounted) {
-      setEmailSubmitted(localStorage.getItem('email_submitted'))
-      if (emailSubmitted === null || emailSubmitted === '1') {
-        const timer = setTimeout(() => openEmailModal(), 15000) // 15 sec
-        return () => clearTimeout(timer)
-      }
-    }
+    setEmailSubmitted(localStorage.getItem('email_submitted'))
   }, [])
   useEffect(() => {
     if (emailSubmitted) {
       localStorage.setItem('email_submitted', emailSubmitted)
+    }
+    if (emailSubmitted === null || emailSubmitted === '1') {
+      const timer = setTimeout(() => openEmailModal(), 15000) // 15 sec
+      return () => clearTimeout(timer)
     }
   }, [emailSubmitted])
 
@@ -120,6 +118,16 @@ export default function HeaderProvider({
   >(undefined)
   const [loadingOverlay, { open, close }] = useDisclosure(false)
 
+  function handleEmailModalClose() {
+    closeEmailModal()
+    if (emailSubmitted === null) {
+      setEmailSubmitted('1')
+    }
+    if (emailSubmitted === '1') {
+      setEmailSubmitted('true')
+    }
+  }
+
   return (
     <HeaderContext.Provider
       value={{
@@ -130,15 +138,7 @@ export default function HeaderProvider({
     >
       <Modal
         opened={emailModal}
-        onClose={() => {
-          closeEmailModal()
-          if (emailSubmitted === null) {
-            setEmailSubmitted('1')
-          }
-          if (emailSubmitted === '1') {
-            setEmailSubmitted('true')
-          }
-        }}
+        onClose={() => handleEmailModalClose()}
         title={
           emailResponse === null ? (
             'Αυτό το email έχει ήδη χρησιμοποιηθεί!'
@@ -241,7 +241,7 @@ export default function HeaderProvider({
 
           <button
             type="button"
-            onClick={() => closeEmailModal()}
+            onClick={() => handleEmailModalClose()}
             className="mt-3 text-center text-black !text-xs underline hover:cursor-pointer"
           >
             Όχι, δεν μου αρέσουν τα δώρα.
