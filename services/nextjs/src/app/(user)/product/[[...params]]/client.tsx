@@ -199,7 +199,11 @@ function Main({
         const selectedBrand = action.payload.selectedBrand
         if (selectedBrand) {
           const displayedVariants = postgresVariants
-            .filter((product) => product.brand === selectedBrand)
+            .filter(
+              (product) =>
+                product.brand === selectedBrand ||
+                product.name === 'Δεν βρίσκω την μηχανή μου (custom σχέδιο)',
+            )
             .map((product) => product.name)
             .filter(
               (item, index, self) =>
