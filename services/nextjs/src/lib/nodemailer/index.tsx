@@ -93,7 +93,7 @@ export async function sendOrderConfirmationEmail(
   }
 
   const options = {
-    from: readSecret('NODEMAILER_EMAIL'),
+    from: envServer.NODEMAILER_EMAIL,
     to: email,
     subject: 'motowear.gr',
     html: emailHtml,
@@ -172,7 +172,7 @@ export async function sendOrderFulfilledEmail(
     throw errorReactEmail
   }
   const options = {
-    from: readSecret('NODEMAILER_EMAIL'),
+    from: envServer.NODEMAILER_EMAIL,
     to: email,
     subject: 'motowear.gr',
     html: emailHtml,
@@ -213,7 +213,7 @@ export async function sendOrderReviewEmail(
     return
   }
   const options = {
-    from: readSecret('NODEMAILER_EMAIL'),
+    from: envServer.NODEMAILER_EMAIL,
     to: email,
     subject: 'motowear.gr',
     html: emailHtml,
@@ -286,7 +286,7 @@ export async function sendAbandonCartEmail(cart: typeCart, email: string) {
     return
   }
   const options = {
-    from: readSecret('NODEMAILER_EMAIL'),
+    from: envServer.NODEMAILER_EMAIL,
     to: email,
     subject: 'motowear.gr',
     html: emailHtml,
