@@ -902,20 +902,36 @@ export function AdminOrderPageClient({
                         }
                         drawHeading(type)
 
-                        for (const { orderId, size, color, name } of items) {
+                        for (const {
+                          orderId,
+                          size,
+                          color,
+                          name,
+                          quantity,
+                        } of items) {
                           if (y < margin + lineHeight) {
                             page = pdfDoc.addPage()
                             y = page.getSize().height - margin
                             drawHeading(type)
                           }
-                          page.drawText(
-                            `${orderId.toString().padEnd(5)} ${size.padEnd(
-                              6,
-                            )} ` + `${color.padEnd(7)} ${name}`,
-                            { x: margin, y, size: fontSize, font: greekFont },
-                          )
+
+                          const line = [
+                            orderId.toString().padEnd(5),
+                            size.padEnd(6),
+                            color.padEnd(7),
+                            `x${quantity.toString().padEnd(3)}`,
+                            name,
+                          ].join(' ')
+
+                          page.drawText(line, {
+                            x: margin,
+                            y,
+                            size: fontSize,
+                            font: greekFont,
+                          })
                           y -= lineHeight
                         }
+
                         y -= groupGap
                       }
 
