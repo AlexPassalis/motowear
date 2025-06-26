@@ -746,7 +746,7 @@ export function AdminOrderPageClient({
                 >
                   {order.tracking_number ? (
                     <Link
-                      href={`${envServer.ELTA_COURIER_URL}/${order.tracking_number}`}
+                      href={`${envServer.ELTA_COURIER_URL}${order.tracking_number}`}
                     >
                       {order.tracking_number}
                     </Link>

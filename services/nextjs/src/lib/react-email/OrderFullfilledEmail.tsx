@@ -60,7 +60,7 @@ export function OrderFullfilledEmail({
               <Link
                 target="_blank"
                 rel="noopener noreferrer"
-                href={`${envServer.ELTA_COURIER_URL}/${tracking_number}`}
+                href={`${envServer.ELTA_COURIER_URL}${tracking_number}`}
                 style={{
                   backgroundColor: '#dc2626',
                   color: '#ffffff',
