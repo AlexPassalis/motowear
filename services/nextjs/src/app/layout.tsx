@@ -111,6 +111,9 @@ const customTheme = createTheme({
   primaryColor: 'red',
 })
 
+import { FacebookPixel } from '@/lib/facebook-pixel'
+import { envClient } from '@/env'
+
 import '@/lib/cron/index'
 
 export default function RootLayout({
@@ -127,6 +130,17 @@ export default function RootLayout({
         className={`${proximaNova.variable} ${proximaNovaExtraBold.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <MantineProvider theme={customTheme}>{children}</MantineProvider>
+        <FacebookPixel />
+        <noscript>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            height="1"
+            width="1"
+            style={{ display: 'none' }}
+            src={`https://www.facebook.com/tr?id=${envClient.FACEBOOK_PIXEL_ID}&ev=PageView&noscript=1`}
+            alt=""
+          />
+        </noscript>
       </body>
     </html>
   )
