@@ -40,7 +40,6 @@ type HomePageClientProps = {
 export function HomePageClient({
   home_page,
   home_page_variants,
-
   product_types,
   all_variants,
   shipping,

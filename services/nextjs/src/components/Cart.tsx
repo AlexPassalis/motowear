@@ -27,6 +27,7 @@ import { z } from 'zod'
 import { useRouter } from 'next/navigation'
 import { zodCoupon } from '@/lib/postgres/data/zod'
 import { MdDiscount } from 'react-icons/md'
+import { facebookPixelInitiateCheckout } from '@/lib/facebook-pixel'
 
 type CartProps = {
   isCartOpen: boolean
@@ -409,7 +410,13 @@ export function Cart({
             )}
 
             <Link href={ROUTE_CHECKOUT}>
-              <Button color="red" size="lg" mt="md" style={{ width: '100%' }}>
+              <Button
+                color="red"
+                size="lg"
+                mt="md"
+                style={{ width: '100%' }}
+                onClick={() => facebookPixelInitiateCheckout(total, cart)}
+              >
                 Ταμείο {total.toFixed(2)}€
               </Button>
             </Link>

@@ -16,6 +16,7 @@ import {
   useSearchBox,
 } from 'react-instantsearch'
 import type { Hit } from '../../node_modules/.pnpm/instantsearch.js@4.78.0_algoliasearch@5.21.0/node_modules/instantsearch.js/es/types/results'
+import { facebookPixelSearch } from '@/lib/facebook-pixel'
 
 type SearchProps = {
   isSearchOpen: boolean
@@ -77,7 +78,10 @@ function Instant() {
         className="text-xl text-center mb-2"
       />
       {uiState.product?.query && (
-        <div className="overflow-y-auto">
+        <div
+          onClick={() => facebookPixelSearch(uiState.product?.query ?? '')}
+          className="overflow-y-auto"
+        >
           <Hits hitComponent={SearchHit} />
         </div>
       )}

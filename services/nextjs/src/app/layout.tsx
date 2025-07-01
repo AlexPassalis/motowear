@@ -111,7 +111,7 @@ const customTheme = createTheme({
   primaryColor: 'red',
 })
 
-import { FacebookPixel } from '@/lib/facebook-pixel'
+import { FacebookPixel } from '@/lib/facebook-pixel/FacebookPixel'
 import { envClient } from '@/env'
 
 import '@/lib/cron/index'

@@ -40,7 +40,7 @@ import {
 } from '@/utils/localStorage'
 import axios from 'axios'
 import Link from 'next/link'
-import ReactPixel from 'react-facebook-pixel'
+import { facebookPixelPurchase } from '@/lib/facebook-pixel/index'
 
 type CheckoutPageProps = {
   isAbandonCart: boolean
@@ -392,18 +392,7 @@ export function CheckoutPageClient({
                       return
                     }
                     setOrderCompleteResponse(validatedResponse)
-                    ReactPixel.track('Purchase', {
-                      value: total.toFixed(2),
-                      currency: 'EUR',
-                      content_type: 'product',
-                      contents: cart.map((item) => ({
-                        id: `${item.product_type}:${item.name}`,
-                        item_price: item.price,
-                        quantity: item.quantity,
-                        ...(item.color ? { color: item.color } : {}),
-                        ...(item.size ? { size: item.size } : {}),
-                      })),
-                    })
+                    facebookPixelPurchase(total, cart)
                   }
                 } catch (err) {
                   localStorage.removeItem('cart')

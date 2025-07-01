@@ -7,7 +7,14 @@ import type {
 } from '@/lib/postgres/data/type'
 import type { typeShipping } from '@/utils/getPostgres'
 
-import { Dispatch, SetStateAction, useReducer, useRef, useState } from 'react'
+import {
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useReducer,
+  useRef,
+  useState,
+} from 'react'
 import { useCounter, useDisclosure } from '@mantine/hooks'
 import {
   Accordion,
@@ -34,6 +41,10 @@ import { Pagination } from '@mantine/core'
 import { IoIosStar } from 'react-icons/io'
 import { TfiRulerAlt } from 'react-icons/tfi'
 import { FaPlus, FaMinus, FaCheck } from 'react-icons/fa'
+import {
+  facebookPixelAddToCart,
+  facebookPixelViewContent,
+} from '@/lib/facebook-pixel'
 
 type ProductPageClientProps = {
   product_types: string[]
@@ -92,6 +103,21 @@ export function ProductPageClient({
   )
 }
 
+export type productPageState = {
+  displayedBrands: string[]
+  selectedBrand: string
+  displayedVariants: string[]
+  selectedVariant: string
+  displayedColors: string[]
+  selectedColor: string
+  displayedSizes: string[]
+  selectedSize: string
+  images: string[]
+  description: string
+  price: number
+  price_before: number
+}
+
 type MainProps = {
   paramsProduct_type: string
   paramsVariant: undefined | typeVariant
@@ -124,7 +150,7 @@ function Main({
   const { setCart, setIsCartOpen } = useHeaderContext()
 
   const fallbackVariant = postgresVariants[0]
-  const initialState = {
+  const initialState: productPageState = {
     displayedBrands: postgresVariants
       .map((product) => product.brand)
       .filter(Boolean)
@@ -187,13 +213,13 @@ function Main({
       ? paramsVariant.price_before
       : fallbackVariant.price_before,
   }
-  type State = typeof initialState
+
   type Action =
     | { type: 'brand'; payload: { selectedBrand: string } }
     | { type: 'variant'; payload: { selectedVariant: string } }
     | { type: 'color'; payload: { selectedColor: string } }
     | { type: 'size'; payload: { selectedSize: string } }
-  function reducer(state: State, action: Action) {
+  function reducer(state: productPageState, action: Action) {
     switch (action.type) {
       case 'brand': {
         const selectedBrand = action.payload.selectedBrand
@@ -380,6 +406,14 @@ function Main({
   const doNotFindYourMoto = postgresVariants.some(
     (variant) => variant.name === 'Δεν βρίσκω την μηχανή μου (custom σχέδιο)',
   )
+
+  useEffect(() => {
+    facebookPixelViewContent(
+      paramsProduct_type,
+      state.selectedVariant,
+      state.price,
+    )
+  }, [paramsProduct_type, state.selectedVariant])
 
   return (
     <>
@@ -637,6 +671,8 @@ function Main({
                         }
                       })
                       handlers.reset()
+
+                      facebookPixelAddToCart(paramsProduct_type, state, count)
                     }}
                     color="red"
                     size="md"
@@ -1280,6 +1316,8 @@ function Main({
                     }
                   })
                   handlers.reset()
+
+                  facebookPixelAddToCart(paramsProduct_type, state, count)
                 }}
                 color="red"
                 size="md"
