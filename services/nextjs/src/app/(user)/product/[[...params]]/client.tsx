@@ -109,21 +109,6 @@ export function ProductPageClient({
   )
 }
 
-export type productPageState = {
-  displayedBrands: string[]
-  selectedBrand: string
-  displayedVariants: string[]
-  selectedVariant: string
-  displayedColors: string[]
-  selectedColor: string
-  displayedSizes: string[]
-  selectedSize: string
-  images: string[]
-  description: string
-  price: number
-  price_before: number
-}
-
 type MainProps = {
   paramsProduct_type: string
   paramsVariant: undefined | typeVariant
@@ -156,7 +141,7 @@ function Main({
   const { setCart, setIsCartOpen } = useHeaderContext()
 
   const fallbackVariant = postgresVariants[0]
-  const initialState: productPageState = {
+  const initialState = {
     displayedBrands: postgresVariants
       .map((product) => product.brand)
       .filter(Boolean)
@@ -220,12 +205,13 @@ function Main({
       : fallbackVariant.price_before,
   }
 
+  type State = typeof initialState
   type Action =
     | { type: 'brand'; payload: { selectedBrand: string } }
     | { type: 'variant'; payload: { selectedVariant: string } }
     | { type: 'color'; payload: { selectedColor: string } }
     | { type: 'size'; payload: { selectedSize: string } }
-  function reducer(state: productPageState, action: Action) {
+  function reducer(state: State, action: Action) {
     switch (action.type) {
       case 'brand': {
         const selectedBrand = action.payload.selectedBrand
@@ -678,7 +664,14 @@ function Main({
                       })
                       handlers.reset()
 
-                      facebookPixelAddToCart(paramsProduct_type, state, count)
+                      facebookPixelAddToCart(
+                        upsellSelectedVariant.price,
+                        count,
+                        upsellSelectedVariant.product_type,
+                        upsellSelectedVariant.name,
+                        upsellSelectedVariant.color,
+                        upsellSelectedVariant.size,
+                      )
                     }}
                     color="red"
                     size="md"
@@ -1323,7 +1316,14 @@ function Main({
                   })
                   handlers.reset()
 
-                  facebookPixelAddToCart(paramsProduct_type, state, count)
+                  facebookPixelAddToCart(
+                    state.price,
+                    count,
+                    paramsProduct_type,
+                    state.selectedVariant,
+                    state.selectedColor,
+                    state.selectedSize,
+                  )
                 }}
                 color="red"
                 size="md"

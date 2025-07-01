@@ -1,4 +1,3 @@
-import type { productPageState } from '@/app/(user)/product/[[...params]]/client'
 import type { typeOrder } from '@/lib/postgres/data/type'
 
 import { envClient } from '@/env'
@@ -64,22 +63,25 @@ export async function facebookPixelViewContent(
 }
 
 export async function facebookPixelAddToCart(
-  paramsProduct_type: string,
-  state: productPageState,
+  price: number,
   count: number,
+  product_type: string,
+  variant: string,
+  color: string,
+  size: string,
 ) {
   const ReactPixel = await getReactPixel()
   ReactPixel.track('AddToCart', {
-    value: (state.price * count).toFixed(2),
+    value: (price * count).toFixed(2),
     currency: 'EUR',
     content_type: 'product',
     contents: [
       {
-        id: `${paramsProduct_type}:${state.selectedVariant}`,
-        item_price: state.price,
+        id: `${product_type}:${variant}`,
+        item_price: price,
         quantity: count,
-        ...(state.selectedColor ? { color: state.selectedColor } : {}),
-        ...(state.selectedSize ? { size: state.selectedSize } : {}),
+        ...(color ? { color: color } : {}),
+        ...(size ? { size: size } : {}),
       },
     ],
   })
