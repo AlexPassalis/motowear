@@ -74,9 +74,15 @@ export function ProductPageClient({
   return (
     <div
       onClick={() => {
-        if (brandDropdown) setBrandDropdown(false)
-        if (variantDropdown) setVariantDropdown(false)
-        if (sizeDropdown) setSizeDropdown(false)
+        if (brandDropdown) {
+          setBrandDropdown(false)
+        }
+        if (variantDropdown) {
+          setVariantDropdown(false)
+        }
+        if (sizeDropdown) {
+          setSizeDropdown(false)
+        }
       }}
     >
       <HeaderProvider
