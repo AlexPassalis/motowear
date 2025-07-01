@@ -4,7 +4,7 @@ import type { typeOrder } from '@/lib/postgres/data/type'
 import { envClient } from '@/env'
 
 const options = {
-  autoConfig: true,
+  autoConfig: false,
   debug: true, // NEEDS FIXING remove later if everything works as expected. It logs in production as well now.
 }
 
