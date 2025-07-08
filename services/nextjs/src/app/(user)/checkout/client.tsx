@@ -70,6 +70,7 @@ export function CheckoutPageClient({
   useEffect(() => {
     if (orderCompleteResponse) {
       window.scrollTo({ top: 0, left: 0 })
+      facebookPixelPurchase(total, cart)
       localStorage.removeItem('cart')
       localStorage.removeItem('coupon')
     }
@@ -392,7 +393,6 @@ export function CheckoutPageClient({
                       return
                     }
                     setOrderCompleteResponse(validatedResponse)
-                    facebookPixelPurchase(total, cart)
                   }
                 } catch (err) {
                   localStorage.removeItem('cart')

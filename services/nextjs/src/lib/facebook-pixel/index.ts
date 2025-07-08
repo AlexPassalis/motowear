@@ -4,7 +4,7 @@ import { envClient } from '@/env'
 
 const options = {
   autoConfig: false,
-  debug: true, // NEEDS FIXING remove later if everything works as expected. It logs in production as well now.
+  debug: false,
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
