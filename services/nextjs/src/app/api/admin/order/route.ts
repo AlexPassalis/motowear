@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     const message = formatMessage(
       '@/app/api/admin/order/route.ts POST',
       errorInvalidBody,
-      e
+      e,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)
@@ -40,23 +40,32 @@ export async function POST(req: NextRequest) {
           async () =>
             await postgres
               .insert(order)
-              .values({ ...row, order_date: new Date(row.order_date) })
+              .values({
+                ...row,
+                order_date: new Date(row.order_date),
+                date_fulfilled: row.date_fulfilled
+                  ? new Date(row.date_fulfilled)
+                  : null,
+              })
               .onConflictDoUpdate({
                 target: [order.id],
                 set: {
                   order_date: new Date(row.order_date),
+                  date_fulfilled: row.date_fulfilled
+                    ? new Date(row.date_fulfilled)
+                    : null,
                   checkout: row.checkout,
                   cart: row.cart,
                 },
-              })
-        )
-      )
+              }),
+        ),
+      ),
     )
   } catch (e) {
     const message = formatMessage(
       '@/app/api/admin/order/route.ts POST',
       errorPostgres,
-      e
+      e,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)
@@ -74,7 +83,7 @@ export async function DELETE(req: NextRequest) {
   if (!validatedBody) {
     const message = formatMessage(
       '@/app/api/admin/order/route.ts DELETE',
-      errorInvalidBody
+      errorInvalidBody,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)
@@ -87,7 +96,7 @@ export async function DELETE(req: NextRequest) {
     const message = formatMessage(
       '@/app/api/admin/order/route.ts DELETE',
       errorPostgres,
-      e
+      e,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)

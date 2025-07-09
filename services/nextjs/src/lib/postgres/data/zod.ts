@@ -1,4 +1,4 @@
-import { string, z } from 'zod'
+import { z } from 'zod'
 import { createSelectSchema } from 'drizzle-zod'
 import {
   coupon,
@@ -80,7 +80,8 @@ export const zodShipping = createSelectSchema(shipping).omit({
 
 export const zodOrder = createSelectSchema(order)
 export const zodOrderServer = zodOrder.extend({
-  order_date: string(),
+  order_date: z.string(),
+  date_fulfilled: z.string().nullable(),
 })
 
 export const zodHomePage = createSelectSchema(home_page).omit({
