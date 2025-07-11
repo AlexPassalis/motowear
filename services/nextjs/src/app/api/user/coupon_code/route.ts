@@ -7,6 +7,9 @@ import { eq } from 'drizzle-orm'
 import { formatMessage } from '@/utils/formatMessage'
 import { sendTelegramMessage } from '@/lib/telegram'
 
+import { OPTIONS } from '@/utils/OPTIONS'
+export { OPTIONS }
+
 export async function POST(req: NextRequest) {
   let validatedBody
   try {

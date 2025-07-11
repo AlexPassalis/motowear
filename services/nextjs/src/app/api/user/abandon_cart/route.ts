@@ -8,6 +8,9 @@ import { sendTelegramMessage } from '@/lib/telegram'
 import { zodCart } from '@/lib/postgres/data/zod'
 import { toZonedTime } from 'date-fns-tz'
 
+import { OPTIONS } from '@/utils/OPTIONS'
+export { OPTIONS }
+
 export async function POST(req: NextRequest) {
   let validatedBody
   try {
@@ -21,7 +24,7 @@ export async function POST(req: NextRequest) {
       const message = formatMessage(
         '@/app/api/user/abandon_cart/route.ts POST zod',
         errorInvalidBody,
-        result.error
+        result.error,
       )
       console.error(message)
       sendTelegramMessage('ERROR', message)
@@ -32,7 +35,7 @@ export async function POST(req: NextRequest) {
     const message = formatMessage(
       '@/app/api/user/abandon_cart/route.ts POST req.json()',
       errorInvalidBody,
-      err
+      err,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)
@@ -58,7 +61,7 @@ export async function POST(req: NextRequest) {
     const message = formatMessage(
       '@/app/api/user/abandon_cart/route.ts POST',
       errorPostgres,
-      err
+      err,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)

@@ -10,6 +10,9 @@ import { z } from 'zod'
 import { isSessionAPI } from '@/lib/better-auth/isSession'
 import { headers } from 'next/headers'
 
+import { OPTIONS } from '@/utils/OPTIONS'
+export { OPTIONS }
+
 export async function POST(req: NextRequest) {
   await isSessionAPI(await headers())
 
@@ -21,7 +24,7 @@ export async function POST(req: NextRequest) {
     const message = formatMessage(
       '@/app/api/admin/order/coupon/route.ts POST',
       errorInvalidBody,
-      err
+      err,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)
@@ -46,7 +49,7 @@ export async function POST(req: NextRequest) {
     const message = formatMessage(
       '@/app/api/admin/order/coupon/route.ts POST',
       errorPostgres,
-      e
+      e,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)

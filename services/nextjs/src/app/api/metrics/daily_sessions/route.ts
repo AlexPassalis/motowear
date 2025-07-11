@@ -7,6 +7,9 @@ import { sendTelegramMessage } from '@/lib/telegram'
 import { NextResponse } from 'next/server'
 import { format } from 'date-fns'
 
+import { OPTIONS } from '@/utils/OPTIONS'
+export { OPTIONS }
+
 export async function POST() {
   try {
     await postgres
@@ -20,7 +23,7 @@ export async function POST() {
     const message = formatMessage(
       '@/app/api/metrics/daily_sessions/route.ts POST',
       errorPostgres,
-      e
+      e,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)

@@ -11,6 +11,9 @@ import { zodOrderServer } from '@/lib/postgres/data/zod'
 import pLimit from 'p-limit'
 import { eq } from 'drizzle-orm'
 
+import { OPTIONS } from '@/utils/OPTIONS'
+export { OPTIONS }
+
 export async function POST(req: NextRequest) {
   await isSessionAPI(await headers())
 
