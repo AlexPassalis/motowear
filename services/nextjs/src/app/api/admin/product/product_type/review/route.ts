@@ -13,8 +13,7 @@ import { sendTelegramMessage } from '@/lib/telegram'
 import { getReviews } from '@/utils/getPostgres'
 import { v4 as id } from 'uuid'
 
-import { OPTIONS } from '@/utils/OPTIONS'
-export { OPTIONS }
+export { OPTIONS } from '@/utils/OPTIONS'
 
 export async function POST(req: NextRequest) {
   await isSessionAPI(await headers())

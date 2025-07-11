@@ -24,8 +24,7 @@ import {
   getVariants,
 } from '@/utils/getPostgres'
 
-import { OPTIONS } from '@/utils/OPTIONS'
-export { OPTIONS }
+export { OPTIONS } from '@/utils/OPTIONS'
 
 export async function POST(req: NextRequest) {
   await isSessionAPI(await headers())

@@ -7,8 +7,7 @@ import { sendTelegramMessage } from '@/lib/telegram'
 import { NextResponse } from 'next/server'
 import { format } from 'date-fns'
 
-import { OPTIONS } from '@/utils/OPTIONS'
-export { OPTIONS }
+export { OPTIONS } from '@/utils/OPTIONS'
 
 export async function POST() {
   try {

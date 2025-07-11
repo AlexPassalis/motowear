@@ -11,8 +11,7 @@ import { sendTelegramMessage } from '@/lib/telegram'
 import pLimit from 'p-limit'
 import { v4 } from 'uuid'
 
-import { OPTIONS } from '@/utils/OPTIONS'
-export { OPTIONS }
+export { OPTIONS } from '@/utils/OPTIONS'
 
 export async function POST(req: NextRequest) {
   const { error, data: validatedBody } = z

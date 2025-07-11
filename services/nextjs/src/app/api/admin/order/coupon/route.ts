@@ -10,8 +10,7 @@ import { z } from 'zod'
 import { isSessionAPI } from '@/lib/better-auth/isSession'
 import { headers } from 'next/headers'
 
-import { OPTIONS } from '@/utils/OPTIONS'
-export { OPTIONS }
+export { OPTIONS } from '@/utils/OPTIONS'
 
 export async function POST(req: NextRequest) {
   await isSessionAPI(await headers())

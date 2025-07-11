@@ -9,8 +9,7 @@ import { formatMessage } from '@/utils/formatMessage'
 import { sendTelegramMessage } from '@/lib/telegram'
 import { DatabaseError } from 'pg'
 
-import { OPTIONS } from '@/utils/OPTIONS'
-export { OPTIONS }
+export { OPTIONS } from '@/utils/OPTIONS'
 
 export async function POST(req: NextRequest) {
   const { error, data: validatedBody } = z

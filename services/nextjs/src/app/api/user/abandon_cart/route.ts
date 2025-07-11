@@ -8,8 +8,7 @@ import { sendTelegramMessage } from '@/lib/telegram'
 import { zodCart } from '@/lib/postgres/data/zod'
 import { toZonedTime } from 'date-fns-tz'
 
-import { OPTIONS } from '@/utils/OPTIONS'
-export { OPTIONS }
+export { OPTIONS } from '@/utils/OPTIONS'
 
 export async function POST(req: NextRequest) {
   let validatedBody
