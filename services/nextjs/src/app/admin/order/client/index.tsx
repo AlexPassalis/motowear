@@ -24,7 +24,7 @@ import {
 import { useDisclosure } from '@mantine/hooks'
 import axios from 'axios'
 import Link from 'next/link'
-import { Fragment, useState } from 'react'
+import { Fragment, useMemo, useState } from 'react'
 import { formatInTimeZone } from 'date-fns-tz'
 import { z } from 'zod'
 import { AdminProvider } from '@/app/admin/components/AdminProvider'
@@ -38,9 +38,18 @@ export function AdminOrderPageClient({
 }: AdminOrderPageClientProps) {
   const [onRequest, setOnRequest] = useState(false)
   const [orders, setOrders] = useState(postgres_orders)
-  const [visibleOrders, setVisibleOrders] = useState(
-    postgres_orders.slice(0, 20),
-  )
+
+  const paginationPageSize = 25
+  const [pageNumber, setPageNumber] = useState(1)
+  const [showUnfulfilledOnly, setShowUnfulfilledOnly] = useState(false)
+
+  const visibleOrders = useMemo(() => {
+    return orders.slice(
+      (pageNumber - 1) * paginationPageSize,
+      pageNumber * paginationPageSize,
+    )
+  }, [orders, pageNumber])
+
   const [modalState, setModalState] = useState<{
     type: '' | 'Checkout' | 'Cart' | 'Delete'
     id: number
@@ -364,7 +373,7 @@ export function AdminOrderPageClient({
             <div>
               {orders
                 .find((order) => order.id === modalState.id)!
-                .cart.map((item, index, array) => (
+                .cart.map((_, index, array) => (
                   <Fragment key={index}>
                     <div className="flex flex-col gap-2 border-2 border-[var(--mantine-border)] rounded-lg p-2">
                       <div className="flex justify-between items-center">
@@ -621,11 +630,15 @@ export function AdminOrderPageClient({
               </Table.Th>
               <Table.Th style={{ textAlign: 'center' }}>Order Code</Table.Th>
               <Table.Th
-                onClick={() =>
-                  setVisibleOrders((prev) =>
-                    prev.filter((order) => !order.date_fulfilled),
-                  )
-                }
+                onClick={() => {
+                  if (!showUnfulfilledOnly) {
+                    setOrders(
+                      postgres_orders.filter((order) => !order.date_fulfilled),
+                    )
+                    setPageNumber(1)
+                    setShowUnfulfilledOnly(true)
+                  }
+                }}
                 style={{ textAlign: 'center' }}
                 className="text-blue-700 hover:cursor-pointer"
               >
@@ -835,7 +848,9 @@ export function AdminOrderPageClient({
                     type="button"
                     disabled={
                       JSON.stringify(orders) ===
-                        JSON.stringify(postgres_orders) || onRequest
+                        JSON.stringify(postgres_orders) ||
+                      onRequest ||
+                      showUnfulfilledOnly
                     }
                     color="green"
                     mr="md"
@@ -951,12 +966,9 @@ export function AdminOrderPageClient({
                   </Button>
                 </div>
                 <Pagination
-                  total={Math.ceil(visibleOrders.length / 20)}
-                  onChange={(pageNumber) =>
-                    setVisibleOrders(
-                      orders.slice((pageNumber - 1) * 20, pageNumber * 20),
-                    )
-                  }
+                  total={Math.ceil(orders.length / paginationPageSize)}
+                  value={pageNumber}
+                  onChange={(pageNumber) => setPageNumber(pageNumber)}
                   style={{
                     display: 'flex',
                     justifyContent: 'center',
