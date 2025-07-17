@@ -26,20 +26,23 @@ function getReactPixel() {
 }
 
 export async function facebookPixelPageView() {
-  const ReactPixel = await getReactPixel()
-  ReactPixel.pageView()
+  if (envClient.HOST !== 'localhost') {
+    const ReactPixel = await getReactPixel()
+    ReactPixel.pageView()
+  }
 }
 
 export async function facebookPixelSearch(query: string) {
-  if (!query) {
-    return
+  if (envClient.HOST !== 'localhost') {
+    if (!query) {
+      return
+    }
+    const ReactPixel = await getReactPixel()
+    ReactPixel.track('Search', {
+      content_type: 'product',
+      search_string: query,
+    })
   }
-
-  const ReactPixel = await getReactPixel()
-  ReactPixel.track('Search', {
-    content_type: 'product',
-    search_string: query,
-  })
 }
 
 export async function facebookPixelViewContent(
@@ -47,19 +50,21 @@ export async function facebookPixelViewContent(
   variant: string,
   price: number,
 ) {
-  const ReactPixel = await getReactPixel()
-  ReactPixel.track('ViewContent', {
-    value: price.toFixed(2),
-    currency: 'EUR',
-    content_type: 'product',
-    contents: [
-      {
-        id: `${product_type}:${variant}`,
-        item_price: price,
-        quantity: 1,
-      },
-    ],
-  })
+  if (envClient.HOST !== 'localhost') {
+    const ReactPixel = await getReactPixel()
+    ReactPixel.track('ViewContent', {
+      value: price.toFixed(2),
+      currency: 'EUR',
+      content_type: 'product',
+      contents: [
+        {
+          id: `${product_type}:${variant}`,
+          item_price: price,
+          quantity: 1,
+        },
+      ],
+    })
+  }
 }
 
 export async function facebookPixelAddToCart(
@@ -70,57 +75,63 @@ export async function facebookPixelAddToCart(
   color: string,
   size: string,
 ) {
-  const ReactPixel = await getReactPixel()
-  ReactPixel.track('AddToCart', {
-    value: (price * count).toFixed(2),
-    currency: 'EUR',
-    content_type: 'product',
-    contents: [
-      {
-        id: `${product_type}:${variant}`,
-        item_price: price,
-        quantity: count,
-        ...(color ? { color: color } : {}),
-        ...(size ? { size: size } : {}),
-      },
-    ],
-  })
+  if (envClient.HOST !== 'localhost') {
+    const ReactPixel = await getReactPixel()
+    ReactPixel.track('AddToCart', {
+      value: (price * count).toFixed(2),
+      currency: 'EUR',
+      content_type: 'product',
+      contents: [
+        {
+          id: `${product_type}:${variant}`,
+          item_price: price,
+          quantity: count,
+          ...(color ? { color: color } : {}),
+          ...(size ? { size: size } : {}),
+        },
+      ],
+    })
+  }
 }
 
 export async function facebookPixelInitiateCheckout(
   total: typeOrder['total'],
   cart: typeOrder['cart'],
 ) {
-  const ReactPixel = await getReactPixel()
-  ReactPixel.track('InitiateCheckout', {
-    value: total.toFixed(2),
-    currency: 'EUR',
-    content_type: 'product',
-    contents: cart.map((item) => ({
-      id: `${item.product_type}:${item.name}`,
-      item_price: item.price,
-      quantity: item.quantity,
-      ...(item.color ? { color: item.color } : {}),
-      ...(item.size ? { size: item.size } : {}),
-    })),
-  })
+  if (envClient.HOST !== 'localhost') {
+    const ReactPixel = await getReactPixel()
+    ReactPixel.track('InitiateCheckout', {
+      value: total.toFixed(2),
+      currency: 'EUR',
+      content_type: 'product',
+      contents: cart.map((item) => ({
+        id: `${item.product_type}:${item.name}`,
+        item_price: item.price,
+        quantity: item.quantity,
+        ...(item.color ? { color: item.color } : {}),
+        ...(item.size ? { size: item.size } : {}),
+      })),
+    })
+  }
 }
 
 export async function facebookPixelPurchase(
   total: typeOrder['total'],
   cart: typeOrder['cart'],
 ) {
-  const ReactPixel = await getReactPixel()
-  ReactPixel.track('Purchase', {
-    value: total.toFixed(2),
-    currency: 'EUR',
-    content_type: 'product',
-    contents: cart.map((item) => ({
-      id: `${item.product_type}:${item.name}`,
-      item_price: item.price,
-      quantity: item.quantity,
-      ...(item.color ? { color: item.color } : {}),
-      ...(item.size ? { size: item.size } : {}),
-    })),
-  })
+  if (envClient.HOST !== 'localhost') {
+    const ReactPixel = await getReactPixel()
+    ReactPixel.track('Purchase', {
+      value: total.toFixed(2),
+      currency: 'EUR',
+      content_type: 'product',
+      contents: cart.map((item) => ({
+        id: `${item.product_type}:${item.name}`,
+        item_price: item.price,
+        quantity: item.quantity,
+        ...(item.color ? { color: item.color } : {}),
+        ...(item.size ? { size: item.size } : {}),
+      })),
+    })
+  }
 }
