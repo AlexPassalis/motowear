@@ -45,6 +45,7 @@ import {
   facebookPixelAddToCart,
   facebookPixelViewContent,
 } from '@/lib/facebook-pixel'
+import { specialVariant } from '@/data/magic'
 
 type ProductPageClientProps = {
   product_types: string[]
@@ -220,7 +221,7 @@ function Main({
             .filter(
               (product) =>
                 product.brand === selectedBrand ||
-                product.name === 'Δεν βρίσκω την μηχανή μου (custom σχέδιο)',
+                product.name === specialVariant,
             )
             .map((product) => product.name)
             .filter(
@@ -396,7 +397,7 @@ function Main({
   const [customError, setCustomError] = useState<string | null>(null)
 
   const doNotFindYourMoto = postgresVariants.some(
-    (variant) => variant.name === 'Δεν βρίσκω την μηχανή μου (custom σχέδιο)',
+    (variant) => variant.name === specialVariant,
   )
 
   useEffect(() => {
@@ -895,14 +896,13 @@ function Main({
                         dispatch({
                           type: 'variant',
                           payload: {
-                            selectedVariant:
-                              'Δεν βρίσκω την μηχανή μου (custom σχέδιο)',
+                            selectedVariant: specialVariant,
                           },
                         })
                         window.history.pushState(
                           {},
                           '',
-                          `${ROUTE_PRODUCT}/${paramsProduct_type}/Δεν βρίσκω την μηχανή μου (custom σχέδιο)`,
+                          `${ROUTE_PRODUCT}/${paramsProduct_type}/${specialVariant}`,
                         )
                       }}
                       className="ml-auto proxima-nova !text-xs lg:!text-lg text-red-500 hover:underline hover:cursor-pointer"
@@ -930,8 +930,7 @@ function Main({
                     className="proxima-nova"
                     classNames={{
                       root: `!text-lg !xl:text-xl ${
-                        state.selectedVariant ===
-                        'Δεν βρίσκω την μηχανή μου (custom σχέδιο)'
+                        state.selectedVariant === specialVariant
                           ? '!italic'
                           : ''
                       }`,
@@ -988,10 +987,7 @@ function Main({
                                 className="proxima-nova"
                                 classNames={{
                                   root: `!text-lg !xl:text-xl ${
-                                    variant ===
-                                    'Δεν βρίσκω την μηχανή μου (custom σχέδιο)'
-                                      ? '!italic'
-                                      : ''
+                                    variant === specialVariant ? '!italic' : ''
                                   }`,
                                 }}
                               >
@@ -1009,8 +1005,7 @@ function Main({
               </div>
             )}
 
-            {state.selectedVariant ===
-              'Δεν βρίσκω την μηχανή μου (custom σχέδιο)' && (
+            {state.selectedVariant === specialVariant && (
               <Textarea
                 ref={customRef}
                 autosize
@@ -1253,10 +1248,7 @@ function Main({
               </div>
               <Button
                 onClick={() => {
-                  if (
-                    state.selectedVariant ===
-                    'Δεν βρίσκω την μηχανή μου (custom σχέδιο)'
-                  ) {
+                  if (state.selectedVariant === specialVariant) {
                     const textAreaValueLength =
                       customRef.current!.value.trim().length
                     if (textAreaValueLength < 3) {
@@ -1301,8 +1293,7 @@ function Main({
                           image: state.images[0],
                           product_type: paramsProduct_type,
                           name:
-                            state.selectedVariant ===
-                            'Δεν βρίσκω την μηχανή μου (custom σχέδιο)'
+                            state.selectedVariant === specialVariant
                               ? customRef.current!.value.trim()
                               : state.selectedVariant,
                           color: state.selectedColor,
@@ -1518,13 +1509,13 @@ function Main({
               dispatch({
                 type: 'variant',
                 payload: {
-                  selectedVariant: 'Δεν βρίσκω την μηχανή μου (custom σχέδιο)',
+                  selectedVariant: specialVariant,
                 },
               })
               window.history.pushState(
                 {},
                 '',
-                `${ROUTE_PRODUCT}/${paramsProduct_type}/Δεν βρίσκω την μηχανή μου (custom σχέδιο)`,
+                `${ROUTE_PRODUCT}/${paramsProduct_type}/${specialVariant}`,
               )
             }}
             className="block mb-8 text-red-500 text-center text-lg hover:underline"

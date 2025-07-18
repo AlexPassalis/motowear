@@ -12,6 +12,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { IoIosArrowDown } from 'react-icons/io'
 import { Cart } from '@/app/(user)/collection/[type]/Cart'
 import { useDisclosure } from '@mantine/hooks'
+import { specialBrand, specialVariant } from '@/data/magic'
 
 type CollectionPageClientProps = {
   paramsProduct_type: string
@@ -51,10 +52,25 @@ export function CollectionPageClient({
   const [pageNumber, setPageNumber] = useState(1)
 
   const filtered = useMemo(() => {
-    return selectedBrand
+    const unique = selectedBrand
       ? uniqueVariants.filter((v) => v.brand === selectedBrand)
       : uniqueVariants
-  }, [selectedBrand, uniqueVariants])
+
+    const specialVariantIndex = uniqueVariants.findIndex(
+      (v) => v.name === specialVariant,
+    )
+
+    if (specialVariantIndex === -1 || selectedBrand === specialBrand) {
+      return unique
+    } else {
+      const special = uniqueVariants[specialVariantIndex]
+      return [
+        special,
+        ...unique.filter((v) => v.name !== specialVariant),
+        special,
+      ]
+    }
+  }, [selectedBrand])
 
   const paginated = useMemo(() => {
     return filtered.slice((pageNumber - 1) * 20, pageNumber * 20)

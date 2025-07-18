@@ -9,6 +9,7 @@ import {
 import { notFound, redirect } from 'next/navigation'
 import { ROUTE_ERROR } from '@/data/routes'
 import { Metadata } from 'next'
+import { specialVariant } from '@/data/magic'
 
 type ProductPageProps = {
   params: Promise<{ params?: [type: string, version?: string] }>
@@ -139,10 +140,10 @@ export default async function ProductPage({
       if (bName === 'Επίλεξε μηχανή') {
         return 1
       }
-      if (aName === 'Δεν βρίσκω την μηχανή μου (custom σχέδιο)') {
+      if (aName === specialVariant) {
         return 1
       }
-      if (bName === 'Δεν βρίσκω την μηχανή μου (custom σχέδιο)') {
+      if (bName === specialVariant) {
         return -1
       }
       return aName.localeCompare(bName)
