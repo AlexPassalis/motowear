@@ -51,23 +51,22 @@ export function CollectionPageClient({
 
   const [pageNumber, setPageNumber] = useState(1)
 
-  const filtered = useMemo(() => {
+  const filtered = useMemo<typeof uniqueVariants>(() => {
     const unique = selectedBrand
       ? uniqueVariants.filter((v) => v.brand === selectedBrand)
       : uniqueVariants
 
-    const specialVariantIndex = uniqueVariants.findIndex(
+    const specialVariants = uniqueVariants.filter(
       (v) => v.name === specialVariant,
     )
 
-    if (specialVariantIndex === -1 || selectedBrand === specialBrand) {
+    if (specialVariants.length === 0 || selectedBrand === specialBrand) {
       return unique
     } else {
-      const special = uniqueVariants[specialVariantIndex]
       return [
-        special,
+        ...specialVariants,
         ...unique.filter((v) => v.name !== specialVariant),
-        special,
+        ...specialVariants,
       ]
     }
   }, [selectedBrand])
