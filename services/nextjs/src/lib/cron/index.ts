@@ -137,7 +137,7 @@ function establishCron() {
   if (!global.global_cron_send_order_review_email) {
     try {
       global.global_cron_send_order_review_email = new CronJob(
-        '0 0 * * * *', // Run at minute 0, second 0 of every hour
+        '0 0 12 * * *', // second 0, minute 0, hour 12 daily
         cronSendOrderReviewEmail,
         null, // onComplete
         true, // start immediately
@@ -160,10 +160,10 @@ function establishCron() {
   if (!global.global_cron_send_abandon_cart_email) {
     try {
       global.global_cron_send_abandon_cart_email = new CronJob(
-        '0 30 * * * *', // Run at minute 30, second 0 of every hour
+        '0 0 13 * * *', // second 0, minute 0, hour 13 daily
         cronSendAbandonCartEmail,
-        null, // onComplete
-        true, // start immediately
+        null,
+        true,
         'Europe/Athens',
       )
 
@@ -183,10 +183,10 @@ function establishCron() {
   if (!global.global_cron_delete_not_paid_orders) {
     try {
       global.global_cron_delete_not_paid_orders = new CronJob(
-        '0 45 0,12 * * *', // at second 0, minute 45 of hour 0 and 12 every day
+        '0 0 0 * * *', // second 0, minute 0, hour 0 daily
         cronDeleteNotPaidOrders,
-        null, // onComplete
-        true, // start immediately
+        null,
+        true,
         'Europe/Athens',
       )
 
