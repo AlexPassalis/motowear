@@ -12,46 +12,23 @@ const chatIds = {
 
 export async function sendTelegramMessage(
   chat: keyof typeof chatIds,
-  message: string
+  message: string,
 ) {
-  if (!global.global_telegram) {
-    global.global_telegram = new Telegraf(readSecret('TELEGRAM_BOT_TOKEN'))
-    process.once('SIGINT', () => {
-      global.global_telegram!.stop('SIGINT')
-      console.info('Telegram connection closed.')
-    })
-    process.once('SIGTERM', () => {
-      global.global_telegram!.stop('SIGTERM')
-      console.info('Telegram connection closed.')
-    })
-    await telegramPing()
-  }
+  const bot = new Telegraf(readSecret('TELEGRAM_BOT_TOKEN'))
 
   const chatId = chatIds[chat]
   try {
-    await global.global_telegram.telegram.sendMessage(chatId, message, {
+    await bot.telegram.sendMessage(chatId, message, {
       parse_mode: 'HTML',
     })
   } catch (e) {
     const message = formatMessage(
       '@/lib/telegram/index.ts sendTelegramMessage()',
       errorTelegram,
-      e
+      e,
     )
     console.error(message)
   }
-}
 
-async function telegramPing() {
-  try {
-    await global.global_telegram!.telegram.getMe()
-    console.info('Telegram connected successfully.')
-  } catch (e) {
-    const message = formatMessage(
-      '@/lib/telegram/index.ts telegramPing()',
-      'Telegram connection failed.',
-      e
-    )
-    console.error(message)
-  }
+  bot.stop()
 }
