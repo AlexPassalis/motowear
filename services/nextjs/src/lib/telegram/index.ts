@@ -29,6 +29,4 @@ export async function sendTelegramMessage(
     )
     console.error(message)
   }
-
-  bot.stop()
 }
