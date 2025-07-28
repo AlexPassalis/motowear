@@ -185,6 +185,7 @@ export function CheckoutPageClient({
           cart,
         })
         .catch(() => {})
+      console.info('abandon_cart send') // NEEDS FIXING Remove after fixing the bug
     }
     window.addEventListener('beforeunload', sendAbandon)
     if (prevPath.current !== pathname) {

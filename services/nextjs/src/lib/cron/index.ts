@@ -5,7 +5,7 @@ import { formatMessage } from '@/utils/formatMessage'
 import { sendTelegramMessage } from '@/lib/telegram/index'
 import { postgres } from '@/lib/postgres/index'
 import { abandoned_cart, order } from '@/lib/postgres/schema'
-import { and, eq, gt, lt } from 'drizzle-orm'
+import { and, eq, lt } from 'drizzle-orm'
 import { errorCron, errorPostgres } from '@/data/error'
 import {
   sendOrderReviewEmail,
@@ -26,7 +26,7 @@ async function cronSendOrderReviewEmail() {
       .where(
         and(
           eq(order.review_email, false),
-          eq(order.date_fulfilled, fourteenDaysAgoStart),
+          lt(order.date_fulfilled, fourteenDaysAgoStart),
         ),
       )
   } catch (err) {
@@ -36,7 +36,7 @@ async function cronSendOrderReviewEmail() {
       err,
     )
     console.error(message)
-    sendTelegramMessage('ERROR', message)
+    await sendTelegramMessage('ERROR', message)
     return
   }
 
@@ -61,7 +61,7 @@ async function cronSendOrderReviewEmail() {
           err,
         )
         console.error(message)
-        sendTelegramMessage('ERROR', message)
+        await sendTelegramMessage('ERROR', message)
       }
     }),
   )
@@ -78,7 +78,7 @@ async function cronSendAbandonCartEmail() {
     array = await postgres
       .select()
       .from(abandoned_cart)
-      .where(gt(abandoned_cart.date, oneDayAgo))
+      .where(lt(abandoned_cart.date, oneDayAgo))
   } catch (err) {
     const message = formatMessage(
       '@/lib/cron/index cronSendAbandonCartEmail',
@@ -86,7 +86,7 @@ async function cronSendAbandonCartEmail() {
       err,
     )
     console.error(message)
-    sendTelegramMessage('ERROR', message)
+    await sendTelegramMessage('ERROR', message)
     return
   }
 
@@ -106,7 +106,7 @@ async function cronSendAbandonCartEmail() {
           err,
         )
         console.error(message)
-        sendTelegramMessage('ERROR', message)
+        await sendTelegramMessage('ERROR', message)
       }
     }),
   )
@@ -114,26 +114,7 @@ async function cronSendAbandonCartEmail() {
   await Promise.all(sendEmailPromises)
 }
 
-async function cronDeleteNotPaidOrders() {
-  const today = toZonedTime(new Date(), 'Europe/Athens')
-  const oneDayAgo = subDays(today, 1)
-
-  try {
-    await postgres
-      .delete(order)
-      .where(and(eq(order.paid, false), lt(order.order_date, oneDayAgo)))
-  } catch (err) {
-    const message = formatMessage(
-      '@/lib/cron/index cronDeleteNotPaidOrders',
-      errorCron,
-      err,
-    )
-    console.error(message)
-    sendTelegramMessage('ERROR', message)
-  }
-}
-
-function establishCron() {
+async function establishCron() {
   if (!global.global_cron_send_order_review_email) {
     try {
       global.global_cron_send_order_review_email = new CronJob(
@@ -152,7 +133,7 @@ function establishCron() {
         e,
       )
       console.error(message)
-      sendTelegramMessage('ERROR', message)
+      await sendTelegramMessage('ERROR', message)
       process.exit(1)
     }
   }
@@ -175,35 +156,12 @@ function establishCron() {
         e,
       )
       console.error(message)
-      sendTelegramMessage('ERROR', message)
-      process.exit(1)
-    }
-  }
-
-  if (!global.global_cron_delete_not_paid_orders) {
-    try {
-      global.global_cron_delete_not_paid_orders = new CronJob(
-        '0 0 0 * * *', // second 0, minute 0, hour 0 daily
-        cronDeleteNotPaidOrders,
-        null,
-        true,
-        'Europe/Athens',
-      )
-
-      console.info('Cron deleteNotPaidOrders connected successfully.')
-    } catch (e) {
-      const message = formatMessage(
-        '@/lib/cron/index.ts establishCron()',
-        'Cron deleteNotPaidOrders connection failed.',
-        e,
-      )
-      console.error(message)
-      sendTelegramMessage('ERROR', message)
+      await sendTelegramMessage('ERROR', message)
       process.exit(1)
     }
   }
 }
 
 if (process.env.BUILD_TIME !== 'true') {
-  establishCron()
+  await establishCron()
 }
