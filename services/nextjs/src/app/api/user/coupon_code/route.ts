@@ -31,7 +31,12 @@ export async function POST(req: NextRequest) {
     couponArray = await postgres
       .select()
       .from(coupon)
-      .where(eq(coupon.coupon_code, validatedBody.coupon_code))
+      .where(
+        eq(
+          coupon.coupon_code,
+          validatedBody.coupon_code.trim().toLocaleLowerCase(),
+        ),
+      )
       .limit(1)
   } catch (e) {
     const message = formatMessage(
