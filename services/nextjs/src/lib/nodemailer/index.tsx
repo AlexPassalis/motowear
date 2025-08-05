@@ -93,9 +93,9 @@ export async function sendOrderConfirmationEmail(
   }
 
   const options = {
-    from: envServer.NODEMAILER_EMAIL,
+    from: `Moto Wear <${envServer.NODEMAILER_EMAIL}>`,
     to: email,
-    subject: 'motowear.gr',
+    subject: `Η παραγγελία #${order_id} επιβεβαιώθηκε`,
     html: emailHtml,
     attachments: attachments,
   }
@@ -172,9 +172,9 @@ export async function sendOrderFulfilledEmail(
     throw errorReactEmail
   }
   const options = {
-    from: envServer.NODEMAILER_EMAIL,
+    from: `Moto Wear <${envServer.NODEMAILER_EMAIL}>`,
     to: email,
-    subject: 'motowear.gr',
+    subject: `Η παραγγελία #${order_id} είναι καθ' οδόν`,
     html: emailHtml,
     attachments: attachments,
   }
@@ -213,9 +213,9 @@ export async function sendOrderReviewEmail(
     return
   }
   const options = {
-    from: envServer.NODEMAILER_EMAIL,
+    from: `Moto Wear <${envServer.NODEMAILER_EMAIL}>`,
     to: email,
-    subject: 'motowear.gr',
+    subject: 'Πες μας την γνώμη σου',
     html: emailHtml,
     attachments: [
       {
@@ -286,9 +286,9 @@ export async function sendAbandonCartEmail(cart: typeCart, email: string) {
     return
   }
   const options = {
-    from: envServer.NODEMAILER_EMAIL,
+    from: `Moto Wear <${envServer.NODEMAILER_EMAIL}>`,
     to: email,
-    subject: 'motowear.gr',
+    subject: 'Άσε το γκάζι... όχι την παραγγελία σου',
     html: emailHtml,
     attachments: attachments,
   }
