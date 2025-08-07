@@ -28,6 +28,7 @@ import { Fragment, useMemo, useState } from 'react'
 import { formatInTimeZone } from 'date-fns-tz'
 import { z } from 'zod'
 import { AdminProvider } from '@/app/admin/components/AdminProvider'
+import { specialVariant } from '@/data/magic'
 
 type AdminOrderPageClientProps = {
   postgres_orders: typeOrder[]
@@ -671,14 +672,24 @@ export function AdminOrderPageClient({
                   <Checkbox
                     checked={selection.some((ord) => ord.id === order.id)}
                     onChange={(e) =>
-                      e.target.checked
-                        ? setSelection((prev) => [
-                            ...prev,
-                            orders.find((ord) => ord.id === order.id)!,
-                          ])
-                        : setSelection((prev) =>
-                            prev.filter((ord) => ord.id !== order.id),
+                      setSelection((oldOrders) => {
+                        const isChecked = e.target.checked
+                        const selectedOrder = orders.find(
+                          (ord) => ord.id === order.id,
+                        )
+                        if (!selectedOrder) {
+                          return oldOrders
+                        }
+                        if (isChecked) {
+                          return [...oldOrders, selectedOrder].sort(
+                            (ordA, ordB) => ordA.id - ordB.id,
                           )
+                        } else {
+                          return oldOrders.filter(
+                            (ord) => ord.id !== selectedOrder.id,
+                          )
+                        }
+                      })
                     }
                   />
                 </Table.Td>
@@ -808,6 +819,28 @@ export function AdminOrderPageClient({
             <Table.Tr>
               <Table.Td colSpan={15} style={{ textAlign: 'center' }}>
                 <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    marginBottom: '0.5rem',
+                  }}
+                >
+                  <TextInput
+                    // onChange={(e) => {}}
+                    placeholder="1295 or Χατζηκαντής"
+                    mr="md"
+                  />
+                  <Button
+                    onClick={async () => {}}
+                    type="button"
+                    disabled={onRequest}
+                    color="blue"
+                  >
+                    {onRequest ? 'Wait ...' : 'Search'}
+                  </Button>
+                </div>
+
+                <div
                   style={{ display: 'inline-block', marginBottom: '0.5rem' }}
                 >
                   <Button
@@ -881,7 +914,7 @@ export function AdminOrderPageClient({
                       })
 
                       const fontSize = 12
-                      const lineHeight = fontSize * 1.3
+                      const lineHeight = fontSize * 1.6
                       const margin = 40
                       const headingSize = 26
                       const groupGap = lineHeight * 2
@@ -943,6 +976,10 @@ export function AdminOrderPageClient({
                             y,
                             size: fontSize,
                             font: greekFont,
+                            color:
+                              name === specialVariant
+                                ? rgb(0.85, 0, 0)
+                                : rgb(0, 0, 0),
                           })
                           y -= lineHeight
                         }
