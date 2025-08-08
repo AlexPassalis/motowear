@@ -114,6 +114,8 @@ const customTheme = createTheme({
 import { FacebookPixel } from '@/lib/facebook-pixel/FacebookPixel'
 import { envClient } from '@/env'
 
+// import { GoogleTagManager } from '@next/third-parties/google'
+
 import '@/lib/cron/index'
 
 export default function RootLayout({
@@ -141,6 +143,7 @@ export default function RootLayout({
             alt=""
           />
         </noscript>
+        {/* <GoogleTagManager gtmId={envClient.GOOGLE_TAG_MANAGER_ID} /> */}
       </body>
     </html>
   )
