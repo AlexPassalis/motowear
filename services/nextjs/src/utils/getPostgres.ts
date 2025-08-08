@@ -218,3 +218,16 @@ export async function getVariantsProductType(product_type: string) {
     .where(eq(variant.product_type, product_type))
     .orderBy(variant.index)
 }
+
+export type typeUniqueVariantNames = Awaited<
+  ReturnType<typeof getUniqueVariantNames>
+>
+
+export async function getUniqueVariantNames() {
+  return (
+    await postgres
+      .selectDistinctOn([variant.name])
+      .from(variant)
+      .orderBy(variant.name)
+  ).map((row) => row.name)
+}

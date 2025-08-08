@@ -8,6 +8,7 @@ import { email } from '@/lib/postgres/schema'
 import { formatMessage } from '@/utils/formatMessage'
 import { sendTelegramMessage } from '@/lib/telegram'
 import { DatabaseError } from 'pg'
+import { couponCodeMPRELOK } from '@/data/magic'
 
 export { OPTIONS } from '@/utils/OPTIONS'
 
@@ -46,7 +47,7 @@ export async function POST(req: NextRequest) {
   return NextResponse.json(
     {
       coupon: {
-        coupon_code: 'FREEMPRELOK',
+        coupon_code: couponCodeMPRELOK,
         percentage: null,
         fixed: null,
       } as typeCoupon,

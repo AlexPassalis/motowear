@@ -28,6 +28,7 @@ import { useRouter } from 'next/navigation'
 import { zodCoupon } from '@/lib/postgres/data/zod'
 import { MdDiscount } from 'react-icons/md'
 import { facebookPixelInitiateCheckout } from '@/lib/facebook-pixel'
+import { couponCodeMPRELOK } from '@/data/magic'
 
 type CartProps = {
   isCartOpen: boolean
@@ -95,7 +96,7 @@ export function Cart({
         {cart.length < 1 ? (
           <>
             <h1 className="text-center text-xl">Το καλάθι σου είναι άδειο.</h1>
-            {coupon && coupon.coupon_code === 'FREEMPRELOK' && (
+            {coupon && coupon.coupon_code === couponCodeMPRELOK && (
               <div className="mt-auto">
                 <div className="flex w-full h-36 mb-2 rounded-lg border border-[var(--mantine-border)]">
                   <Link
@@ -303,7 +304,7 @@ export function Cart({
               overlayProps={{ radius: 'xs', blur: 1 }}
             />
 
-            {coupon && coupon.coupon_code === 'FREEMPRELOK' && (
+            {coupon && coupon.coupon_code === couponCodeMPRELOK && (
               <div className="flex w-full h-36 mb-2 rounded-lg border border-[var(--mantine-border)]">
                 <Link
                   href={`${ROUTE_PRODUCT}/Μπρελόκ/Πιστόνι`}

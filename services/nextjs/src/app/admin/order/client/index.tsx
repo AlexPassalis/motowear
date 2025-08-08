@@ -6,6 +6,8 @@ import { PDFDocument, rgb } from 'pdf-lib'
 import fontkit from '@pdf-lib/fontkit'
 
 import type { typeOrder } from '@/lib/postgres/data/type'
+import type { typeUniqueVariantNames } from '@/utils/getPostgres'
+
 import { zodOrder } from '@/lib/postgres/data/zod'
 
 import { errorUnexpected } from '@/data/error'
@@ -14,42 +16,97 @@ import { order } from '@/lib/postgres/schema'
 import {
   Button,
   Checkbox,
+  HoverCard,
   Modal,
   NumberInput,
   Pagination,
   Select,
   Table,
+  Text,
   TextInput,
 } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import axios from 'axios'
 import Link from 'next/link'
-import { Fragment, useMemo, useState } from 'react'
+import { Fragment, useMemo, useRef, useState } from 'react'
 import { formatInTimeZone } from 'date-fns-tz'
 import { z } from 'zod'
 import { AdminProvider } from '@/app/admin/components/AdminProvider'
-import { specialVariant } from '@/data/magic'
+import { regexOrderFirstLastName, regexOrderId } from '@/data/regex'
 
 type AdminOrderPageClientProps = {
   postgres_orders: typeOrder[]
+  postgres_unique_variant_names: typeUniqueVariantNames
 }
 
 export function AdminOrderPageClient({
   postgres_orders,
+  postgres_unique_variant_names,
 }: AdminOrderPageClientProps) {
   const [onRequest, setOnRequest] = useState(false)
   const [orders, setOrders] = useState(postgres_orders)
+
+  const searchValue = useRef<null | HTMLInputElement>(null)
+  const [searchQuery, setSearchQuery] = useState('')
 
   const paginationPageSize = 25
   const [pageNumber, setPageNumber] = useState(1)
   const [showUnfulfilledOnly, setShowUnfulfilledOnly] = useState(false)
 
   const visibleOrders = useMemo(() => {
-    return orders.slice(
+    let selectedOrders = orders
+
+    if (searchQuery) {
+      if (regexOrderId.test(searchQuery)) {
+        const matchingOrder = orders.find(
+          (order) => order.id === Number(searchQuery),
+        )
+        if (!matchingOrder) {
+          alert('No order with that id exists.')
+          selectedOrders = []
+        } else {
+          selectedOrders = [matchingOrder]
+        }
+      } else if (regexOrderFirstLastName.test(searchQuery)) {
+        function normalise(query: string) {
+          return query
+            .trim()
+            .toLocaleLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/['’΄]/g, '')
+        }
+        const query = normalise(searchQuery)
+
+        const matchingOrders = orders.filter(({ checkout }) => {
+          const fullName = normalise(
+            `${checkout.first_name} ${checkout.last_name}`,
+          )
+          const fullNameReverse = normalise(
+            `${checkout.last_name} ${checkout.first_name}`,
+          )
+
+          return fullName.includes(query) || fullNameReverse.includes(query)
+        })
+
+        if (matchingOrders.length < 1) {
+          alert('No orders with that name exist.')
+          selectedOrders = []
+        } else {
+          selectedOrders = matchingOrders
+        }
+      } else {
+        alert(
+          'Invalid input. Either 4 numbers (e.g. 1234) or only words (e.g. Φίλιππος Χατζηκαντής)',
+        )
+      }
+    }
+
+    return selectedOrders.slice(
       (pageNumber - 1) * paginationPageSize,
       pageNumber * paginationPageSize,
     )
-  }, [orders, pageNumber])
+  }, [orders, searchQuery, pageNumber])
 
   const [modalState, setModalState] = useState<{
     type: '' | 'Checkout' | 'Cart' | 'Delete'
@@ -724,13 +781,24 @@ export function AdminOrderPageClient({
                   </Button>
                 </Table.Td>
                 <Table.Td style={{ textAlign: 'center' }}>
-                  {order?.coupon
-                    ? order.coupon.coupon_code === 'FREEMPRELOK'
-                      ? 'MPRELOK'
-                      : order.coupon.percentage
-                      ? `${order.coupon.percentage * 100}%`
-                      : `-${order.coupon.fixed}`
-                    : '-'}
+                  <HoverCard openDelay={500} closeDelay={100} shadow="md">
+                    <HoverCard.Target>
+                      <Text size="sm">
+                        {order.coupon ? order.coupon.coupon_code : '-'}
+                      </Text>
+                    </HoverCard.Target>
+                    <HoverCard.Dropdown>
+                      <Text size="sm">
+                        {order.coupon
+                          ? order.coupon.percentage
+                            ? `- ${order.coupon.percentage * 100}%`
+                            : order.coupon.fixed
+                            ? `- ${order.coupon.fixed}€`
+                            : order.coupon.coupon_code
+                          : '-'}
+                      </Text>
+                    </HoverCard.Dropdown>
+                  </HoverCard>
                 </Table.Td>
                 <Table.Td style={{ textAlign: 'center' }}>
                   {order.total}€
@@ -826,12 +894,23 @@ export function AdminOrderPageClient({
                   }}
                 >
                   <TextInput
-                    // onChange={(e) => {}}
+                    ref={searchValue}
                     placeholder="1295 or Χατζηκαντής"
                     mr="md"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        if (searchValue.current) {
+                          setSearchQuery(searchValue.current.value)
+                        }
+                      }
+                    }}
                   />
                   <Button
-                    onClick={async () => {}}
+                    onClick={() => {
+                      if (searchValue.current) {
+                        setSearchQuery(searchValue.current.value)
+                      }
+                    }}
                     type="button"
                     disabled={onRequest}
                     color="blue"
@@ -976,10 +1055,9 @@ export function AdminOrderPageClient({
                             y,
                             size: fontSize,
                             font: greekFont,
-                            color:
-                              name === specialVariant
-                                ? rgb(0.85, 0, 0)
-                                : rgb(0, 0, 0),
+                            color: !postgres_unique_variant_names.includes(name)
+                              ? rgb(0.85, 0, 0)
+                              : rgb(0, 0, 0),
                           })
                           y -= lineHeight
                         }
@@ -997,7 +1075,7 @@ export function AdminOrderPageClient({
                     }}
                     type="button"
                     disabled={selection.length < 1 || onRequest}
-                    color="blue"
+                    color="orange"
                   >
                     {onRequest ? 'Wait ...' : 'Packing slips'}
                   </Button>

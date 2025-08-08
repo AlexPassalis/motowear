@@ -38,6 +38,7 @@ import { errorAxios, errorInvalidResponse } from '@/data/error'
 import Link from 'next/link'
 import { Image } from '@mantine/core'
 import NextImage from 'next/image'
+import { couponCodeMPRELOK } from '@/data/magic'
 
 type HeaderContext = {
   setCart: Dispatch<SetStateAction<typeCartLocalStorage>>
@@ -179,7 +180,7 @@ export default function HeaderProvider({
                 const { error: err, data: validatedResponse } = z
                   .object({
                     coupon: zodCoupon.extend({
-                      coupon_code: z.literal('FREEMPRELOK'),
+                      coupon_code: z.literal(couponCodeMPRELOK),
                     }),
                   })
                   .safeParse(res.data)
