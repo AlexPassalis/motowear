@@ -41,6 +41,7 @@ import {
 import axios from 'axios'
 import Link from 'next/link'
 import { facebookPixelPurchase } from '@/lib/facebook-pixel/index'
+import { couponCodeMPRELOK } from '@/data/magic'
 
 type CheckoutPageProps = {
   isAbandonCart: boolean
@@ -322,7 +323,7 @@ export function CheckoutPageClient({
                         </div>
                       </div>
                     ))}
-                    {coupon && coupon.coupon_code === 'FREEMPRELOK' && (
+                    {coupon && coupon.coupon_code === couponCodeMPRELOK && (
                       <div className="flex w-full h-36 mb-2 rounded-lg border border-[var(--mantine-border)]">
                         <div className="relative w-1/3 h-full rounded-lg overflow-hidden">
                           <Image
@@ -606,7 +607,7 @@ export function CheckoutPageClient({
                             </div>
                           </div>
                         ))}
-                        {coupon && coupon.coupon_code === 'FREEMPRELOK' && (
+                        {coupon && coupon.coupon_code === couponCodeMPRELOK && (
                           <div className="flex w-full h-36 mb-2 rounded-lg border border-[var(--mantine-border)]">
                             <div className="relative w-1/3 h-full rounded-lg overflow-hidden">
                               <Image
