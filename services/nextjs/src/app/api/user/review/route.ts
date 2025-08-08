@@ -10,6 +10,7 @@ import { formatMessage, formatReviewMessage } from '@/utils/formatMessage'
 import { sendTelegramMessage } from '@/lib/telegram'
 import pLimit from 'p-limit'
 import { v4 } from 'uuid'
+import { couponCodeReview } from '@/data/magic'
 
 export { OPTIONS } from '@/utils/OPTIONS'
 
@@ -86,7 +87,11 @@ export async function POST(req: NextRequest) {
   }
 
   return NextResponse.json(
-    { coupon_code: 'REVIEW15', percentage: 0.15, fixed: null } as typeCoupon,
+    {
+      coupon_code: couponCodeReview,
+      percentage: 0.15,
+      fixed: null,
+    } as typeCoupon,
     { status: 200 },
   )
 }
