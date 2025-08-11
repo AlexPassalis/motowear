@@ -142,6 +142,7 @@ export const shipping = otherSchema.table('shipping', {
 })
 export const email = otherSchema.table('email', {
   email: text('email').primaryKey(),
+  customer: boolean('customer').notNull().default(false),
 })
 export const phone = otherSchema.table('phone', {
   phone: text('phone').primaryKey(),
