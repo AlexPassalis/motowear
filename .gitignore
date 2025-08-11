@@ -10,6 +10,7 @@ SSH-motowear.md
 
 ### services/nextjs ###
 .next/
+.pnpm-store/
 migrations/
 postgresErrorCodes.txt
 
