@@ -173,31 +173,66 @@ export function CheckoutPageClient({
 
   const pathname = usePathname()
   const prevPath = useRef(pathname)
+  const sentRef = useRef(false)
   useEffect(() => {
     if (isAbandonCart || orderCompleteResponse || !form.values.receive_email) {
       return
     }
 
-    const parsed = z.string().email().safeParse(form.values.email)
-    if (!parsed.success) return
+    const { data: validatedEmail } = z
+      .string()
+      .email()
+      .safeParse(form.values.email)
+    if (!validatedEmail) {
+      return
+    }
+
+    const url = `${envClient.API_USER_URL}/abandon_cart`
 
     const sendAbandon = () => {
-      void axios
-        .post(`${envClient.API_USER_URL}/abandon_cart`, {
-          email: parsed.data,
-          cart,
-        })
+      if (sentRef.current) {
+        return
+      }
+
+      const payload = JSON.stringify({ email: validatedEmail, cart })
+
+      if (typeof navigator.sendBeacon === 'function') {
+        const blob = new Blob([payload], { type: 'text/plain;charset=UTF-8' })
+        if (navigator.sendBeacon(url, blob)) {
+          sentRef.current = true
+          return
+        }
+      }
+
+      fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: payload,
+        keepalive: true,
+      })
         .catch(() => {})
-      console.info('abandon_cart send') // NEEDS FIXING Remove after fixing the bug
+        .finally(() => {
+          sentRef.current = true
+        })
     }
-    window.addEventListener('beforeunload', sendAbandon)
+
+    const onVisibility = () => {
+      if (document.visibilityState === 'hidden') {
+        sendAbandon()
+      }
+    }
+
+    window.addEventListener('pagehide', sendAbandon)
+    document.addEventListener('visibilitychange', onVisibility)
+
     if (prevPath.current !== pathname) {
       sendAbandon()
     }
     prevPath.current = pathname
 
     return () => {
-      window.removeEventListener('beforeunload', sendAbandon)
+      window.removeEventListener('pagehide', sendAbandon)
+      document.removeEventListener('visibilitychange', onVisibility)
     }
   }, [
     isAbandonCart,
