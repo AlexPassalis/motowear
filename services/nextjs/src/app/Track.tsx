@@ -1,15 +1,17 @@
 'use client'
 
+import { usePathname } from 'next/navigation'
 import { useEffect } from 'react'
 import { facebookPixelPageView } from '@/lib/facebook-pixel/index'
-import { usePathname } from 'next/navigation'
+import { googleAnalyticsPageView } from '@/lib/google-analytics'
 
-export function FacebookPixel() {
+export function Track() {
   const pathname = usePathname()
 
   useEffect(() => {
-    if (!pathname?.startsWith('/admin')) {
+    if (pathname && !pathname.startsWith('/admin')) {
       facebookPixelPageView()
+      googleAnalyticsPageView(pathname)
     }
   }, [])
 

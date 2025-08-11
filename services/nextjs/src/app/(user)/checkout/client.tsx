@@ -41,6 +41,7 @@ import {
 import axios from 'axios'
 import Link from 'next/link'
 import { facebookPixelPurchase } from '@/lib/facebook-pixel/index'
+import { googleAnalyticsPurchase } from '@/lib/google-analytics'
 import { couponCodeMPRELOK } from '@/data/magic'
 
 type CheckoutPageProps = {
@@ -71,9 +72,10 @@ export function CheckoutPageClient({
   useEffect(() => {
     if (orderCompleteResponse) {
       window.scrollTo({ top: 0, left: 0 })
-      facebookPixelPurchase(total, cart)
       localStorage.removeItem('cart')
       localStorage.removeItem('coupon')
+      facebookPixelPurchase(total, cart)
+      googleAnalyticsPurchase(orderCompleteResponse.id, total, cart)
     }
   }, [orderCompleteResponse])
 

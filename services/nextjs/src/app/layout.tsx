@@ -111,12 +111,12 @@ const customTheme = createTheme({
   primaryColor: 'red',
 })
 
-import { FacebookPixel } from '@/lib/facebook-pixel/FacebookPixel'
+import '@/lib/cron/index'
+
 import { envClient } from '@/env'
 
-// import { GoogleTagManager } from '@next/third-parties/google'
-
-import '@/lib/cron/index'
+import { GoogleAnalytics } from '@next/third-parties/google'
+import { Track } from '@/app/Track'
 
 export default function RootLayout({
   children,
@@ -131,8 +131,6 @@ export default function RootLayout({
       <body
         className={`${proximaNova.variable} ${proximaNovaExtraBold.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <MantineProvider theme={customTheme}>{children}</MantineProvider>
-        <FacebookPixel />
         <noscript>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -143,7 +141,9 @@ export default function RootLayout({
             alt=""
           />
         </noscript>
-        {/* <GoogleTagManager gtmId={envClient.GOOGLE_TAG_MANAGER_ID} /> */}
+        <GoogleAnalytics gaId={envClient.GOOGLE_ANALYTICS_ID} />
+        <Track />
+        <MantineProvider theme={customTheme}>{children}</MantineProvider>
       </body>
     </html>
   )
