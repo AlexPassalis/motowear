@@ -5,8 +5,11 @@ import { AdminHomePageClient } from '@/app/admin/home/client/index'
 import { redirect } from 'next/navigation'
 import { ROUTE_ERROR } from '@/data/routes'
 import { getFileNames } from '@/lib/minio'
+import { isSessionRSC } from '@/lib/better-auth/isSession'
 
 export default async function AdminHomePage() {
+  await isSessionRSC()
+
   const resolved = await Promise.allSettled([
     getHomePage(),
     getFileNames('home_page'),

@@ -161,7 +161,7 @@ export async function getCoupons() {
 export type typeCoupons = Awaited<ReturnType<typeof getCoupons>>
 
 export async function getEmails() {
-  return (await postgres.select().from(email)).map((obj) => obj.email)
+  return await postgres.select().from(email)
 }
 export type typeEmails = Awaited<ReturnType<typeof getEmails>>
 
@@ -230,4 +230,17 @@ export async function getUniqueVariantNames() {
       .from(variant)
       .orderBy(variant.name)
   ).map((row) => row.name)
+}
+
+export type typeCustomerDetails = Awaited<ReturnType<typeof getCustomerDetails>>
+
+export async function getCustomerDetails(email: string) {
+  return (
+    await postgres
+      .select({ checkout: order.checkout })
+      .from(order)
+      .where(sql`lower(${order.checkout} ->> 'email') = lower(${email})`)
+      .orderBy(desc(order.order_date))
+      .limit(1)
+  )[0]
 }
