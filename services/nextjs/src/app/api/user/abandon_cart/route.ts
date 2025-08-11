@@ -11,46 +11,34 @@ import { toZonedTime } from 'date-fns-tz'
 export { OPTIONS } from '@/utils/OPTIONS'
 
 export async function POST(req: NextRequest) {
-  let validatedBody
-  try {
-    const result = z
-      .object({
-        email: z.string().email(),
-        cart: zodCart,
-      })
-      .safeParse(await req.json())
-    if (result.error) {
-      const message = formatMessage(
-        '@/app/api/user/abandon_cart/route.ts POST zod',
-        errorInvalidBody,
-        result.error,
-      )
-      console.error(message)
-      sendTelegramMessage('ERROR', message)
-      return NextResponse.json({ message: errorInvalidBody }, { status: 400 })
-    }
-    validatedBody = result.data
-  } catch (err) {
+  const { error, data: validatedBody } = z
+    .object({
+      email: z.string().email(),
+      cart: zodCart,
+    })
+    .safeParse(await req.json())
+  if (error) {
     const message = formatMessage(
-      '@/app/api/user/abandon_cart/route.ts POST req.json()',
+      '@/app/api/user/abandon_cart/route.ts POST zod',
       errorInvalidBody,
-      err,
+      error,
     )
     console.error(message)
     sendTelegramMessage('ERROR', message)
     return NextResponse.json({ message: errorInvalidBody }, { status: 400 })
   }
 
+  const { email, cart } = validatedBody
   try {
     await postgres
       .insert(abandoned_cart)
       .values({
-        email: validatedBody.email,
-        cart: validatedBody.cart,
+        email: email,
+        cart: cart,
         date: toZonedTime(new Date(), 'Europe/Athens'),
       })
       .onConflictDoUpdate({
-        target: [abandoned_cart.email],
+        target: abandoned_cart.email,
         set: {
           cart: validatedBody.cart,
           date: toZonedTime(new Date(), 'Europe/Athens'),

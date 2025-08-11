@@ -83,7 +83,7 @@
     "tailwindcss": "^4",
     "typescript": "^5"
   },
-  "packageManager": "pnpm@10.12.1",
+  "packageManager": "pnpm@10.14.0",
   "pnpm": {
     "onlyBuiltDependencies": [
       "argon2",
