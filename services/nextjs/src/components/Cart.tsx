@@ -29,6 +29,7 @@ import { zodCoupon } from '@/lib/postgres/data/zod'
 import { MdDiscount } from 'react-icons/md'
 import { facebookPixelInitiateCheckout } from '@/lib/facebook-pixel'
 import { couponCodeMPRELOK } from '@/data/magic'
+import { googleAnalyticsBeginCheckout } from '@/lib/google-analytics'
 
 type CartProps = {
   isCartOpen: boolean
@@ -416,7 +417,10 @@ export function Cart({
                 size="lg"
                 mt="md"
                 style={{ width: '100%' }}
-                onClick={() => facebookPixelInitiateCheckout(total, cart)}
+                onClick={() => {
+                  facebookPixelInitiateCheckout(total, cart)
+                  googleAnalyticsBeginCheckout(total, cart)
+                }}
               >
                 Ταμείο {total.toFixed(2)}€
               </Button>

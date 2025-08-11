@@ -46,6 +46,10 @@ import {
   facebookPixelViewContent,
 } from '@/lib/facebook-pixel'
 import { specialVariant } from '@/data/magic'
+import {
+  googleAnalyticsAddToCart,
+  googleAnalyticsViewItem,
+} from '@/lib/google-analytics'
 
 type ProductPageClientProps = {
   product_types: string[]
@@ -406,6 +410,11 @@ function Main({
       state.selectedVariant,
       state.price,
     )
+    googleAnalyticsViewItem(
+      paramsProduct_type,
+      state.selectedVariant,
+      state.price,
+    )
   }, [paramsProduct_type, state.selectedVariant])
 
   return (
@@ -666,6 +675,15 @@ function Main({
                       handlers.reset()
 
                       facebookPixelAddToCart(
+                        upsellSelectedVariant.price,
+                        count,
+                        upsellSelectedVariant.product_type,
+                        upsellSelectedVariant.name,
+                        upsellSelectedVariant.color,
+                        upsellSelectedVariant.size,
+                      )
+
+                      googleAnalyticsAddToCart(
                         upsellSelectedVariant.price,
                         count,
                         upsellSelectedVariant.product_type,
@@ -1308,6 +1326,15 @@ function Main({
                   handlers.reset()
 
                   facebookPixelAddToCart(
+                    state.price,
+                    count,
+                    paramsProduct_type,
+                    state.selectedVariant,
+                    state.selectedColor,
+                    state.selectedSize,
+                  )
+
+                  googleAnalyticsAddToCart(
                     state.price,
                     count,
                     paramsProduct_type,
