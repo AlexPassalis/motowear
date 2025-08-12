@@ -219,10 +219,6 @@ export async function getVariantsProductType(product_type: string) {
     .orderBy(variant.index)
 }
 
-export type typeUniqueVariantNames = Awaited<
-  ReturnType<typeof getUniqueVariantNames>
->
-
 export async function getUniqueVariantNames() {
   return (
     await postgres
@@ -232,7 +228,9 @@ export async function getUniqueVariantNames() {
   ).map((row) => row.name)
 }
 
-export type typeCustomerDetails = Awaited<ReturnType<typeof getCustomerDetails>>
+export type typeUniqueVariantNames = Awaited<
+  ReturnType<typeof getUniqueVariantNames>
+>
 
 export async function getCustomerDetails(email: string) {
   return (

@@ -1,8 +1,7 @@
 import {
   ROUTE_ADMIN,
-  ROUTE_ADMIN_EMAIL,
+  ROUTE_ADMIN_INFORMATION,
   ROUTE_ADMIN_ORDER,
-  ROUTE_ADMIN_PHONE,
   ROUTE_ADMIN_PRODUCT,
 } from '@/data/routes'
 import Link from 'next/link'
@@ -44,15 +43,6 @@ export function AdminMenu({ isMenuOpen, setIsMenuOpen }: MenuProps) {
             <hr className="w-full border-t border-[var(--mantine-border)]" />
             <li>
               <Link
-                href={ROUTE_ADMIN_PRODUCT}
-                className="text-xl hover:text-red-500"
-              >
-                Pages
-              </Link>
-            </li>
-            <hr className="w-full border-t border-[var(--mantine-border)]" />
-            <li>
-              <Link
                 href={ROUTE_ADMIN_ORDER}
                 className="text-xl hover:text-red-500"
               >
@@ -62,19 +52,19 @@ export function AdminMenu({ isMenuOpen, setIsMenuOpen }: MenuProps) {
             <hr className="w-full border-t border-[var(--mantine-border)]" />
             <li>
               <Link
-                href={ROUTE_ADMIN_EMAIL}
+                href={ROUTE_ADMIN_PRODUCT}
                 className="text-xl hover:text-red-500"
               >
-                Email list
+                Pages
               </Link>
             </li>
             <hr className="w-full border-t border-[var(--mantine-border)]" />
             <li>
               <Link
-                href={ROUTE_ADMIN_PHONE}
+                href={ROUTE_ADMIN_INFORMATION}
                 className="text-xl hover:text-red-500"
               >
-                Phone list
+                Contact Information
               </Link>
             </li>
           </ul>

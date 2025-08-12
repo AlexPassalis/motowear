@@ -11,5 +11,4 @@ export const ROUTE_ADMIN = '/admin' as const
 export const ROUTE_ADMIN_HOME = '/admin/home' as const
 export const ROUTE_ADMIN_PRODUCT = '/admin/product' as const
 export const ROUTE_ADMIN_ORDER = '/admin/order' as const
-export const ROUTE_ADMIN_EMAIL = '/admin/email' as const
-export const ROUTE_ADMIN_PHONE = '/admin/phone' as const
+export const ROUTE_ADMIN_INFORMATION = '/admin/information' as const

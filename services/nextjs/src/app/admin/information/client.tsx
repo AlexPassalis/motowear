@@ -1,20 +1,29 @@
 'use client'
 
-import type { typeCustomerDetails, typeEmails } from '@/utils/getPostgres'
+import type { typeOrder } from '@/lib/postgres/data/type'
+import type { typeEmails } from '@/utils/getPostgres'
+
 import { AdminProvider } from '@/app/admin/components/AdminProvider'
 
-type AdminEmailPageClientProps = {
-  customerDetails: typeCustomerDetails[]
+type typeCustomerDetails = {
+  first_name: typeOrder['checkout']['first_name']
+  last_name: typeOrder['checkout']['last_name']
+  email: typeOrder['checkout']['email']
+  phone?: typeOrder['checkout']['phone']
+}[]
+
+type AdminInformationPageClientProps = {
+  customerDetails: typeCustomerDetails
   nonCustomerEmails: typeEmails
 }
 
-export function AdminEmailPageClient({
+export function AdminInformationPageClient({
   customerDetails,
   nonCustomerEmails,
-}: AdminEmailPageClientProps) {
+}: AdminInformationPageClientProps) {
   return (
     <AdminProvider>
-      <main className="py-20 px-8 w-full max-w-full grid grid-cols-1 gap-6">
+      <main className="py-20 px-8 w-full max-w-full grid grid-cols-1 gap-96">
         <section>
           <h2 className="text-lg font-semibold">
             Customers ({customerDetails.length})
@@ -23,9 +32,10 @@ export function AdminEmailPageClient({
             {customerDetails.length === 0 && (
               <li className="py-2 italic text-gray-500">None</li>
             )}
-            {customerDetails.map(({ checkout }) => (
-              <li key={checkout.email} className="py-2">
-                {checkout.email} {checkout.first_name} {checkout.last_name}
+            {customerDetails.map(({ first_name, last_name, email, phone }) => (
+              <li key={email} className="py-2">
+                {first_name},{last_name},{email}
+                {phone && `,${phone}`}
               </li>
             ))}
           </ul>
