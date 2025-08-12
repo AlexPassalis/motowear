@@ -119,7 +119,9 @@ export function AdminPageClient({
             <h1 className="text-lg">Revenew (€)</h1>
             <h2>
               {visibleData.length > 0
-                ? visibleData.reduce((acc, item) => acc + item.revenue, 0)
+                ? visibleData
+                    .reduce((acc, item) => acc + item.revenue, 0)
+                    .toFixed(2)
                 : 0}
             </h2>
           </div>
