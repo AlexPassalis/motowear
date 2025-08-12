@@ -16,8 +16,8 @@ export default async function AdminInformationPage() {
     redirect(`${ROUTE_ERROR}?message=${errorPostgres}`)
   }
 
-  const customerEmails = resolved[0].value.filter((r) => r.customer)
-  const nonCustomerEmails = resolved[0].value.filter((r) => !r.customer)
+  const customerEmails = resolved[0].value.filter((obj) => obj.customer)
+  const nonCustomerEmails = resolved[0].value.filter((obj) => !obj.customer)
 
   let customerDetails
   try {
@@ -29,12 +29,13 @@ export default async function AdminInformationPage() {
   }
 
   const customerPhones = resolved[1].value
+  console.log('These are the customerDetails: ', customerDetails) // NEEDS FIXING only for debugging purposes.
   customerDetails = customerDetails.map((obj) => {
     return {
       first_name: obj.checkout.first_name,
       last_name: obj.checkout.last_name,
       email: obj.checkout.email,
-      ...(customerPhones.find((phone) => phone === obj.checkout.phone)
+      ...(customerPhones.includes(obj.checkout.phone)
         ? { phone: obj.checkout.phone }
         : {}),
     }
