@@ -11,25 +11,25 @@ export default async function AdminInformationPage() {
   await isSessionRSC()
 
   const resolved = await Promise.allSettled([getEmails(), getPhones()])
-
   if (resolved[0].status === 'rejected' || resolved[1].status === 'rejected') {
     redirect(`${ROUTE_ERROR}?message=${errorPostgres}`)
   }
 
-  const customerEmails = resolved[0].value.filter((obj) => obj.customer)
-  const nonCustomerEmails = resolved[0].value.filter((obj) => !obj.customer)
+  const emails = resolved[0].value
+  const customerEmails = emails.filter((obj) => obj.customer)
+  const nonCustomerEmails = emails.filter((obj) => !obj.customer)
 
   let customerDetails
   try {
     customerDetails = await Promise.all(
-      customerEmails.map((obj) => getCustomerDetails(obj.email)),
+      customerEmails.map(({ email }) => getCustomerDetails(email)),
     )
+    customerDetails = customerDetails.filter((details) => details) // filter out all falsy (undefined, because the order was deleted) values
   } catch {
     redirect(`${ROUTE_ERROR}?message=${errorPostgres}`)
   }
 
   const customerPhones = resolved[1].value
-  console.log('These are the customerDetails: ', customerDetails) // NEEDS FIXING only for debugging purposes.
   customerDetails = customerDetails.map((obj) => {
     return {
       first_name: obj.checkout.first_name,
