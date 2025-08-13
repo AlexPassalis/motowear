@@ -17,38 +17,25 @@ import {
 import { eq, and, sql, not, or, isNull, desc } from 'drizzle-orm'
 
 export async function getProductTypes() {
-  return (
-    await postgres
-      .select({ product_type: product_pages.product_type })
-      .from(product_pages)
-      .orderBy(
-        sql`CASE
+  const array = await postgres
+    .select({ product_type: product_pages.product_type })
+    .from(product_pages)
+    .orderBy(
+      sql`CASE
               WHEN ${product_pages.product_type} = 'Φούτερ'    THEN 0
               WHEN ${product_pages.product_type} = 'Μπλουζάκι' THEN 1
               ELSE 2
             END`,
-      )
-  ).map((row) => row.product_type)
+    )
+
+  return array.map((row) => row.product_type)
 }
 export type typeProductTypes = Awaited<ReturnType<typeof getProductTypes>>
 
 export async function getVariants() {
-  return await postgres
-    .select({
-      product_type: variant.product_type,
-      id: variant.id,
-      images: variant.images,
-      name: variant.name,
-      description: variant.description,
-      brand: variant.brand,
-      color: variant.color,
-      size: variant.size,
-      price: variant.price,
-      price_before: variant.price_before,
-      upsell: variant.upsell,
-    })
-    .from(variant)
-    .orderBy(variant.index)
+  const array = await postgres.select().from(variant).orderBy(variant.index)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  return array.map(({ index, ...rest }) => rest)
 }
 
 export async function getPages() {
@@ -56,31 +43,20 @@ export async function getPages() {
 }
 
 export async function getShipping() {
-  return (
-    await postgres
-      .select({
-        expense: shipping.expense,
-        free: shipping.free,
-        surcharge: shipping.surcharge,
-      })
-      .from(shipping)
-  )[0]
+  const array = await postgres.select().from(shipping)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { primary_key, ...rest } = array[0]
+
+  return rest
 }
 export type typeShipping = Awaited<ReturnType<typeof getShipping>>
 
 export async function getHomePage() {
-  return (
-    await postgres
-      .select({
-        big_image: home_page.big_image,
-        smaller_images: home_page.smaller_images,
-        quotes: home_page.quotes,
-        faq: home_page.faq,
-        coupon: home_page.coupon,
-        reviews: home_page.reviews,
-      })
-      .from(home_page)
-  )[0]
+  const array = await postgres.select().from(home_page)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { primary_key, ...rest } = array[0]
+
+  return rest
 }
 export type typeHomePage = Awaited<ReturnType<typeof getHomePage>>
 
@@ -114,24 +90,24 @@ export async function getReviews() {
 // ### ADMIN QUERIES FROM NOW ON ###
 
 export async function getBrands() {
-  return (
-    await postgres
-      .select({ image: brand.image })
-      .from(brand)
-      .where(not(eq(brand.image, '')))
-      .orderBy(brand.index)
-  ).map((row) => row.image)
+  const array = await postgres
+    .select({ image: brand.image })
+    .from(brand)
+    .where(not(eq(brand.image, '')))
+    .orderBy(brand.index)
+
+  return array.map((row) => row.image)
 }
 export type typeBrands = Awaited<ReturnType<typeof getBrands>>
 
 export async function getProductPage(product_type: string) {
-  return (
-    await postgres
-      .select()
-      .from(product_pages)
-      .where(eq(product_pages.product_type, product_type))
-      .limit(1)
-  )[0]
+  const array = await postgres
+    .select()
+    .from(product_pages)
+    .where(eq(product_pages.product_type, product_type))
+    .limit(1)
+
+  return array[0]
 }
 
 export async function getProductReviews(product_type: string) {
@@ -166,7 +142,9 @@ export async function getEmails() {
 export type typeEmails = Awaited<ReturnType<typeof getEmails>>
 
 export async function getPhones() {
-  return (await postgres.select().from(phone)).map((obj) => obj.phone)
+  const array = await postgres.select().from(phone)
+
+  return array.map((obj) => obj.phone)
 }
 export type typePhones = Awaited<ReturnType<typeof getPhones>>
 
@@ -184,12 +162,12 @@ export async function getOrder(order_id: string) {
 }
 
 export async function getOrderByOrderCode(order_code: string) {
-  return (
-    await postgres
-      .select()
-      .from(order)
-      .where(and(eq(order.order_code, order_code)))
-  )[0]
+  const array = await postgres
+    .select()
+    .from(order)
+    .where(and(eq(order.order_code, order_code)))
+
+  return array[0]
 }
 export type typeOrderByOrderCode = Awaited<
   ReturnType<typeof getOrderByOrderCode>
@@ -200,32 +178,22 @@ export async function unsubscribe(customer_email: string) {
 }
 
 export async function getVariantsProductType(product_type: string) {
-  return await postgres
-    .select({
-      product_type: variant.product_type,
-      id: variant.id,
-      images: variant.images,
-      name: variant.name,
-      description: variant.description,
-      brand: variant.brand,
-      color: variant.color,
-      size: variant.size,
-      price: variant.price,
-      price_before: variant.price_before,
-      upsell: variant.upsell,
-    })
+  const array = await postgres
+    .select()
     .from(variant)
     .where(eq(variant.product_type, product_type))
     .orderBy(variant.index)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  return array.map(({ index, ...rest }) => rest)
 }
 
 export async function getUniqueVariantNames() {
-  return (
-    await postgres
-      .selectDistinctOn([variant.name])
-      .from(variant)
-      .orderBy(variant.name)
-  ).map((row) => row.name)
+  const array = await postgres
+    .selectDistinctOn([variant.name])
+    .from(variant)
+    .orderBy(variant.name)
+
+  return array.map((row) => row.name)
 }
 
 export type typeUniqueVariantNames = Awaited<
@@ -233,12 +201,12 @@ export type typeUniqueVariantNames = Awaited<
 >
 
 export async function getCustomerDetails(email: string) {
-  return (
-    await postgres
-      .select({ checkout: order.checkout })
-      .from(order)
-      .where(sql`lower(${order.checkout} ->> 'email') = lower(${email})`)
-      .orderBy(desc(order.order_date))
-      .limit(1)
-  )[0]
+  const array = await postgres
+    .select({ checkout: order.checkout })
+    .from(order)
+    .where(sql`lower(${order.checkout} ->> 'email') = lower(${email})`)
+    .orderBy(desc(order.order_date))
+    .limit(1)
+
+  return array[0]
 }
