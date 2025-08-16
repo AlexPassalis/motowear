@@ -60,8 +60,8 @@ export function ProductVariantsTable({
     let selectedVariants = variants
 
     if (searchQuery) {
-      const matchingVariants = variants.filter(
-        (variant) => normalise(variant.name) === normalise(searchQuery),
+      const matchingVariants = variants.filter((variant) =>
+        normalise(variant.name).includes(normalise(searchQuery)),
       )
       if (matchingVariants.length < 1) {
         alert('No variants with that name exist.')
