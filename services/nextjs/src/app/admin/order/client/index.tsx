@@ -33,6 +33,7 @@ import { formatInTimeZone } from 'date-fns-tz'
 import { z } from 'zod'
 import { AdminProvider } from '@/app/admin/components/AdminProvider'
 import { regexOrderFirstLastName, regexOrderId } from '@/data/regex'
+import { normalise } from '@/utils/normalise'
 
 type AdminOrderPageClientProps = {
   postgres_orders: typeOrder[]
@@ -68,16 +69,7 @@ export function AdminOrderPageClient({
           selectedOrders = [matchingOrder]
         }
       } else if (regexOrderFirstLastName.test(searchQuery)) {
-        function normalise(query: string) {
-          return query
-            .trim()
-            .toLocaleLowerCase()
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '')
-            .replace(/['’΄]/g, '')
-        }
         const query = normalise(searchQuery)
-
         const matchingOrders = orders.filter(({ checkout }) => {
           const fullName = normalise(
             `${checkout.first_name} ${checkout.last_name}`,
@@ -120,6 +112,12 @@ export function AdminOrderPageClient({
   const modalOrder = orders.find((order) => order.id === modalState.id)
 
   const [selection, setSelection] = useState<typeOrder[]>([])
+
+  function handleSearch() {
+    if (searchValue.current) {
+      setSearchQuery(searchValue.current.value.trim())
+    }
+  }
 
   return (
     <AdminProvider>
@@ -899,18 +897,12 @@ export function AdminOrderPageClient({
                     mr="md"
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
-                        if (searchValue.current) {
-                          setSearchQuery(searchValue.current.value)
-                        }
+                        handleSearch()
                       }
                     }}
                   />
                   <Button
-                    onClick={() => {
-                      if (searchValue.current) {
-                        setSearchQuery(searchValue.current.value)
-                      }
-                    }}
+                    onClick={() => handleSearch()}
                     type="button"
                     disabled={onRequest}
                     color="blue"
@@ -1066,9 +1058,12 @@ export function AdminOrderPageClient({
                       }
 
                       const blobUrl = URL.createObjectURL(
-                        new Blob([await pdfDoc.save()], {
-                          type: 'application/pdf',
-                        }),
+                        new Blob(
+                          [await pdfDoc.save()] as unknown as BlobPart[],
+                          {
+                            type: 'application/pdf',
+                          },
+                        ),
                       )
                       window.open(blobUrl, '_blank')
                       setTimeout(() => URL.revokeObjectURL(blobUrl), 60000)

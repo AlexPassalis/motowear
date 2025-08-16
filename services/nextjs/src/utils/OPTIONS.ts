@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 
 export async function OPTIONS() {
   return new NextResponse(null, {
-    status: 204, // No Content
+    status: 204, // No content
     headers: {
       'Access-Control-Allow-Origin': 'https://www.motowear.gr',
       'Access-Control-Allow-Methods': 'POST, OPTIONS',
