@@ -34,13 +34,32 @@ export function AdminPageClient({
 }: AdminPageClientProps) {
   const [onRequest, setOnRequest] = useState(false)
 
-  const todayAthens = startOfDay(toZonedTime(new Date(), 'Europe/Athens'))
+  const timezone = 'Europe/Athens'
+  const todayAthens = startOfDay(toZonedTime(new Date(), timezone))
   const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([
     todayAthens,
     addDays(todayAthens, 1),
   ])
 
+  const [visibleData, setVisibleData] = useState<
+    {
+      date: string
+      revenue: number
+      orders: number
+      sessions: number
+      conversion: number
+    }[]
+  >([])
+
   useEffect(() => {
+    if (!dateRange[0] || !dateRange[1]) {
+      setVisibleData([])
+      return
+    }
+
+    const startAthens = startOfDay(toZonedTime(dateRange[0], timezone))
+    const endAthens = startOfDay(toZonedTime(dateRange[1], timezone))
+
     const data: {
       date: string
       revenue: number
@@ -50,9 +69,9 @@ export function AdminPageClient({
     }[] = []
 
     orders.forEach((order) => {
-      const orderDate = toZonedTime(order.order_date, 'Europe/Athens')
-      if (orderDate >= dateRange[0]! && orderDate <= dateRange[1]!) {
-        const date = format(orderDate, 'yyyy-MM-dd')
+      const orderDate = toZonedTime(order.order_date, timezone)
+      if (orderDate >= startAthens && orderDate < endAthens) {
+        const date = format(orderDate, 'yyyy-MM-dd', { timeZone: timezone })
         const existingEntry = data.find((item) => item.date === date)
         if (existingEntry) {
           existingEntry.revenue += order.total
@@ -72,12 +91,12 @@ export function AdminPageClient({
     })
 
     daily_sessions.forEach((day) => {
-      if (
-        new Date(day.date) >= dateRange[0]! &&
-        new Date(day.date) <= dateRange[1]!
-      ) {
+      const dayDate = toZonedTime(new Date(day.date), timezone)
+
+      if (dayDate >= startAthens && dayDate < endAthens) {
         const existingEntry = data.find(
-          (item) => item.date === format(day.date, 'yyyy-MM-dd'),
+          (item) =>
+            item.date === format(dayDate, 'yyyy-MM-dd', { timeZone: timezone }),
         )
         if (existingEntry) {
           existingEntry.sessions = day.sessions || 0
@@ -85,7 +104,7 @@ export function AdminPageClient({
             day.sessions > 0 ? (existingEntry.orders / day.sessions) * 100 : 0
         } else {
           data.push({
-            date: format(day.date, 'yyyy-MM-dd'),
+            date: format(dayDate, 'yyyy-MM-dd', { timeZone: timezone }),
             revenue: 0,
             orders: 0,
             sessions: day.sessions,
@@ -98,15 +117,7 @@ export function AdminPageClient({
     data.sort((a, b) => a.date.localeCompare(b.date))
     setVisibleData(data)
   }, [orders, daily_sessions, dateRange])
-  const [visibleData, setVisibleData] = useState<
-    {
-      date: string
-      revenue: number
-      orders: number
-      sessions: number
-      conversion: number
-    }[]
-  >([])
+
   const [shipping, setShipping] = useState(shippingPostgres)
   const [coupons, setCoupons] = useState(postgres_coupons)
 
@@ -184,15 +195,33 @@ export function AdminPageClient({
         <h1 className="text-center text-2xl">Shipping</h1>
         <div className="flex gap-2 items-end">
           <NumberInput
-            value={shipping.expense ?? ''}
+            value={shipping.expense_elta_courier ?? ''}
             onChange={(value) => {
               if (typeof value === 'number') {
-                setShipping((prev) => ({ ...prev, expense: value }))
+                setShipping((prev) => ({
+                  ...prev,
+                  expense_elta_courier: value,
+                }))
               } else {
-                setShipping((prev) => ({ ...prev, expense: null }))
+                setShipping((prev) => ({ ...prev, expense_elta_courier: null }))
               }
             }}
-            label="Expense"
+            label="Expense Elta Courier"
+            min={0}
+            max={9999.99}
+            suffix="€"
+            disabled={onRequest}
+          />
+          <NumberInput
+            value={shipping.expense_box_now ?? ''}
+            onChange={(value) => {
+              if (typeof value === 'number') {
+                setShipping((prev) => ({ ...prev, expense_box_now: value }))
+              } else {
+                setShipping((prev) => ({ ...prev, expense_box_now: null }))
+              }
+            }}
+            label="Expense BOX NOW"
             min={0}
             max={9999.99}
             suffix="€"
