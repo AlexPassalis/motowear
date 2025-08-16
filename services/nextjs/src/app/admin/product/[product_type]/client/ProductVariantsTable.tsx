@@ -8,6 +8,7 @@ import {
   Dispatch,
   SetStateAction,
   useCallback,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -17,6 +18,7 @@ import { errorUnexpected } from '@/data/error'
 import { envClient } from '@/env'
 import axios from 'axios'
 import { ProductVariantRowWrapper } from '@/app/admin/product/[product_type]/client/ProductVariantRowWrapper'
+import { normalise } from '@/utils/normalise'
 
 type ProductVariantsTableProps = {
   product_type: string
@@ -48,14 +50,45 @@ export function ProductVariantsTable({
 }: ProductVariantsTableProps) {
   const massCreateRef = useRef<null | HTMLInputElement>(null)
 
-  const pageSize = 25
-  const totalPages = Math.max(1, Math.ceil(variants.length / pageSize))
+  const searchValue = useRef<null | HTMLInputElement>(null)
+  const [searchQuery, setSearchQuery] = useState('')
 
+  const paginationPageSize = 25
   const [pageNumber, setPageNumber] = useState(1)
+
+  const filteredVariants = useMemo(() => {
+    let selectedVariants = variants
+
+    if (searchQuery) {
+      const matchingVariants = variants.filter(
+        (variant) => normalise(variant.name) === normalise(searchQuery),
+      )
+      if (matchingVariants.length < 1) {
+        alert('No variants with that name exist.')
+        selectedVariants = []
+      } else {
+        selectedVariants = matchingVariants
+      }
+    }
+
+    return selectedVariants
+  }, [variants, searchQuery])
+
   const visibleVariants = useMemo(() => {
-    const start = (pageNumber - 1) * pageSize
-    return variants.slice(start, start + pageSize)
-  }, [variants, pageNumber])
+    return filteredVariants.slice(
+      (pageNumber - 1) * paginationPageSize,
+      pageNumber * paginationPageSize,
+    )
+  }, [filteredVariants, pageNumber])
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredVariants.length / paginationPageSize),
+  )
+  useEffect(() => {
+    setPageNumber((prevPageNumber) =>
+      Math.min(Math.max(1, prevPageNumber), totalPages),
+    )
+  }, [totalPages])
 
   const setVariantsCb = useCallback(setVariants, [setVariants])
   const setModalStateCb = useCallback(setModalState, [setModalState])
@@ -84,6 +117,13 @@ export function ProductVariantsTable({
       setOnRequestCb,
     ],
   )
+
+  function handleSearch() {
+    if (searchValue.current) {
+      setSearchQuery(searchValue.current.value.trim())
+      setPageNumber(1)
+    }
+  }
 
   return (
     <Table.ScrollContainer
@@ -252,21 +292,19 @@ export function ProductVariantsTable({
           </Droppable>
 
           <Table.Tfoot>
-            {
-              <Table.Tr>
-                <Table.Td colSpan={12}>
-                  <div className="flex justify-center items-center gap-2">
-                    <Pagination
-                      total={totalPages}
-                      value={pageNumber}
-                      onChange={(pageNum) => setPageNumber(pageNum)}
-                    />
-                  </div>
-                </Table.Td>
-              </Table.Tr>
-            }
+            <Table.Tr>
+              <Table.Td colSpan={12}>
+                <div className="flex justify-center items-center gap-2">
+                  <Pagination
+                    total={totalPages}
+                    value={pageNumber}
+                    onChange={(pageNumber) => setPageNumber(pageNumber)}
+                  />
+                </div>
+              </Table.Td>
+            </Table.Tr>
 
-            {pageNumber === totalPages && (
+            {pageNumber === totalPages && !searchQuery && (
               <Table.Tr>
                 <Table.Td colSpan={12}>
                   <div className="flex justify-center items-center gap-2">
@@ -291,7 +329,9 @@ export function ProductVariantsTable({
 
                         const next = [...variants, blank]
                         setVariants(next)
-                        setPageNumber(Math.ceil(next.length / pageSize))
+                        setPageNumber(
+                          Math.ceil(next.length / paginationPageSize),
+                        )
                       }}
                       type="button"
                       disabled={onRequest}
@@ -312,7 +352,9 @@ export function ProductVariantsTable({
 
                         const next = [...variants, ...clones]
                         setVariants(next)
-                        setPageNumber(Math.ceil(next.length / pageSize))
+                        setPageNumber(
+                          Math.ceil(next.length / paginationPageSize),
+                        )
                         if (massCreateRef.current)
                           massCreateRef.current.value = ''
                       }}
@@ -329,6 +371,33 @@ export function ProductVariantsTable({
 
             <Table.Tr style={{ borderBottom: 'none' }}>
               <Table.Td colSpan={12}>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    marginBottom: '0.5rem',
+                  }}
+                >
+                  <TextInput
+                    ref={searchValue}
+                    placeholder="1295 or Χατζηκαντής"
+                    mr="md"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        handleSearch()
+                      }
+                    }}
+                  />
+                  <Button
+                    onClick={() => handleSearch()}
+                    type="button"
+                    disabled={onRequest}
+                    color="blue"
+                  >
+                    {onRequest ? 'Wait ...' : 'Search'}
+                  </Button>
+                </div>
+
                 <div className="flex justify-center">
                   <Button
                     onClick={async () => {
