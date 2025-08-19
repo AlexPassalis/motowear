@@ -101,7 +101,9 @@ export function AdminPageClient({
         if (existingEntry) {
           existingEntry.sessions = day.sessions || 0
           existingEntry.conversion =
-            day.sessions > 0 ? (existingEntry.orders / day.sessions) * 100 : 0
+            day.sessions > 0
+              ? Number(((existingEntry.orders / day.sessions) * 100).toFixed(2))
+              : 0
         } else {
           data.push({
             date: format(dayDate, 'yyyy-MM-dd', { timeZone: timezone }),
