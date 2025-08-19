@@ -136,8 +136,11 @@ export const daily_session = otherSchema.table('daily_session', {
 })
 export const shipping = otherSchema.table('shipping', {
   primary_key: text('primary_key').primaryKey(),
-  expense_elta_courier: Numeric('expense', { precision: 7, scale: 2 }),
-  expense_box_now: Numeric('expense', { precision: 7, scale: 2 }),
+  expense_elta_courier: Numeric('expense_elta_courier', {
+    precision: 7,
+    scale: 2,
+  }),
+  expense_box_now: Numeric('expense_box_now', { precision: 7, scale: 2 }),
   free: Numeric('free', { precision: 7, scale: 2 }),
   surcharge: Numeric('surcharge', { precision: 7, scale: 2 }),
 })
