@@ -29,14 +29,15 @@ async function redisPing() {
     if (result === 'PONG') {
       console.info('Redis connected successfully.')
     }
-  } catch (e) {
+  } catch (err) {
     const message = formatMessage(
       '@/lib/redis/redis.ts redisPing()',
       'Redis connection failed.',
-      e,
+      err,
     )
     console.error(message)
-    sendTelegramMessage('ERROR', message)
+    await sendTelegramMessage('ERROR', message)
+
     process.exit(1)
   }
 }

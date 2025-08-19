@@ -23,7 +23,8 @@ export async function POST(req: NextRequest) {
       error,
     )
     console.error(message)
-    sendTelegramMessage('ERROR', message)
+    await sendTelegramMessage('ERROR', message)
+
     return NextResponse.json({ message: errorInvalidBody }, { status: 400 })
   }
 
@@ -39,7 +40,8 @@ export async function POST(req: NextRequest) {
         err,
       )
       console.error(message)
-      sendTelegramMessage('ERROR', message)
+      await sendTelegramMessage('ERROR', message)
+
       return NextResponse.json({ message: errorPostgres }, { status: 500 })
     }
   }

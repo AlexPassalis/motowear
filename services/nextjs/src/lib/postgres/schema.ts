@@ -114,7 +114,7 @@ export const order = ordersSchema.table('order', {
   paid: boolean('paid'),
   date_fulfilled: timestamp('date_fulfilled'),
   tracking_number: text('tracking_number'),
-  fulfilled_email: boolean('fulfilled_email').notNull(),
+  date_delivered: timestamp('date_delivered'),
   review_email: boolean('review_email').notNull(),
   review_submitted: boolean('review_submitted').notNull(),
 })
@@ -136,7 +136,8 @@ export const daily_session = otherSchema.table('daily_session', {
 })
 export const shipping = otherSchema.table('shipping', {
   primary_key: text('primary_key').primaryKey(),
-  expense: Numeric('expense', { precision: 7, scale: 2 }),
+  expense_elta_courier: Numeric('expense', { precision: 7, scale: 2 }),
+  expense_box_now: Numeric('expense', { precision: 7, scale: 2 }),
   free: Numeric('free', { precision: 7, scale: 2 }),
   surcharge: Numeric('surcharge', { precision: 7, scale: 2 }),
 })

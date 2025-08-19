@@ -203,9 +203,9 @@ export function AdminHomePageClient({
                                         )
                                         console.error(res)
                                       }
-                                    } catch (e) {
+                                    } catch (err) {
                                       alert(`Error deleting smaller image`)
-                                      console.error(e)
+                                      console.error(err)
                                     }
                                     setOnRequest(false)
                                   } else {
@@ -341,9 +341,9 @@ export function AdminHomePageClient({
                                         )
                                         console.error(res)
                                       }
-                                    } catch (e) {
+                                    } catch (err) {
                                       alert(`Error deleting quote`)
-                                      console.error(e)
+                                      console.error(err)
                                     }
                                     setOnRequest(false)
                                   } else {
@@ -433,7 +433,10 @@ export function AdminHomePageClient({
                                     ...prev,
                                     faq: prev.faq.map((item, i) =>
                                       i === index
-                                        ? { ...item, question: e.target.value }
+                                        ? {
+                                            ...item,
+                                            question: e.target.value,
+                                          }
                                         : item,
                                     ),
                                   }))
@@ -475,9 +478,9 @@ export function AdminHomePageClient({
                                         )
                                         console.error(res)
                                       }
-                                    } catch (e) {
+                                    } catch (err) {
                                       alert(`Error deleting ${'question'}`)
-                                      console.error(e)
+                                      console.error(err)
                                     }
                                     setOnRequest(false)
                                   } else {
@@ -552,9 +555,9 @@ export function AdminHomePageClient({
                 )
                 console.error(res)
               }
-            } catch (e) {
+            } catch (err) {
               alert('Error updating page')
-              console.error(e)
+              console.error(err)
             }
             setOnRequest(false)
           }}
@@ -711,9 +714,9 @@ export function AdminHomePageClient({
                             )
                             console.error(res)
                           }
-                        } catch (e) {
+                        } catch (err) {
                           alert('Error updating page')
-                          console.error(e)
+                          console.error(err)
                         }
                         setOnRequest(false)
                       }}

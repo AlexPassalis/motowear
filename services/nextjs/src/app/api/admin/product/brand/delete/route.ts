@@ -20,10 +20,11 @@ export async function DELETE(req: NextRequest) {
   if (!validatedBody) {
     const message = formatMessage(
       '/api/admin/product/brand/delete DELETE',
-      errorInvalidBody
+      errorInvalidBody,
     )
     console.error(message)
-    sendTelegramMessage('ERROR', message)
+    await sendTelegramMessage('ERROR', message)
+
     return NextResponse.json({ message: errorInvalidBody }, { status: 400 })
   }
 
@@ -32,28 +33,30 @@ export async function DELETE(req: NextRequest) {
       .delete(brand)
       .where(eq(brand.image, validatedBody.brand))
       .execute()
-  } catch (e) {
+  } catch (err) {
     const message = formatMessage(
       '/api/admin/product/brand/delete DELETE',
       errorPostgres,
-      e
+      err,
     )
     console.error(message)
-    sendTelegramMessage('ERROR', message)
+    await sendTelegramMessage('ERROR', message)
+
     return NextResponse.json({ message: errorPostgres }, { status: 500 })
   }
 
   try {
     await deleteFile('brand', validatedBody.brand)
     return NextResponse.json({}, { status: 200 })
-  } catch (e) {
+  } catch (err) {
     const message = formatMessage(
       '/api/admin/product/brand/delete DELETE',
       errorMinio,
-      e
+      err,
     )
     console.error(message)
-    sendTelegramMessage('ERROR', message)
+    await sendTelegramMessage('ERROR', message)
+
     return NextResponse.json({ message: errorMinio }, { status: 500 })
   }
 }

@@ -3,7 +3,12 @@ import { zodVariants } from '@/lib/postgres/data/zod'
 import { isSessionAPI } from '@/lib/better-auth/isSession'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { errorInvalidBody, errorPostgres, errorRedis } from '@/data/error'
+import {
+  errorInvalidBody,
+  errorPostgres,
+  errorRedis,
+  errorTypesense,
+} from '@/data/error'
 import { headers } from 'next/headers'
 import { postgres } from '@/lib/postgres/index'
 import { updateTypesense } from '@/lib/typesense/server'
@@ -28,14 +33,15 @@ export async function POST(req: NextRequest) {
         variants: zodVariants,
       })
       .parse(await req.json())
-  } catch (e) {
+  } catch (err) {
     const message = formatMessage(
       '@/app/api/product/product_type/variant/route.ts POST',
       errorInvalidBody,
-      e,
+      err,
     )
     console.error(message)
-    sendTelegramMessage('ERROR', message)
+    await sendTelegramMessage('ERROR', message)
+
     return NextResponse.json({ message: errorInvalidBody }, { status: 400 })
   }
 
@@ -71,40 +77,44 @@ export async function POST(req: NextRequest) {
         ),
       ),
     )
-  } catch (e) {
+  } catch (err) {
     const message = formatMessage(
       '@/app/api/product/product_type/variant/route.ts POST',
       errorPostgres,
-      e,
+      err,
     )
     console.error(message)
-    sendTelegramMessage('ERROR', message)
+    await sendTelegramMessage('ERROR', message)
+
     return NextResponse.json({ message: errorPostgres }, { status: 500 })
   }
 
   try {
     await updateTypesense(validatedBody.variants[0].product_type)
-  } catch (e) {
-    return NextResponse.json({ message: e }, { status: 500 })
+  } catch (err) {
+    console.error(err)
+    return NextResponse.json({ message: errorTypesense }, { status: 500 })
   }
 
   let variants_postgres
   try {
     variants_postgres = await getVariants()
-  } catch (e) {
-    return NextResponse.json({ message: e }, { status: 500 })
+  } catch (err) {
+    console.error(err)
+    return NextResponse.json({ message: errorPostgres }, { status: 500 })
   }
 
   try {
     await redis.set('variants', JSON.stringify(variants_postgres), 'EX', 3600)
-  } catch (e) {
+  } catch (err) {
     const message = formatMessage(
       '@/app/api/product/product_type/variant/route.ts POST',
       errorRedis,
-      e,
+      err,
     )
     console.error(message)
-    sendTelegramMessage('ERROR', message)
+    await sendTelegramMessage('ERROR', message)
+
     return NextResponse.json({ message: errorRedis }, { status: 500 })
   }
 
@@ -122,53 +132,58 @@ export async function DELETE(req: NextRequest) {
         product_type: z.string(),
       })
       .parse(await req.json())
-  } catch (e) {
+  } catch (err) {
     const message = formatMessage(
       '@/app/api/product/product_type/variant/route.ts DELETE',
       errorInvalidBody,
-      e,
+      err,
     )
     console.error(message)
-    sendTelegramMessage('ERROR', message)
+    await sendTelegramMessage('ERROR', message)
+
     return NextResponse.json({ message: errorInvalidBody }, { status: 400 })
   }
 
   try {
     await postgres.delete(variant).where(eq(variant.id, validatedBody.id))
-  } catch (e) {
+  } catch (err) {
     const message = formatMessage(
       '@/app/api/product/product_type/variant/route.ts DELETE',
       errorPostgres,
-      e,
+      err,
     )
     console.error(message)
-    sendTelegramMessage('ERROR', message)
+    await sendTelegramMessage('ERROR', message)
+
     return NextResponse.json({ message: errorPostgres }, { status: 500 })
   }
 
   try {
     await updateTypesense(validatedBody.product_type)
-  } catch (e) {
-    return NextResponse.json({ message: e }, { status: 500 })
+  } catch (err) {
+    console.error(err)
+    return NextResponse.json({ message: errorTypesense }, { status: 500 })
   }
 
   let variants_postgres
   try {
     variants_postgres = await getVariants()
-  } catch (e) {
-    return NextResponse.json({ message: e }, { status: 500 })
+  } catch (err) {
+    console.error(err)
+    return NextResponse.json({ message: errorPostgres }, { status: 500 })
   }
 
   try {
     await redis.set('variants', JSON.stringify(variants_postgres), 'EX', 3600)
-  } catch (e) {
+  } catch (err) {
     const message = formatMessage(
       '@/app/api/product/product_type/variant/route.ts DELETE',
       errorRedis,
-      e,
+      err,
     )
     console.error(message)
-    sendTelegramMessage('ERROR', message)
+    await sendTelegramMessage('ERROR', message)
+
     return NextResponse.json({ message: errorRedis }, { status: 500 })
   }
 

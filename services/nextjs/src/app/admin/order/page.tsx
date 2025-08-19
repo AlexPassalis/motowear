@@ -12,7 +12,12 @@ export default async function AdminOrderPage() {
     getOrders(),
     getUniqueVariantNames(),
   ])
-  if (resolved[0].status === 'rejected' || resolved[1].status === 'rejected') {
+  if (resolved[0].status === 'rejected') {
+    console.error(resolved[0].reason)
+    redirect(`${ROUTE_ERROR}?message=${errorPostgres}`)
+  }
+  if (resolved[1].status === 'rejected') {
+    console.error(resolved[1].reason)
     redirect(`${ROUTE_ERROR}?message=${errorPostgres}`)
   }
 

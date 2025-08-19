@@ -2,22 +2,36 @@
 
 ---
 
-### Docker Stack Services
+### [Docker Stack Deploy](https://docs.docker.com/reference/cli/docker/stack/deploy/) — container orchestration and load balancing
 
-_(container orchestration and load balancing)_
+- [**Next.js**](https://nextjs.org/): Full-stack application.
+- [**PostgreSQL**](https://www.postgresql.org/): Relational database.
+- [**MinIO**](https://min.io/): S3-compatible object storage for images/files.
+- [**Typesense**](https://typesense.org/): Search engine.
+- [**Nginx**](https://nginx.org/): Reverse proxy and TLS termination.
+- [**Redis**](https://redis.io/): In-memory cache and queue.
+- [**pgweb**](https://sosedoff.github.io/pgweb/): Web UI for PostgreSQL.
+- [**Dozzle**](https://dozzle.dev/): Container logs viewer.
 
-- **Dozzle**: Container logs viewer (https://dozzle.dev/)
-- **Postgres**: PostgreSQL database (https://www.postgresql.org/)
-- **pgWeb**: Web-based UI for PostgreSQL (https://sosedoff.github.io/pgweb/)
-- **minIO**: S3-compatible object storage for images (https://min.io/)
-- **Typesense**: Search Engine (https://typesense.org/)
-- **Next.js**: Full-stack application (https://nextjs.org/)
-- **nginx**: Web-server - reverse proxy and SSL termination (https://nginx.org/)
+---
+
+### APIs
+
+- [Aftersales](https://aftersalespro.com/): Logistics/aftersales integrations.
+- [Viva.com](https://www.viva.com/): Payments processing.
+- [Prosvasis Go](https://go.prosvasis.com/): Invoicing/accounting.
+- [Amazon SES](https://aws.amazon.com/ses/): Transactional email.
+- [Facebook Pixel](https://www.npmjs.com/package/react-facebook-pixel): Ad/remarketing analytics.
+- [Google Analytics 4](https://nextjs.org/docs/app/guides/third-party-libraries): Web analytics.
+- [Telegraf](https://www.npmjs.com/package/telegraf): Telegram bot framework.
 
 ---
 
 ### Additional
 
-- git-crypt for file encryption (https://github.com/AGWA/git-crypt)
-- tailwindcss (https://tailwindcss.com/) + Mantine (https://mantine.dev/) for the UI
-- GitHub Actions for CI/CD to VPS
+- [Better Auth](https://www.better-auth.com/): Admin authentication.
+- [React Email](https://react.email/) + [Nodemailer](https://nodemailer.com/) + [Amazon SES](https://aws.amazon.com/ses/): Email templates and delivery.
+- [cron](https://www.npmjs.com/package/cron): Time-scheduled operations.
+- [git-crypt](https://github.com/AGWA/git-crypt): Secrets/file encryption in Git.
+- [Tailwind CSS](https://tailwindcss.com/) + [Mantine](https://mantine.dev/): UI components and styling.
+- [GitHub Actions](https://github.com/features/actions): CI/CD to VPS.

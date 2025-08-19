@@ -1,4 +1,4 @@
-  import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
+import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 import { Pool } from 'pg'
 import { readSecret } from '@/utils/readSecret'
@@ -33,14 +33,15 @@ async function postgresPing() {
   try {
     await global.global_postgres!.execute(sql`SELECT 1`)
     console.info('Postgres connected successfully.')
-  } catch (e) {
+  } catch (err) {
     const message = formatMessage(
       '@/lib/postgres/index.ts postgresPing()',
       'Postgres connection failed.',
-      e,
+      err,
     )
     console.error(message)
-    sendTelegramMessage('ERROR', message)
+    await sendTelegramMessage('ERROR', message)
+
     process.exit(1)
   }
 }

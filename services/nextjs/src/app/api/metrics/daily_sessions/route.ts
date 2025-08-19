@@ -18,14 +18,16 @@ export async function POST() {
         target: daily_session.date,
         set: { sessions: sql`${daily_session.sessions} + 1` },
       })
-  } catch (e) {
+  } catch (err) {
     const message = formatMessage(
       '@/app/api/metrics/daily_sessions/route.ts POST',
       errorPostgres,
-      e,
+      err,
     )
     console.error(message)
-    sendTelegramMessage('ERROR', message)
+    await sendTelegramMessage('ERROR', message)
+
+    return NextResponse.json({ err: errorPostgres }, { status: 500 })
   }
 
   return NextResponse.json({}, { status: 200 })

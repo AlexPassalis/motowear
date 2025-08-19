@@ -38,7 +38,7 @@ export async function updateTypesense(product_type: string) {
       typesense
         .collections(collectionName)
         .documents()
-        .delete({ filter_by: `product_type:=${product_type}` })
+        .delete({ filter_by: `product_type:=${product_type}` }),
     ),
   ])
 
@@ -46,10 +46,11 @@ export async function updateTypesense(product_type: string) {
     const message = formatMessage(
       '@/lib/typesense/server.ts updateTypesense()',
       errorPostgres,
-      resolved[0].reason
+      resolved[0].reason,
     )
     console.error(message)
-    sendTelegramMessage('ERROR', message)
+    await sendTelegramMessage('ERROR', message)
+
     throw errorPostgres
   }
 
@@ -57,10 +58,11 @@ export async function updateTypesense(product_type: string) {
     const message = formatMessage(
       '@/lib/typesense/server.ts updateTypesense() delete',
       errorTypesense,
-      resolved[1].reason
+      resolved[1].reason,
     )
     console.error(message)
-    sendTelegramMessage('ERROR', message)
+    await sendTelegramMessage('ERROR', message)
+
     throw errorTypesense
   }
 
@@ -75,14 +77,15 @@ export async function updateTypesense(product_type: string) {
       }
       try {
         await typesense.collections(collectionName).documents().upsert(document)
-      } catch (e) {
+      } catch (err) {
         const message = formatMessage(
           '@/lib/typesense/server.ts updateTypesense() upsert',
           errorTypesense,
-          e
+          err,
         )
         console.error(message)
-        sendTelegramMessage('ERROR', message)
+        await sendTelegramMessage('ERROR', message)
+
         throw errorTypesense
       }
       upsertedVersions.push(variant.name)
@@ -97,7 +100,7 @@ export async function deleteTypesense(product_type: string) {
       typesense
         .collections(collectionName)
         .documents()
-        .delete({ filter_by: `product_type:=${product_type}` })
+        .delete({ filter_by: `product_type:=${product_type}` }),
     ),
   ])
 }

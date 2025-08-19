@@ -224,9 +224,9 @@ export function ProductPageComponent({
                                         )
                                         console.error(res)
                                       }
-                                    } catch (e) {
+                                    } catch (err) {
                                       alert(`Error deleting ${faq.question}`)
-                                      console.error(e)
+                                      console.error(err)
                                     }
                                     setOnRequest(false)
                                   } else {
@@ -372,9 +372,9 @@ export function ProductPageComponent({
                                         )
                                         console.error(res)
                                       }
-                                    } catch (e) {
+                                    } catch (err) {
                                       alert(`Error deleting ${carousel.image}`)
-                                      console.error(e)
+                                      console.error(err)
                                     }
                                     setOnRequest(false)
                                   } else {
@@ -453,9 +453,9 @@ export function ProductPageComponent({
                 )
                 console.error(res)
               }
-            } catch (e) {
+            } catch (err) {
               alert('Error updating page')
-              console.error(e)
+              console.error(err)
             }
             setOnRequest(false)
           }}

@@ -24,14 +24,15 @@ export async function POST(req: NextRequest) {
         productPage: zodProductPage,
       })
       .parse(await req.json())
-  } catch (e) {
+  } catch (err) {
     const message = formatMessage(
       '@/app/api/product/product_type/product_page/route.ts POST',
       errorInvalidBody,
-      e,
+      err,
     )
     console.error(message)
-    sendTelegramMessage('ERROR', message)
+    await sendTelegramMessage('ERROR', message)
+
     return NextResponse.json({ message: errorInvalidBody }, { status: 400 })
   }
 
@@ -51,34 +52,36 @@ export async function POST(req: NextRequest) {
           upsell: validatedBody.productPage.upsell,
         },
       })
-  } catch (e) {
+  } catch (err) {
     const message = formatMessage(
       '@/app/api/product/product_type/variant/route.ts POST',
       errorPostgres,
-      e,
+      err,
     )
     console.error(message)
-    sendTelegramMessage('ERROR', message)
+    await sendTelegramMessage('ERROR', message)
+
     return NextResponse.json({ message: errorPostgres }, { status: 500 })
   }
 
   let pages_postgres
   try {
     pages_postgres = await getPages()
-  } catch (e) {
-    return NextResponse.json({ message: e }, { status: 500 })
+  } catch (err) {
+    return NextResponse.json({ message: err }, { status: 500 })
   }
 
   try {
     await redis.set('pages', JSON.stringify(pages_postgres), 'EX', 3600)
-  } catch (e) {
+  } catch (err) {
     const message = formatMessage(
       '@/app/api/product/product_type/variant/route.ts POST',
       errorRedis,
-      e,
+      err,
     )
     console.error(message)
-    sendTelegramMessage('ERROR', message)
+    await sendTelegramMessage('ERROR', message)
+
     return NextResponse.json({ message: errorRedis }, { status: 500 })
   }
 

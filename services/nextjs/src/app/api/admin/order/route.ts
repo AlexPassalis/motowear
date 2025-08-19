@@ -23,14 +23,15 @@ export async function POST(req: NextRequest) {
         orders: z.array(zodOrderServer),
       })
       .parse(await req.json())
-  } catch (e) {
+  } catch (err) {
     const message = formatMessage(
       '@/app/api/admin/order/route.ts POST',
       errorInvalidBody,
-      e,
+      err,
     )
     console.error(message)
-    sendTelegramMessage('ERROR', message)
+    await sendTelegramMessage('ERROR', message)
+
     return NextResponse.json({ message: errorInvalidBody }, { status: 400 })
   }
 
@@ -63,14 +64,14 @@ export async function POST(req: NextRequest) {
         ),
       ),
     )
-  } catch (e) {
+  } catch (err) {
     const message = formatMessage(
       '@/app/api/admin/order/route.ts POST',
       errorPostgres,
-      e,
+      err,
     )
     console.error(message)
-    sendTelegramMessage('ERROR', message)
+    await sendTelegramMessage('ERROR', message)
     return NextResponse.json({ message: errorPostgres }, { status: 500 })
   }
 
@@ -88,20 +89,22 @@ export async function DELETE(req: NextRequest) {
       errorInvalidBody,
     )
     console.error(message)
-    sendTelegramMessage('ERROR', message)
+    await sendTelegramMessage('ERROR', message)
+
     return NextResponse.json({ message: errorInvalidBody }, { status: 400 })
   }
 
   try {
     await postgres.delete(order).where(eq(order.id, validatedBody.id))
-  } catch (e) {
+  } catch (err) {
     const message = formatMessage(
       '@/app/api/admin/order/route.ts DELETE',
       errorPostgres,
-      e,
+      err,
     )
     console.error(message)
-    sendTelegramMessage('ERROR', message)
+    await sendTelegramMessage('ERROR', message)
+
     return NextResponse.json({ message: errorPostgres }, { status: 500 })
   }
 

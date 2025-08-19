@@ -119,9 +119,9 @@ function reviewNotMemoised({
                   )
                   console.error(res)
                 }
-              } catch (e) {
+              } catch (err) {
                 alert(`Error deleting review`)
-                console.error(e)
+                console.error(err)
               }
               setOnRequest(false)
             } else {

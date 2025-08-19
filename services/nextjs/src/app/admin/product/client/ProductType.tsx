@@ -69,9 +69,9 @@ export function ProductType({
                   )
                   console.error(res)
                 }
-              } catch (e) {
+              } catch (err) {
                 alert(`Error deleting ${modalState}`)
-                console.error(e)
+                console.error(err)
               }
               setOnRequest(false)
             }}
@@ -183,9 +183,9 @@ export function ProductType({
                           )
                           console.error(res)
                         }
-                      } catch (e) {
+                      } catch (err) {
                         alert(`Error deleting ${image}`)
-                        console.error(e)
+                        console.error(err)
                       }
                       setOnRequest(false)
                     } else {
@@ -269,9 +269,9 @@ export function ProductType({
                 validatedImagesNewFiles.forEach((image) => {
                   formData.append('imagesNewFiles', image, image.name)
                 })
-              } catch (e) {
+              } catch (err) {
                 alert('Error appending to formData')
-                console.error(e)
+                console.error(err)
                 return
               }
 
@@ -294,9 +294,9 @@ export function ProductType({
                   )
                   console.error(res)
                 }
-              } catch (e) {
+              } catch (err) {
                 alert('Error creating brands')
-                console.error(e)
+                console.error(err)
               }
               setOnRequest(false)
             }}
