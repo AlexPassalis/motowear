@@ -10,38 +10,50 @@ import {
   variant,
 } from '../schema'
 
-export const zodCheckout = z.object({
-  email: z.string().email({ message: 'Λάθος email.' }),
-  receive_email: z.boolean(),
-  country: z.union([z.literal('Ελλάδα'), z.literal('Κύπρος')]),
-  first_name: z
-    .string()
-    .min(1, { message: 'Τουλάχιστον 1 χαρακτήρα.' })
-    .max(30, { message: 'Όριο 30 χαρακτήρων.' }),
-  last_name: z
-    .string()
-    .min(1, { message: 'Τουλάχιστον 1 χαρακτήρα.' })
-    .max(30, { message: 'Όριο 30 χαρακτήρων.' }),
-  address: z
-    .string()
-    .min(1, { message: 'Τουλάχιστον 1 χαρακτήρα.' })
-    .max(30, { message: 'Όριο 30 χαρακτήρων.' }),
-  extra: z.string(),
-  post_code: z
-    .string()
-    .min(1, { message: 'Τουλάχιστον 1 χαρακτήρα.' })
-    .max(30, { message: 'Όριο 30 χαρακτήρων.' }),
-  city: z
-    .string()
-    .min(1, { message: 'Τουλάχιστον 1 χαρακτήρα.' })
-    .max(30, { message: 'Όριο 30 χαρακτήρων.' }),
-  phone: z
-    .string()
-    .min(1, { message: 'Τουλάχιστον 1 χαρακτήρα.' })
-    .max(30, { message: 'Όριο 30 χαρακτήρων.' }),
-  receive_phone: z.boolean(),
-  payment_method: z.union([z.literal('Κάρτα'), z.literal('Αντικαταβολή')]),
-})
+export const zodCheckout = z
+  .object({
+    email: z.string().email({ message: 'Λάθος email.' }),
+    receive_email: z.boolean(),
+    country: z.union([z.literal('Ελλάδα'), z.literal('Κύπρος')]),
+    first_name: z
+      .string()
+      .min(1, { message: 'Τουλάχιστον 1 χαρακτήρα.' })
+      .max(30, { message: 'Όριο 30 χαρακτήρων.' }),
+    last_name: z
+      .string()
+      .min(1, { message: 'Τουλάχιστον 1 χαρακτήρα.' })
+      .max(30, { message: 'Όριο 30 χαρακτήρων.' }),
+    address: z
+      .string()
+      .min(1, { message: 'Τουλάχιστον 1 χαρακτήρα.' })
+      .max(30, { message: 'Όριο 30 χαρακτήρων.' }),
+    extra: z.string(),
+    post_code: z
+      .string()
+      .min(1, { message: 'Τουλάχιστον 1 χαρακτήρα.' })
+      .max(30, { message: 'Όριο 30 χαρακτήρων.' }),
+    city: z
+      .string()
+      .min(1, { message: 'Τουλάχιστον 1 χαρακτήρα.' })
+      .max(30, { message: 'Όριο 30 χαρακτήρων.' }),
+    phone: z
+      .string()
+      .min(1, { message: 'Τουλάχιστον 1 χαρακτήρα.' })
+      .max(30, { message: 'Όριο 30 χαρακτήρων.' }),
+    receive_phone: z.boolean(),
+    delivery_method: z.union([z.literal('ΕΛΤΑ Courier'), z.literal('BOX NOW')]),
+    box_now_locker_id: z.string().nullable(),
+    payment_method: z.union([z.literal('Κάρτα'), z.literal('Αντικαταβολή')]),
+  })
+  .superRefine((data, ctx) => {
+    if (data.delivery_method === 'BOX NOW' && !data.box_now_locker_id) {
+      ctx.addIssue({
+        path: ['box_now_locker_id'],
+        code: z.ZodIssueCode.custom,
+        message: 'Δεν έχετε επιλέξει locker για BOX NOW.',
+      })
+    }
+  })
 
 export const zodCartItem = z.object({
   product_type: z.string(),

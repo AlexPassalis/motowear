@@ -15,14 +15,15 @@ export async function POST(req: NextRequest) {
     validatedBody = z
       .object({ coupon_code: z.string() })
       .parse(await req.json())
-  } catch (e) {
+  } catch (err) {
     const message = formatMessage(
       '@/app/api/user/coupon_code/route.ts POST',
       errorInvalidBody,
-      e,
+      err,
     )
     console.error(message)
-    sendTelegramMessage('ERROR', message)
+    await sendTelegramMessage('ERROR', message)
+
     return NextResponse.json({ message: errorInvalidBody }, { status: 400 })
   }
 
@@ -38,14 +39,15 @@ export async function POST(req: NextRequest) {
         ),
       )
       .limit(1)
-  } catch (e) {
+  } catch (err) {
     const message = formatMessage(
       '@/app/api/user/coupon_code/route.ts POST',
       errorPostgres,
-      e,
+      err,
     )
     console.error(message)
-    sendTelegramMessage('ERROR', message)
+    await sendTelegramMessage('ERROR', message)
+
     return NextResponse.json({ message: errorPostgres }, { status: 500 })
   }
 

@@ -104,9 +104,9 @@ export function Home({
                         )
                         console.error(res)
                       }
-                    } catch (e) {
+                    } catch (err) {
                       alert(`Error deleting ${image}`)
-                      console.error(e)
+                      console.error(err)
                     }
                     setOnRequest(false)
                   } else {
@@ -173,9 +173,9 @@ export function Home({
               validatedImagesNewFiles.forEach((image) => {
                 formData.append('imagesNewFiles', image, image.name)
               })
-            } catch (e) {
+            } catch (err) {
               alert('Error appending to formData')
-              console.error(e)
+              console.error(err)
               return
             }
 
@@ -198,9 +198,9 @@ export function Home({
                 )
                 console.error(res)
               }
-            } catch (e) {
+            } catch (err) {
               alert('Error creating brands')
-              console.error(e)
+              console.error(err)
             }
             setOnRequest(false)
           }}

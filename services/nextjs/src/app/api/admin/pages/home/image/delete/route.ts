@@ -17,23 +17,25 @@ export async function DELETE(req: NextRequest) {
   if (!validatedBody) {
     const message = formatMessage(
       '/api/admin/pages/home/image/delete/route.ts DELETE',
-      errorInvalidBody
+      errorInvalidBody,
     )
     console.error(message)
-    sendTelegramMessage('ERROR', message)
+    await sendTelegramMessage('ERROR', message)
+
     return NextResponse.json({ message: errorInvalidBody }, { status: 400 })
   }
 
   try {
     await deleteFile('home_page', validatedBody.image)
-  } catch (e) {
+  } catch (err) {
     const message = formatMessage(
       '/api/admin/pages/home/image/delete/route.ts DELETE',
       errorMinio,
-      e
+      err,
     )
     console.error(message)
-    sendTelegramMessage('ERROR', message)
+    await sendTelegramMessage('ERROR', message)
+
     return NextResponse.json({ message: errorMinio }, { status: 500 })
   }
 

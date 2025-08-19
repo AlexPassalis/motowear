@@ -25,14 +25,15 @@ export async function POST(req: NextRequest) {
         home_page: zodHomePage,
       })
       .parse(await req.json())
-  } catch (e) {
+  } catch (err) {
     const message = formatMessage(
       '@/app/api/admin/pages/home/image/route.ts POST',
       errorInvalidBody,
-      e,
+      err,
     )
     console.error(message)
-    sendTelegramMessage('ERROR', message)
+    await sendTelegramMessage('ERROR', message)
+
     return NextResponse.json({ message: errorInvalidBody }, { status: 400 })
   }
 
@@ -54,34 +55,37 @@ export async function POST(req: NextRequest) {
           })),
         },
       })
-  } catch (e) {
+  } catch (err) {
     const message = formatMessage(
       '@/app/api/admin/pages/home/image/route.ts POST',
       errorPostgres,
-      e,
+      err,
     )
     console.error(message)
-    sendTelegramMessage('ERROR', message)
+    await sendTelegramMessage('ERROR', message)
+
     return NextResponse.json({ message: errorPostgres }, { status: 500 })
   }
 
   let home_page_cache
   try {
     home_page_cache = await getHomePage()
-  } catch (e) {
-    return NextResponse.json({ message: e }, { status: 500 })
+  } catch (err) {
+    console.error(err)
+    return NextResponse.json({ message: errorPostgres }, { status: 500 })
   }
 
   try {
     await redis.set('home_page', JSON.stringify(home_page_cache), 'EX', 3600)
-  } catch (e) {
+  } catch (err) {
     const message = formatMessage(
       '@/app/api/admin/pages/home/image/route.ts POST',
       errorRedis,
-      e,
+      err,
     )
     console.error(message)
-    sendTelegramMessage('ERROR', message)
+    await sendTelegramMessage('ERROR', message)
+
     return NextResponse.json({ message: errorRedis }, { status: 500 })
   }
 

@@ -27,10 +27,11 @@ export async function DELETE(req: NextRequest) {
     const message = formatMessage(
       '@/app/api/product/product_type/delete/route.ts DELETE',
       errorInvalidBody,
-      err
+      err,
     )
     console.error(message)
-    sendTelegramMessage('ERROR', message)
+    await sendTelegramMessage('ERROR', message)
+
     return NextResponse.json({ message: errorInvalidBody }, { status: 400 })
   }
 
@@ -42,10 +43,11 @@ export async function DELETE(req: NextRequest) {
     const message = formatMessage(
       '@/app/api/product/product_type/delete/route.ts DELETE product_pages',
       errorPostgres,
-      err
+      err,
     )
     console.error(message)
-    sendTelegramMessage('ERROR', message)
+    await sendTelegramMessage('ERROR', message)
+
     return NextResponse.json({ message: errorPostgres }, { status: 500 })
   }
 
@@ -55,10 +57,11 @@ export async function DELETE(req: NextRequest) {
     const message = formatMessage(
       '@/app/api/product/product_type/delete/route.ts DELETE typesense',
       errorTypesense,
-      err
+      err,
     )
     console.error(message)
-    sendTelegramMessage('ERROR', message)
+    await sendTelegramMessage('ERROR', message)
+
     return NextResponse.json({ message: errorTypesense }, { status: 500 })
   }
 
@@ -68,10 +71,11 @@ export async function DELETE(req: NextRequest) {
     const message = formatMessage(
       '@/app/api/product/product_type/delete/route.ts DELETE minio',
       errorMinio,
-      err
+      err,
     )
     console.error(message)
-    sendTelegramMessage('ERROR', message)
+    await sendTelegramMessage('ERROR', message)
+
     return NextResponse.json({ message: errorMinio }, { status: 500 })
   }
 

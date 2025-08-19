@@ -126,9 +126,9 @@ function ProductReviewsTableNotMemoised({
                         )
                         console.error(res)
                       }
-                    } catch (e) {
+                    } catch (err) {
                       alert('Error creating updating the reviews')
-                      console.error(e)
+                      console.error(err)
                     }
                     setOnRequest(false)
                   }}

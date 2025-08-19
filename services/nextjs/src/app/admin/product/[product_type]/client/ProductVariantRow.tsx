@@ -228,9 +228,9 @@ function ProductVariantRowNotMemoised({
                   )
                   console.error(res)
                 }
-              } catch (e) {
+              } catch (err) {
                 alert(`Error deleting ${variant.id}`)
-                console.error(e)
+                console.error(err)
               }
               setOnRequest(false)
             } else {

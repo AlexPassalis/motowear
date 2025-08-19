@@ -114,9 +114,9 @@ function ProductReviewNotMemoised({
                   )
                   console.error(res)
                 }
-              } catch (e) {
+              } catch (err) {
                 alert(`Error deleting ${productReviews[index].id}`)
-                console.error(e)
+                console.error(err)
               }
               setOnRequest(false)
             } else {

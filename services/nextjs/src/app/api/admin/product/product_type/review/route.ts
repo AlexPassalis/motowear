@@ -25,14 +25,15 @@ export async function POST(req: NextRequest) {
         reviews: zodTypeReviews,
       })
       .parse(await req.json())
-  } catch (e) {
+  } catch (err) {
     const message = formatMessage(
       '@/app/api/product/product_type/review/route.ts POST',
       errorInvalidBody,
-      e,
+      err,
     )
     console.error(message)
-    sendTelegramMessage('ERROR', message)
+    await sendTelegramMessage('ERROR', message)
+
     return NextResponse.json({ message: errorInvalidBody }, { status: 400 })
   }
 
@@ -61,41 +62,44 @@ export async function POST(req: NextRequest) {
         ),
       ),
     )
-  } catch (e) {
+  } catch (err) {
     const message = formatMessage(
       '@/app/api/product/product_type/review/route.ts POST insert',
       errorPostgres,
-      e,
+      err,
     )
     console.error(message)
-    sendTelegramMessage('ERROR', message)
+    await sendTelegramMessage('ERROR', message)
+
     return NextResponse.json({ message: errorPostgres }, { status: 500 })
   }
 
   let reviews_postgres
   try {
     reviews_postgres = await getReviews()
-  } catch (e) {
+  } catch (err) {
     const message = formatMessage(
       '@/app/api/product/product_type/variant/route.ts POST get',
       errorPostgres,
-      e,
+      err,
     )
     console.error(message)
-    sendTelegramMessage('ERROR', message)
-    return NextResponse.json({ message: e }, { status: 500 })
+    await sendTelegramMessage('ERROR', message)
+
+    return NextResponse.json({ message: err }, { status: 500 })
   }
 
   try {
     await redis.set('reviews', JSON.stringify(reviews_postgres), 'EX', 3600)
-  } catch (e) {
+  } catch (err) {
     const message = formatMessage(
       '@/app/api/product/product_type/variant/route.ts POST',
       errorRedis,
-      e,
+      err,
     )
     console.error(message)
-    sendTelegramMessage('ERROR', message)
+    await sendTelegramMessage('ERROR', message)
+
     return NextResponse.json({ message: errorRedis }, { status: 500 })
   }
 

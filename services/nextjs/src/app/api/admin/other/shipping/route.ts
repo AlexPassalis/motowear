@@ -27,7 +27,8 @@ export async function POST(req: NextRequest) {
       error,
     )
     console.error(message)
-    sendTelegramMessage('ERROR', message)
+    await sendTelegramMessage('ERROR', message)
+
     return NextResponse.json({ message: errorInvalidBody }, { status: 400 })
   }
 
@@ -36,46 +37,53 @@ export async function POST(req: NextRequest) {
       .insert(shipping)
       .values({
         primary_key: 'primary_key',
-        expense: validatedBody.shipping.expense,
+        expense_elta_courier: validatedBody.shipping.expense_elta_courier,
+        expense_box_now: validatedBody.shipping.expense_box_now,
         free: validatedBody.shipping.free,
         surcharge: validatedBody.shipping.surcharge,
       })
       .onConflictDoUpdate({
         target: shipping.primary_key,
         set: {
-          expense: validatedBody.shipping.expense,
+          expense_elta_courier: validatedBody.shipping.expense_elta_courier,
+          expense_box_now: validatedBody.shipping.expense_box_now,
           free: validatedBody.shipping.free,
           surcharge: validatedBody.shipping.surcharge,
         },
       })
-  } catch (e) {
+  } catch (err) {
     const message = formatMessage(
       '@/app/api/admin/other/shipping/route.ts POST',
       errorPostgres,
-      e,
+      err,
     )
     console.error(message)
-    sendTelegramMessage('ERROR', message)
+    await sendTelegramMessage('ERROR', message)
+
+    return NextResponse.json({ message: errorPostgres }, { status: 500 })
   }
 
   try {
     await redis.set(
       'shipping',
       JSON.stringify({
-        expense: validatedBody.shipping.expense,
+        expense_elta_courier: validatedBody.shipping.expense_elta_courier,
+        expense_box_now: validatedBody.shipping.expense_box_now,
         free: validatedBody.shipping.free,
+        surcharge: validatedBody.shipping.surcharge,
       }),
       'EX',
       3600,
     )
-  } catch (e) {
+  } catch (err) {
     const message = formatMessage(
       '@/app/api/admin/other/shipping/route.ts POST',
       errorRedis,
-      e,
+      err,
     )
     console.error(message)
-    sendTelegramMessage('ERROR', message)
+    await sendTelegramMessage('ERROR', message)
+
     return NextResponse.json({ message: errorRedis }, { status: 500 })
   }
 

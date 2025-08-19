@@ -43,6 +43,7 @@ import Link from 'next/link'
 import { facebookPixelPurchase } from '@/lib/facebook-pixel/index'
 import { googleAnalyticsPurchase } from '@/lib/google-analytics'
 import { couponCodeMPRELOK } from '@/data/magic'
+import Script from 'next/script'
 
 type CheckoutPageProps = {
   isAbandonCart: boolean
@@ -86,7 +87,9 @@ export function CheckoutPageClient({
     mode: 'controlled',
     onValuesChange(values) {
       if (saveInfo) {
-        localStorage.setItem('checkout', JSON.stringify(values))
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { box_now_locker_id, ...rest } = values
+        localStorage.setItem('checkout', JSON.stringify(rest))
       }
     },
     initialValues: {
@@ -101,6 +104,8 @@ export function CheckoutPageClient({
       city: '',
       phone: '',
       receive_phone: true,
+      delivery_method: 'ΕΛΤΑ Courier',
+      box_now_locker_id: null as null | string,
       payment_method: 'Κάρτα',
     },
     validate: zodResolver(zodCheckout),
@@ -149,23 +154,30 @@ export function CheckoutPageClient({
     : baseCartTotal
 
   const freeShipping = shipping.free ? cartTotal >= shipping.free : false
-  const shippingSurchargeTotal =
-    (freeShipping ? 0 : shipping.expense ?? 0) +
-    (form.getValues().payment_method !== 'Αντικαταβολή'
-      ? 0
-      : shipping.surcharge ?? 0)
+  const shippingExpense = freeShipping
+    ? 0
+    : form.getValues().delivery_method === 'ΕΛΤΑ Courier'
+    ? shipping.expense_elta_courier ?? 0
+    : shipping.expense_box_now ?? 0
+  const shippingSurcharge =
+    form.getValues().payment_method === 'Αντικαταβολή'
+      ? shipping.surcharge
+        ? shipping.surcharge
+        : 0
+      : 0
+  const shippingAndSurchargeTotal = shippingExpense + shippingSurcharge
 
-  const [total, setTotal] = useState(cartTotal + shippingSurchargeTotal)
+  const [total, setTotal] = useState(cartTotal + shippingAndSurchargeTotal)
 
   useEffect(() => {
     if (hasMounted) {
       setLocalStorageCoupon(coupon)
     }
-    setTotal(cartTotal + shippingSurchargeTotal)
+    setTotal(cartTotal + shippingAndSurchargeTotal)
     if (couponCodeRef?.current?.value) {
       couponCodeRef.current.value = ''
     }
-  }, [hasMounted, coupon, cartTotal, shippingSurchargeTotal])
+  }, [hasMounted, coupon, cartTotal, shippingAndSurchargeTotal])
   const [
     formLoadingOverlay,
     { open: openFormLoadingOverlay, close: closeFormLoadingOverlay },
@@ -243,8 +255,72 @@ export function CheckoutPageClient({
     orderCompleteResponse,
   ])
 
+  const [boxNowScriptHasLoaded, setBoxNowScriptHasLoaded] = useState(false)
+  const boxNowButtonRef = useRef<HTMLButtonElement | null>(null)
+  useEffect(() => {
+    if (boxNowScriptHasLoaded) {
+      requestAnimationFrame(() => boxNowButtonRef.current?.click())
+    }
+  }, [boxNowScriptHasLoaded])
+
+  type typeBoxNowDetail = {
+    boxnowLockerPostalCode: string
+    boxnowLockerAddressLine1: string
+    boxnowLockerId: string
+  }
+  useEffect(() => {
+    const onBoxNowLockerSelection = (e: Event) => {
+      const { detail } = e as CustomEvent<typeBoxNowDetail>
+      const { boxnowLockerId } = detail
+      form.setFieldValue('box_now_locker_id', boxnowLockerId)
+    }
+
+    window.addEventListener(
+      'selected',
+      onBoxNowLockerSelection as EventListener,
+    )
+    return () => {
+      window.removeEventListener(
+        'selected',
+        onBoxNowLockerSelection as EventListener,
+      )
+    }
+  }, [])
+  useEffect(() => {
+    if (form.getValues().delivery_method !== 'BOX NOW') {
+      form.setFieldValue('box_now_locker_id', null)
+    }
+  }, [form.getValues().delivery_method])
+
+  const countryIsGreece = form.getValues().country === 'Ελλάδα'
+  useEffect(() => {
+    if (form.getValues().country === 'Κύπρος') {
+      form.setFieldValue('delivery_method', 'ΕΛΤΑ Courier')
+      form.setFieldValue('payment_method', 'Κάρτα')
+    }
+  }, [form.getValues().country])
+
   return (
     <div className="min-h-screen flex flex-col">
+      <Script id="boxnow-config" strategy="afterInteractive">
+        {`
+          window._bn_map_widget_config = {
+            partnerId: ${envClient.BOX_NOW_PARTNER_ID},
+            parentElement: "#boxnowmap",
+            afterSelect: function(selected) {
+              window.dispatchEvent(
+                new CustomEvent("selected", { detail: selected })
+              )
+            }
+          };
+        `}
+      </Script>
+      <Script
+        src="https://widget-cdn.boxnow.gr/map-widget/client/v5.js"
+        strategy="afterInteractive"
+        onLoad={() => setBoxNowScriptHasLoaded(true)}
+      />
+
       <header className="relative flex justify-center p-2 border-b border-b-[var(--mantine-border)]">
         <Link
           href={ROUTE_HOME}
@@ -480,6 +556,7 @@ export function CheckoutPageClient({
                       data={['Ελλάδα', 'Κύπρος']}
                       defaultValue={'Ελλάδα'}
                       allowDeselect={false}
+                      {...form.getInputProps('country')}
                       styles={{ input: { fontSize: 16 } }}
                     />
                     <TextInput
@@ -676,7 +753,83 @@ export function CheckoutPageClient({
                     </Accordion.Item>
                   </Accordion>
                 </div>
-                <h1 className="text-xl mt-4 lg:mt-0">Τρόπος Πληρωμής</h1>
+
+                <h1 className="text-xl mt-4 lg:mt-0">Τρόπος Παράδωσης</h1>
+                <Radio.Group
+                  name="delivery_method"
+                  value={form.values.delivery_method}
+                  onChange={(value) =>
+                    form.setFieldValue('delivery_method', value)
+                  }
+                  error={form.errors.box_now_locker_id}
+                  className={`p-2 border ${
+                    form.errors.box_now_locker_id
+                      ? 'border-red-500'
+                      : 'border-[var(--mantine-border)]'
+                  }  rounded-lg`}
+                >
+                  <Group gap="xs">
+                    <Radio
+                      size="sm"
+                      value="ΕΛΤΑ Courier"
+                      styles={{ body: { alignItems: 'center' } }}
+                      label={
+                        <span>
+                          {`ΕΛΤΑ Courier ${
+                            shipping.expense_elta_courier
+                              ? `(${shipping.expense_elta_courier}€ έξοδα αποστολής)`
+                              : ''
+                          }`}
+                          <br />
+                          <span className="proxima-nova">
+                            Παράδωση στο σπίτι σου
+                          </span>
+                        </span>
+                      }
+                    />
+                    {countryIsGreece && (
+                      <>
+                        <hr className="w-full border-[var(--mantine-border)]" />
+                        <Radio
+                          size="sm"
+                          value="BOX NOW"
+                          styles={{ body: { alignItems: 'center' } }}
+                          label={
+                            <>
+                              <span>
+                                {`BOX NOW ${
+                                  shipping.expense_box_now
+                                    ? `(${shipping.expense_box_now}€ έξοδα αποστολής)`
+                                    : ''
+                                }`}
+                                <br />
+                                <span className="proxima-nova">
+                                  Παραλαβή από locker
+                                </span>
+                              </span>
+                              <button
+                                ref={boxNowButtonRef}
+                                type="button"
+                                onClick={(e) => e.stopPropagation()}
+                                className="boxnow-map-widget-button hidden"
+                              />
+                            </>
+                          }
+                        />
+                      </>
+                    )}
+                  </Group>
+                  <div
+                    id="boxnowmap"
+                    className={`${
+                      form.getValues().delivery_method === 'BOX NOW'
+                        ? 'h-[750px]'
+                        : 'hidden'
+                    }`}
+                  />
+                </Radio.Group>
+
+                <h1 className="text-xl mt-4">Τρόπος Πληρωμής</h1>
                 <Radio.Group
                   name="payment_method"
                   value={form.values.payment_method}
@@ -701,25 +854,41 @@ export function CheckoutPageClient({
                             className="max-w-[750px]"
                           />
                           <h3 className="mt-1">
-                            Κάρτα, Iris, Google Pay ... (viva.com)
+                            Τραπεζική Κάρτα, Iris, Apple Pay ... (Viva.com)
                           </h3>
                         </div>
                       }
                     />
-                    <hr className="w-full border-[var(--mantine-border)]" />
-                    <Radio
-                      size="sm"
-                      value="Αντικαταβολή"
-                      styles={{ body: { alignItems: 'center' } }}
-                      label={
-                        <span>
-                          Αντικαταβολή <br /> Δεν συνιστάται
-                          {shipping.surcharge
-                            ? ` (+${shipping.surcharge}€ επιβάρυνση)`
-                            : ''}
-                        </span>
-                      }
-                    />
+                    {countryIsGreece && (
+                      <>
+                        <hr className="w-full border-[var(--mantine-border)]" />
+                        <Radio
+                          size="sm"
+                          value="Αντικαταβολή"
+                          styles={{ body: { alignItems: 'center' } }}
+                          label={
+                            <span>
+                              {form.getValues().delivery_method ===
+                              'ΕΛΤΑ Courier'
+                                ? 'Αντικαταβολή'
+                                : 'Πληρωμή online κατά την παραλαβή'}
+                              <br />
+                              <span className="proxima-nova">
+                                {form.getValues().delivery_method ===
+                                'ΕΛΤΑ Courier'
+                                  ? 'Δεν συνιστάται'
+                                  : '* Όχι μετρητά'}
+                                {`${
+                                  shipping.surcharge
+                                    ? ` (+${shipping.surcharge}€ επιβάρυνση)`
+                                    : ''
+                                }`}
+                              </span>
+                            </span>
+                          }
+                        />
+                      </>
+                    )}
                   </Group>
                 </Radio.Group>
 
@@ -830,20 +999,25 @@ export function CheckoutPageClient({
                     <h2>Έξοδα αποστολής</h2>
                     {!freeShipping ? (
                       <p className="ml-auto">
-                        {shipping.expense
-                          ? shipping.expense.toFixed(2)
+                        {shipping.expense_elta_courier
+                          ? shipping.expense_elta_courier.toFixed(2)
+                          : shipping.expense_box_now
+                          ? shipping.expense_box_now.toFixed(2)
                           : '0.00'}
                         €
                       </p>
                     ) : (
                       <div className="ml-auto flex gap-2 items-center">
                         <p className="text-[var(--mantine-border)] line-through decoration-red-500">
-                          {shipping.expense
-                            ? shipping.expense.toFixed(2)
+                          {shipping.expense_elta_courier
+                            ? shipping.expense_elta_courier.toFixed(2)
+                            : shipping.expense_box_now
+                            ? shipping.expense_box_now.toFixed(2)
                             : '0.00'}
                           €
                         </p>
-                        {shipping.expense && <p>0.00€</p>}
+                        {shipping.expense_elta_courier ||
+                          (shipping.expense_box_now && <p>0.00€</p>)}
                       </div>
                     )}
                   </div>

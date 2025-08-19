@@ -5,6 +5,7 @@ import { ROUTE_ERROR } from '@/data/routes'
 import { getShippingCached, getVariantsCached } from '@/app/(user)/cache'
 import { redirect } from 'next/navigation'
 import { getOrderByOrderCode } from '@/utils/getPostgres'
+import { errorPostgres } from '@/data/error'
 
 type CheckoutPageProps = {
   searchParams: Promise<{ abandon_cart?: string; s?: string }>
@@ -49,7 +50,8 @@ export default async function CheckoutPage({
         email: order.checkout.email,
       }
     } catch (err) {
-      redirect(`${ROUTE_ERROR}?message=${err}`)
+      console.error(err)
+      redirect(`${ROUTE_ERROR}?message=${errorPostgres}`)
     }
   }
 

@@ -8,7 +8,7 @@ import { z } from 'zod'
 
 export async function GET(
   req: NextRequest,
-  route: { params: Promise<{ image: string }> }
+  route: { params: Promise<{ image: string }> },
 ) {
   await isSessionAPI(await headers())
   const resolvedParams = await route.params
@@ -25,7 +25,7 @@ export async function GET(
   try {
     const res = await axios.get(
       `${envServer.MINIO_PRODUCT_URL}/home_page/${validatedParams.image}`,
-      { responseType: 'arraybuffer' }
+      { responseType: 'arraybuffer' },
     )
     if (res.status === 200) {
       return new NextResponse(res.data, {
@@ -37,8 +37,8 @@ export async function GET(
     } else {
       return NextResponse.json({ message: errorMinio }, { status: 400 })
     }
-  } catch (e) {
-    console.error(errorMinio, e)
+  } catch (err) {
+    console.error(err)
     return NextResponse.json({ message: errorAxios }, { status: 500 })
   }
 }

@@ -616,8 +616,7 @@ export function AdminOrderPageClient({
 
           {modalState.type === 'Delete' && (
             <div className="flex flex-col">
-              <h1>You are about to delete order with id: {modalState.id}</h1>
-              <h2>Click the delete button to delete.</h2>
+              <h1>You are about to delete order with id: #{modalState.id}.</h1>
               <Button
                 onClick={async () => {
                   setOnRequest(true)
@@ -640,9 +639,9 @@ export function AdminOrderPageClient({
                       )
                       console.error(res)
                     }
-                  } catch (e) {
+                  } catch (err) {
                     alert(`Error deleting ${order.id}`)
-                    console.error(e)
+                    console.error(err)
                   }
                   setOnRequest(false)
                 }}
@@ -663,7 +662,7 @@ export function AdminOrderPageClient({
           <Table.Thead>
             <Table.Tr style={{ borderBottom: 'none' }}>
               <Table.Th
-                colSpan={15}
+                colSpan={17}
                 style={{ textAlign: 'center' }}
                 className="text-2xl font-bold"
               >
@@ -704,9 +703,12 @@ export function AdminOrderPageClient({
                 Tracking Number
               </Table.Th>
               <Table.Th style={{ textAlign: 'center' }}>
-                Fulfilled Email
+                Date Delivered
               </Table.Th>
               <Table.Th style={{ textAlign: 'center' }}>Review Email</Table.Th>
+              <Table.Th style={{ textAlign: 'center' }}>
+                Review Submitted
+              </Table.Th>
               <Table.Th />
             </Table.Tr>
           </Table.Thead>
@@ -764,8 +766,10 @@ export function AdminOrderPageClient({
                       setModalState({ type: 'Checkout', id: order.id })
                       openModal()
                     }}
+                    color="blue"
+                    size="compact-md"
                   >
-                    Info
+                    info
                   </Button>
                 </Table.Td>
                 <Table.Td style={{ textAlign: 'center' }}>
@@ -774,8 +778,10 @@ export function AdminOrderPageClient({
                       setModalState({ type: 'Cart', id: order.id })
                       openModal()
                     }}
+                    color="blue"
+                    size="compact-md"
                   >
-                    Info
+                    info
                   </Button>
                 </Table.Td>
                 <Table.Td style={{ textAlign: 'center' }}>
@@ -789,9 +795,9 @@ export function AdminOrderPageClient({
                       <Text size="sm">
                         {order.coupon
                           ? order.coupon.percentage
-                            ? `- ${order.coupon.percentage * 100}%`
+                            ? `${order.coupon.percentage * 100}%`
                             : order.coupon.fixed
-                            ? `- ${order.coupon.fixed}€`
+                            ? `${order.coupon.fixed}€`
                             : order.coupon.coupon_code
                           : '-'}
                       </Text>
@@ -850,7 +856,13 @@ export function AdminOrderPageClient({
                     whiteSpace: 'nowrap',
                   }}
                 >
-                  {order.fulfilled_email ? 'send' : 'not-send'}
+                  {order.date_delivered
+                    ? formatInTimeZone(
+                        order.date_delivered,
+                        'UTC',
+                        'dd/MM/yyyy HH:mm:ss',
+                      )
+                    : '-'}
                 </Table.Td>
                 <Table.Td
                   style={{
@@ -866,6 +878,14 @@ export function AdminOrderPageClient({
                     whiteSpace: 'nowrap',
                   }}
                 >
+                  {order.review_submitted ? 'yes' : 'no'}
+                </Table.Td>
+                <Table.Td
+                  style={{
+                    textAlign: 'center',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
                   <Button
                     onClick={async () => {
                       setModalState({ type: 'Delete', id: order.id })
@@ -874,8 +894,9 @@ export function AdminOrderPageClient({
                     type="button"
                     disabled={onRequest}
                     color="red"
+                    size="compact-md"
                   >
-                    {onRequest ? 'Wait ...' : 'Delete'}
+                    {onRequest ? 'Wait ...' : 'delete'}
                   </Button>
                 </Table.Td>
               </Table.Tr>
@@ -883,7 +904,7 @@ export function AdminOrderPageClient({
           </Table.Tbody>
           <Table.Tfoot>
             <Table.Tr>
-              <Table.Td colSpan={15} style={{ textAlign: 'center' }}>
+              <Table.Td colSpan={17} style={{ textAlign: 'center' }}>
                 <div
                   style={{
                     display: 'flex',
@@ -943,9 +964,9 @@ export function AdminOrderPageClient({
                           )
                           console.error(res)
                         }
-                      } catch (e) {
+                      } catch (err) {
                         alert('Error creating New Orders')
-                        console.error(e)
+                        console.error(err)
                       }
                       setOnRequest(false)
                     }}

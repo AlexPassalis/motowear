@@ -53,9 +53,9 @@ export function NewProductType({
               )
               console.error(res)
             }
-          } catch (e) {
+          } catch (err) {
             alert('Error creating product type')
-            console.error(e)
+            console.error(err)
           }
           if (newProductTypeRef.current) {
             newProductTypeRef.current.value = ''

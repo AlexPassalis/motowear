@@ -152,9 +152,9 @@ export function BrandsComponent({
                                       )
                                       console.error(res)
                                     }
-                                  } catch (e) {
+                                  } catch (err) {
                                     alert(`Error deleting ${brand}`)
-                                    console.error(e)
+                                    console.error(err)
                                   }
                                   setOnRequest(false)
                                 } else {
@@ -242,9 +242,9 @@ export function BrandsComponent({
               validatedImageNew.forEach((image) => {
                 formData.append('imageNew', image, image.name)
               })
-            } catch (e) {
+            } catch (err) {
               alert('Error appending to formData')
-              console.error(e)
+              console.error(err)
               return
             }
 
@@ -267,9 +267,9 @@ export function BrandsComponent({
                 )
                 console.error(res)
               }
-            } catch (e) {
+            } catch (err) {
               alert('Error creating brands')
-              console.error(e)
+              console.error(err)
             }
             setOnRequest(false)
           }}

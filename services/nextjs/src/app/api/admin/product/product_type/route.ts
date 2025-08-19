@@ -34,14 +34,15 @@ export async function POST(req: NextRequest) {
     validatedBody = z
       .object({ product_type: z.string() })
       .parse(await req.json())
-  } catch (e) {
+  } catch (err) {
     const message = formatMessage(
       '@/app/api/product/product_type/route.ts POST',
       errorInvalidBody,
-      e,
+      err,
     )
     console.error(message)
-    sendTelegramMessage('ERROR', message)
+    await sendTelegramMessage('ERROR', message)
+
     return NextResponse.json({ message: errorInvalidBody }, { status: 400 })
   }
 
@@ -54,14 +55,15 @@ export async function POST(req: NextRequest) {
       carousel: [],
       upsell: '',
     })
-  } catch (e) {
+  } catch (err) {
     const message = formatMessage(
       '@/app/api/product/product_type/route.ts POST',
       errorPostgres,
-      e,
+      err,
     )
     console.error(message)
-    sendTelegramMessage('ERROR', message)
+    await sendTelegramMessage('ERROR', message)
+
     return NextResponse.json({ message: errorPostgres }, { status: 500 })
   }
 
@@ -70,8 +72,8 @@ export async function POST(req: NextRequest) {
   try {
     product_types_postgres = await getProductTypes()
     pages_postgres = await getPages()
-  } catch (e) {
-    return NextResponse.json({ message: e }, { status: 500 })
+  } catch (err) {
+    return NextResponse.json({ message: err }, { status: 500 })
   }
 
   try {
@@ -82,14 +84,15 @@ export async function POST(req: NextRequest) {
       3600,
     )
     await redis.set('pages', JSON.stringify(pages_postgres), 'EX', 3600)
-  } catch (e) {
+  } catch (err) {
     const message = formatMessage(
       '@/app/api/product/product_type/route.ts POST',
       errorRedis,
-      e,
+      err,
     )
     console.error(message)
-    sendTelegramMessage('ERROR', message)
+    await sendTelegramMessage('ERROR', message)
+
     return NextResponse.json({ message: errorRedis }, { status: 500 })
   }
 
@@ -111,22 +114,22 @@ export async function DELETE(req: NextRequest) {
     await postgres.execute(sql`
       DROP TABLE IF EXISTS product."${sql.raw(productType)}"
     `)
-  } catch (e) {
-    console.error(errorPostgres, e)
+  } catch (err) {
+    console.error(errorPostgres, err)
     return NextResponse.json({ message: errorPostgres }, { status: 500 })
   }
 
   try {
     await deleteTypeImages(`${productType}`)
-  } catch (e) {
-    console.error(errorMinio, e)
+  } catch (err) {
+    console.error(errorMinio, err)
     return NextResponse.json({ message: errorMinio }, { status: 500 })
   }
 
   try {
     await updateTypesense(productType)
-  } catch (e) {
-    console.error(errorTypesense, e)
+  } catch (err) {
+    console.error(errorTypesense, err)
     return NextResponse.json({ message: errorTypesense }, { status: 500 })
   }
 
@@ -139,8 +142,8 @@ export async function DELETE(req: NextRequest) {
     variants = await getVariants()
     pages = await getPages()
     home_page_variants = await getHomePageVariants()
-  } catch (e) {
-    return NextResponse.json({ message: e }, { status: 500 })
+  } catch (err) {
+    return NextResponse.json({ message: err }, { status: 500 })
   }
 
   try {
@@ -153,14 +156,15 @@ export async function DELETE(req: NextRequest) {
       'EX',
       3600,
     )
-  } catch (e) {
+  } catch (err) {
     const message = formatMessage(
       '@/app/api/admin/product/product_type/route.ts DELETE',
       errorRedis,
-      e,
+      err,
     )
     console.error(message)
-    sendTelegramMessage('ERROR', message)
+    await sendTelegramMessage('ERROR', message)
+
     return NextResponse.json({ message: errorRedis }, { status: 500 })
   }
 

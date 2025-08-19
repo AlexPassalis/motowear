@@ -21,11 +21,11 @@ export async function sendTelegramMessage(
     await bot.telegram.sendMessage(chatId, message, {
       parse_mode: 'HTML',
     })
-  } catch (e) {
+  } catch (err) {
     const message = formatMessage(
       '@/lib/telegram/index.ts sendTelegramMessage()',
       errorTelegram,
-      e,
+      err,
     )
     console.error(message)
   }

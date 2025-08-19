@@ -285,9 +285,9 @@ export function AdminPageClient({
                   )
                   console.error(res)
                 }
-              } catch (e) {
+              } catch (err) {
                 alert('Error creating New Versions')
-                console.error(e)
+                console.error(err)
               }
               setOnRequest(false)
             }}
@@ -379,9 +379,9 @@ export function AdminPageClient({
                       )
                       console.error(res)
                     }
-                  } catch (e) {
+                  } catch (err) {
                     alert('Error deleting coupon')
-                    console.error(e)
+                    console.error(err)
                   }
                   setOnRequest(false)
                 }}
@@ -442,9 +442,9 @@ export function AdminPageClient({
                   )
                   console.error(res)
                 }
-              } catch (e) {
+              } catch (err) {
                 alert('Error creating New coupons')
-                console.error(e)
+                console.error(err)
               }
               setOnRequest(false)
             }}

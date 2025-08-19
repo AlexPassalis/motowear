@@ -22,7 +22,7 @@ export const config = {
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse,
 ) {
   if (req.method === 'POST') {
     await isSessionPages(req, res)
@@ -64,12 +64,12 @@ export default async function handler(
         try {
           const limit = pLimit(10)
           await Promise.all(
-            imageNew.map(imageFile =>
-              limit(() => uploadFile('brands', imageFile))
-            )
+            imageNew.map((imageFile) =>
+              limit(() => uploadFile('brands', imageFile)),
+            ),
           )
-        } catch (e) {
-          console.error(errorMinio, e)
+        } catch (err) {
+          console.error(errorMinio, err)
           return res.status(500).json({ message: errorMinio })
         }
       }
@@ -91,16 +91,16 @@ export default async function handler(
                   set: { index: newIndex },
                 })
             })
-          })
+          }),
         )
-      } catch (e) {
-        console.error(errorPostgres, e)
+      } catch (err) {
+        console.error(errorPostgres, err)
         return res.status(500).json({ message: errorPostgres })
       }
 
       return res.status(200).json({})
-    } catch (e) {
-      console.error(errorFormidable, e)
+    } catch (err) {
+      console.error(errorFormidable, err)
       return res.status(500).json({ message: errorFormidable })
     }
   } else {
