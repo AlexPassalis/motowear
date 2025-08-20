@@ -273,6 +273,7 @@ export function CheckoutPageClient({
     requestAnimationFrame(() => boxNowButtonRef.current?.click())
     setBoxNowMapHasRendered(true)
   }, [countryIsGreece, boxNowScriptHasLoaded, boxNowMapHasRendered])
+  const isBoxNow = form.getValues().delivery_method === 'BOX NOW'
 
   useEffect(() => {
     const onBoxNowLockerSelection = (e: Event) => {
@@ -297,15 +298,17 @@ export function CheckoutPageClient({
     }
   }, [])
   useEffect(() => {
-    if (form.getValues().delivery_method !== 'BOX NOW') {
+    if (!isBoxNow) {
       form.setFieldValue('box_now_locker_id', null)
     }
   }, [form.getValues().delivery_method])
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Script id="boxnow-config" strategy="afterInteractive">
-        {`
+      {isBoxNow && (
+        <>
+          <Script id="boxnow-config" strategy="afterInteractive">
+            {`
           window._bn_map_widget_config = {
             partnerId: ${envClient.BOX_NOW_PARTNER_ID},
             parentElement: "#boxnowmap",
@@ -316,12 +319,14 @@ export function CheckoutPageClient({
             }
           };
         `}
-      </Script>
-      <Script
-        src="https://widget-cdn.boxnow.gr/map-widget/client/v5.js"
-        strategy="afterInteractive"
-        onLoad={() => setBoxNowScriptHasLoaded(true)}
-      />
+          </Script>
+          <Script
+            src="https://widget-cdn.boxnow.gr/map-widget/client/v5.js"
+            strategy="afterInteractive"
+            onLoad={() => setBoxNowScriptHasLoaded(true)}
+          />
+        </>
+      )}
 
       <header className="relative flex justify-center p-2 border-b border-b-[var(--mantine-border)]">
         <Link
@@ -821,11 +826,7 @@ export function CheckoutPageClient({
                   />
                   <div
                     id="boxnowmap"
-                    className={`${
-                      form.getValues().delivery_method === 'BOX NOW'
-                        ? 'h-[750px]'
-                        : 'hidden'
-                    }`}
+                    className={`${isBoxNow ? 'h-[750px]' : 'hidden'}`}
                   />
                 </Radio.Group>
 
@@ -978,7 +979,7 @@ export function CheckoutPageClient({
                     <div className="ml-auto flex gap-2 items-center">
                       {coupon && (
                         <p className="text-[var(--mantine-border)] line-through decoration-red-500">
-                          {(cartTotal * 0.76).toFixed(2)}€
+                          {(baseCartTotal * 0.76).toFixed(2)}€
                         </p>
                       )}
                       <p>{(cartTotal * 0.76).toFixed(2)}€</p>
@@ -989,7 +990,7 @@ export function CheckoutPageClient({
                     <div className="ml-auto flex gap-2 items-center">
                       {coupon && (
                         <p className="text-[var(--mantine-border)] line-through decoration-red-500">
-                          {(cartTotal * 0.24).toFixed(2)}€
+                          {(baseCartTotal * 0.24).toFixed(2)}€
                         </p>
                       )}
                       <p>{(cartTotal * 0.24).toFixed(2)}€</p>
