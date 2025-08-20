@@ -26,6 +26,14 @@ type AdminPageClientProps = {
   postgres_coupons: typeCoupons
 }
 
+type typeData = {
+  date: string
+  revenue: number
+  orders: number
+  sessions: number
+  conversion: number
+}[]
+
 export function AdminPageClient({
   orders,
   daily_sessions,
@@ -41,15 +49,7 @@ export function AdminPageClient({
     addDays(todayAthens, 1),
   ])
 
-  const [visibleData, setVisibleData] = useState<
-    {
-      date: string
-      revenue: number
-      orders: number
-      sessions: number
-      conversion: number
-    }[]
-  >([])
+  const [visibleData, setVisibleData] = useState<typeData>([])
 
   useEffect(() => {
     if (!dateRange[0] || !dateRange[1]) {
@@ -60,13 +60,7 @@ export function AdminPageClient({
     const startAthens = startOfDay(toZonedTime(dateRange[0], timezone))
     const endAthens = startOfDay(toZonedTime(dateRange[1], timezone))
 
-    const data: {
-      date: string
-      revenue: number
-      orders: number
-      sessions: number
-      conversion: number
-    }[] = []
+    const data: typeData = []
 
     orders.forEach((order) => {
       const orderDate = toZonedTime(order.order_date, timezone)
@@ -74,14 +68,16 @@ export function AdminPageClient({
         const date = format(orderDate, 'yyyy-MM-dd', { timeZone: timezone })
         const existingEntry = data.find((item) => item.date === date)
         if (existingEntry) {
-          existingEntry.revenue += order.total
+          existingEntry.revenue = Number(
+            (existingEntry.revenue + order.total).toFixed(2),
+          )
           existingEntry.orders++
           existingEntry.sessions = 0
           existingEntry.conversion = 0
         } else {
           data.push({
             date: date,
-            revenue: order.total,
+            revenue: Number(order.total.toFixed(2)),
             orders: 1,
             sessions: 0,
             conversion: 0,
