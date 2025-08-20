@@ -255,22 +255,32 @@ export function CheckoutPageClient({
     orderCompleteResponse,
   ])
 
+  const countryIsGreece = form.getValues().country === 'Ελλάδα'
+  useEffect(() => {
+    if (form.getValues().country === 'Κύπρος') {
+      form.setFieldValue('delivery_method', 'ΕΛΤΑ Courier')
+      form.setFieldValue('payment_method', 'Κάρτα')
+    }
+  }, [form.getValues().country])
+
   const [boxNowScriptHasLoaded, setBoxNowScriptHasLoaded] = useState(false)
+  const [boxNowMapHasRendered, setBoxNowMapHasRendered] = useState(false)
   const boxNowButtonRef = useRef<HTMLButtonElement | null>(null)
   useEffect(() => {
-    if (boxNowScriptHasLoaded) {
-      requestAnimationFrame(() => boxNowButtonRef.current?.click())
+    if (!countryIsGreece || !boxNowScriptHasLoaded || boxNowMapHasRendered) {
+      return
     }
-  }, [boxNowScriptHasLoaded])
+    requestAnimationFrame(() => boxNowButtonRef.current?.click())
+    setBoxNowMapHasRendered(true)
+  }, [countryIsGreece, boxNowScriptHasLoaded, boxNowMapHasRendered])
 
-  type typeBoxNowDetail = {
-    boxnowLockerPostalCode: string
-    boxnowLockerAddressLine1: string
-    boxnowLockerId: string
-  }
   useEffect(() => {
     const onBoxNowLockerSelection = (e: Event) => {
-      const { detail } = e as CustomEvent<typeBoxNowDetail>
+      const { detail } = e as CustomEvent<{
+        boxnowLockerPostalCode: string
+        boxnowLockerAddressLine1: string
+        boxnowLockerId: string
+      }>
       const { boxnowLockerId } = detail
       form.setFieldValue('box_now_locker_id', boxnowLockerId)
     }
@@ -291,14 +301,6 @@ export function CheckoutPageClient({
       form.setFieldValue('box_now_locker_id', null)
     }
   }, [form.getValues().delivery_method])
-
-  const countryIsGreece = form.getValues().country === 'Ελλάδα'
-  useEffect(() => {
-    if (form.getValues().country === 'Κύπρος') {
-      form.setFieldValue('delivery_method', 'ΕΛΤΑ Courier')
-      form.setFieldValue('payment_method', 'Κάρτα')
-    }
-  }, [form.getValues().country])
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -548,7 +550,7 @@ export function CheckoutPageClient({
                 </div>
 
                 <div>
-                  <h1 className="text-xl mt-4">Παράδωση</h1>
+                  <h1 className="text-xl mt-4">Παράδοση</h1>
                   <div className="flex flex-col gap-3">
                     <Select
                       key={form.key('country')}
@@ -754,7 +756,7 @@ export function CheckoutPageClient({
                   </Accordion>
                 </div>
 
-                <h1 className="text-xl mt-4 lg:mt-0">Τρόπος Παράδωσης</h1>
+                <h1 className="text-xl mt-4 lg:mt-0">Τρόπος Παράδοσης</h1>
                 <Radio.Group
                   name="delivery_method"
                   value={form.values.delivery_method}
@@ -782,7 +784,7 @@ export function CheckoutPageClient({
                           }`}
                           <br />
                           <span className="proxima-nova">
-                            Παράδωση στο σπίτι σου
+                            Παράδοση στο σπίτι σου
                           </span>
                         </span>
                       }
@@ -795,30 +797,28 @@ export function CheckoutPageClient({
                           value="BOX NOW"
                           styles={{ body: { alignItems: 'center' } }}
                           label={
-                            <>
-                              <span>
-                                {`BOX NOW ${
-                                  shipping.expense_box_now
-                                    ? `(${shipping.expense_box_now}€ έξοδα αποστολής)`
-                                    : ''
-                                }`}
-                                <br />
-                                <span className="proxima-nova">
-                                  Παραλαβή από locker
-                                </span>
+                            <span>
+                              {`BOX NOW ${
+                                shipping.expense_box_now
+                                  ? `(${shipping.expense_box_now}€ έξοδα αποστολής)`
+                                  : ''
+                              }`}
+                              <br />
+                              <span className="proxima-nova">
+                                Παραλαβή από locker
                               </span>
-                              <button
-                                ref={boxNowButtonRef}
-                                type="button"
-                                onClick={(e) => e.stopPropagation()}
-                                className="boxnow-map-widget-button hidden"
-                              />
-                            </>
+                            </span>
                           }
                         />
                       </>
                     )}
                   </Group>
+                  <button
+                    ref={boxNowButtonRef}
+                    type="button"
+                    onClick={(e) => e.stopPropagation()}
+                    className="boxnow-map-widget-button hidden"
+                  />
                   <div
                     id="boxnowmap"
                     className={`${
