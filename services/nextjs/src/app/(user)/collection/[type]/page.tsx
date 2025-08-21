@@ -1,14 +1,14 @@
-import { Metadata } from 'next'
+// import { Metadata } from 'next'
 import { notFound, redirect } from 'next/navigation'
 import {
-  getPagesCached,
+  // getPagesCached,
   getProductTypesCached,
   getShippingCached,
   getVariantsCached,
 } from '@/app/(user)/cache'
 import { ROUTE_ERROR } from '@/data/routes'
-import { errorPostgres } from '@/data/error'
-import { envServer } from '@/env'
+// import { errorPostgres } from '@/data/error'
+// import { envServer } from '@/env'
 
 import { CollectionPageClient } from '@/app/(user)/collection/[type]/client'
 
@@ -17,77 +17,77 @@ type ProductPageProps = {
   params: Promise<typeParams>
 }
 
-export async function generateMetadata({
-  params,
-}: ProductPageProps): Promise<Metadata> {
-  const resolvedParams = await params
-  if (!resolvedParams?.type) {
-    notFound()
-  }
-  const paramsProduct_type = resolvedParams.type
+// export async function generateMetadata({
+//   params,
+// }: ProductPageProps): Promise<Metadata> {
+//   const resolvedParams = await params
+//   if (!resolvedParams?.type) {
+//     notFound()
+//   }
+//   const paramsProduct_type = resolvedParams.type
 
-  const resolved = await Promise.allSettled([
-    getPagesCached(),
-    getVariantsCached(),
-  ])
-  if (resolved[0].status === 'rejected') {
-    console.error(resolved[0].reason)
-    redirect(`${ROUTE_ERROR}?message=${errorPostgres}`)
-  }
-  if (resolved[1].status === 'rejected') {
-    console.error(resolved[1].reason)
-    redirect(`${ROUTE_ERROR}?message=${errorPostgres}`)
-  }
+//   const resolved = await Promise.allSettled([
+//     getPagesCached(),
+//     getVariantsCached(),
+//   ])
+//   if (resolved[0].status === 'rejected') {
+//     console.error(resolved[0].reason)
+//     redirect(`${ROUTE_ERROR}?message=${errorPostgres}`)
+//   }
+//   if (resolved[1].status === 'rejected') {
+//     console.error(resolved[1].reason)
+//     redirect(`${ROUTE_ERROR}?message=${errorPostgres}`)
+//   }
 
-  const description = resolved[0].value.find(
-    (page) => page.product_type === paramsProduct_type,
-  )!.product_description
-  const canonical = `/collection/${decodeURIComponent(paramsProduct_type)}`
+//   const description = resolved[0].value.find(
+//     (page) => page.product_type === paramsProduct_type,
+//   )!.product_description
+//   const canonical = `/collection/${decodeURIComponent(paramsProduct_type)}`
 
-  const firstProductImageFileName = resolved[1].value
-    .filter((variant) => variant.product_type === paramsProduct_type)
-    .filter(
-      (variant, index, self) =>
-        self.findIndex(
-          (v) => v.name === variant.name && v.color === variant.color,
-        ) === index,
-    )
-    .map((variant) => {
-      return {
-        name: variant.name,
-        color: variant.color,
-        brand: variant.brand,
-        image: variant.images[0],
-      }
-    })
-    .sort((a, b) => a.name.localeCompare(b.name))[0].image
+//   const firstProductImageFileName = resolved[1].value
+//     .filter((variant) => variant.product_type === paramsProduct_type)
+//     .filter(
+//       (variant, index, self) =>
+//         self.findIndex(
+//           (v) => v.name === variant.name && v.color === variant.color,
+//         ) === index,
+//     )
+//     .map((variant) => {
+//       return {
+//         name: variant.name,
+//         color: variant.color,
+//         brand: variant.brand,
+//         image: variant.images[0],
+//       }
+//     })
+//     .sort((a, b) => a.name.localeCompare(b.name))[0].image
 
-  const firstProductImageUrl = `${
-    envServer.MINIO_PUBLIC_URL
-  }/${decodeURIComponent(paramsProduct_type)}/${decodeURIComponent(
-    firstProductImageFileName,
-  )}`
+//   const firstProductImageUrl = `${
+//     envServer.MINIO_PUBLIC_URL
+//   }/${decodeURIComponent(paramsProduct_type)}/${decodeURIComponent(
+//     firstProductImageFileName,
+//   )}`
 
-  return {
-    title: paramsProduct_type,
-    description: description,
-    alternates: { canonical: canonical },
-    openGraph: {
-      url: canonical,
-      title: paramsProduct_type,
-      description: description,
-      images: [
-        {
-          url: firstProductImageUrl,
-          width: 1200,
-          height: 630,
-          alt: paramsProduct_type,
-        },
-      ],
-    },
-    robots: { index: true, follow: true },
-  }
-}
+//   return {
+//     title: paramsProduct_type,
+//     description: description,
+//     alternates: { canonical: canonical },
+//     openGraph: {
+//       url: canonical,
+//       title: paramsProduct_type,
+//       description: description,
+//       images: [
+//         {
+//           url: firstProductImageUrl,
+//           width: 1200,
+//           height: 630,
+//           alt: paramsProduct_type,
+//         },
+//       ],
+//     },
+//     robots: { index: true, follow: true },
+//   }
+// }
 
 export default async function CollectionPage({ params }: ProductPageProps) {
   const resolved = await Promise.allSettled([
