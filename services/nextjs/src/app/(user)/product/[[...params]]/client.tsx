@@ -1545,7 +1545,7 @@ function Main({
                 `${ROUTE_PRODUCT}/${paramsProduct_type}/${specialVariant}`,
               )
             }}
-            className="block mb-8 text-red-500 text-center text-lg hover:underline"
+            className="block mx-4 mb-8 text-red-500 text-center text-lg hover:underline"
           >
             ΔΕΝ ΒΡΙΣΚΕΙΣ ΤΗ ΜΗΧΑΝΗ ΣΟΥ; <br />
             Εάν δεν βρίσκεις το μοντέλο της μηχανής σου ή την μάρκα της, πάτησε
