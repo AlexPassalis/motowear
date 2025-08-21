@@ -48,15 +48,40 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
 })
 
+import { envClient, envServer } from '@/env'
+
 export const metadata: Metadata = {
-  metadataBase: new URL('https://motowear.gr'),
+  metadataBase: new URL(`https://${envServer.HOST}`),
   title: {
-    default: 'motowear.gr',
-    template: '%s | motowear.gr',
+    default: `${envServer.HOST}`,
+    template: `%s | ${envServer.HOST}`,
   },
-  description:
-    'Για όσους ζουν για τη μηχανή τους: Στο motowear.gr θα βρεις ρούχα, βάσεις κράνους, καλύμματα και μοναδικά αξεσουάρ που φτιάχτηκαν από αναβάτες για αναβάτες.',
-  alternates: { canonical: '/' },
+  description: `Για όσους ζουν για τη μηχανή τους: Στο ${envServer.HOST} θα βρεις ρούχα, βάσεις κράνους, καλύμματα και μοναδικά αξεσουάρ που φτιάχτηκαν από αναβάτες για αναβάτες.`,
+  openGraph: {
+    type: 'website',
+    siteName: `${envServer.HOST}`,
+    locale: 'el_GR',
+    images: [
+      { url: '/motowear.png', width: 1200, height: 630, alt: 'motowear.gr' },
+    ],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+      'max-video-preview': -1,
+    },
+  },
+  icons: {
+    icon: [{ url: 'favicon.ico', sizes: '40x40', type: 'image/x-icon' }],
+    shortcut: ['/favicon.ico'],
+  },
+  manifest: '/site.webmanifest',
+  themeColor: [{ media: '(prefers-color-scheme: light)', color: '#ffffff' }],
 }
 
 const customTheme = createTheme({
@@ -112,8 +137,6 @@ const customTheme = createTheme({
 })
 
 import '@/lib/cron/index'
-
-import { envClient } from '@/env'
 
 import { GoogleAnalytics } from '@next/third-parties/google'
 import { Track } from '@/app/Track'

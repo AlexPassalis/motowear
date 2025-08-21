@@ -35,7 +35,7 @@ export default async function ReviewPage({ searchParams }: ReviewPageProps) {
   }
 
   if (!resolved[0].value?.order_id) {
-    return notFound()
+    notFound()
   }
 
   let array
@@ -46,7 +46,7 @@ export default async function ReviewPage({ searchParams }: ReviewPageProps) {
   }
 
   if (array.length !== 1) {
-    return notFound()
+    notFound()
   }
 
   const orderId = array[0].id
