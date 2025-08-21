@@ -1,4 +1,5 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
+
 import localFont from 'next/font/local'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { ReactNode } from 'react'
@@ -81,6 +82,9 @@ export const metadata: Metadata = {
     shortcut: ['/favicon.ico'],
   },
   manifest: '/site.webmanifest',
+}
+
+export const viewport: Viewport = {
   themeColor: [{ media: '(prefers-color-scheme: light)', color: '#ffffff' }],
 }
 
