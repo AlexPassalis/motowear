@@ -10,85 +10,127 @@ import { notFound, redirect } from 'next/navigation'
 import { ROUTE_ERROR } from '@/data/routes'
 import { Metadata } from 'next'
 import { specialVariant } from '@/data/magic'
+import { errorPostgres } from '@/data/error'
+import { envServer } from '@/env'
 
+type typeParams = { params?: [type?: string, version?: string] }
+type typeSearchParams = { color?: string }
 type ProductPageProps = {
-  params: Promise<{ params?: [type: string, version?: string] }>
-  searchParams: Promise<{ color?: string }>
+  params: Promise<typeParams>
+  searchParams: Promise<typeSearchParams>
 }
 
 export async function generateMetadata({
   params,
+  searchParams,
 }: ProductPageProps): Promise<Metadata> {
+  const resolvedPageProps = await Promise.allSettled([params, searchParams])
+
+  const resolvedParams = (
+    resolvedPageProps[0] as PromiseFulfilledResult<typeParams>
+  ).value
+  if (!resolvedParams?.params || resolvedParams.params.length < 1) {
+    notFound()
+  }
+  const paramsProduct_type = resolvedParams.params[0]!
+  const paramsProduct_version = resolvedParams.params[1]
+
+  const resolvedSearchParams = (
+    resolvedPageProps[1] as PromiseFulfilledResult<typeSearchParams>
+  ).value
+  const searchParamsProduct_color = resolvedSearchParams?.color
+
   const resolved = await Promise.allSettled([
-    params,
     getProductTypesCached(),
     getVariantsCached(),
     getPagesCached(),
   ])
+  if (resolved[0].status === 'rejected') {
+    console.error(resolved[0].reason)
+    redirect(`${ROUTE_ERROR}?message=${errorPostgres}`)
+  }
   if (resolved[1].status === 'rejected') {
-    redirect(`${ROUTE_ERROR}?message=${resolved[1].reason}`)
+    console.error(resolved[1].reason)
+    redirect(`${ROUTE_ERROR}?message=${errorPostgres}`)
   }
   if (resolved[2].status === 'rejected') {
-    redirect(`${ROUTE_ERROR}?message=${resolved[2].reason}`)
-  }
-  if (resolved[3].status === 'rejected') {
-    redirect(`${ROUTE_ERROR}?message=${resolved[3].reason}`)
+    console.error(resolved[2].reason)
+    redirect(`${ROUTE_ERROR}?message=${errorPostgres}`)
   }
 
-  const resolvedParams = (
-    resolved[0] as PromiseFulfilledResult<{
-      params?: [type: string, version?: string]
-    }>
-  ).value
-  if (!resolvedParams.params || resolvedParams.params.length < 1) {
-    return notFound()
-  }
-  const paramsProduct_type = decodeURIComponent(resolvedParams.params[0])
-
-  const postgresVariants = resolved[2].value.filter(
-    (variant) => variant.product_type === paramsProduct_type,
-  )
-
+  const postgresVariants = resolved[1].value
+    .filter((variant) => variant.product_type === paramsProduct_type)
+    .sort(({ name: aName }, { name: bName }) => {
+      if (aName === 'Επίλεξε μηχανή') {
+        return -1
+      }
+      if (bName === 'Επίλεξε μηχανή') {
+        return 1
+      }
+      if (aName === specialVariant) {
+        return 1
+      }
+      if (bName === specialVariant) {
+        return -1
+      }
+      return aName.localeCompare(bName)
+    })
   if (
     !postgresVariants.find(
       (variant) => variant.product_type === paramsProduct_type,
     )
   ) {
-    return notFound()
+    notFound()
   }
 
-  const variant = resolvedParams.params?.[1]
-    ? decodeURIComponent(resolvedParams.params?.[1])
-    : undefined
-  const paramsVariant = variant
-    ? postgresVariants.find((v) => v.name === variant) ?? undefined
+  const paramsVariant = paramsProduct_version
+    ? postgresVariants.find((v) =>
+        searchParamsProduct_color
+          ? v.name === paramsProduct_version &&
+            v.color === searchParamsProduct_color
+          : v.name === paramsProduct_version,
+      ) ?? undefined
     : undefined
 
-  const page = resolved[3].value.find(
+  const title = `${
+    paramsVariant
+      ? `${paramsProduct_type} - ${paramsVariant.name}`
+      : paramsProduct_type
+  }`
+  const description = resolved[2].value.find(
     (page) => page.product_type === paramsProduct_type,
-  )!
+  )!.product_description
+  const canonical = `/product/${decodeURIComponent(paramsProduct_type)}/${
+    paramsProduct_version ? decodeURIComponent(paramsProduct_version) : ''
+  }${`${
+    searchParamsProduct_color
+      ? `?color=${decodeURIComponent(searchParamsProduct_color)}`
+      : ''
+  }`}`
+  const productDescription = paramsVariant
+    ? paramsVariant.description
+    : description
 
-  const canonicalPath = paramsVariant
-    ? `/product/${encodeURIComponent(paramsProduct_type)}/${encodeURIComponent(
-        paramsVariant.name,
-      )}`
-    : `/product/${encodeURIComponent(paramsProduct_type)}`
+  const firstProductImageFileName = postgresVariants[0].images[0]
+  const firstProductImageUrl = `${
+    envServer.MINIO_PUBLIC_URL
+  }/${decodeURIComponent(paramsProduct_type)}/${decodeURIComponent(
+    firstProductImageFileName,
+  )}`
 
   return {
-    title: paramsVariant
-      ? `${paramsVariant.name} – ${paramsProduct_type}`
-      : paramsProduct_type,
-    description: page.product_description,
-    alternates: {
-      canonical: canonicalPath,
-    },
+    title: title,
+    description: description,
+    alternates: { canonical: canonical },
     openGraph: {
-      title: paramsVariant
-        ? `${paramsVariant.name} – ${paramsProduct_type}`
-        : paramsProduct_type,
-      description: page.product_description,
-      url: canonicalPath,
+      url: canonical,
+      title: title,
+      description: productDescription,
+      images: [
+        { url: firstProductImageUrl, width: 1200, height: 630, alt: title },
+      ],
     },
+    robots: { index: true, follow: true },
   }
 }
 
@@ -127,7 +169,7 @@ export default async function ProductPage({
     }>
   ).value
   if (!resolvedParams.params || resolvedParams.params.length < 1) {
-    return notFound()
+    notFound()
   }
   const paramsProduct_type = decodeURIComponent(resolvedParams.params[0])
 
@@ -153,7 +195,7 @@ export default async function ProductPage({
       (variant) => variant.product_type === paramsProduct_type,
     )
   ) {
-    return notFound()
+    notFound()
   }
 
   const variant = resolvedParams.params?.[1]

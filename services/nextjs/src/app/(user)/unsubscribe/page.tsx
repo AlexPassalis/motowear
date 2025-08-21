@@ -37,7 +37,7 @@ export default async function UnsubscribePage({
   }
 
   if (!resolved[0].value?.email) {
-    return notFound()
+    notFound()
   }
 
   let deletedCount
@@ -48,7 +48,7 @@ export default async function UnsubscribePage({
   }
 
   if (deletedCount.rowCount !== 1) {
-    return notFound()
+    notFound()
   }
 
   return (

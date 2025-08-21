@@ -28,7 +28,7 @@ export default async function AdminProductProductTypePage({
   }
   const product_type = decodeURIComponent(
     (resolvedFirst[0] as PromiseFulfilledResult<{ product_type: string }>).value
-      .product_type
+      .product_type,
   )
 
   const resolvedSecond = await Promise.allSettled([
@@ -43,7 +43,7 @@ export default async function AdminProductProductTypePage({
   }
 
   if (!resolvedSecond[1].value) {
-    return notFound()
+    notFound()
   }
 
   return (

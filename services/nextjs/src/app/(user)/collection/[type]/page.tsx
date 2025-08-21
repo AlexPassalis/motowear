@@ -1,5 +1,5 @@
+import { Metadata } from 'next'
 import { notFound, redirect } from 'next/navigation'
-import { CollectionPageClient } from '@/app/(user)/collection/[type]/client'
 import {
   getPagesCached,
   getProductTypesCached,
@@ -7,38 +7,85 @@ import {
   getVariantsCached,
 } from '@/app/(user)/cache'
 import { ROUTE_ERROR } from '@/data/routes'
-import { Metadata } from 'next'
+import { errorPostgres } from '@/data/error'
+import { envServer } from '@/env'
 
+import { CollectionPageClient } from '@/app/(user)/collection/[type]/client'
+
+type typeParams = { type?: string }
 type ProductPageProps = {
-  params: Promise<{ type?: string }>
+  params: Promise<typeParams>
 }
 
 export async function generateMetadata({
   params,
 }: ProductPageProps): Promise<Metadata> {
-  const resolved = await Promise.allSettled([params, getPagesCached()])
-  if (resolved[1].status === 'rejected') {
-    redirect(`${ROUTE_ERROR}?message=${resolved[1].reason}`)
-  }
-
-  const resolvedParams = (
-    resolved[0] as PromiseFulfilledResult<{
-      type: string
-    }>
-  ).value
+  const resolvedParams = await params
   if (!resolvedParams?.type) {
-    return notFound()
+    notFound()
   }
-  const paramsProduct_type = decodeURIComponent(resolvedParams.type)
+  const paramsProduct_type = resolvedParams.type
 
-  const description = resolved[1].value.find(
+  const resolved = await Promise.allSettled([
+    getPagesCached(),
+    getVariantsCached(),
+  ])
+  if (resolved[0].status === 'rejected') {
+    console.error(resolved[0].reason)
+    redirect(`${ROUTE_ERROR}?message=${errorPostgres}`)
+  }
+  if (resolved[1].status === 'rejected') {
+    console.error(resolved[1].reason)
+    redirect(`${ROUTE_ERROR}?message=${errorPostgres}`)
+  }
+
+  const description = resolved[0].value.find(
     (page) => page.product_type === paramsProduct_type,
   )!.product_description
+  const canonical = `/collection/${decodeURIComponent(paramsProduct_type)}`
+
+  const firstProductImageFileName = resolved[1].value
+    .filter((variant) => variant.product_type === paramsProduct_type)
+    .filter(
+      (variant, index, self) =>
+        self.findIndex(
+          (v) => v.name === variant.name && v.color === variant.color,
+        ) === index,
+    )
+    .map((variant) => {
+      return {
+        name: variant.name,
+        color: variant.color,
+        brand: variant.brand,
+        image: variant.images[0],
+      }
+    })
+    .sort((a, b) => a.name.localeCompare(b.name))[0].image
+
+  const firstProductImageUrl = `${
+    envServer.MINIO_PUBLIC_URL
+  }/${decodeURIComponent(paramsProduct_type)}/${decodeURIComponent(
+    firstProductImageFileName,
+  )}`
 
   return {
     title: paramsProduct_type,
     description: description,
-    alternates: { canonical: `/collection/${paramsProduct_type}` },
+    alternates: { canonical: canonical },
+    openGraph: {
+      url: canonical,
+      title: paramsProduct_type,
+      description: description,
+      images: [
+        {
+          url: firstProductImageUrl,
+          width: 1200,
+          height: 630,
+          alt: paramsProduct_type,
+        },
+      ],
+    },
+    robots: { index: true, follow: true },
   }
 }
 
@@ -59,13 +106,10 @@ export default async function CollectionPage({ params }: ProductPageProps) {
     redirect(`${ROUTE_ERROR}?message=${resolved[3].reason}`)
   }
 
-  const resolvedParams = (
-    resolved[0] as PromiseFulfilledResult<{
-      type: string
-    }>
-  ).value
+  const resolvedParams = (resolved[0] as PromiseFulfilledResult<typeParams>)
+    .value
   if (!resolvedParams?.type) {
-    return notFound()
+    notFound()
   }
   const paramsProduct_type = decodeURIComponent(resolvedParams.type)
 
@@ -78,7 +122,7 @@ export default async function CollectionPage({ params }: ProductPageProps) {
       (variant) => variant.product_type === paramsProduct_type,
     )
   ) {
-    return notFound()
+    notFound()
   }
 
   const uniqueVariants = postgresVariants
