@@ -999,26 +999,17 @@ export function CheckoutPageClient({
                   <div className="flex">
                     <h2>Έξοδα αποστολής</h2>
                     {!freeShipping ? (
-                      <p className="ml-auto">
-                        {shipping.expense_elta_courier
-                          ? shipping.expense_elta_courier.toFixed(2)
-                          : shipping.expense_box_now
-                          ? shipping.expense_box_now.toFixed(2)
-                          : '0.00'}
-                        €
-                      </p>
+                      <p className="ml-auto">{shippingExpense.toFixed(2)}€</p>
                     ) : (
                       <div className="ml-auto flex gap-2 items-center">
                         <p className="text-[var(--mantine-border)] line-through decoration-red-500">
-                          {shipping.expense_elta_courier
-                            ? shipping.expense_elta_courier.toFixed(2)
-                            : shipping.expense_box_now
-                            ? shipping.expense_box_now.toFixed(2)
-                            : '0.00'}
+                          {(form.getValues().delivery_method === 'ΕΛΤΑ Courier'
+                            ? shipping.expense_elta_courier ?? 0
+                            : shipping.expense_box_now ?? 0
+                          ).toFixed(2)}
                           €
                         </p>
-                        {shipping.expense_elta_courier ||
-                          (shipping.expense_box_now && <p>0.00€</p>)}
+                        <p>0.00€</p>
                       </div>
                     )}
                   </div>
