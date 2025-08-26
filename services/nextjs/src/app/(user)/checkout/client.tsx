@@ -517,17 +517,20 @@ export function CheckoutPageClient({
                     setOrderCompleteResponse(validatedResponse)
                   }
                 } catch (err) {
-                  localStorage.removeItem('cart')
-                  localStorage.removeItem('coupon')
-                  let message: string = errorUnexpected
+                  // localStorage.removeItem('cart') NEEDS FIXING remove temporarily to see if customers still get redirected.
+                  // localStorage.removeItem('coupon') NEEDS FIXING remove temporarily to see if customers still get redirected.
+
                   if (axios.isAxiosError(err)) {
-                    if (err.response?.data?.message) {
-                      message = err.response.data.message
-                    } else if (err.message) {
-                      message = err.message
-                    }
+                    console.error({
+                      code: err?.code,
+                      message: err.message,
+                      status: err?.response?.status,
+                      url: err?.config?.url,
+                      request: err?.response?.request,
+                    })
                   }
-                  router.push(`${ROUTE_ERROR}?message=${message}`)
+
+                  // router.push(`${ROUTE_ERROR}?message=${errorAxios}`) NEEDS FIXING remove temporarily to see if customers still get redirected.
                 } finally {
                   closeFormLoadingOverlay()
                 }

@@ -7,6 +7,7 @@
     "postgres:generate": "drizzle-kit generate",
     "postgres:migrate": "drizzle-kit push",
     "lint": "next lint",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
     "build": "cross-env NODE_ENV=production BUILD_TIME=true next build",
     "start": "next start"
   },
@@ -44,6 +45,7 @@
     "mime": "^4.0.7",
     "minio": "^8.0.4",
     "next": "15.3.4",
+    "nextjs-toploader": "^3.8.16",
     "nodemailer": "^6.10.0",
     "p-limit": "^6.2.0",
     "pdf-lib": "^1.17.1",

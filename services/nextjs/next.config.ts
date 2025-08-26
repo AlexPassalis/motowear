@@ -10,8 +10,8 @@ const nextConfig: NextConfig = {
     optimizePackageImports: [
       '@mantine/core',
       '@mantine/hooks',
-      '@mantine/carousel',
       '@mantine/form',
+      '@mantine/carousel',
       '@mantine/dates',
       '@mantine/charts',
     ],
