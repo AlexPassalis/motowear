@@ -528,6 +528,8 @@ export function CheckoutPageClient({
                       url: err?.config?.url,
                       request: err?.response?.request,
                     })
+                  } else {
+                    console.error(err)
                   }
 
                   // router.push(`${ROUTE_ERROR}?message=${errorAxios}`) NEEDS FIXING remove temporarily to see if customers still get redirected.
@@ -941,7 +943,19 @@ export function CheckoutPageClient({
                             } else {
                               setCoupon(null)
                             }
-                          } catch {
+                          } catch (err) {
+                            if (axios.isAxiosError(err)) {
+                              console.error({
+                                code: err?.code,
+                                message: err.message,
+                                status: err?.response?.status,
+                                url: err?.config?.url,
+                                request: err?.response?.request,
+                              })
+                            } else {
+                              console.error(err)
+                            }
+
                             router.push(`${ROUTE_ERROR}?message=${errorAxios}`)
                           } finally {
                             closeCouponLoadingOverlay()
