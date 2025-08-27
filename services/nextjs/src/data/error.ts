@@ -12,6 +12,7 @@ export const errorNodemailer = 'nodemailer' as const
 export const errorCron = 'cron' as const
 export const errorViva = 'viva' as const
 export const errorAftersales = 'aftersales' as const
+export const errorProsvasisGO = 'prosvasis-go' as const
 
 export const errorInvalidTableName = 'invalid-table-name' as const
 
