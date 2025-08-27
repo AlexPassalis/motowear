@@ -161,7 +161,11 @@ export default function RootLayout({
       <body
         className={`${proximaNova.variable} ${proximaNovaExtraBold.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <NextTopLoader />
+        <NextTopLoader
+          color="var(--mantine-color-red-6)"
+          showSpinner={false}
+          zIndex={9999}
+        />
         <noscript>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
