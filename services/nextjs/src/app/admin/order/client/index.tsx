@@ -187,7 +187,7 @@ export function AdminOrderPageClient({
                 <h1>country</h1>
                 <Select
                   data={['Ελλάδα', 'Κύπρος']}
-                  value={modalOrder.checkout.country.toString()}
+                  value={modalOrder.checkout.country}
                   onChange={(e) => {
                     setOrders((prev) =>
                       prev.map((order) => {
@@ -400,7 +400,7 @@ export function AdminOrderPageClient({
                 <h1>payment_method</h1>
                 <Select
                   data={['Κάρτα', 'Αντικαταβολή']}
-                  value={modalOrder.checkout.payment_method.toString()}
+                  value={modalOrder.checkout.payment_method}
                   onChange={(e) => {
                     setOrders((prev) =>
                       prev.map((order) => {
@@ -842,7 +842,12 @@ export function AdminOrderPageClient({
                 >
                   {order.tracking_number ? (
                     <Link
-                      href={`${envServer.ELTA_COURIER_URL}${order.tracking_number}`}
+                      href={`${
+                        order.checkout.box_now_locker_id
+                          ? envServer.BOX_NOW_URL
+                          : envServer.ELTA_COURIER_URL
+                      }${order.tracking_number}`}
+                      target="_blank"
                     >
                       {order.tracking_number}
                     </Link>

@@ -23,6 +23,7 @@ interface EmailProps {
   order_id: typeOrder['id']
   total: typeOrder['total']
   cart: typeCart
+  box_now_locker_id: typeOrder['checkout']['box_now_locker_id']
 }
 
 export function OrderFullfilledEmail({
@@ -30,6 +31,7 @@ export function OrderFullfilledEmail({
   order_id,
   total,
   cart,
+  box_now_locker_id,
 }: EmailProps) {
   const previewText = `Η παραγγελία σας βρίσκεται καθ' οδόν!`
 
@@ -60,7 +62,11 @@ export function OrderFullfilledEmail({
               <Link
                 target="_blank"
                 rel="noopener noreferrer"
-                href={`${envServer.ELTA_COURIER_URL}${tracking_number}`}
+                href={`${
+                  box_now_locker_id
+                    ? envServer.BOX_NOW_URL
+                    : envServer.ELTA_COURIER_URL
+                }${tracking_number}`}
                 style={{
                   backgroundColor: '#dc2626',
                   color: '#ffffff',
