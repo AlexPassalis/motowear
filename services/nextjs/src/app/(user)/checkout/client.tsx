@@ -31,7 +31,7 @@ import { zodResolver } from 'mantine-form-zod-resolver'
 import { z } from 'zod'
 import { MdDiscount } from 'react-icons/md'
 import { ROUTE_ERROR, ROUTE_HOME } from '@/data/routes'
-import { errorAxios, errorUnexpected, errorInvalidResponse } from '@/data/error'
+import { errorAxios, errorInvalidResponse } from '@/data/error'
 import { Footer } from '@/components/Footer'
 import {
   getLocalStorageCart,
@@ -130,7 +130,7 @@ export function CheckoutPageClient({
     if (!saveInfo) {
       localStorage.removeItem('checkout')
     }
-  }, [saveInfo, form])
+  }, [saveInfo, form.values])
 
   const couponCodeRef = useRef<null | HTMLInputElement>(null)
   const [
@@ -156,11 +156,11 @@ export function CheckoutPageClient({
   const freeShipping = shipping.free ? cartTotal >= shipping.free : false
   const shippingExpense = freeShipping
     ? 0
-    : form.getValues().delivery_method === 'ΕΛΤΑ Courier'
+    : form.values.delivery_method === 'ΕΛΤΑ Courier'
     ? shipping.expense_elta_courier ?? 0
     : shipping.expense_box_now ?? 0
   const shippingSurcharge =
-    form.getValues().payment_method === 'Αντικαταβολή'
+    form.values.payment_method === 'Αντικαταβολή'
       ? shipping.surcharge
         ? shipping.surcharge
         : 0
@@ -255,13 +255,13 @@ export function CheckoutPageClient({
     orderCompleteResponse,
   ])
 
-  const countryIsGreece = form.getValues().country === 'Ελλάδα'
+  const countryIsGreece = form.values.country === 'Ελλάδα'
   useEffect(() => {
-    if (form.getValues().country === 'Κύπρος') {
+    if (form.values.country === 'Κύπρος') {
       form.setFieldValue('delivery_method', 'ΕΛΤΑ Courier')
       form.setFieldValue('payment_method', 'Κάρτα')
     }
-  }, [form.getValues().country])
+  }, [form.values.country])
 
   const [boxNowScriptHasLoaded, setBoxNowScriptHasLoaded] = useState(false)
   const [boxNowMapHasRendered, setBoxNowMapHasRendered] = useState(false)
@@ -273,7 +273,7 @@ export function CheckoutPageClient({
     requestAnimationFrame(() => boxNowButtonRef.current?.click())
     setBoxNowMapHasRendered(true)
   }, [countryIsGreece, boxNowScriptHasLoaded, boxNowMapHasRendered])
-  const isBoxNow = form.getValues().delivery_method === 'BOX NOW'
+  const isBoxNow = form.values.delivery_method === 'BOX NOW'
 
   useEffect(() => {
     const onBoxNowLockerSelection = (e: Event) => {
@@ -301,7 +301,7 @@ export function CheckoutPageClient({
     if (!isBoxNow) {
       form.setFieldValue('box_now_locker_id', null)
     }
-  }, [form.getValues().delivery_method])
+  }, [form.values.delivery_method])
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -489,37 +489,40 @@ export function CheckoutPageClient({
                       coupon: coupon,
                     },
                   )
+
                   if (res.status === 209) {
-                    const { error: err, data: validatedResponse } = z
+                    const { error, data: validatedResponse } = z
                       .object({ url: z.string() })
                       .safeParse(res.data)
-                    if (err) {
+
+                    if (error) {
                       router.push(
                         `${ROUTE_ERROR}?message=${errorInvalidResponse}`,
                       )
                       return
                     }
+
                     window.location.assign(validatedResponse.url)
-                  } else {
-                    const { error: err, data: validatedResponse } = z
+                  } else if (res.status === 200) {
+                    const { error, data: validatedResponse } = z
                       .object({
                         id: z.number(),
                         first_name: z.string(),
                         email: z.string().email(),
                       })
                       .safeParse(res.data)
-                    if (err) {
+
+                    if (error) {
                       router.push(
                         `${ROUTE_ERROR}?message=${errorInvalidResponse}`,
                       )
+
                       return
                     }
+
                     setOrderCompleteResponse(validatedResponse)
                   }
                 } catch (err) {
-                  // localStorage.removeItem('cart') NEEDS FIXING remove temporarily to see if customers still get redirected.
-                  // localStorage.removeItem('coupon') NEEDS FIXING remove temporarily to see if customers still get redirected.
-
                   if (axios.isAxiosError(err)) {
                     console.error({
                       code: err?.code,
@@ -532,7 +535,7 @@ export function CheckoutPageClient({
                     console.error(err)
                   }
 
-                  // router.push(`${ROUTE_ERROR}?message=${errorAxios}`) NEEDS FIXING remove temporarily to see if customers still get redirected.
+                  router.push(`${ROUTE_ERROR}?message=${errorAxios}`)
                 } finally {
                   closeFormLoadingOverlay()
                 }
@@ -874,14 +877,12 @@ export function CheckoutPageClient({
                           styles={{ body: { alignItems: 'center' } }}
                           label={
                             <span>
-                              {form.getValues().delivery_method ===
-                              'ΕΛΤΑ Courier'
+                              {form.values.delivery_method === 'ΕΛΤΑ Courier'
                                 ? 'Αντικαταβολή'
                                 : 'Πληρωμή online κατά την παραλαβή'}
                               <br />
                               <span className="proxima-nova">
-                                {form.getValues().delivery_method ===
-                                'ΕΛΤΑ Courier'
+                                {form.values.delivery_method === 'ΕΛΤΑ Courier'
                                   ? 'Δεν συνιστάται'
                                   : '* Όχι μετρητά'}
                                 {`${
@@ -912,6 +913,7 @@ export function CheckoutPageClient({
                       styles={{ input: { fontSize: 16 } }}
                     />
                     <Button
+                      type="button"
                       onClick={async () => {
                         if (couponCodeRef.current) {
                           try {
@@ -922,26 +924,25 @@ export function CheckoutPageClient({
                                 coupon_code: couponCodeRef.current.value,
                               },
                             )
-                            if (res.status !== 200) {
-                              router.push(
-                                `${ROUTE_ERROR}?message=${
-                                  res?.data?.message || errorUnexpected
-                                }`,
-                              )
-                            }
 
-                            const { data: validatedResponse } = z
-                              .object({ couponArray: z.array(zodCoupon) })
-                              .safeParse(res?.data)
-                            if (!validatedResponse) {
-                              router.push(
-                                `${ROUTE_ERROR}?message=${errorInvalidResponse}-coupon_code`,
-                              )
-                            }
-                            if (validatedResponse!.couponArray.length === 1) {
-                              setCoupon(validatedResponse!.couponArray[0])
-                            } else {
-                              setCoupon(null)
+                            if (res.status === 200) {
+                              const { error, data: validatedResponse } = z
+                                .object({ couponArray: z.array(zodCoupon) })
+                                .safeParse(res?.data)
+
+                              if (error) {
+                                router.push(
+                                  `${ROUTE_ERROR}?message=${errorInvalidResponse}`,
+                                )
+
+                                return
+                              }
+
+                              if (validatedResponse.couponArray.length === 1) {
+                                setCoupon(validatedResponse.couponArray[0])
+                              } else {
+                                setCoupon(null)
+                              }
                             }
                           } catch (err) {
                             if (axios.isAxiosError(err)) {
@@ -1020,7 +1021,7 @@ export function CheckoutPageClient({
                     ) : (
                       <div className="ml-auto flex gap-2 items-center">
                         <p className="text-[var(--mantine-border)] line-through decoration-red-500">
-                          {(form.getValues().delivery_method === 'ΕΛΤΑ Courier'
+                          {(form.values.delivery_method === 'ΕΛΤΑ Courier'
                             ? shipping.expense_elta_courier ?? 0
                             : shipping.expense_box_now ?? 0
                           ).toFixed(2)}
