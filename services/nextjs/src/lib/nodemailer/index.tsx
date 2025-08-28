@@ -192,6 +192,7 @@ export async function sendOrderFulfilledEmail(
   total: typeOrder['total'],
   cart: typeCart,
   email: typeEmail,
+  box_now_locker_id: typeOrder['checkout']['box_now_locker_id'],
 ) {
   const attachments: Attachment[] = [
     {
@@ -235,6 +236,7 @@ export async function sendOrderFulfilledEmail(
         order_id={order_id}
         total={total}
         cart={cart}
+        box_now_locker_id={box_now_locker_id}
       />,
     )
   } catch (err) {
