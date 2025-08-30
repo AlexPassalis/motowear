@@ -49,6 +49,9 @@ export async function POST(req: NextRequest) {
                 date_fulfilled: row.date_fulfilled
                   ? new Date(row.date_fulfilled)
                   : null,
+                date_delivered: row.date_delivered
+                  ? new Date(row.date_delivered)
+                  : null,
               })
               .onConflictDoUpdate({
                 target: [order.id],

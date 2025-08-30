@@ -5,7 +5,7 @@ RUN apk add --no-cache curl
 FROM base AS deps
 WORKDIR /app/deps
 COPY package.json pnpm-lock.yaml ./
-RUN corepack enable && corepack prepare pnpm@10.14.0 --activate && pnpm i --frozen-lockfile
+RUN corepack enable && corepack prepare pnpm@10.15.0 --activate && pnpm i --frozen-lockfile
 
 
 

@@ -94,6 +94,7 @@ export const zodOrder = createSelectSchema(order)
 export const zodOrderServer = zodOrder.extend({
   order_date: z.string(),
   date_fulfilled: z.string().nullable(),
+  date_delivered: z.string().nullable(),
 })
 
 export const zodHomePage = createSelectSchema(home_page).omit({
