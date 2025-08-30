@@ -7,22 +7,9 @@ import {
   getShippingCached,
 } from '@/app/(user)/cache'
 import { redirect } from 'next/navigation'
-import type { Metadata } from 'next'
 
 type ErrorPageProps = {
   searchParams: Promise<{ message?: string }>
-}
-
-export const metadata: Metadata = {
-  title: 'Επικοινωνία',
-  alternates: { canonical: '/contact' },
-  openGraph: {
-    title: 'Επικοινωνία | motowear.gr',
-    url: '/contact',
-  },
-  other: {
-    'page-type': 'contact',
-  },
 }
 
 export default async function ErrorPage({ searchParams }: ErrorPageProps) {

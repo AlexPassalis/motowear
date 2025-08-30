@@ -6,7 +6,6 @@ export const errorPostgres = 'postgres' as const
 export const errorRedis = 'redis' as const
 export const errorMinio = 'minio' as const
 export const errorTypesense = 'typesense' as const
-export const errorTelegram = 'telegram' as const
 export const errorReactEmail = 'react-email' as const
 export const errorNodemailer = 'nodemailer' as const
 export const errorCron = 'cron' as const

@@ -1,7 +1,6 @@
-import { errorTelegram } from '@/data/error'
-import { formatMessage } from '@/utils/formatMessage'
 import { readSecret } from '@/utils/readSecret'
 import { Telegraf } from 'telegraf'
+import { inspect } from 'node:util'
 
 const chatIds = {
   ERROR: readSecret('TELEGRAM_ERROR_CHAT_ID'),
@@ -22,11 +21,9 @@ export async function sendTelegramMessage(
       parse_mode: 'HTML',
     })
   } catch (err) {
-    const message = formatMessage(
+    console.error(
       '@/lib/telegram/index.ts sendTelegramMessage()',
-      errorTelegram,
-      err,
+      inspect(err, { depth: null, colors: false }),
     )
-    console.error(message)
   }
 }
