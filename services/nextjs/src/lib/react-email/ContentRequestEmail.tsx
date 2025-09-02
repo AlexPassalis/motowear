@@ -60,7 +60,7 @@ export function ContentRequestEmail({ email }: ContentRequestEmailProps) {
               }}
               className="text-black text-[14px] mt-8 mb-8"
             >
-              Αν μας στείλεις μια φωτό (ή ανεβάσεις story με tag @motowear.gr),
+              Αν μας στείλεις μια φώτο (ή ανεβάσεις story με tag @motowear.gr),
               θα σε ανεβάσουμε στο{' '}
               <Link
                 target="_blank"
