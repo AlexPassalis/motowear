@@ -75,7 +75,6 @@ export const metadata: Metadata = {
     icon: [{ url: 'favicon.ico', sizes: '40x40', type: 'image/x-icon' }],
     shortcut: ['/favicon.ico'],
   },
-  manifest: '/site.webmanifest',
 }
 
 export const viewport: Viewport = {
@@ -99,7 +98,7 @@ const customTheme = createTheme({
   },
   colors: {
     red: [
-      'oklch(0.971 0.013 17.380)', // red-50
+      'oklch(0.971 0.013 17.380)', // red-050
       'oklch(0.936 0.032 17.717)', // red-100
       'oklch(0.885 0.062 18.334)', // red-200
       'oklch(0.808 0.114 19.571)', // red-300
@@ -112,7 +111,7 @@ const customTheme = createTheme({
       'oklch(0.258 0.092 26.042)', // red-950
     ],
     green: [
-      'oklch(0.982 0.018 155.826)', // green-50
+      'oklch(0.982 0.018 155.826)', // green-050
       'oklch(0.962 0.044 156.743)', // green-100
       'oklch(0.925 0.084 155.995)', // green-200
       'oklch(0.871 0.150 154.449)', // green-300
@@ -125,7 +124,7 @@ const customTheme = createTheme({
       'oklch(0.266 0.065 152.934)', // green-950
     ],
     blue: [
-      'oklch(0.970 0.014 254.604)', // blue-50
+      'oklch(0.970 0.014 254.604)', // blue-050
       'oklch(0.932 0.032 255.585)', // blue-100
       'oklch(0.882 0.059 254.128)', // blue-200
       'oklch(0.809 0.105 251.813)', // blue-300
