@@ -39,7 +39,6 @@
     "embla-carousel-react": "^8.5.2",
     "formidable": "^3.5.2",
     "framer-motion": "^12.6.2",
-    "iconv-lite": "^0.7.0",
     "ioredis": "^5.6.0",
     "ip-range-check": "^0.2.0",
     "mantine-form-zod-resolver": "^1.1.0",
@@ -86,7 +85,7 @@
     "tailwindcss": "^4",
     "typescript": "^5"
   },
-  "packageManager": "pnpm@10.15.0+sha512.486ebc259d3e999a4e8691ce03b5cac4a71cbeca39372a9b762cb500cfdf0873e2cb16abe3d951b1ee2cf012503f027b98b6584e4df22524e0c7450d9ec7aa7b",
+  "packageManager": "pnpm@10.15.0",
   "pnpm": {
     "onlyBuiltDependencies": [
       "argon2",
