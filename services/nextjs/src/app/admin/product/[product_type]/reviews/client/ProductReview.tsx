@@ -96,11 +96,11 @@ function ProductReviewNotMemoised({
               setOnRequest(true)
               try {
                 const res = await axios.delete(
-                  `${envClient.API_ADMIN_URL}/product/product_type/variant`,
+                  `${envClient.API_ADMIN_URL}/product/product_type/review/delete`,
                   {
                     data: {
-                      id: productReviews[index].id,
                       product_type: product_type,
+                      id: productReviews[index].id,
                     },
                   },
                 )
