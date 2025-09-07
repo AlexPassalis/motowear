@@ -13,10 +13,10 @@ export async function sendTelegramMessage(
   chat: keyof typeof chatIds,
   message: string,
 ) {
-  const bot = new Telegraf(readSecret('TELEGRAM_BOT_TOKEN'))
-
   const chatId = chatIds[chat]
+
   try {
+    const bot = new Telegraf(readSecret('TELEGRAM_BOT_TOKEN'))
     await bot.telegram.sendMessage(chatId, message, {
       parse_mode: 'HTML',
     })
