@@ -684,6 +684,7 @@ export function AdminOrderPageClient({
                 Shipping Surcharge
               </Table.Th>
               <Table.Th style={{ textAlign: 'center' }}>Order Code</Table.Th>
+              <Table.Th style={{ textAlign: 'center' }}>Invoice</Table.Th>
               <Table.Th
                 onClick={() => {
                   if (!showUnfulfilledOnly) {
@@ -705,7 +706,6 @@ export function AdminOrderPageClient({
               <Table.Th style={{ textAlign: 'center' }}>
                 Date Delivered
               </Table.Th>
-              <Table.Th style={{ textAlign: 'center' }}>Review Email</Table.Th>
               <Table.Th style={{ textAlign: 'center' }}>
                 Review Submitted
               </Table.Th>
@@ -823,6 +823,22 @@ export function AdminOrderPageClient({
                 <Table.Td
                   style={{
                     textAlign: 'center',
+                    color: `${
+                      order.einvoice_id && order.einvoice_link ? 'blue' : 'red'
+                    }`,
+                  }}
+                >
+                  {order.einvoice_id && order.einvoice_link ? (
+                    <Link href={order.einvoice_link} target="_blank">
+                      {order.einvoice_id}
+                    </Link>
+                  ) : (
+                    '-'
+                  )}
+                </Table.Td>
+                <Table.Td
+                  style={{
+                    textAlign: 'center',
                     whiteSpace: 'nowrap',
                   }}
                 >
@@ -868,14 +884,6 @@ export function AdminOrderPageClient({
                         'dd/MM/yyyy HH:mm:ss',
                       )
                     : '-'}
-                </Table.Td>
-                <Table.Td
-                  style={{
-                    textAlign: 'center',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {order.review_email ? 'send' : 'not-send'}
                 </Table.Td>
                 <Table.Td
                   style={{
