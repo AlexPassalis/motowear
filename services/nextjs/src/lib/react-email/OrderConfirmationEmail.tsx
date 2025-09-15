@@ -13,6 +13,7 @@ import {
   Section,
   Tailwind,
   Text,
+  Link,
 } from '@react-email/components'
 import type {
   typeCart,
@@ -23,6 +24,7 @@ import type {
 interface EmailProps {
   order_id: typeOrder['id']
   total: typeOrder['total']
+  einvoice_link: typeOrder['einvoice_link']
   cart: typeCart
   checkout: typeCheckout
 }
@@ -30,6 +32,7 @@ interface EmailProps {
 export function OrderConfirmationEmail({
   order_id,
   total,
+  einvoice_link,
   cart,
   checkout,
 }: EmailProps) {
@@ -66,6 +69,19 @@ export function OrderConfirmationEmail({
             <Text className="text-black text-[14px] leading-[24px] font-bold mb-4">
               Σύνολο: <span className="font-normal">{total}€</span>
             </Text>
+            {einvoice_link && (
+              <Text className="text-black text-[14px] leading-[24px] font-bold mb-4">
+                Απόδειξη πελάτη:{' '}
+                <Link
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href={einvoice_link}
+                  className="font-normal underline text-blue-600"
+                >
+                  ProsvasisGo
+                </Link>
+              </Text>
+            )}
             <Text className="text-black text-[14px] leading-[24px] font-bold mb-4">
               Σύνοψη παραγγελίας:
             </Text>
@@ -181,6 +197,8 @@ export function OrderConfirmationEmail({
 OrderConfirmationEmail.PreviewProps = {
   order_id: '1000',
   total: 68.98,
+  einvoice_link:
+    'https://go-einvoicing.prosvasis.com/v/EL054600895-3087881-0050BB813F9E0E8EF641C0D41A49D3F39F2FE896-99FBD88BD9694A519D91F3C99F89E7AD',
   cart: [
     {
       product_type: 'Μπλουζάκι',

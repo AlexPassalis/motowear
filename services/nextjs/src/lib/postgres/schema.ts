@@ -112,6 +112,8 @@ export const order = ordersSchema.table('order', {
   }),
   order_code: text('order_code'),
   paid: boolean('paid'),
+  einvoice_id: text('einvoice_id'),
+  einvoice_link: text('einvoice_link'),
   date_fulfilled: timestamp('date_fulfilled'),
   tracking_number: text('tracking_number'),
   date_delivered: timestamp('date_delivered'),
