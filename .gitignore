@@ -1,8 +1,7 @@
 ### Everywhere ###
+.DS_Store
 node_modules/
 secrets/
-SQL/
-docker-stack-dev.yaml
 hashPassword.js
 SETUP.md
 Makefile
@@ -12,7 +11,3 @@ SSH-motowear.md
 .next/
 .pnpm-store/
 migrations/
-postgresErrorCodes.txt
-
-### services/nginx ###
-nginx-development.conf

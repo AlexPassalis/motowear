@@ -1,0 +1,174 @@
+networks:
+  network-motowear:
+    external: true
+
+volumes:
+  postgres:
+  redis:
+  minio:
+  typesense:
+
+secrets:
+  POSTGRES_DB:
+    external: true
+  POSTGRES_USER:
+    external: true
+  POSTGRES_PASSWORD:
+    external: true
+  MINIO_ROOT_USER:
+    external: true
+  MINIO_ROOT_PASSWORD:
+    external: true
+  POSTGRES_URL:
+    external: true
+  BETTER_AUTH_SECRET:
+    external: true
+  TELEGRAM_BOT_TOKEN:
+    external: true
+  TELEGRAM_ERROR_CHAT_ID:
+    external: true
+  TELEGRAM_AUTH_CHAT_ID:
+    external: true
+  TELEGRAM_ORDER_CHAT_ID:
+    external: true
+  TELEGRAM_REVIEW_CHAT_ID:
+    external: true
+  NODEMAILER_AUTH_USER:
+    external: true
+  NODEMAILER_AUTH_PASS:
+    external: true
+  NODEMAILER_EMAIL:
+    external: true
+  VIVA_CLIENT_ID_DEMO:
+    external: true
+  VIVA_CLIENT_SECRET_DEMO:
+    external: true
+  VIVA_WEBHOOK_VERIFICATION_KEY_DEMO:
+    external: true
+  AFTERSALES_ACCOUNT_API_TOKEN:
+    external: true
+  AFTERSALES_PLATFORM_UUID:
+    external: true
+  AFTERSALES_SIGN_SECRET_PHRASE:
+    external: true
+
+services:
+  dozzle:
+    image: amir20/dozzle:pr-3710
+    networks:
+      - network-motowear
+    environment:
+      - DOZZLE_NO_ANALYTICS=true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    ports:
+      - '8080:8080'
+
+  postgres:
+    image: image-motowear-postgres
+    networks:
+      - network-motowear
+    secrets:
+      - POSTGRES_DB
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB_FILE: /run/secrets/POSTGRES_DB
+      POSTGRES_USER_FILE: /run/secrets/POSTGRES_USER
+      POSTGRES_PASSWORD_FILE: /run/secrets/POSTGRES_PASSWORD
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    ports:
+      - '5432:5432' ### ONLY IN DEV FOR pgAdmin 4 ###
+
+  pgweb:
+    image: sosedoff/pgweb:0.16.2
+    networks:
+      - network-motowear
+    secrets:
+      - POSTGRES_URL
+    entrypoint: ['/bin/sh']
+    command:
+      - -c
+      - 'pgweb --url "$$(cat /run/secrets/POSTGRES_URL)?sslmode=disable" --bind 0.0.0.0 --listen 8081'
+    ports:
+      - '8081:8081'
+
+  redis:
+    image: redis:7-alpine
+    networks:
+      - network-motowear
+    volumes:
+      - redis:/data
+    ports:
+      - '6379:6379' ### ONLY IN DEV FOR Redis for VS CODE ###
+
+  minio:
+    image: minio/minio:RELEASE.2025-03-12T18-04-18Z-cpuv1
+    networks:
+      - network-motowear
+    secrets:
+      - MINIO_ROOT_USER
+      - MINIO_ROOT_PASSWORD
+    environment:
+      MINIO_ROOT_USER_FILE: /run/secrets/MINIO_ROOT_USER
+      MINIO_ROOT_PASSWORD_FILE: /run/secrets/MINIO_ROOT_PASSWORD
+    command: ['server', '/data', '--console-address', ':9001']
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    volumes:
+      - minio:/data
+
+  typesense:
+    image: image-motowear-typesense
+    networks:
+      - network-motowear
+    command: '--data-dir /data --api-key=typesense_admin_api_key --enable-cors'
+    volumes:
+      - typesense:/data
+
+  nextjs:
+    image: image-motowear-nextjs
+    networks:
+      - network-motowear
+    volumes:
+      - ./services/nextjs:/app
+      - /app/node_modules
+    secrets:
+      - POSTGRES_URL
+      - BETTER_AUTH_SECRET
+      - MINIO_ROOT_USER
+      - MINIO_ROOT_PASSWORD
+      - TELEGRAM_BOT_TOKEN
+      - TELEGRAM_ERROR_CHAT_ID
+      - TELEGRAM_AUTH_CHAT_ID
+      - TELEGRAM_ORDER_CHAT_ID
+      - TELEGRAM_REVIEW_CHAT_ID
+      - NODEMAILER_AUTH_USER
+      - NODEMAILER_AUTH_PASS
+      - NODEMAILER_EMAIL
+      - VIVA_CLIENT_ID_DEMO
+      - VIVA_CLIENT_SECRET_DEMO
+      - VIVA_WEBHOOK_VERIFICATION_KEY_DEMO
+      - AFTERSALES_ACCOUNT_API_TOKEN
+      - AFTERSALES_PLATFORM_UUID
+      - AFTERSALES_SIGN_SECRET_PHRASE
+    environment:
+      HOSTNAME: 0.0.0.0
+      PORT: 3000
+
+  nginx:
+    image: image-motowear-nginx
+    networks:
+      - network-motowear
+    volumes:
+      - ./services/nginx/certs:/etc/nginx/certs:ro
+      - ./services/nginx/nginx-development.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - target: 443
+        published: 443
+        protocol: tcp
+        mode: host
