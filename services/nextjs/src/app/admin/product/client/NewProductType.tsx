@@ -2,7 +2,7 @@ import type { typeProductTypes } from '@/utils/getPostgres'
 
 import { Button, TextInput } from '@mantine/core'
 import { errorUnexpected } from '@/data/error'
-import { envClient } from '@/env'
+import { envClient } from '@/envClient'
 import axios from 'axios'
 import { Dispatch, SetStateAction, useRef } from 'react'
 
@@ -23,7 +23,7 @@ export function NewProductType({
     <div className="flex flex-col gap-4 h-full p-2 border border-neutral-300 rounded-lg bg-white">
       <h1 className="text-center text-2xl">Create Product Type</h1>
       <form
-        onSubmit={async e => {
+        onSubmit={async (e) => {
           e.preventDefault()
           const newProductType = newProductTypeRef.current?.value ?? ''
           if (!newProductType) {
@@ -41,7 +41,7 @@ export function NewProductType({
               `${envClient.API_ADMIN_URL}/product/product_type`,
               {
                 product_type: newProductType,
-              }
+              },
             )
             if (res.status === 200) {
               window.location.reload()
@@ -49,7 +49,7 @@ export function NewProductType({
               alert(
                 `Error creating product type: ${
                   res.data?.message || errorUnexpected
-                }`
+                }`,
               )
               console.error(res)
             }

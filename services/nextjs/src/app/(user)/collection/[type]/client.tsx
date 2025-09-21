@@ -4,7 +4,7 @@ import type { typeVariant } from '@/lib/postgres/data/type'
 import type { typeShipping } from '@/utils/getPostgres'
 
 import HeaderProvider from '@/context/HeaderProvider'
-import { envClient } from '@/env'
+import { envClient } from '@/envClient'
 import { SimpleGrid, Pagination, UnstyledButton, Modal } from '@mantine/core'
 import Image from 'next/image'
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'

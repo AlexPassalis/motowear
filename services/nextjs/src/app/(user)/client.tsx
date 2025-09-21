@@ -14,7 +14,7 @@ import {
   SimpleGrid,
 } from '@mantine/core'
 import Image from 'next/image'
-import { envClient } from '@/env'
+import { envClient } from '@/envClient'
 import {
   typeHomePage,
   typeHomePageVariants,

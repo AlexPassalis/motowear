@@ -16,7 +16,7 @@ import {
   Text,
   Link,
 } from '@react-email/components'
-import { envServer } from '@/env'
+import { envServer } from '@/envServer'
 
 interface AbandonCartEmailProps {
   email: typeEmail
@@ -136,15 +136,9 @@ export function AbandonCartEmail({ email, cart }: AbandonCartEmailProps) {
                         <Text style={tight}>{product.product_type}</Text>
                         <Text style={tight}>{product.name}</Text>
                         {product.color && (
-                          <div style={tight} className="flex items-center">
-                            <Text className="mr-1" style={{ margin: 0 }}>
-                              Χρώμα:
-                            </Text>
-                            <span
-                              style={{ backgroundColor: product.color }}
-                              className="ml-1 inline-block w-4 h-4 rounded-full"
-                            />
-                          </div>
+                          <Text className="mr-1" style={{ margin: 0 }}>
+                            Χρώμα: {product.color}
+                          </Text>
                         )}
                         {product.size && (
                           <Text style={tight}>Μέγεθος: {product.size}</Text>

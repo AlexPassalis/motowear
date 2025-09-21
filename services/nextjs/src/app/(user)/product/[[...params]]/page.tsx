@@ -11,7 +11,7 @@ import { ROUTE_ERROR } from '@/data/routes'
 import { Metadata } from 'next'
 import { specialVariant } from '@/data/magic'
 import { errorPostgres } from '@/data/error'
-import { envServer } from '@/env'
+import { envServer } from '@/envServer'
 
 type typeParams = { params?: [type?: string, version?: string] }
 type typeSearchParams = { color?: string }
