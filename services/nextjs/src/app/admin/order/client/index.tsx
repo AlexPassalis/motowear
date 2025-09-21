@@ -127,7 +127,11 @@ export function AdminOrderPageClient({
           setModalState({ type: '', id: 0 })
           closeModal()
         }}
-        title={modalState.type}
+        title={`${modalState.type}   -   #${modalState.id}`}
+        styles={{
+          header: { justifyContent: 'center' },
+          title: { width: '100%', textAlign: 'center' },
+        }}
         centered
       >
         <>
