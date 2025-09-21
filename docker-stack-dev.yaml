@@ -45,9 +45,9 @@ secrets:
     external: true
   VIVA_WEBHOOK_VERIFICATION_KEY_DEMO:
     external: true
-  AFTERSALES_ACCOUNT_API_TOKEN:
+  AFTERSALES_ACCOUNT_API_TOKEN_DEMO:
     external: true
-  AFTERSALES_PLATFORM_UUID:
+  AFTERSALES_PLATFORM_UUID_DEMO:
     external: true
   AFTERSALES_SIGN_SECRET_PHRASE:
     external: true
@@ -137,6 +137,7 @@ services:
     volumes:
       - ./services/nextjs:/app
       - /app/node_modules
+      - /app/.next
     secrets:
       - POSTGRES_URL
       - BETTER_AUTH_SECRET
@@ -153,12 +154,14 @@ services:
       - VIVA_CLIENT_ID_DEMO
       - VIVA_CLIENT_SECRET_DEMO
       - VIVA_WEBHOOK_VERIFICATION_KEY_DEMO
-      - AFTERSALES_ACCOUNT_API_TOKEN
-      - AFTERSALES_PLATFORM_UUID
+      - AFTERSALES_ACCOUNT_API_TOKEN_DEMO
+      - AFTERSALES_PLATFORM_UUID_DEMO
       - AFTERSALES_SIGN_SECRET_PHRASE
     environment:
       HOSTNAME: 0.0.0.0
       PORT: 3000
+      NO_PROXY: 'api.telegram.org,.telegram.org'
+      no_proxy: 'api.telegram.org,.telegram.org'
 
   nginx:
     image: image-motowear-nginx

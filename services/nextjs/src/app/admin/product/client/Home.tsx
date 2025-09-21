@@ -1,7 +1,7 @@
 import { errorUnexpected } from '@/data/error'
 import { ROUTE_ADMIN_HOME } from '@/data/routes'
 import { zodImage } from '@/data/zod'
-import { envClient } from '@/env'
+import { envClient } from '@/envClient'
 import { sanitizeFilename } from '@/utils/sanitize'
 import { Button, FileButton, Image, Text, Tooltip } from '@mantine/core'
 import axios from 'axios'
@@ -57,9 +57,9 @@ export function Home({
                               imagesNewFiles[
                                 imagesNewFiles.findIndex(
                                   (file) =>
-                                    sanitizeFilename(file.name) === image
+                                    sanitizeFilename(file.name) === image,
                                 )
-                              ]
+                              ],
                             )
                       }
                       alt={image}
@@ -92,7 +92,7 @@ export function Home({
                         `${envClient.API_ADMIN_URL}/pages/home/image/delete`,
                         {
                           data: { image: image },
-                        }
+                        },
                       )
                       if (res.status === 200) {
                         window.location.reload()
@@ -100,7 +100,7 @@ export function Home({
                         alert(
                           `Error deleting ${image}: ${
                             res.data?.message || errorUnexpected
-                          }`
+                          }`,
                         )
                         console.error(res)
                       }
@@ -112,7 +112,7 @@ export function Home({
                   } else {
                     setImagesNew((prev) => prev.filter((b) => b !== image))
                     setImagesNewFiles((prev) =>
-                      prev.filter((f) => f.name !== image)
+                      prev.filter((f) => f.name !== image),
                     )
                   }
                 }}
@@ -186,7 +186,7 @@ export function Home({
                 formData,
                 {
                   headers: { 'Content-Type': 'multipart/form-data' },
-                }
+                },
               )
               if (res.status === 200) {
                 window.location.reload()
@@ -194,7 +194,7 @@ export function Home({
                 alert(
                   `Error creating brands: ${
                     res.data?.message || errorUnexpected
-                  }`
+                  }`,
                 )
                 console.error(res)
               }

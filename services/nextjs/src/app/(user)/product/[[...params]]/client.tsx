@@ -29,7 +29,7 @@ import {
 import Image from 'next/image'
 import Link from 'next/link'
 import { ROUTE_COLLECTION, ROUTE_PRODUCT } from '@/data/routes'
-import { envClient } from '@/env'
+import { envClient } from '@/envClient'
 import { IoIosArrowDown } from 'react-icons/io'
 import { Fragment } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'

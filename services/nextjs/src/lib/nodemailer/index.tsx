@@ -9,7 +9,7 @@ import React from 'react'
 
 import nodemailer from 'nodemailer'
 import { Attachment } from 'nodemailer/lib/mailer'
-import { envServer } from '@/env'
+import { envServer } from '@/envServer'
 import { render } from '@react-email/components'
 import { readSecret } from '@/utils/readSecret'
 import { formatMessage } from '@/utils/formatMessage'

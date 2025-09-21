@@ -4,7 +4,7 @@ import classes from '@/css/DndList.module.css'
 import cx from 'clsx'
 
 import { errorUnexpected } from '@/data/error'
-import { envClient } from '@/env'
+import { envClient } from '@/envClient'
 import { zodHomePage } from '@/lib/postgres/data/zod'
 import { typeHomePage } from '@/utils/getPostgres'
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd'

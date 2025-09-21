@@ -14,7 +14,7 @@ import {
   Text,
   Link,
 } from '@react-email/components'
-import { envServer } from '@/env'
+import { envServer } from '@/envServer'
 
 interface ContentRequestEmailProps {
   email: typeEmail

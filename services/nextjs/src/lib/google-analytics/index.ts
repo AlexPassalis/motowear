@@ -1,6 +1,6 @@
 import type { typeOrder } from '@/lib/postgres/data/type'
 
-import { envClient } from '@/env'
+import { envClient } from '@/envClient'
 import { sendGAEvent } from '@next/third-parties/google'
 
 const isProduction = envClient.HOST !== 'localhost'
