@@ -14,7 +14,7 @@ import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 
 import { z } from 'zod'
 import axios from 'axios'
-import { envClient } from '@/env'
+import { envClient } from '@/envClient'
 import { errorUnexpected } from '@/data/error'
 import { useListState } from '@mantine/hooks'
 
@@ -101,10 +101,10 @@ export function BrandsComponent({
                                               brandNewFiles.findIndex(
                                                 (file) =>
                                                   sanitizeFilename(
-                                                    file.name
-                                                  ) === brand
+                                                    file.name,
+                                                  ) === brand,
                                               )
-                                            ]
+                                            ],
                                           )
                                     }
                                     alt={brand}
@@ -140,7 +140,7 @@ export function BrandsComponent({
                                       `${envClient.API_ADMIN_URL}/product/brand/delete`,
                                       {
                                         data: { brand },
-                                      }
+                                      },
                                     )
                                     if (res.status === 200) {
                                       window.location.reload()
@@ -148,7 +148,7 @@ export function BrandsComponent({
                                       alert(
                                         `Error deleting ${brand}: ${
                                           res.data?.message || errorUnexpected
-                                        }`
+                                        }`,
                                       )
                                       console.error(res)
                                     }
@@ -159,10 +159,10 @@ export function BrandsComponent({
                                   setOnRequest(false)
                                 } else {
                                   setBrandsNew((prev) =>
-                                    prev.filter((b) => b !== brand)
+                                    prev.filter((b) => b !== brand),
                                   )
                                   setBrandNewFiles((prev) =>
-                                    prev.filter((f) => f.name !== brand)
+                                    prev.filter((f) => f.name !== brand),
                                   )
                                 }
                               }}
@@ -255,7 +255,7 @@ export function BrandsComponent({
                 formData,
                 {
                   headers: { 'Content-Type': 'multipart/form-data' },
-                }
+                },
               )
               if (res.status === 200) {
                 window.location.reload()
@@ -263,7 +263,7 @@ export function BrandsComponent({
                 alert(
                   `Error creating brands: ${
                     res.data?.message || errorUnexpected
-                  }`
+                  }`,
                 )
                 console.error(res)
               }

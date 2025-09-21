@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { ROUTE_PRODUCT } from '@/data/routes'
 import { LoadingOverlay } from '@mantine/core'
 import Image from 'next/image'
-import { envClient } from '@/env'
+import { envClient } from '@/envClient'
 
 export const Cart = memo(CartNotMemoised)
 

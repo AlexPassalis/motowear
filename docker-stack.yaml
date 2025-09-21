@@ -248,6 +248,8 @@ services:
     environment:
       HOSTNAME: 0.0.0.0
       PORT: 3000
+      NO_PROXY: 'api.telegram.org,.telegram.org'
+      no_proxy: 'api.telegram.org,.telegram.org'
     healthcheck:
       start_period: 30s
       start_interval: 5s

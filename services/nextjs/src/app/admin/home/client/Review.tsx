@@ -5,7 +5,7 @@ import { Button, NumberInput, Table, TextInput } from '@mantine/core'
 import { Dispatch, memo, SetStateAction } from 'react'
 import { DateInput } from '@mantine/dates'
 import axios from 'axios'
-import { envClient } from '@/env'
+import { envClient } from '@/envClient'
 import { errorUnexpected } from '@/data/error'
 
 export const Review = memo(reviewNotMemoised)

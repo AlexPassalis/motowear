@@ -1,6 +1,6 @@
 import type { typeOrder } from '@/lib/postgres/data/type'
 
-import { envClient } from '@/env'
+import { envClient } from '@/envClient'
 
 const options = {
   autoConfig: false,

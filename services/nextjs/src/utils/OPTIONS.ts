@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { envServer } from '@/env'
+import { envServer } from '@/envServer'
 
 export async function OPTIONS() {
   return new NextResponse(null, {

@@ -15,7 +15,7 @@ import {
 } from 'react'
 import { Button, Pagination, Table, TextInput } from '@mantine/core'
 import { errorUnexpected } from '@/data/error'
-import { envClient } from '@/env'
+import { envClient } from '@/envClient'
 import axios from 'axios'
 import { ProductVariantRowWrapper } from '@/app/admin/product/[product_type]/client/ProductVariantRowWrapper'
 import { normalise } from '@/utils/normalise'
