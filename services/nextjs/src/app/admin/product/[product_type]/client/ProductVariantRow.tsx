@@ -12,7 +12,7 @@ import {
 import { Dispatch, memo, SetStateAction } from 'react'
 
 import axios from 'axios'
-import { envClient } from '@/env'
+import { envClient } from '@/envClient'
 import { errorUnexpected } from '@/data/error'
 
 export const ProductVariantRow = memo(

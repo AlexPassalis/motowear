@@ -4,7 +4,7 @@ import { zodTypeReviews } from '@/lib/postgres/data/zod'
 import { Dispatch, memo, SetStateAction, useState } from 'react'
 import { Button, Table } from '@mantine/core'
 import { errorUnexpected } from '@/data/error'
-import { envClient } from '@/env'
+import { envClient } from '@/envClient'
 import axios from 'axios'
 import { ProductReview } from '@/app/admin/product/[product_type]/reviews/client/ProductReview'
 

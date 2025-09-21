@@ -8,7 +8,7 @@ import type {
 import type { typeOrderByOrderCode, typeShipping } from '@/utils/getPostgres'
 
 import { zodCheckout, zodCoupon } from '@/lib/postgres/data/zod'
-import { envClient } from '@/env'
+import { envClient } from '@/envClient'
 import { useEffect, useRef, useState } from 'react'
 import NextImage from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'

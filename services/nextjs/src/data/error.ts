@@ -1,6 +1,5 @@
 export const errorUnexpected = 'unexpected' as const
 
-export const errorFetch = 'fetch' as const
 export const errorAxios = 'axios' as const
 export const errorPostgres = 'postgres' as const
 export const errorRedis = 'redis' as const

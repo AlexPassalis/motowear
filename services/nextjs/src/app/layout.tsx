@@ -43,7 +43,8 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
 })
 
-import { envClient, envServer } from '@/env'
+import { envServer } from '@/envServer'
+import { envClient } from '@/envClient'
 
 export const metadata: Metadata = {
   metadataBase: new URL(`https://${envServer.HOST}`),

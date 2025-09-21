@@ -14,7 +14,7 @@ import {
   Link,
 } from '@react-email/components'
 import type { typeOrder } from '@/lib/postgres/data/type'
-import { envServer } from '@/env'
+import { envServer } from '@/envServer'
 
 interface EmailProps {
   first_name: typeOrder['checkout']['first_name']

@@ -1,7 +1,7 @@
 import { formatMessage } from '@/utils/formatMessage'
 import Redis from 'ioredis'
 import { sendTelegramMessage } from '@/lib/telegram/index'
-import { envServer } from '@/env'
+import { envServer } from '@/envServer'
 
 async function establishRedis() {
   if (!global.global_redis) {
