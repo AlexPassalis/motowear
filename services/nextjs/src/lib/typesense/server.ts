@@ -1,6 +1,6 @@
 import Typesense from 'typesense'
 import { getVariantsProductType } from '@/utils/getPostgres'
-import { envServer } from '@/env'
+import { envServer } from '@/envServer'
 import { formatMessage } from '@/utils/formatMessage'
 import { errorPostgres, errorTypesense } from '@/data/error'
 import { sendTelegramMessage } from '../telegram'

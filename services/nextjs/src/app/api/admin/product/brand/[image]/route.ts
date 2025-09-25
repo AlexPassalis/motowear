@@ -1,5 +1,5 @@
 import { errorAxios, errorInvalidParams, errorMinio } from '@/data/error'
-import { envServer } from '@/env'
+import { envServer } from '@/envServer'
 import { isSessionAPI } from '@/lib/better-auth/isSession'
 import axios from 'axios'
 import { headers } from 'next/headers'

@@ -3,7 +3,7 @@
 import type { typeCoupon } from '@/lib/postgres/data/type'
 
 import HeaderProvider from '@/context/HeaderProvider'
-import { envClient } from '@/env'
+import { envClient } from '@/envClient'
 import { typeOrder, typeVariant } from '@/lib/postgres/data/type'
 import { zodCoupon } from '@/lib/postgres/data/zod'
 import { typeProductTypes, typeShipping } from '@/utils/getPostgres'
@@ -41,30 +41,30 @@ export function ReviewPageClient({
 
   const formSchema = z.object(
     Object.fromEntries(
-      unique_product_types.map(product_type => [
+      unique_product_types.map((product_type) => [
         product_type,
         z.object({
           rating: z.number().min(1).max(5),
           review: z.string().refine(
-            value => {
+            (value) => {
               const length = value.replace(/\s+/g, '').length
               return length >= 5 && length <= 150
             },
             {
               message: 'Η κριτική πρέπει να είναι μεταξύ 5 και 150 χαρακτήρες.',
-            }
+            },
           ),
         }),
-      ])
-    )
+      ]),
+    ),
   )
   const form = useForm<FormValues>({
     mode: 'controlled',
     initialValues: Object.fromEntries(
-      unique_product_types.map(product_type => [
+      unique_product_types.map((product_type) => [
         product_type,
         { rating: 1, review: '' },
-      ])
+      ]),
     ) as FormValues,
     validate: zodResolver(formSchema),
   })
@@ -86,7 +86,7 @@ export function ReviewPageClient({
       <main className="flex-1 container mx-auto px-6 py-12 text-black">
         {!reviewSubmittedSuccessfully ? (
           <form
-            onSubmit={form.onSubmit(async values => {
+            onSubmit={form.onSubmit(async (values) => {
               openFormLoadingOverlay()
               try {
                 const res = await axios.post(
@@ -95,10 +95,10 @@ export function ReviewPageClient({
                     id: orderId,
                     full_name: full_name,
                     values,
-                  }
+                  },
                 )
                 const { error, data: validatedResponse } = zodCoupon.safeParse(
-                  res.data
+                  res.data,
                 )
                 if (error) {
                   router.push(`${ROUTE_ERROR}?message=${errorInvalidResponse}`)

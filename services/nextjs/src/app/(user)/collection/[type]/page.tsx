@@ -8,7 +8,7 @@ import {
 } from '@/app/(user)/cache'
 import { ROUTE_ERROR } from '@/data/routes'
 import { errorPostgres } from '@/data/error'
-import { envServer } from '@/env'
+import { envServer } from '@/envServer'
 
 import { CollectionPageClient } from '@/app/(user)/collection/[type]/client'
 

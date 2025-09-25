@@ -1,7 +1,7 @@
 import type { typeCartLocalStorage, typeCoupon } from '@/lib/postgres/data/type'
 import { typeShipping } from '@/utils/getPostgres'
 
-import { envClient } from '@/env'
+import { envClient } from '@/envClient'
 import {
   Box,
   Button,

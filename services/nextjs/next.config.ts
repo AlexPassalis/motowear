@@ -17,7 +17,7 @@ const nextConfig: NextConfig = {
     ],
   },
   images: {
-    minimumCacheTTL: 31536000, // Set TTL to 1 year for Cloudflare
+    qualities: [75, 100],
     remotePatterns: [
       {
         protocol: 'http',
@@ -27,6 +27,7 @@ const nextConfig: NextConfig = {
         search: '',
       },
     ],
+    minimumCacheTTL: 31536000, // Set TTL to 1 year for Cloudflare
   },
   /* Remove next.js compression, so that nginx can do the compression using gzip 
   and therefore prevent buffering (and use streaming instead). */
