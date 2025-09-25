@@ -11,7 +11,6 @@ import nodemailer from 'nodemailer'
 import { Attachment } from 'nodemailer/lib/mailer'
 import { envServer } from '@/envServer'
 import { render } from '@react-email/components'
-import { readSecret } from '@/utils/readSecret'
 import { formatMessage } from '@/utils/formatMessage'
 import { errorAxios, errorNodemailer, errorReactEmail } from '@/data/error'
 import { sendTelegramMessage } from '@/lib/telegram/index'
@@ -29,8 +28,8 @@ const transporter = nodemailer.createTransport({
   port: envServer.NODEMAILER_PORT,
   secure: envServer.NODEMAILER_SECURE,
   auth: {
-    user: readSecret('NODEMAILER_AUTH_USER'),
-    pass: readSecret('NODEMAILER_AUTH_PASS'),
+    user: envServer.NODEMAILER_AUTH_USER,
+    pass: envServer.NODEMAILER_AUTH_PASS,
   },
 })
 
