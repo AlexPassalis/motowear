@@ -49,6 +49,10 @@ secrets:
     external: true
   AFTERSALES_SIGN_SECRET_PHRASE:
     external: true
+  PROSVASIS_GO_TOKEN:
+    external: true
+  PROSVASIS_GO_S1CODE:
+    external: true
 
 services:
   dozzle:
@@ -245,6 +249,8 @@ services:
       - AFTERSALES_ACCOUNT_API_TOKEN
       - AFTERSALES_PLATFORM_UUID
       - AFTERSALES_SIGN_SECRET_PHRASE
+      - PROSVASIS_GO_TOKEN
+      - PROSVASIS_GO_S1CODE
     environment:
       HOSTNAME: 0.0.0.0
       PORT: 3000
