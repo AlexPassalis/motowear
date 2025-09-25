@@ -1,7 +1,7 @@
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 import { Pool } from 'pg'
-import { readSecret } from '@/utils/readSecret'
+import { envServer } from '@/envServer'
 import { drizzle } from 'drizzle-orm/node-postgres'
 import * as schema from '@/lib/postgres/schema'
 import { sql } from 'drizzle-orm'
@@ -11,7 +11,7 @@ import { sendTelegramMessage } from '@/lib/telegram/index'
 async function establishPostgres() {
   if (!global.global_postgres) {
     const postgresPool = new Pool({
-      connectionString: readSecret('POSTGRES_URL'),
+      connectionString: envServer.POSTGRES_URL,
       ssl: false,
     })
     process.once('SIGINT', () => {

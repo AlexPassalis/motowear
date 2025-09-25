@@ -828,10 +828,19 @@ export function AdminOrderPageClient({
                     }`,
                   }}
                 >
-                  {order.einvoice_id && order.einvoice_link ? (
-                    <Link href={order.einvoice_link} target="_blank">
-                      {order.einvoice_id}
-                    </Link>
+                  {order.einvoice_id ? (
+                    order.einvoice_link ? (
+                      <Link
+                        href={order.einvoice_link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:underline"
+                      >
+                        {order.einvoice_id}
+                      </Link>
+                    ) : (
+                      order.einvoice_id
+                    )
                   ) : (
                     '-'
                   )}
@@ -864,6 +873,8 @@ export function AdminOrderPageClient({
                           : envClient.ELTA_COURIER_URL
                       }${order.tracking_number}`}
                       target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:underline"
                     >
                       {order.tracking_number}
                     </Link>
