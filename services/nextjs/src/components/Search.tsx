@@ -1,6 +1,6 @@
 import { useHeaderContext } from '@/context/useHeaderContext'
 import { ROUTE_PRODUCT } from '@/data/routes'
-import { envClient } from '@/env'
+import { envClient } from '@/envClient'
 import { typesenseClient } from '@/lib/typesense/client'
 import { Image } from '@mantine/core'
 import NextImage from 'next/image'

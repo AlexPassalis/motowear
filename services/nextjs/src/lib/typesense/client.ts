@@ -1,4 +1,4 @@
-import { envClient } from '@/env'
+import { envClient } from '@/envClient'
 import TypesenseInstantSearchAdapter from 'typesense-instantsearch-adapter'
 
 export const typesenseClient = new TypesenseInstantSearchAdapter({

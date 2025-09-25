@@ -11,7 +11,7 @@ import type { typeUniqueVariantNames } from '@/utils/getPostgres'
 import { zodOrder } from '@/lib/postgres/data/zod'
 
 import { errorUnexpected } from '@/data/error'
-import { envClient, envServer } from '@/env'
+import { envClient } from '@/envClient'
 import { order } from '@/lib/postgres/schema'
 import {
   Button,
@@ -688,6 +688,7 @@ export function AdminOrderPageClient({
                 Shipping Surcharge
               </Table.Th>
               <Table.Th style={{ textAlign: 'center' }}>Order Code</Table.Th>
+              <Table.Th style={{ textAlign: 'center' }}>Invoice</Table.Th>
               <Table.Th
                 onClick={() => {
                   if (!showUnfulfilledOnly) {
@@ -709,7 +710,6 @@ export function AdminOrderPageClient({
               <Table.Th style={{ textAlign: 'center' }}>
                 Date Delivered
               </Table.Th>
-              <Table.Th style={{ textAlign: 'center' }}>Review Email</Table.Th>
               <Table.Th style={{ textAlign: 'center' }}>
                 Review Submitted
               </Table.Th>
@@ -827,6 +827,31 @@ export function AdminOrderPageClient({
                 <Table.Td
                   style={{
                     textAlign: 'center',
+                    color: `${
+                      order.einvoice_id && order.einvoice_link ? 'blue' : 'red'
+                    }`,
+                  }}
+                >
+                  {order.einvoice_id ? (
+                    order.einvoice_link ? (
+                      <Link
+                        href={order.einvoice_link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:underline"
+                      >
+                        {order.einvoice_id}
+                      </Link>
+                    ) : (
+                      order.einvoice_id
+                    )
+                  ) : (
+                    '-'
+                  )}
+                </Table.Td>
+                <Table.Td
+                  style={{
+                    textAlign: 'center',
                     whiteSpace: 'nowrap',
                   }}
                 >
@@ -848,10 +873,12 @@ export function AdminOrderPageClient({
                     <Link
                       href={`${
                         order.checkout.box_now_locker_id
-                          ? envServer.BOX_NOW_URL
-                          : envServer.ELTA_COURIER_URL
+                          ? envClient.BOX_NOW_URL
+                          : envClient.ELTA_COURIER_URL
                       }${order.tracking_number}`}
                       target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:underline"
                     >
                       {order.tracking_number}
                     </Link>
@@ -872,14 +899,6 @@ export function AdminOrderPageClient({
                         'dd/MM/yyyy HH:mm:ss',
                       )
                     : '-'}
-                </Table.Td>
-                <Table.Td
-                  style={{
-                    textAlign: 'center',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {order.review_email ? 'send' : 'not-send'}
                 </Table.Td>
                 <Table.Td
                   style={{
