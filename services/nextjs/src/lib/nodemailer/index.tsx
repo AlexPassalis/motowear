@@ -105,7 +105,6 @@ export async function sendAbandonCartEmail(cart: typeCart, email: string) {
 export async function sendOrderConfirmationEmail(
   order_id: typeOrder['id'],
   total: typeOrder['total'],
-  einvoice_link: typeOrder['einvoice_link'],
   cart: typeCart,
   checkout: typeCheckout,
   email: typeEmail,
@@ -148,7 +147,6 @@ export async function sendOrderConfirmationEmail(
       <OrderConfirmationEmail
         order_id={order_id}
         total={total}
-        einvoice_link={einvoice_link}
         cart={cart}
         checkout={checkout}
       />,
@@ -191,6 +189,7 @@ export async function sendOrderFulfilledEmail(
   tracking_number: NonNullable<typeOrder['tracking_number']>,
   order_id: typeOrder['id'],
   total: typeOrder['total'],
+  einvoice_link: typeOrder['einvoice_link'],
   cart: typeCart,
   email: typeEmail,
   box_now_locker_id: typeOrder['checkout']['box_now_locker_id'],
@@ -236,6 +235,7 @@ export async function sendOrderFulfilledEmail(
         tracking_number={tracking_number}
         order_id={order_id}
         total={total}
+        einvoice_link={einvoice_link}
         cart={cart}
         box_now_locker_id={box_now_locker_id}
       />,

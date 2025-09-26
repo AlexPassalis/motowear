@@ -3,7 +3,7 @@
   "name": "motowear",
   "scripts": {
     "dev": "next dev",
-    "react-email": "email dev --dir ./src/lib/react-email",
+    "react-email": "cross-env BUILD_TIME=true email dev --dir ./src/lib/react-email",
     "postgres:generate": "drizzle-kit generate",
     "postgres:migrate": "drizzle-kit push",
     "lint": "next lint",
