@@ -7,7 +7,7 @@ const minio = new Client({
   endPoint: 'minio',
   port: 9000,
   useSSL: false,
-  accessKey: envServer.BETTER_AUTH_SECRET,
+  accessKey: envServer.MINIO_ROOT_USER,
   secretKey: envServer.MINIO_ROOT_PASSWORD,
 })
 

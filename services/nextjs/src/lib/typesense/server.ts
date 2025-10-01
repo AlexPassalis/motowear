@@ -3,7 +3,7 @@ import { getVariantsProductType } from '@/utils/getPostgres'
 import { envServer } from '@/envServer'
 import { formatMessage } from '@/utils/formatMessage'
 import { errorPostgres, errorTypesense } from '@/data/error'
-import { sendTelegramMessage } from '../telegram'
+import { sendTelegramMessage } from '@/lib/telegram/index'
 import pLimit from 'p-limit'
 
 const typesense = new Typesense.Client({

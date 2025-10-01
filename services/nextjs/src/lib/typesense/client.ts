@@ -17,6 +17,5 @@ export const typesenseClient = new TypesenseInstantSearchAdapter({
     query_by: 'product_type,variant',
     highlight_full_fields: '*',
     prefix: true,
-    // infix: 'always',
   },
 })
