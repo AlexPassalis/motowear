@@ -37,8 +37,6 @@ secrets:
     external: true
   NODEMAILER_AUTH_PASS:
     external: true
-  NODEMAILER_EMAIL:
-    external: true
   VIVA_CLIENT_ID_DEMO:
     external: true
   VIVA_CLIENT_SECRET_DEMO:
@@ -154,7 +152,6 @@ services:
       - TELEGRAM_REVIEW_CHAT_ID
       - NODEMAILER_AUTH_USER
       - NODEMAILER_AUTH_PASS
-      - NODEMAILER_EMAIL
       - VIVA_CLIENT_ID_DEMO
       - VIVA_CLIENT_SECRET_DEMO
       - VIVA_WEBHOOK_VERIFICATION_KEY_DEMO
