@@ -791,7 +791,9 @@ export function CheckoutPageClient({
                       label={
                         <span>
                           {`ΕΛΤΑ Courier ${
-                            shipping.expense_elta_courier
+                            shipping.expense_elta_courier === 0
+                              ? 'Δωρεάν'
+                              : shipping.expense_elta_courier
                               ? `(${shipping.expense_elta_courier}€ έξοδα αποστολής)`
                               : ''
                           }`}
@@ -812,7 +814,9 @@ export function CheckoutPageClient({
                           label={
                             <span>
                               {`BOX NOW ${
-                                shipping.expense_box_now
+                                shipping.expense_box_now === 0
+                                  ? 'Δωρεάν'
+                                  : shipping.expense_box_now
                                   ? `(${shipping.expense_box_now}€ έξοδα αποστολής)`
                                   : ''
                               }`}
@@ -878,18 +882,17 @@ export function CheckoutPageClient({
                           label={
                             <span>
                               {form.values.delivery_method === 'ΕΛΤΑ Courier'
-                                ? 'Αντικαταβολή'
+                                ? `Αντικαταβολή${
+                                    shipping.surcharge
+                                      ? ` +${shipping.surcharge}€`
+                                      : ''
+                                  }`
                                 : 'Πληρωμή online κατά την παραλαβή'}
                               <br />
                               <span className="proxima-nova">
                                 {form.values.delivery_method === 'ΕΛΤΑ Courier'
                                   ? 'Δεν συνιστάται'
                                   : '* Όχι μετρητά'}
-                                {`${
-                                  shipping.surcharge
-                                    ? ` (+${shipping.surcharge}€ επιβάρυνση)`
-                                    : ''
-                                }`}
                               </span>
                             </span>
                           }
