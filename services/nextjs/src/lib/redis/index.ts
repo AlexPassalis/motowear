@@ -31,7 +31,7 @@ async function redisPing() {
     }
   } catch (err) {
     const message = formatMessage(
-      '@/lib/redis/redis.ts redisPing()',
+      '@/lib/redis/index.ts redisPing()',
       'Redis connection failed.',
       err,
     )
