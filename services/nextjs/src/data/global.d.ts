@@ -9,7 +9,6 @@ declare global {
   var global_telegram_bot: Telegraf<Context<Update>> | undefined
   var global_cron_send_order_review_email: CronJob | undefined
   var global_cron_send_abandon_cart_email: CronJob | undefined
-  var global_cron_delete_not_paid_orders: CronJob | undefined
 }
 
-export {}
+export {} // Treat as module

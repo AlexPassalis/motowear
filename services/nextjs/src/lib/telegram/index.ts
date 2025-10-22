@@ -71,3 +71,9 @@ export async function sendTelegramMessage(
     }
   }
 }
+
+if (process.env.BUILD_TIME !== 'true') {
+  await establishTelegram()
+}
+
+export {} // Initialize at application startup
