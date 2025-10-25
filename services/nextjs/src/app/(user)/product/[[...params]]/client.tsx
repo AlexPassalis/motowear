@@ -1445,10 +1445,16 @@ function Main({
         <ProductImages
           images={page.images}
           productType={paramsProduct_type}
-          className="hidden md:grid md:gap-4 my-8"
-          style={{
-            gridTemplateColumns: `repeat(${page.images.length}, minmax(0, 1fr))`,
-          }}
+          className={`hidden md:gap-4 my-8 ${
+            page.images.length === 1 ? 'md:flex md:justify-center' : 'md:grid'
+          }`}
+          style={
+            page.images.length === 1
+              ? { width: '50%', margin: '2rem auto' }
+              : {
+                  gridTemplateColumns: `repeat(${page.images.length}, minmax(0, 1fr))`,
+                }
+          }
         />
 
         {page.faq.length > 0 && (

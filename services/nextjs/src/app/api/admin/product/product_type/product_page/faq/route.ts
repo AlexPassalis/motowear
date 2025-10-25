@@ -8,7 +8,7 @@ import { product_pages } from '@/lib/postgres/schema'
 import { redis } from '@/lib/redis/index'
 import { formatMessage } from '@/utils/formatMessage'
 import { sendTelegramMessage } from '@/lib/telegram'
-import { getHomePage } from '@/utils/getPostgres'
+import { getPages } from '@/utils/getPostgres'
 import { sql } from 'drizzle-orm'
 
 export async function DELETE(req: NextRequest) {
@@ -61,15 +61,15 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ message: errorPostgres }, { status: 500 })
   }
 
-  let home_page_cache
+  let pages_postgres
   try {
-    home_page_cache = await getHomePage()
+    pages_postgres = await getPages()
   } catch (err) {
     return NextResponse.json({ message: err }, { status: 500 })
   }
 
   try {
-    await redis.set('home_page', JSON.stringify(home_page_cache), 'EX', 3600)
+    await redis.set('pages', JSON.stringify(pages_postgres), 'EX', 3600)
   } catch (err) {
     const message = formatMessage(
       '@/app/api/admin/product/product_type/product_page/faq/route.ts DELETE',
