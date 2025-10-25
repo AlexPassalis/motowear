@@ -13,14 +13,6 @@ const chatIds = {
 async function establishTelegram() {
   if (!global.global_telegram_bot) {
     const telegram_bot = new Telegraf(envServer.TELEGRAM_BOT_TOKEN)
-    process.once('SIGINT', () => {
-      telegram_bot.stop('SIGINT')
-      console.info('Telegram connection closed.')
-    })
-    process.once('SIGTERM', () => {
-      telegram_bot.stop('SIGTERM')
-      console.info('Telegram connection closed.')
-    })
     global.global_telegram_bot = telegram_bot
     await telegramPing()
   }
