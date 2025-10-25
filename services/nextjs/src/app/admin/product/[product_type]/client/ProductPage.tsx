@@ -35,12 +35,18 @@ export function ProductPageComponent({
 
   const [productPage, setProductPage] = useState(product_page)
 
+  const [imagesState, imagesHandlers] = useListState(product_page.images)
   const [faqState, fagHandlers] = useListState(product_page.faq)
   const [carouselState, carouselHandlers] = useListState(product_page.carousel)
   useEffect(() => {
+    if (JSON.stringify(productPage.images) !== JSON.stringify(imagesState)) {
+      imagesHandlers.setState(productPage.images)
+    }
+
     if (JSON.stringify(productPage.faq) !== JSON.stringify(faqState)) {
       fagHandlers.setState(productPage.faq)
     }
+
     if (
       JSON.stringify(productPage.carousel) !== JSON.stringify(carouselState)
     ) {
@@ -138,11 +144,143 @@ export function ProductPageComponent({
             </Button>
           </div>
           <div className="flex flex-col">
+            <h2 className="mx-auto p-1">Images</h2>
+            {productPage.images.length > 0 ? (
+              <DragDropContext
+                onDragEnd={({ destination, source }) => {
+                  if (!destination || destination.index === source.index) {
+                    return
+                  }
+                  const reordered = [...imagesState]
+                  const [moved] = reordered.splice(source.index, 1)
+                  reordered.splice(destination.index, 0, moved)
+                  setProductPage((prev) => ({ ...prev, images: reordered }))
+                }}
+              >
+                <Droppable droppableId="dnd-list" direction="vertical">
+                  {(provided) => (
+                    <div {...provided.droppableProps} ref={provided.innerRef}>
+                      {imagesState.map((image, index) => (
+                        <Draggable
+                          key={`${index.toString()}`}
+                          index={index}
+                          draggableId={`${index.toString()}`}
+                        >
+                          {(provided, snapshot) => (
+                            <div
+                              className={cx('gap-2', classes.item, {
+                                [classes.itemDragging]: snapshot.isDragging,
+                              })}
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                            >
+                              <div
+                                {...provided.dragHandleProps}
+                                className={classes.dragHandle}
+                              >
+                                <RxDragHandleDots2 size={20} />
+                              </div>
+                              <Select
+                                data={imagesMinio}
+                                defaultValue={productPage.images[index]}
+                                onBlur={(e) =>
+                                  setProductPage((prev) => ({
+                                    ...prev,
+                                    images: e.target.value
+                                      ? prev.images.map((img, i) =>
+                                          i === index ? e.target.value : img,
+                                        )
+                                      : prev.images.filter((_, i) => i !== index),
+                                  }))
+                                }
+                                disabled={onRequest}
+                                checkIconPosition="right"
+                                maxDropdownHeight={200}
+                                searchable
+                                nothingFoundMessage="Nothing found..."
+                              />
+                              <Button
+                                onClick={async () => {
+                                  if (product_page.images.includes(image)) {
+                                    setOnRequest(true)
+                                    try {
+                                      const res = await axios.delete(
+                                        `${envClient.API_ADMIN_URL}/product/product_type/product_page/images`,
+                                        {
+                                          data: {
+                                            product_type: product_type,
+                                            image: image,
+                                          },
+                                        },
+                                      )
+                                      if (res.status === 200) {
+                                        window.location.reload()
+                                      } else {
+                                        alert(
+                                          `Error deleting ${image}: ${
+                                            res.data?.message || errorUnexpected
+                                          }`,
+                                        )
+                                        console.error(res)
+                                      }
+                                    } catch (err) {
+                                      alert(`Error deleting ${image}`)
+                                      console.error(err)
+                                    }
+                                    setOnRequest(false)
+                                  } else {
+                                    setProductPage((prev) => ({
+                                      ...prev,
+                                      images: prev.images.filter(
+                                        (_, i) => i !== index,
+                                      ),
+                                    }))
+                                  }
+                                }}
+                                type="button"
+                                disabled={onRequest}
+                                color="red"
+                                className="ml-auto"
+                              >
+                                {onRequest ? 'Wait ...' : 'Delete'}
+                              </Button>
+                            </div>
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
+              </DragDropContext>
+            ) : (
+              <p className="text-red-500">
+                You have not created any Image items yet.
+              </p>
+            )}
+            <Button
+              onClick={() =>
+                setProductPage((prev) => ({
+                  ...prev,
+                  images: [...prev.images, ''],
+                }))
+              }
+              type="button"
+              disabled={onRequest}
+              color="green"
+              className="m-1 mx-auto"
+            >
+              {onRequest ? 'Wait ...' : 'Create'}
+            </Button>
+          </div>
+          <div className="flex flex-col">
             <h2 className="mx-auto p-1">FAQ</h2>
             {productPage.faq.length > 0 ? (
               <DragDropContext
                 onDragEnd={({ destination, source }) => {
-                  if (!destination || destination.index === source.index) return
+                  if (!destination || destination.index === source.index) {
+                    return
+                  }
                   const reordered = [...faqState]
                   const [moved] = reordered.splice(source.index, 1)
                   reordered.splice(destination.index, 0, moved)
@@ -279,7 +417,9 @@ export function ProductPageComponent({
             {productPage.carousel.length > 0 ? (
               <DragDropContext
                 onDragEnd={({ destination, source }) => {
-                  if (!destination || destination.index === source.index) return
+                  if (!destination || destination.index === source.index) {
+                    return
+                  }
                   const reordered = [...carouselState]
                   const [moved] = reordered.splice(source.index, 1)
                   reordered.splice(destination.index, 0, moved)

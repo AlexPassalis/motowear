@@ -44,11 +44,12 @@ export const product_pages = pagesSchema.table('product_pages', {
   product_type: text('product_type').primaryKey(),
   size_chart: text('size_chart').notNull(),
   product_description: text('product_description').notNull(),
+  upsell: text('upsell').notNull(),
+  images: jsonb('images').$type<string[]>().default([]).notNull(),
   faq: jsonb('faq').$type<{ question: string; answer: string }[]>().notNull(),
   carousel: jsonb('carousel')
     .$type<{ title: string; image: string }[]>()
     .notNull(),
-  upsell: text('upsell').notNull(),
 })
 
 export const productsSchema = pgSchema('products')

@@ -1,5 +1,3 @@
-import { zodProductPage } from '@/lib/postgres/data/zod'
-
 import { isSessionAPI } from '@/lib/better-auth/isSession'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
@@ -10,23 +8,23 @@ import { product_pages } from '@/lib/postgres/schema'
 import { redis } from '@/lib/redis/index'
 import { formatMessage } from '@/utils/formatMessage'
 import { sendTelegramMessage } from '@/lib/telegram'
-import { getPages } from '@/utils/getPostgres'
+import { getHomePage } from '@/utils/getPostgres'
+import { sql } from 'drizzle-orm'
 
-export { OPTIONS } from '@/utils/OPTIONS'
-
-export async function POST(req: NextRequest) {
+export async function DELETE(req: NextRequest) {
   await isSessionAPI(await headers())
 
   let validatedBody
   try {
     validatedBody = z
       .object({
-        productPage: zodProductPage,
+        product_type: z.string(),
+        image: z.string(),
       })
       .parse(await req.json())
   } catch (err) {
     const message = formatMessage(
-      '@/app/api/product/product_type/product_page/route.ts POST',
+      '@/app/api/admin/product/product_type/product_page/images/route.ts DELETE',
       errorInvalidBody,
       err,
     )
@@ -37,25 +35,21 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    await postgres
-      .insert(product_pages)
-      .values({
-        ...validatedBody.productPage,
-      })
-      .onConflictDoUpdate({
-        target: [product_pages.product_type],
-        set: {
-          size_chart: validatedBody.productPage.size_chart,
-          product_description: validatedBody.productPage.product_description,
-          images: validatedBody.productPage.images,
-          faq: validatedBody.productPage.faq,
-          carousel: validatedBody.productPage.carousel,
-          upsell: validatedBody.productPage.upsell,
-        },
-      })
+    await postgres.execute(
+      sql`
+          UPDATE ${product_pages}
+          SET images = COALESCE((
+            SELECT jsonb_agg(elem)
+            FROM jsonb_array_elements_text(${product_pages}.images) AS elem
+            WHERE elem <> ${validatedBody.image}
+          ), '[]'::jsonb)
+          WHERE ${product_pages}.product_type = ${validatedBody.product_type}
+            AND ${product_pages}.images @> ${JSON.stringify([validatedBody.image])}
+        `,
+    )
   } catch (err) {
     const message = formatMessage(
-      '@/app/api/product/product_type/variant/route.ts POST',
+      '@/app/api/admin/product/product_type/product_page/images/route.ts DELETE',
       errorPostgres,
       err,
     )
@@ -65,18 +59,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: errorPostgres }, { status: 500 })
   }
 
-  let pages_postgres
+  let home_page_cache
   try {
-    pages_postgres = await getPages()
+    home_page_cache = await getHomePage()
   } catch (err) {
     return NextResponse.json({ message: err }, { status: 500 })
   }
 
   try {
-    await redis.set('pages', JSON.stringify(pages_postgres), 'EX', 3600)
+    await redis.set('home_page', JSON.stringify(home_page_cache), 'EX', 3600)
   } catch (err) {
     const message = formatMessage(
-      '@/app/api/product/product_type/variant/route.ts POST',
+      '@/app/api/admin/product/product_type/product_page/images/route.ts DELETE',
       errorRedis,
       err,
     )

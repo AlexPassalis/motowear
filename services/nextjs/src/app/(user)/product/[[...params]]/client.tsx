@@ -1,10 +1,13 @@
 'use client'
 
+import { CSSProperties } from 'react'
+
 import type {
   typeProductPage,
   typeReview,
   typeVariant,
 } from '@/lib/postgres/data/type'
+
 import type { typeShipping } from '@/utils/getPostgres'
 
 import {
@@ -110,6 +113,38 @@ export function ProductPageClient({
           setSizeDropdown={setSizeDropdown}
         />
       </HeaderProvider>
+    </div>
+  )
+}
+
+function ProductImages({
+  images,
+  productType,
+  className,
+  style,
+}: {
+  images: string[]
+  productType: string
+  className?: string
+  style?: CSSProperties
+}) {
+  if (images.length === 0) {
+    return null
+  }
+
+  return (
+    <div className={className} style={style}>
+      {images.map((image, index) => (
+        <Image
+          key={index}
+          src={`${envClient.MINIO_PRODUCT_URL}/${productType}/${image}`}
+          alt={image}
+          width={0}
+          height={0}
+          sizes="100vw"
+          className="w-full h-auto"
+        />
+      ))}
     </div>
   )
 }
@@ -1357,7 +1392,7 @@ function Main({
               </h2>
             )}
             {page.faq.length > 0 && (
-              <Container size="xl" className="hidden lg:block mt-auto w-full">
+              <Container size="xl" className="hidden md:block mt-auto w-full">
                 <h1 className="mb-2 text-center text-xl xl:text-2xl">FAQ</h1>
                 <Accordion variant="separated">
                   {page.faq.map((faq, index) => (
@@ -1401,8 +1436,23 @@ function Main({
           </h2>
         )}
 
+        <ProductImages
+          images={page.images}
+          productType={paramsProduct_type}
+          className="md:hidden flex flex-col gap-4 my-8"
+        />
+
+        <ProductImages
+          images={page.images}
+          productType={paramsProduct_type}
+          className="hidden md:grid md:gap-4 my-8"
+          style={{
+            gridTemplateColumns: `repeat(${page.images.length}, minmax(0, 1fr))`,
+          }}
+        />
+
         {page.faq.length > 0 && (
-          <Container size="xl" className="lg:hidden">
+          <Container size="xl" className="md:hidden">
             <h1 className="mb-2 text-center text-xl xl:text-2xl">FAQ</h1>
             <Accordion variant="separated">
               {page.faq.map((faq, index) => (
