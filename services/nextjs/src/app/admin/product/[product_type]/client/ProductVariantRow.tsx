@@ -203,6 +203,20 @@ function ProductVariantRowNotMemoised({
         </Button>
       </Table.Td>
 
+      <Table.Td style={{ textAlign: 'center' }}>
+        <Button
+          onClick={() => {
+            setVariants((prev) =>
+              prev.map((item, i) =>
+                i === index ? { ...item, sold_out: !item.sold_out } : item,
+              ),
+            )
+          }}
+          color={variant.sold_out ? 'red' : 'green'}
+          disabled={onRequest}
+        />
+      </Table.Td>
+
       <Table.Td>
         <Button
           onClick={async () => {

@@ -56,6 +56,7 @@ function ModalNotMemoised({
   closeModal,
 }: ModalProps) {
   const upsells: typeUpsells = variantsPostgres
+    .filter((variant) => !variant.sold_out)
     .map((variant) => ({
       product_type: variant.product_type,
       name: variant.name,

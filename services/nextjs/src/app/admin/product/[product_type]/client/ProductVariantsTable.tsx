@@ -245,9 +245,9 @@ export function ProductVariantsTable({
                     })
                     openModal()
                   }}
-                  className="hover:cursor-pointer hover:text-green-500"
+                  className="whitespace-nowrap hover:cursor-pointer hover:text-green-500"
                 >
-                  Price_Before
+                  Price Before
                 </button>
               </Table.Th>
               <Table.Th style={{ textAlign: 'center' }}>
@@ -262,6 +262,30 @@ export function ProductVariantsTable({
                   className="hover:cursor-pointer hover:text-green-500"
                 >
                   Upsell
+                </button>
+              </Table.Th>
+              <Table.Th style={{ textAlign: 'center' }}>
+                <button
+                  onClick={() => {
+                    const first_variant_sold_out = variants[0].sold_out
+                    setVariants((variants) => {
+                      const new_variants = variants.map((variant) => ({
+                        ...variant,
+                        sold_out: !first_variant_sold_out,
+                      }))
+
+                      return new_variants
+                    })
+                  }}
+                  className={`whitespace-nowrap hover:cursor-pointer ${
+                    variants.every((v) => v.sold_out)
+                      ? 'text-red-500 hover:text-green-500'
+                      : variants.every((v) => !v.sold_out)
+                      ? 'text-green-500 hover:text-red-500'
+                      : 'text-black hover:text-red-500'
+                  }`}
+                >
+                  Sold Out
                 </button>
               </Table.Th>
               <Table.Th />
@@ -325,6 +349,7 @@ export function ProductVariantsTable({
                                 size: '',
                                 price_before: 0,
                                 upsell: null,
+                                sold_out: false,
                               }
 
                         const next = [...variants, blank]

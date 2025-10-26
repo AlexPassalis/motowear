@@ -16,6 +16,7 @@ import { errorAxios, errorNodemailer, errorReactEmail } from '@/data/error'
 import { sendTelegramMessage } from '@/lib/telegram/index'
 import AbandonCartEmail from '@/lib/react-email/AbandonCartEmail'
 import OrderConfirmationEmail from '@/lib/react-email/OrderConfirmationEmail'
+import OrderLateEmail from '@/lib/react-email/OrderLateEmail'
 import OrderFullfilledEmail from '@/lib/react-email/OrderFullfilledEmail'
 import ContentRequestEmail from '@/lib/react-email/ContentRequestEmail'
 import OrderReviewEmail from '@/lib/react-email/OrderReviewEmail'
@@ -175,6 +176,89 @@ export async function sendOrderConfirmationEmail(
   } catch (err) {
     const message = formatMessage(
       '@/lib/nodemailer/index.tsx sendOrderConfirmationEmail()',
+      errorNodemailer,
+      err,
+    )
+    console.error(message)
+    await sendTelegramMessage('ERROR', message)
+
+    return
+  }
+}
+
+export async function sendOrderLateEmail(
+  order_id: typeOrder['id'],
+  total: typeOrder['total'],
+  cart: typeCart,
+  checkout: typeCheckout,
+  email: typeEmail,
+) {
+  const attachments: Attachment[] = [
+    {
+      filename: 'motowear.png',
+      path: path.join(process.cwd(), 'public', 'motowear.png'),
+      cid: 'motowear_logo',
+    },
+  ]
+
+  for (const [index, item] of cart.entries()) {
+    try {
+      const res = await axios.get(
+        `${envServer.MINIO_PRODUCT_URL}/${item.product_type}/${item.image}`,
+        { responseType: 'arraybuffer' },
+      )
+      attachments.push({
+        filename: `${item.product_type} ${item.name}`,
+        content: res.data,
+        cid: `item-${index}`,
+        contentDisposition: 'inline',
+        contentType: mime.getType(item.image) || undefined,
+      })
+    } catch (err) {
+      const message = formatMessage(
+        '@/lib/nodemailer/index.tsx sendOrderLateEmail()',
+        errorAxios,
+        err,
+      )
+      console.error(message)
+      await sendTelegramMessage('ERROR', message)
+    }
+  }
+
+  let emailHtml
+  try {
+    emailHtml = await render(
+      <OrderLateEmail
+        order_id={order_id}
+        total={total}
+        cart={cart}
+        checkout={checkout}
+      />,
+    )
+  } catch (err) {
+    const message = formatMessage(
+      '@/lib/nodemailer/index.tsx sendOrderLateEmail()',
+      errorReactEmail,
+      err,
+    )
+    console.error(message)
+    await sendTelegramMessage('ERROR', message)
+
+    return
+  }
+
+  const options = {
+    from: `Moto Wear <${envServer.NODEMAILER_EMAIL}>`,
+    to: email,
+    subject: `Η παραγγελία σου έχει καθυστερήσει`,
+    html: emailHtml,
+    attachments: attachments,
+  }
+  try {
+    await transporter.sendMail(options)
+  } catch (err) {
+    const message = formatMessage(
+      '@/lib/nodemailer/index.tsx sendOrderLateEmail()',
       errorNodemailer,
       err,
     )

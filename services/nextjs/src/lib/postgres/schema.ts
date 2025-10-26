@@ -78,6 +78,7 @@ export const variant = productsSchema.table('variant', {
   price: Numeric('price', { precision: 7, scale: 2 }).notNull(),
   price_before: Numeric('price_before', { precision: 7, scale: 2 }).notNull(),
   upsell: jsonb('upsell').$type<typeUpsell>(),
+  sold_out: boolean('sold_out').default(false).notNull(),
 })
 
 export const ordersSchema = pgSchema('orders')
@@ -113,6 +114,9 @@ export const order = ordersSchema.table('order', {
   }),
   order_code: text('order_code'),
   paid: boolean('paid'),
+  order_late_email_sent: boolean('order_late_email_sent')
+    .default(false)
+    .notNull(),
   einvoice_id: text('einvoice_id'),
   einvoice_link: text('einvoice_link'),
   date_fulfilled: timestamp('date_fulfilled'),
