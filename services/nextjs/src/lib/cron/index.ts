@@ -5,10 +5,11 @@ import { formatMessage } from '@/utils/formatMessage'
 import { sendTelegramMessage } from '@/lib/telegram/index'
 import { postgres } from '@/lib/postgres/index'
 import { abandoned_cart, order } from '@/lib/postgres/schema'
-import { and, eq, lt } from 'drizzle-orm'
+import { and, eq, lt, or, isNotNull, isNull } from 'drizzle-orm'
 import { errorCron, errorPostgres } from '@/data/error'
 import {
   sendOrderReviewEmail,
+  sendOrderLateEmail,
   sendAbandonCartEmail,
 } from '@/lib/nodemailer/index'
 import pLimit from 'p-limit'
@@ -45,7 +46,67 @@ async function cronSendAbandonCartEmail() {
           .where(eq(abandoned_cart.email, ab_cart.email))
       } catch (err) {
         const message = formatMessage(
-          `@/lib/cron/index cronSendAbandonCartEmail() email: ${abandoned_cart.email}`,
+          `@/lib/cron/index cronSendAbandonCartEmail() email: ${ab_cart.email}`,
+          errorPostgres,
+          err,
+        )
+        console.error(message)
+        await sendTelegramMessage('ERROR', message)
+      }
+    }),
+  )
+
+  await Promise.all(sendEmailPromises)
+}
+
+async function cronSendOrderLateEmail() {
+  const today = toZonedTime(new Date(), 'Europe/Athens')
+  const fiveDaysAgo = subDays(today, 5)
+
+  let array
+  try {
+    array = await postgres
+      .select()
+      .from(order)
+      .where(
+        and(
+          lt(order.order_date, fiveDaysAgo),
+          eq(order.order_late_email_sent, false),
+          or(eq(order.paid, true), isNull(order.paid)),
+        ),
+      )
+  } catch (err) {
+    const message = formatMessage(
+      '@/lib/cron/index cronSendOrderLateEmail',
+      errorCron,
+      err,
+    )
+    console.error(message)
+    await sendTelegramMessage('ERROR', message)
+    return
+  }
+
+  const limit = pLimit(10)
+  const sendEmailPromises = array.map((ord) =>
+    limit(async () => {
+      await sendOrderLateEmail(
+        ord.id,
+        ord.total,
+        ord.cart,
+        ord.checkout,
+        ord.checkout.email,
+      )
+
+      try {
+        await postgres
+          .update(order)
+          .set({ order_late_email_sent: true })
+          .where(
+            and(eq(order.id, ord.id), eq(order.order_late_email_sent, false)),
+          )
+      } catch (err) {
+        const message = formatMessage(
+          `@/lib/cron/index cronSendOrderLateEmail() email: ${ord.checkout.email}`,
           errorPostgres,
           err,
         )
@@ -68,7 +129,11 @@ async function cronSendOrderReviewEmail() {
       .select()
       .from(order)
       .where(
-        and(eq(order.review_email, false), lt(order.date_delivered, oneDayAgo)),
+        and(
+          eq(order.review_email, false),
+          isNotNull(order.date_delivered),
+          lt(order.date_delivered, oneDayAgo),
+        ),
       )
   } catch (err) {
     const message = formatMessage(
@@ -82,22 +147,22 @@ async function cronSendOrderReviewEmail() {
   }
 
   const limit = pLimit(10)
-  const sendEmailPromises = array.map((orderItem) =>
+  const sendEmailPromises = array.map((ord) =>
     limit(async () => {
       await sendOrderReviewEmail(
-        orderItem.checkout.first_name,
-        orderItem.id,
-        orderItem.checkout.email,
+        ord.checkout.first_name,
+        ord.id,
+        ord.checkout.email,
       )
 
       try {
         await postgres
           .update(order)
           .set({ review_email: true })
-          .where(eq(order.id, orderItem.id))
+          .where(and(eq(order.id, ord.id), eq(order.review_email, false)))
       } catch (err) {
         const message = formatMessage(
-          `@/lib/cron/index cronSendOrderReviewEmail() order_id: #${order.id}`,
+          `@/lib/cron/index cronSendOrderReviewEmail() order_id: #${ord.id}`,
           errorPostgres,
           err,
         )
@@ -114,7 +179,7 @@ async function establishCron() {
   if (!global.global_cron_send_abandon_cart_email) {
     try {
       global.global_cron_send_abandon_cart_email = new CronJob(
-        '0 0 13 * * *', // second 0, minute 0, hour 13 daily
+        '0 0 12 * * *', // second 0, minute 0, hour 12 daily
         cronSendAbandonCartEmail,
         null,
         true,
@@ -130,6 +195,31 @@ async function establishCron() {
       )
       console.error(message)
       await sendTelegramMessage('ERROR', message)
+
+      process.exit(1)
+    }
+  }
+
+  if (!global.global_cron_send_order_late_email) {
+    try {
+      global.global_cron_send_order_late_email = new CronJob(
+        '0 0 13 * * *', // second 0, minute 0, hour 13 daily
+        cronSendOrderLateEmail,
+        null, // onComplete
+        true, // start immediately
+        'Europe/Athens',
+      )
+
+      console.info('Cron sendOrderLateEmail connected successfully.')
+    } catch (err) {
+      const message = formatMessage(
+        '@/lib/cron/index.ts establishCron()',
+        'Cron sendOrderLateEmail connection failed.',
+        err,
+      )
+      console.error(message)
+      await sendTelegramMessage('ERROR', message)
+
       process.exit(1)
     }
   }
@@ -137,7 +227,7 @@ async function establishCron() {
   if (!global.global_cron_send_order_review_email) {
     try {
       global.global_cron_send_order_review_email = new CronJob(
-        '0 0 12 * * *', // second 0, minute 0, hour 12 daily
+        '0 0 14 * * *', // second 0, minute 0, hour 14 daily
         cronSendOrderReviewEmail,
         null, // onComplete
         true, // start immediately
@@ -153,6 +243,7 @@ async function establishCron() {
       )
       console.error(message)
       await sendTelegramMessage('ERROR', message)
+
       process.exit(1)
     }
   }

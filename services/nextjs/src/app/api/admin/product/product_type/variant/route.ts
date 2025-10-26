@@ -72,6 +72,7 @@ export async function POST(req: NextRequest) {
                   size: v.size,
                   price_before: v.price_before,
                   upsell: v.upsell,
+                  sold_out: v.sold_out,
                 },
               }),
         ),

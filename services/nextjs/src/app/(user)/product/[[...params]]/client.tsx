@@ -439,6 +439,15 @@ function Main({
     (variant) => variant.name === specialVariant,
   )
 
+  const variantIsSoldOut =
+    postgresVariants.find(
+      (variant) =>
+        variant.product_type === paramsProduct_type &&
+        variant.name === state.selectedVariant &&
+        variant.color === state.selectedColor &&
+        variant.size === state.selectedSize,
+    )?.sold_out === true
+
   useEffect(() => {
     facebookPixelViewContent(
       paramsProduct_type,
@@ -1232,35 +1241,52 @@ function Main({
                     )}
                   </div>
                   <div className="flex gap-2">
-                    {state.displayedSizes.map((size, index) => (
-                      <div
-                        key={index}
-                        onClick={() =>
-                          dispatch({
-                            type: 'size',
-                            payload: { selectedSize: size },
-                          })
-                        }
-                        className={`w-12 h-[42px] border-2 rounded-lg ${
-                          state.selectedSize === size
-                            ? 'border-black'
-                            : 'border-[var(--mantine-border)]'
-                        }`}
-                      >
-                        <UnstyledButton
-                          size="md"
-                          style={{
-                            width: '100%',
-                            height: '100%',
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                          }}
+                    {state.displayedSizes.map((size, index) => {
+                      const sizeVariantIsSoldOut =
+                        postgresVariants.find(
+                          (variant) =>
+                            variant.product_type === paramsProduct_type &&
+                            variant.name === state.selectedVariant &&
+                            variant.color === state.selectedColor &&
+                            variant.size === size,
+                        )?.sold_out === true
+
+                      return (
+                        <div
+                          key={index}
+                          onClick={() =>
+                            dispatch({
+                              type: 'size',
+                              payload: { selectedSize: size },
+                            })
+                          }
+                          className={`w-12 h-[42px] border-2 rounded-lg ${
+                            state.selectedSize === size
+                              ? 'border-black'
+                              : 'border-[var(--mantine-border)]'
+                          }`}
                         >
-                          {size}
-                        </UnstyledButton>
-                      </div>
-                    ))}
+                          <UnstyledButton
+                            size="md"
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              display: 'flex',
+                              justifyContent: 'center',
+                              alignItems: 'center',
+                              textDecoration: sizeVariantIsSoldOut
+                                ? 'line-through'
+                                : 'none',
+                              textDecorationColor: sizeVariantIsSoldOut
+                                ? 'red'
+                                : 'inherit',
+                            }}
+                          >
+                            {size}
+                          </UnstyledButton>
+                        </div>
+                      )
+                    })}
                   </div>
                 </div>
               ))}
@@ -1300,6 +1326,7 @@ function Main({
                 </div>
               </div>
               <Button
+                disabled={variantIsSoldOut}
                 onClick={() => {
                   if (state.selectedVariant === specialVariant) {
                     const textAreaValueLength =
@@ -1383,7 +1410,7 @@ function Main({
                 radius="md"
                 style={{ width: '100%' }}
               >
-                Προσθήκη στο Καλάθι
+                {variantIsSoldOut ? 'Sold out' : 'Προσθήκη στο Καλάθι'}
               </Button>
             </div>
             {page.product_description && (
