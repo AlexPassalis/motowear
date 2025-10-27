@@ -148,16 +148,6 @@ import { Track } from '@/app/Track'
 
 import '@/lib/cron/index'
 
-import { toZonedTime } from 'date-fns-tz'
-import { sendMistakeEmails } from '@/lib/nodemailer/index'
-if (process.env.BUILD_TIME !== 'true') {
-  const today = toZonedTime(new Date(), 'Europe/Athens')
-
-  if (today.getHours() < 15) {
-    sendMistakeEmails()
-  }
-}
-
 export default function RootLayout({
   children,
 }: Readonly<{
