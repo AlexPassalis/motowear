@@ -20,6 +20,7 @@ import OrderLateEmail from '@/lib/react-email/OrderLateEmail'
 import OrderFullfilledEmail from '@/lib/react-email/OrderFullfilledEmail'
 import ContentRequestEmail from '@/lib/react-email/ContentRequestEmail'
 import OrderReviewEmail from '@/lib/react-email/OrderReviewEmail'
+import MistakeEmail from '@/lib/react-email/MistakeEmail'
 import path from 'path'
 import axios from 'axios'
 import mime from 'mime'
@@ -448,4 +449,88 @@ export async function sendOrderReviewEmail(
 
     return
   }
+}
+
+import { postgres } from '@/lib/postgres/index'
+import { order } from '@/lib/postgres/schema'
+import { and, eq, isNotNull } from 'drizzle-orm'
+import { errorCron } from '@/data/error'
+import pLimit from 'p-limit'
+
+async function sendMistakeEmail(email: string) {
+  const attachments: Attachment[] = [
+    {
+      filename: 'motowear.png',
+      path: path.join(process.cwd(), 'public', 'motowear.png'),
+      cid: 'motowear_logo',
+    },
+  ]
+
+  let emailHtml
+  try {
+    emailHtml = await render(<MistakeEmail email={email} />)
+  } catch (err) {
+    const message = formatMessage(
+      `@/lib/nodemailer/sendMistakeEmail email: ${email}`,
+      errorReactEmail,
+      err,
+    )
+    console.error(message)
+    await sendTelegramMessage('ERROR', message)
+
+    return
+  }
+  const options = {
+    from: `Moto Wear <${envServer.NODEMAILER_EMAIL}>`,
+    to: email,
+    subject: 'Σχετικά με το προηγούμενο email',
+    html: emailHtml,
+    attachments: attachments,
+  }
+  try {
+    await transporter.sendMail(options)
+  } catch (err) {
+    const message = formatMessage(
+      `@/lib/nodemailer/sendMistakeEmail email: ${email}`,
+      errorNodemailer,
+      err,
+    )
+    console.error(message)
+    await sendTelegramMessage('ERROR', message)
+
+    return
+  }
+}
+
+export async function sendMistakeEmails() {
+  let array
+  try {
+    array = await postgres
+      .select()
+      .from(order)
+      .where(
+        and(
+          isNotNull(order.date_fulfilled),
+          eq(order.order_late_email_sent, true),
+        ),
+      )
+  } catch (err) {
+    const message = formatMessage(
+      '@/lib/cron/index cronSendOrderLateEmail',
+      errorCron,
+      err,
+    )
+    console.error(message)
+    await sendTelegramMessage('ERROR', message)
+    return
+  }
+
+  const limit = pLimit(10)
+  const sendEmailPromises = array.map((ord) =>
+    limit(async () => {
+      await sendMistakeEmail(ord.checkout.email)
+    }),
+  )
+
+  await Promise.all(sendEmailPromises)
 }
