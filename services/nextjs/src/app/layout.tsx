@@ -153,7 +153,7 @@ import { sendMistakeEmails } from '@/lib/nodemailer/index'
 if (process.env.BUILD_TIME !== 'true') {
   const today = toZonedTime(new Date(), 'Europe/Athens')
 
-  if (today.getHours() < 14) {
+  if (today.getHours() < 15) {
     sendMistakeEmails()
   }
 }
