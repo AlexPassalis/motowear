@@ -70,6 +70,7 @@ async function cronSendOrderLateEmail() {
       .from(order)
       .where(
         and(
+          isNull(order.date_fulfilled),
           lt(order.order_date, fiveDaysAgo),
           eq(order.order_late_email_sent, false),
           or(eq(order.paid, true), isNull(order.paid)),
