@@ -270,7 +270,7 @@ export function CollectionPageClient({
                 {paginated.map(({ name, color, image }, index) => {
                   return (
                     <Cart
-                      key={`${selectedBrand}-${index}`}
+                      key={`${name}-${color}-${image}-${index}`}
                       paramsProduct_type={paramsProduct_type}
                       isLoading={loadingImages.has(index)}
                       index={index}
