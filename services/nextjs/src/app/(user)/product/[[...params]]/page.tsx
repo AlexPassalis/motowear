@@ -71,10 +71,10 @@ export async function generateMetadata({
       if (bName === 'Επίλεξε μηχανή') {
         return 1
       }
-      if (aName === specialVariant) {
+      if (specialVariant.includes(aName)) {
         return 1
       }
-      if (bName === specialVariant) {
+      if (specialVariant.includes(bName)) {
         return -1
       }
       return aName.localeCompare(bName)
@@ -183,10 +183,10 @@ export default async function ProductPage({
       if (bName === 'Επίλεξε μηχανή') {
         return 1
       }
-      if (aName === specialVariant) {
+      if (specialVariant.includes(aName)) {
         return 1
       }
-      if (bName === specialVariant) {
+      if (specialVariant.includes(bName)) {
         return -1
       }
       return aName.localeCompare(bName)

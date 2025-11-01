@@ -260,7 +260,7 @@ function Main({
             .filter(
               (product) =>
                 product.brand === selectedBrand ||
-                product.name === specialVariant,
+                specialVariant.includes(product.name),
             )
             .map((product) => product.name)
             .filter(
@@ -435,8 +435,8 @@ function Main({
   const customRef = useRef<null | HTMLTextAreaElement>(null)
   const [customError, setCustomError] = useState<string | null>(null)
 
-  const doNotFindYourMoto = postgresVariants.some(
-    (variant) => variant.name === specialVariant,
+  const doNotFindYourMoto = postgresVariants.some((variant) =>
+    specialVariant.includes(variant.name),
   )
 
   const variantIsSoldOut =
@@ -958,13 +958,13 @@ function Main({
                         dispatch({
                           type: 'variant',
                           payload: {
-                            selectedVariant: specialVariant,
+                            selectedVariant: specialVariant[0],
                           },
                         })
                         window.history.pushState(
                           {},
                           '',
-                          `${ROUTE_PRODUCT}/${paramsProduct_type}/${specialVariant}`,
+                          `${ROUTE_PRODUCT}/${paramsProduct_type}/${specialVariant[0]}`,
                         )
                       }}
                       className="ml-auto proxima-nova !text-xs lg:!text-lg text-red-500 hover:underline hover:cursor-pointer"
@@ -992,7 +992,7 @@ function Main({
                     className="proxima-nova"
                     classNames={{
                       root: `!text-lg !xl:text-xl ${
-                        state.selectedVariant === specialVariant
+                        specialVariant.includes(state.selectedVariant)
                           ? '!italic'
                           : ''
                       }`,
@@ -1049,7 +1049,9 @@ function Main({
                                 className="proxima-nova"
                                 classNames={{
                                   root: `!text-lg !xl:text-xl ${
-                                    variant === specialVariant ? '!italic' : ''
+                                    specialVariant.includes(variant)
+                                      ? '!italic'
+                                      : ''
                                   }`,
                                 }}
                               >
@@ -1067,7 +1069,7 @@ function Main({
               </div>
             )}
 
-            {state.selectedVariant === specialVariant && (
+            {specialVariant.includes(state.selectedVariant) && (
               <Textarea
                 ref={customRef}
                 autosize
@@ -1328,7 +1330,7 @@ function Main({
               <Button
                 disabled={variantIsSoldOut}
                 onClick={() => {
-                  if (state.selectedVariant === specialVariant) {
+                  if (specialVariant.includes(state.selectedVariant)) {
                     const textAreaValueLength =
                       customRef.current!.value.trim().length
                     if (textAreaValueLength < 3) {
@@ -1372,10 +1374,9 @@ function Main({
                         {
                           image: state.images[0],
                           product_type: paramsProduct_type,
-                          name:
-                            state.selectedVariant === specialVariant
-                              ? customRef.current!.value.trim()
-                              : state.selectedVariant,
+                          name: specialVariant.includes(state.selectedVariant)
+                            ? customRef.current!.value.trim()
+                            : state.selectedVariant,
                           color: state.selectedColor,
                           size: state.selectedSize,
                           price: state.price,
@@ -1619,13 +1620,13 @@ function Main({
               dispatch({
                 type: 'variant',
                 payload: {
-                  selectedVariant: specialVariant,
+                  selectedVariant: specialVariant[0],
                 },
               })
               window.history.pushState(
                 {},
                 '',
-                `${ROUTE_PRODUCT}/${paramsProduct_type}/${specialVariant}`,
+                `${ROUTE_PRODUCT}/${paramsProduct_type}/${specialVariant[0]}`,
               )
             }}
             className="block mx-4 mb-8 text-red-500 text-center text-lg hover:underline"
