@@ -47,6 +47,7 @@ function CartNotMemoised({
           priority={index < 8}
           fetchPriority={index < 8 ? 'high' : 'auto'}
           onLoad={() => onImageLoad(index)}
+          onError={() => onImageLoad(index)}
         />
       </div>
       <p className="text-center">{name}</p>
