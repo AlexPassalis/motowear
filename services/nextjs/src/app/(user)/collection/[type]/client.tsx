@@ -56,8 +56,8 @@ export function CollectionPageClient({
       ? uniqueVariants.filter((v) => v.brand === selectedBrand)
       : uniqueVariants
 
-    const specialVariants = uniqueVariants.filter(
-      (v) => v.name === specialVariant,
+    const specialVariants = uniqueVariants.filter((v) =>
+      specialVariant.includes(v.name),
     )
 
     if (specialVariants.length === 0 || selectedBrand === specialBrand) {
@@ -65,7 +65,7 @@ export function CollectionPageClient({
     } else {
       return [
         ...specialVariants,
-        ...unique.filter((v) => v.name !== specialVariant),
+        ...unique.filter((v) => !specialVariant.includes(v.name)),
         ...specialVariants,
       ]
     }
