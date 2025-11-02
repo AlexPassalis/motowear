@@ -329,26 +329,29 @@ export function CheckoutPageClient({
       )}
 
       <header className="relative flex justify-center p-2 border-b border-b-[var(--mantine-border)]">
-        <Link
-          href={ROUTE_HOME}
-          onClick={(e) => {
-            if (!orderCompleteResponse) {
-              e.preventDefault()
-            }
-          }}
-          className={`flex justify-center ${
-            !orderCompleteResponse ? 'cursor-default' : ''
-          }`}
-        >
-          <Image
-            component={NextImage}
-            src="/motowear.png"
-            width={200}
-            height={100}
-            alt="motowear.gr"
-            className="sm:scale-110"
-          />
-        </Link>
+        {orderCompleteResponse ? (
+          <Link href={ROUTE_HOME} className="flex justify-center">
+            <Image
+              component={NextImage}
+              src="/motowear.png"
+              width={200}
+              height={100}
+              alt="motowear.gr"
+              className="sm:scale-110"
+            />
+          </Link>
+        ) : (
+          <div className="flex justify-center cursor-default">
+            <Image
+              component={NextImage}
+              src="/motowear.png"
+              width={200}
+              height={100}
+              alt="motowear.gr"
+              className="sm:scale-110"
+            />
+          </div>
+        )}
       </header>
 
       <main className="flex-1 relative p-4">
