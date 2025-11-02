@@ -1,3 +1,7 @@
+hashPassword.js filter=git-crypt diff=git-crypt
+SETUP.md filter=git-crypt diff=git-crypt
+SSH.md filter=git-crypt diff=git-crypt
+
 *env.ts filter=git-crypt diff=git-crypt
 *envServer.ts filter=git-crypt diff=git-crypt
 *envClient.ts filter=git-crypt diff=git-crypt
@@ -5,6 +9,7 @@
 *.key filter=git-crypt diff=git-crypt
 *.pem filter=git-crypt diff=git-crypt
 *.conf filter=git-crypt diff=git-crypt
+
 services/nextjs/src/middleware.ts filter=git-crypt diff=git-crypt
 services/nextjs/src/lib/better-auth/** filter=git-crypt diff=git-crypt
 services/nextjs/src/utils/readSecret.ts filter=git-crypt diff=git-crypt
