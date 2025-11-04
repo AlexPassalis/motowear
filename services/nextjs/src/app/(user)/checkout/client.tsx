@@ -789,11 +789,11 @@ export function CheckoutPageClient({
                   <Group gap="xs">
                     <Radio
                       size="sm"
-                      value="ΕΛΤΑ Courier"
+                      value="Center Courier"
                       styles={{ body: { alignItems: 'center' } }}
                       label={
                         <span>
-                          {`ΕΛΤΑ Courier ${
+                          {`Center Courier ${
                             shipping.expense_elta_courier === 0
                               ? 'Δωρεάν'
                               : shipping.expense_elta_courier
