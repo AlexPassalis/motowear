@@ -789,7 +789,7 @@ export function CheckoutPageClient({
                   <Group gap="xs">
                     <Radio
                       size="sm"
-                      value="Center Courier"
+                      value="ΕΛΤΑ Courier"
                       styles={{ body: { alignItems: 'center' } }}
                       label={
                         <span>
