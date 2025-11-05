@@ -793,7 +793,7 @@ export function CheckoutPageClient({
                       styles={{ body: { alignItems: 'center' } }}
                       label={
                         <span>
-                          {`Center Courier ${
+                          {`courier Center ${
                             shipping.expense_elta_courier === 0
                               ? 'Δωρεάν'
                               : shipping.expense_elta_courier
