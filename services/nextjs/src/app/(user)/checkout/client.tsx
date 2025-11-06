@@ -1101,10 +1101,10 @@ export function CheckoutPageClient({
               </Link>{' '}
               ή τηλεφωνικώς στο{' '}
               <Link
-                href="tel:+306939133385"
+                href={`tel:+30${envClient.MOTOWEAR_PHONE_NUMBER}`}
                 className="text-red-600 hover:underline"
               >
-                6939133385
+                {envClient.MOTOWEAR_PHONE_NUMBER}
               </Link>
               .
             </p>

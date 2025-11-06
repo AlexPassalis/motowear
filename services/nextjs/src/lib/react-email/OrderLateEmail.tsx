@@ -19,6 +19,7 @@ import type {
   typeCheckout,
   typeOrder,
 } from '@/lib/postgres/data/type'
+import { envClient } from '@/envClient'
 
 interface EmailProps {
   order_id: typeOrder['id']
@@ -164,8 +165,11 @@ export function OrderLateEmail({
             <Text className="text-[#666666] text-[12px] leading-[24px]">
               Για οποιαδήποτε απορία σχετικά με την παραγγελία σας, μπορείτε να
               επικοινωνήσετε μαζί μας στο τηλέφωνο{' '}
-              <a href="tel:+306939133385" className="text-red-600 underline">
-                693 913 3385
+              <a
+                href={`tel:+30${envClient.MOTOWEAR_PHONE_NUMBER}`}
+                className="text-red-600 underline"
+              >
+                {envClient.MOTOWEAR_PHONE_NUMBER}
               </a>{' '}
               ή στο email{' '}
               <a
