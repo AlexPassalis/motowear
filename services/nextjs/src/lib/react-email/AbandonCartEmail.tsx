@@ -235,8 +235,11 @@ export function AbandonCartEmail({ email, cart }: AbandonCartEmailProps) {
             <Text className="text-[#666666] text-[12px]">
               Για οποιαδήποτε απορία σχετικά με την παραγγελία σας, μπορείτε να
               επικοινωνήσετε μαζί μας στο τηλέφωνο{' '}
-              <a href="tel:+306939133385" className="text-red-600 underline">
-                693 913 3385
+              <a
+                href={`tel:+30${envServer.MOTOWEAR_PHONE_NUMBER}`}
+                className="text-red-600 underline"
+              >
+                {envServer.MOTOWEAR_PHONE_NUMBER}
               </a>{' '}
               ή στο email{' '}
               <a

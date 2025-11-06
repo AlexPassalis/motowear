@@ -1,6 +1,7 @@
 'use client'
 
 import HeaderProvider from '@/context/HeaderProvider'
+import { envClient } from '@/envClient'
 import { typeVariant } from '@/lib/postgres/data/type'
 import { typeProductTypes, typeShipping } from '@/utils/getPostgres'
 
@@ -32,10 +33,10 @@ export function ContactPageClient({
           </h2>
           <p className="mb-2">
             <a
-              href="tel:+306939133385"
+              href={`tel:+30${envClient.MOTOWEAR_PHONE_NUMBER}`}
               className="text-red-600 hover:underline"
             >
-              693 913 3385
+              {envClient.MOTOWEAR_PHONE_NUMBER}
             </a>
           </p>
           <p className="text-gray-600">Ώρες λειτουργίας: 10:00 – 19:00.</p>
