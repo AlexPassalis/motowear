@@ -7,6 +7,7 @@ import { FaFacebookSquare } from 'react-icons/fa'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ROUTE_HOME } from '@/data/routes'
+import { envClient } from '@/envClient'
 
 const links = [
   { link: '/contact', label: 'Στοιχεία Επικοινωνίας' },
@@ -59,7 +60,7 @@ export function Footer() {
             </ActionIcon>
             <ActionIcon
               component="a"
-              href="tel:+306939133385"
+              href={`tel:+30${envClient.MOTOWEAR_PHONE_NUMBER}`}
               size="lg"
               variant="default"
               radius="xl"
