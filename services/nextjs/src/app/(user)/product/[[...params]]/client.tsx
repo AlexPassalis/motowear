@@ -707,8 +707,8 @@ function Main({
                               image: upsellSelectedVariant.images[0],
                               product_type: upsellSelectedVariant.product_type,
                               name: upsellSelectedVariant.name,
-                              color: upsellSelectedVariant.color,
-                              size: upsellSelectedVariant.size,
+                              color: upsellSelectedVariant.color || '',
+                              size: upsellSelectedVariant.size || '',
                               price: upsellSelectedVariant.price,
                               price_before: upsellSelectedVariant.price_before,
                               quantity: count,
@@ -1377,8 +1377,8 @@ function Main({
                           name: specialVariant.includes(state.selectedVariant)
                             ? customRef.current!.value.trim()
                             : state.selectedVariant,
-                          color: state.selectedColor,
-                          size: state.selectedSize,
+                          color: state.selectedColor || '',
+                          size: state.selectedSize || '',
                           price: state.price,
                           price_before: state.price_before,
                           quantity: count,
