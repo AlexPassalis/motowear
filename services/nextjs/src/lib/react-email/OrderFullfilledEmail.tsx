@@ -17,6 +17,7 @@ import {
   Link,
 } from '@react-email/components'
 import { envServer } from '@/envServer'
+import { envClient } from '@/envClient'
 
 interface EmailProps {
   tracking_number: typeOrder['tracking_number']
