@@ -66,8 +66,8 @@ export function OrderFullfilledEmail({
                 rel="noopener noreferrer"
                 href={`${
                   box_now_locker_id
-                    ? envClient.BOX_NOW_URL
-                    : envClient.ELTA_COURIER_URL
+                    ? envServer.BOX_NOW_URL
+                    : envServer.ELTA_COURIER_URL
                 }${tracking_number}`}
                 style={{
                   backgroundColor: '#dc2626',
