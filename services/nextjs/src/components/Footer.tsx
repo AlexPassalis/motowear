@@ -89,6 +89,8 @@ export function Footer() {
           <Link
             href="https://alexpassalis.dev/bio"
             className="text-xs text-red-600 hover:underline"
+            target="_blank"
+            rel="noopener noreferrer"
           >
             Developed by Alex Passalis
           </Link>
