@@ -52,6 +52,8 @@ export function Footer() {
             <ActionIcon
               component="a"
               href="mailto:contact@motowear.gr"
+              target="_blank"
+              rel="noopener noreferrer"
               size="lg"
               variant="default"
               radius="xl"
@@ -61,6 +63,8 @@ export function Footer() {
             <ActionIcon
               component="a"
               href={`tel:+30${envClient.MOTOWEAR_PHONE_NUMBER}`}
+              target="_blank"
+              rel="noopener noreferrer"
               size="lg"
               variant="default"
               radius="xl"
@@ -70,6 +74,8 @@ export function Footer() {
             <ActionIcon
               component="a"
               href="https://instagram.com/motowear.gr"
+              target="_blank"
+              rel="noopener noreferrer"
               size="lg"
               variant="default"
               radius="xl"
@@ -79,6 +85,8 @@ export function Footer() {
             <ActionIcon
               component="a"
               href="https://www.facebook.com/p/Moto-Wear-GR-100087815463903/"
+              target="_blank"
+              rel="noopener noreferrer"
               size="lg"
               variant="default"
               radius="xl"
@@ -88,9 +96,9 @@ export function Footer() {
           </div>
           <Link
             href="https://alexpassalis.dev/bio"
-            className="text-xs text-red-600 hover:underline"
             target="_blank"
             rel="noopener noreferrer"
+            className="text-xs text-red-600 hover:underline"
           >
             Developed by Alex Passalis
           </Link>
