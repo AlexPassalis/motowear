@@ -13,7 +13,7 @@ import {
   useRef,
   useState,
 } from 'react'
-import { Button, Pagination, Table, TextInput } from '@mantine/core'
+import { Button, Pagination, Select, Table, TextInput } from '@mantine/core'
 import { errorUnexpected } from '@/data/error'
 import { envClient } from '@/envClient'
 import axios from 'axios'
@@ -48,7 +48,9 @@ export function ProductVariantsTable({
   setModalState,
   openModal,
 }: ProductVariantsTableProps) {
-  const massCreateRef = useRef<null | HTMLInputElement>(null)
+  const massCreateNameRef = useRef<null | HTMLInputElement>(null)
+  const massCreateImagesRef = useRef<null | HTMLInputElement>(null)
+  const massCreateBrandRef = useRef<null | HTMLInputElement>(null)
 
   const searchValue = useRef<null | HTMLInputElement>(null)
   const [searchQuery, setSearchQuery] = useState('')
@@ -364,24 +366,57 @@ export function ProductVariantsTable({
                     >
                       {onRequest ? 'Wait ...' : 'Create'}
                     </Button>
-                    <TextInput ref={massCreateRef} />
+                    <TextInput
+                      ref={massCreateNameRef}
+                      placeholder="Name"
+                      style={{ minWidth: '150px' }}
+                    />
+                    <Select
+                      ref={massCreateImagesRef}
+                      placeholder="Image"
+                      style={{ minWidth: '150px' }}
+                      data={imagesMinio}
+                    />
+                    <Select
+                      ref={massCreateBrandRef}
+                      placeholder="Brand"
+                      style={{ minWidth: '150px' }}
+                      data={brandsPostgres}
+                    />
                     <Button
                       onClick={() => {
-                        const value = massCreateRef.current?.value.trim()
-                        if (!value || variants.length === 0) return
+                        const name = massCreateNameRef.current?.value.trim()
+                        const image = massCreateImagesRef.current?.value.trim()
+                        const brand = massCreateBrandRef.current?.value.trim()
+                        if (variants.length === 0 || !name) {
+                          return
+                        }
 
                         const templateName = variants.at(-1)!.name
                         const clones = variants
                           .filter((v) => v.name === templateName)
-                          .map((v) => ({ ...v, id: '', name: value }))
+                          .map((v) => ({
+                            ...v,
+                            id: '',
+                            name: name,
+                            ...(image && { images: [image] }),
+                            ...(brand && { brand: brand }),
+                          }))
 
                         const next = [...variants, ...clones]
                         setVariants(next)
                         setPageNumber(
                           Math.ceil(next.length / paginationPageSize),
                         )
-                        if (massCreateRef.current)
-                          massCreateRef.current.value = ''
+                        if (massCreateNameRef.current) {
+                          massCreateNameRef.current.value = ''
+                        }
+                        if (massCreateImagesRef.current) {
+                          massCreateImagesRef.current.value = ''
+                        }
+                        if (massCreateBrandRef.current) {
+                          massCreateBrandRef.current.value = ''
+                        }
                       }}
                       type="button"
                       disabled={variants.length < 1 || onRequest}
