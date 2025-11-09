@@ -13,7 +13,14 @@ import {
   useRef,
   useState,
 } from 'react'
-import { Button, Pagination, Select, Table, TextInput } from '@mantine/core'
+import {
+  Button,
+  MultiSelect,
+  Pagination,
+  Select,
+  Table,
+  TextInput,
+} from '@mantine/core'
 import { errorUnexpected } from '@/data/error'
 import { envClient } from '@/envClient'
 import axios from 'axios'
@@ -49,7 +56,7 @@ export function ProductVariantsTable({
   openModal,
 }: ProductVariantsTableProps) {
   const massCreateNameRef = useRef<null | HTMLInputElement>(null)
-  const massCreateImagesRef = useRef<null | HTMLInputElement>(null)
+  const [massCreateImages, setMassCreateImages] = useState<string[]>([])
   const massCreateBrandRef = useRef<null | HTMLInputElement>(null)
 
   const searchValue = useRef<null | HTMLInputElement>(null)
@@ -371,11 +378,19 @@ export function ProductVariantsTable({
                       placeholder="Name"
                       style={{ minWidth: '150px' }}
                     />
-                    <Select
-                      ref={massCreateImagesRef}
-                      placeholder="Image"
+                    <MultiSelect
+                      value={massCreateImages}
+                      onChange={setMassCreateImages}
+                      placeholder={massCreateImages.length > 0 ? '' : 'Images'}
                       style={{ minWidth: '150px' }}
                       data={imagesMinio}
+                      styles={{
+                        pillsList: {
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '4px',
+                        },
+                      }}
                     />
                     <Select
                       ref={massCreateBrandRef}
@@ -386,7 +401,7 @@ export function ProductVariantsTable({
                     <Button
                       onClick={() => {
                         const name = massCreateNameRef.current?.value.trim()
-                        const image = massCreateImagesRef.current?.value.trim()
+                        const images = massCreateImages
                         const brand = massCreateBrandRef.current?.value.trim()
                         if (variants.length === 0 || !name) {
                           return
@@ -399,7 +414,8 @@ export function ProductVariantsTable({
                             ...v,
                             id: '',
                             name: name,
-                            ...(image && { images: [image] }),
+                            ...(images &&
+                              images.length > 0 && { images: images }),
                             ...(brand && { brand: brand }),
                           }))
 
@@ -411,9 +427,7 @@ export function ProductVariantsTable({
                         if (massCreateNameRef.current) {
                           massCreateNameRef.current.value = ''
                         }
-                        if (massCreateImagesRef.current) {
-                          massCreateImagesRef.current.value = ''
-                        }
+                        setMassCreateImages([])
                         if (massCreateBrandRef.current) {
                           massCreateBrandRef.current.value = ''
                         }
