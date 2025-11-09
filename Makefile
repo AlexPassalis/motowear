@@ -1,4 +1,4 @@
-.PHONY: start 64 git-crypt lines-code
+.PHONY: default start 64 git-crypt lines-code
 
 default: start
 
