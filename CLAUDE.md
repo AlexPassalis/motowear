@@ -182,6 +182,40 @@ Server components fetch data directly from PostgreSQL/Redis, client components h
 
 Husky + lint-staged runs `pnpm lint` on staged Next.js files before commits. Configuration in `.lintstagedrc`.
 
+## Code Style Guidelines
+
+When writing or modifying code in this repository, follow these conventions:
+
+### Control Flow Braces
+**ALWAYS use curly braces `{}` for all control structures**, even single-line statements:
+
+```typescript
+// ✅ CORRECT
+if (condition) {
+  doSomething()
+}
+
+if (value) {
+  return result
+}
+
+for (const item of items) {
+  process(item)
+}
+
+// ❌ INCORRECT - Never omit braces
+if (condition) doSomething()
+if (value) return result
+for (const item of items) process(item)
+```
+
+This applies to:
+- `if`, `else if`, `else` statements
+- `for`, `while`, `do-while` loops
+- `switch` cases (when containing single statements)
+
+This convention prevents bugs when adding additional statements and maintains consistent code style throughout the codebase.
+
 ## Common Workflows
 
 ### Adding a new product type
