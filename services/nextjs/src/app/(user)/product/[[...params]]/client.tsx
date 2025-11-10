@@ -48,7 +48,7 @@ import {
   facebookPixelAddToCart,
   facebookPixelViewContent,
 } from '@/lib/facebook-pixel'
-import { specialVariant } from '@/data/magic'
+import { specialVariant, specialVariantTwo } from '@/data/magic'
 import {
   googleAnalyticsAddToCart,
   googleAnalyticsViewItem,
@@ -282,6 +282,7 @@ function Main({
           )!
           const displayedSizes = postgresVariants
             .filter((product) => product.name === displayedVariants[0])
+            .filter((product) => product.color === displayedColors[0])
             .map((product) => product.size)
             .filter(Boolean)
             .filter(
@@ -1142,7 +1143,7 @@ function Main({
             )}
 
             {state.displayedSizes.length > 0 &&
-              (paramsProduct_type === 'Θήκη Κινητού' ? (
+              (paramsProduct_type === specialVariantTwo ? (
                 <div>
                   <h1 className="mb-1 text-xl xl:text-2xl">Συσκευή</h1>
                   <div
