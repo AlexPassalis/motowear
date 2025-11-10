@@ -391,12 +391,14 @@ export function ProductVariantsTable({
                           gap: '4px',
                         },
                       }}
+                      searchable
                     />
                     <Select
                       ref={massCreateBrandRef}
                       placeholder="Brand"
                       style={{ minWidth: '150px' }}
                       data={brandsPostgres}
+                      searchable
                     />
                     <Button
                       onClick={() => {
