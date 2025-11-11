@@ -41,7 +41,6 @@ export default async function ShippingPolicyPage() {
   return (
     <ShippingPolicyPageClient
       product_types={resolved[0].value}
-      all_variants={resolved[1].value}
       shipping={resolved[2].value}
     />
   )

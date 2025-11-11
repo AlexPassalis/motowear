@@ -1,8 +1,4 @@
-import type {
-  typeVariant,
-  typeCartLocalStorage,
-  typeCoupon,
-} from '@/lib/postgres/data/type'
+import type { typeCartLocalStorage, typeCoupon } from '@/lib/postgres/data/type'
 import type { typeProductTypes, typeShipping } from '@/utils/getPostgres'
 
 import { Menu } from '@/components/Menu'
@@ -50,14 +46,12 @@ export const HeaderContext = createContext<HeaderContext | null>(null)
 
 type HeaderProviderProps = {
   product_types: typeProductTypes
-  all_variants: typeVariant[]
   shipping: typeShipping
   children: ReactNode
 }
 
 export default function HeaderProvider({
   product_types,
-  all_variants,
   shipping,
   children,
 }: HeaderProviderProps) {
@@ -72,7 +66,7 @@ export default function HeaderProvider({
   useEffect(() => {
     setCart(getLocalStorageCart())
     setHasMounted(true)
-  }, [all_variants])
+  }, [])
   useEffect(() => {
     if (hasMounted) {
       setLocalStorageCart(cart)

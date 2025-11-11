@@ -2,8 +2,6 @@
 
 import classes from '@/css/Demo.module.css'
 
-import type { typeVariant } from '@/lib/postgres/data/type'
-
 import HeaderProvider from '@/context/HeaderProvider'
 import {
   Accordion,
@@ -33,7 +31,6 @@ type HomePageClientProps = {
   home_page: typeHomePage
   home_page_variants: typeHomePageVariants
   product_types: string[]
-  all_variants: typeVariant[]
   shipping: typeShipping
 }
 
@@ -41,7 +38,6 @@ export function HomePageClient({
   home_page,
   home_page_variants,
   product_types,
-  all_variants,
   shipping,
 }: HomePageClientProps) {
   const autoplay = useRef(Autoplay({ delay: 5000 }))
@@ -67,11 +63,7 @@ export function HomePageClient({
   )
 
   return (
-    <HeaderProvider
-      product_types={product_types}
-      all_variants={all_variants}
-      shipping={shipping}
-    >
+    <HeaderProvider product_types={product_types} shipping={shipping}>
       <main className="flex-1">
         <Link
           href={home_page.big_image.url}
