@@ -37,7 +37,6 @@ export default async function ErrorPage({ searchParams }: ErrorPageProps) {
   return (
     <ErrorPageClient
       product_types={resolved[1].value}
-      all_variants={resolved[2].value}
       shipping={resolved[3].value}
       message={message}
     />

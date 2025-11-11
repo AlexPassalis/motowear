@@ -56,7 +56,7 @@ import {
 
 type ProductPageClientProps = {
   product_types: string[]
-  all_variants: typeVariant[]
+  upsellVariants: typeVariant[]
   page: typeProductPage
   postgres_reviews: typeReview[]
   shipping: typeShipping
@@ -67,7 +67,7 @@ type ProductPageClientProps = {
 
 export function ProductPageClient({
   product_types,
-  all_variants,
+  upsellVariants,
   page,
   postgres_reviews,
   shipping,
@@ -93,15 +93,11 @@ export function ProductPageClient({
         }
       }}
     >
-      <HeaderProvider
-        product_types={product_types}
-        all_variants={all_variants}
-        shipping={shipping}
-      >
+      <HeaderProvider product_types={product_types} shipping={shipping}>
         <Main
           paramsProduct_type={paramsProduct_type}
           paramsVariant={paramsVariant}
-          all_variants={all_variants}
+          upsellVariants={upsellVariants}
           postgresVariants={postgresVariants}
           page={page}
           postgres_reviews={postgres_reviews}
@@ -152,7 +148,7 @@ function ProductImages({
 type MainProps = {
   paramsProduct_type: string
   paramsVariant: undefined | typeVariant
-  all_variants: typeVariant[]
+  upsellVariants: typeVariant[]
   postgresVariants: typeVariant[]
   page: typeProductPage
   postgres_reviews: typeReview[]
@@ -167,7 +163,7 @@ type MainProps = {
 function Main({
   paramsProduct_type,
   paramsVariant,
-  all_variants,
+  upsellVariants,
   postgresVariants,
   page,
   postgres_reviews,
@@ -399,7 +395,7 @@ function Main({
     { open: openSizeChartModal, close: closeSizeChartModal },
   ] = useDisclosure(false)
 
-  const upsellProductVariant = all_variants.find(
+  const upsellProductVariant = postgresVariants.find(
     (variant) =>
       variant.product_type === paramsProduct_type &&
       variant.name === state.selectedVariant &&
@@ -407,7 +403,7 @@ function Main({
       variant.size === state.selectedSize,
   )?.upsell
   const upsellDisplayedVariants = upsellProductVariant
-    ? all_variants
+    ? upsellVariants
         .filter(
           (variant) =>
             variant.product_type === upsellProductVariant.product_type &&
@@ -417,7 +413,7 @@ function Main({
     : null
   const [upsellSelectedVariant, setUpsellSelectedVariant] = useState(
     upsellProductVariant
-      ? all_variants
+      ? upsellVariants
           .filter(
             (variant) =>
               variant.product_type === upsellProductVariant.product_type &&
@@ -541,7 +537,7 @@ function Main({
                             <div
                               key={index}
                               onClick={() => {
-                                const displayedVariants = all_variants
+                                const displayedVariants = upsellVariants
                                   .filter(
                                     (variant) =>
                                       variant.product_type ===
@@ -568,7 +564,7 @@ function Main({
                             <div
                               key={index}
                               onClick={() => {
-                                const displayedVariants = all_variants
+                                const displayedVariants = upsellVariants
                                   .filter(
                                     (variant) =>
                                       variant.product_type ===

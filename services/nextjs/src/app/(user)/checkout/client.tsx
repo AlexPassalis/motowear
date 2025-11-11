@@ -1,10 +1,6 @@
 'use client'
 
-import type {
-  typeVariant,
-  typeCartLocalStorage,
-  typeCoupon,
-} from '@/lib/postgres/data/type'
+import type { typeCartLocalStorage, typeCoupon } from '@/lib/postgres/data/type'
 import type { typeOrderByOrderCode, typeShipping } from '@/utils/getPostgres'
 
 import { zodCheckout, zodCoupon } from '@/lib/postgres/data/zod'
@@ -54,14 +50,12 @@ type CheckoutPageProps = {
         id: typeOrderByOrderCode['id']
         email: typeOrderByOrderCode['checkout']['email']
       }
-  all_variants: typeVariant[]
   shipping: typeShipping
 }
 
 export function CheckoutPageClient({
   isAbandonCart,
   orderDetails,
-  all_variants,
   shipping,
 }: CheckoutPageProps) {
   const router = useRouter()
@@ -121,7 +115,7 @@ export function CheckoutPageClient({
       router.push(ROUTE_HOME)
     }
     setCart(localStorageCart)
-  }, [all_variants])
+  }, [])
 
   useEffect(() => {
     if (saveInfo) {

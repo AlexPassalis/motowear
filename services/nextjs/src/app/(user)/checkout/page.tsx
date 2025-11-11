@@ -59,7 +59,6 @@ export default async function CheckoutPage({
     <CheckoutPageClient
       isAbandonCart={isAbandonCart}
       orderDetails={orderDetails}
-      all_variants={resolved[1].value}
       shipping={resolved[2].value}
     />
   )

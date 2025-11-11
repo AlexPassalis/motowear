@@ -4,7 +4,7 @@ import type { typeCoupon } from '@/lib/postgres/data/type'
 
 import HeaderProvider from '@/context/HeaderProvider'
 import { envClient } from '@/envClient'
-import { typeOrder, typeVariant } from '@/lib/postgres/data/type'
+import { typeOrder } from '@/lib/postgres/data/type'
 import { zodCoupon } from '@/lib/postgres/data/zod'
 import { typeProductTypes, typeShipping } from '@/utils/getPostgres'
 import { Button, Input, LoadingOverlay, Rating, Textarea } from '@mantine/core'
@@ -25,7 +25,6 @@ type ReviewPageClientProps = {
   unique_product_types: string[]
   full_name: string
   product_types: typeProductTypes
-  all_variants: typeVariant[]
   shipping: typeShipping
 }
 
@@ -34,7 +33,6 @@ export function ReviewPageClient({
   unique_product_types,
   full_name,
   product_types,
-  all_variants,
   shipping,
 }: ReviewPageClientProps) {
   const router = useRouter()
@@ -78,11 +76,7 @@ export function ReviewPageClient({
     useState<null | typeCoupon>(null)
 
   return (
-    <HeaderProvider
-      product_types={product_types}
-      all_variants={all_variants}
-      shipping={shipping}
-    >
+    <HeaderProvider product_types={product_types} shipping={shipping}>
       <main className="flex-1 container mx-auto px-6 py-12 text-black">
         {!reviewSubmittedSuccessfully ? (
           <form

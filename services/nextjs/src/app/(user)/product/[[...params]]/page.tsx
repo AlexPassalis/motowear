@@ -215,6 +215,27 @@ export default async function ProductPage({
       ) ?? undefined
     : undefined
 
+  const upsells = postgresVariants
+    .map((variant) => variant.upsell)
+    .filter((upsell) => upsell !== null)
+    .filter(
+      (upsell, index, self) =>
+        index ===
+        self.findIndex(
+          (other) =>
+            other.product_type === upsell.product_type &&
+            other.name === upsell.name,
+        ),
+    )
+
+  const upsellVariants = resolved[3].value.filter((variant) =>
+    upsells.some(
+      (upsell) =>
+        upsell.product_type === variant.product_type &&
+        upsell.name === variant.name,
+    ),
+  )
+
   const page = resolved[4].value.find(
     (page) => page.product_type === paramsProduct_type,
   )!
@@ -226,7 +247,7 @@ export default async function ProductPage({
   return (
     <ProductPageClient
       product_types={resolved[2].value}
-      all_variants={resolved[3].value}
+      upsellVariants={upsellVariants}
       page={page}
       postgres_reviews={postgres_reviews}
       shipping={resolved[6].value}
