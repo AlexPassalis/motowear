@@ -353,7 +353,7 @@ export function ProductVariantsTable({
                                 description: '',
                                 images: [],
                                 price: 0,
-                                brand: null,
+                                brand: '',
                                 color: '',
                                 size: '',
                                 price_before: 0,
