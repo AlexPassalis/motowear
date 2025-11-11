@@ -64,7 +64,6 @@ export default async function ReviewPage({ searchParams }: ReviewPageProps) {
       unique_product_types={unique_product_types}
       full_name={full_name}
       product_types={resolved[1].value}
-      all_variants={resolved[2].value}
       shipping={resolved[3].value}
     />
   )

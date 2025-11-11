@@ -151,7 +151,6 @@ export default async function CollectionPage({ params }: ProductPageProps) {
     <CollectionPageClient
       paramsProduct_type={paramsProduct_type}
       product_types={resolved[1].value}
-      all_variants={resolved[2].value}
       shipping={resolved[3].value}
       uniqueVariants={uniqueVariants}
       uniqueBrands={uniqueBrands}

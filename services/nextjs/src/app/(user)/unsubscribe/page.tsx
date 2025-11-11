@@ -55,7 +55,6 @@ export default async function UnsubscribePage({
     <UnsubscribePageClient
       email={resolved[0].value.email}
       product_types={resolved[1].value}
-      all_variants={resolved[2].value}
       shipping={resolved[3].value}
     />
   )

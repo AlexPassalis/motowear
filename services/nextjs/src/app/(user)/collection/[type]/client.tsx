@@ -1,6 +1,5 @@
 'use client'
 
-import type { typeVariant } from '@/lib/postgres/data/type'
 import type { typeShipping } from '@/utils/getPostgres'
 
 import HeaderProvider from '@/context/HeaderProvider'
@@ -17,7 +16,6 @@ import { specialBrand, specialVariant } from '@/data/magic'
 type CollectionPageClientProps = {
   paramsProduct_type: string
   product_types: string[]
-  all_variants: typeVariant[]
   shipping: typeShipping
   uniqueVariants: {
     name: string
@@ -31,7 +29,6 @@ type CollectionPageClientProps = {
 export function CollectionPageClient({
   paramsProduct_type,
   product_types,
-  all_variants,
   shipping,
   uniqueVariants,
   uniqueBrands,
@@ -148,11 +145,7 @@ export function CollectionPageClient({
           }
         }}
       >
-        <HeaderProvider
-          product_types={product_types}
-          all_variants={all_variants}
-          shipping={shipping}
-        >
+        <HeaderProvider product_types={product_types} shipping={shipping}>
           <main className="flex-1 flex flex-col">
             <h1 className="text-2xl text-center">{paramsProduct_type}</h1>
             {uniqueBrands.length > 0 && (

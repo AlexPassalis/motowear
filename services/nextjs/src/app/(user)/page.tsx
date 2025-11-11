@@ -40,7 +40,6 @@ export default async function HomePage() {
       home_page={resolved[0].value}
       home_page_variants={resolved[1].value}
       product_types={resolved[2].value}
-      all_variants={resolved[3].value}
       shipping={resolved[4].value}
     />
   )
