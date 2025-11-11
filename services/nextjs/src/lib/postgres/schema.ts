@@ -69,10 +69,7 @@ export const variant = productsSchema.table('variant', {
   images: text('images').array().notNull(),
   name: text('name').notNull(),
   description: text('description').notNull(),
-  brand: text('brand')
-    .notNull()
-    .default('')
-    .references(() => brand.image, { onDelete: 'set default' }),
+  brand: text('brand').references(() => brand.image, { onDelete: 'set null' }),
   color: text('color').notNull(),
   size: text('size').notNull(),
   price: Numeric('price', { precision: 7, scale: 2 }).notNull(),
