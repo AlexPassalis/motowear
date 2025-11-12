@@ -48,7 +48,7 @@ import {
   facebookPixelAddToCart,
   facebookPixelViewContent,
 } from '@/lib/facebook-pixel'
-import { specialVariant, specialVariantTwo } from '@/data/magic'
+import { specialVariant, specialProductType } from '@/data/magic'
 import {
   googleAnalyticsAddToCart,
   googleAnalyticsViewItem,
@@ -597,8 +597,12 @@ function Main({
                   )
                   .map((variant) => variant.size).length > 0 && (
                   <div className="mb-2">
-                    <h1 className="mb-1 text-lg">Μέγεθος</h1>
-                    <div className="flex gap-2">
+                    <h1 className="mb-1 text-lg">
+                      {upsellSelectedVariant.product_type === specialProductType
+                        ? 'Συσκευή'
+                        : 'Μέγεθος'}
+                    </h1>
+                    <div className="flex flex-wrap gap-2">
                       {upsellDisplayedVariants
                         .filter(
                           (variant) =>
@@ -619,7 +623,7 @@ function Main({
                                 )!,
                               )
                             }
-                            className={`w-9 h-[31.5px] border-2 rounded-lg ${
+                            className={`min-w-9 h-[31.5px] border-2 rounded-lg ${
                               upsellSelectedVariant.size === size
                                 ? 'border-black'
                                 : 'border-[var(--mantine-border)]'
@@ -632,6 +636,8 @@ function Main({
                                 display: 'flex',
                                 justifyContent: 'center',
                                 alignItems: 'center',
+                                padding: '0 8px',
+                                whiteSpace: 'nowrap',
                               }}
                             >
                               {size}
@@ -1073,7 +1079,7 @@ function Main({
                 minRows={5}
                 label="Πληκτρολογήστε το μοντέλο της μηχανής"
                 placeholder={`ΠΩΣ ΛΕΙΤΟΥΡΓΕΙ;
-    1. Πληκτρολογείς το μοντέλο της μηχανής σου (με χρονολογία) 
+    1. Πληκτρολογείς το μοντέλο της μηχανής σου (με χρονολογία)
     2. Ο εξιδεικευμένος γραφίστας μας φτιάχνει το σχέδιο σου σε 2-3 εργάσιμες.
     3. Σου το στέλνουμε στο email ώστε να το εγκρινεις.
     4. Το τυπώνουμε στη μπλούζα και το παραλαμβάνεις σε 1-3 εργάσιμες.`}
@@ -1139,7 +1145,7 @@ function Main({
             )}
 
             {state.displayedSizes.length > 0 &&
-              (paramsProduct_type === specialVariantTwo ? (
+              (paramsProduct_type === specialProductType ? (
                 <div>
                   <h1 className="mb-1 text-xl xl:text-2xl">Συσκευή</h1>
                   <div

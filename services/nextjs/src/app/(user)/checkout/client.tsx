@@ -38,7 +38,7 @@ import axios from 'axios'
 import Link from 'next/link'
 import { facebookPixelPurchase } from '@/lib/facebook-pixel/index'
 import { googleAnalyticsPurchase } from '@/lib/google-analytics'
-import { couponCodeMPRELOK, specialVariantTwo } from '@/data/magic'
+import { couponCodeMPRELOK, specialProductType } from '@/data/magic'
 import Script from 'next/script'
 
 type CheckoutPageProps = {
@@ -403,7 +403,7 @@ export function CheckoutPageClient({
                             <div className="flex gap-1">
                               <h2>
                                 {`${
-                                  product.product_type !== specialVariantTwo
+                                  product.product_type !== specialProductType
                                     ? 'Μέγεθος'
                                     : 'Συσκευή'
                                 }:`}{' '}
@@ -693,7 +693,7 @@ export function CheckoutPageClient({
                                 <div className="flex gap-1">
                                   <h2>
                                     {`${
-                                      product.product_type !== specialVariantTwo
+                                      product.product_type !== specialProductType
                                         ? 'Μέγεθος'
                                         : 'Συσκευή'
                                     }:`}{' '}
