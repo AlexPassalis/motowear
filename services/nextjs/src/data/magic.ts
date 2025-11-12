@@ -1,7 +1,7 @@
 export const specialVariant = [
   'Δεν βρίσκω την μηχανή μου (custom σχέδιο)',
   'Δεν βρίσκω την μηχανή μου (custom σχέδιο) v2',
-] as const
+]
 
 export const specialProductType = 'Θήκη Κινητού' as const
 
