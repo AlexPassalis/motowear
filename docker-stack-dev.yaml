@@ -166,6 +166,15 @@ services:
       NO_PROXY: 'api.telegram.org,.telegram.org'
       no_proxy: 'api.telegram.org,.telegram.org'
 
+  prometheus:
+    image: image-motowear-prometheus
+    networks:
+      - network-motowear
+    volumes:
+      - ./services/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - '9090:9090'
+
   nginx:
     image: image-motowear-nginx
     networks:
