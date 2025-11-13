@@ -7,6 +7,8 @@ start:
 	docker build -t image-motowear-typesense -f ./services/typesense/Dockerfile ./services/typesense
 	docker build --target dev -t image-motowear-nextjs -f ./services/nextjs/Dockerfile ./services/nextjs
 	docker build -t image-motowear-nginx -f ./services/nginx/Dockerfile ./services/nginx
+	docker build -t image-motowear-prometheus -f ./services/prometheus/Dockerfile ./services/prometheus
+	docker build -t image-motowear-grafana -f ./services/grafana/Dockerfile ./services/grafana
 	# docker network create -d overlay network-motowear
 	docker stack deploy -c ./docker-stack-dev.yaml --detach=false --with-registry-auth stack-motowear
 

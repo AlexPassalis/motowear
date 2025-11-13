@@ -7,6 +7,7 @@ volumes:
   redis:
   minio:
   typesense:
+  prometheus:
 
 secrets:
   POSTGRES_DB:
@@ -171,9 +172,22 @@ services:
     networks:
       - network-motowear
     volumes:
-      - ./services/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus:/prometheus
     ports:
       - '9090:9090'
+
+  grafana:
+    image: image-motowear-grafana
+    networks:
+      - network-motowear
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - ./services/grafana/provisioning:/etc/grafana/provisioning
+    ports:
+      - '3001:3000'
 
   nginx:
     image: image-motowear-nginx

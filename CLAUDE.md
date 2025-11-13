@@ -57,8 +57,11 @@ pnpm start
 From the repository root:
 
 ```bash
-# Development stack
-make docker-dev
+# Start development stack
+make start
+
+# Stop development stack
+make stop
 
 # Production stack
 make docker
