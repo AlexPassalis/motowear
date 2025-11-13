@@ -9,22 +9,28 @@ import { formatMessage } from '@/utils/formatMessage'
 import { sendTelegramMessage } from '@/lib/telegram/index'
 
 async function establishPostgres() {
-  if (!global.global_postgres) {
-    const postgresPool = new Pool({
-      connectionString: envServer.POSTGRES_URL,
-      ssl: false,
-    })
-    process.once('SIGINT', () => {
-      postgresPool.end()
-      console.info('Postgres connection closed.')
-    })
-    process.once('SIGTERM', () => {
-      postgresPool.end()
-      console.info('Postgres connection closed.')
-    })
-    global.global_postgres = drizzle(postgresPool, { schema })
-    await postgresPing()
+  if (
+    global.global_postgres_pool &&
+    !global.global_postgres_pool.ended &&
+    global.global_postgres
+  ) {
+    return global.global_postgres
   }
+
+  global.global_postgres_pool = new Pool({
+    connectionString: envServer.POSTGRES_URL,
+    ssl: false,
+  })
+  process.once('SIGINT', () => {
+    global.global_postgres_pool!.end()
+    console.info('Postgres connection closed.')
+  })
+  process.once('SIGTERM', () => {
+    global.global_postgres_pool!.end()
+    console.info('Postgres connection closed.')
+  })
+  global.global_postgres = drizzle(global.global_postgres_pool, { schema })
+  await postgresPing()
 
   return global.global_postgres
 }

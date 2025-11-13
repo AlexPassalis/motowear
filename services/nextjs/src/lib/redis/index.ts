@@ -4,21 +4,23 @@ import { sendTelegramMessage } from '@/lib/telegram/index'
 import { envServer } from '@/envServer'
 
 async function establishRedis() {
-  if (!global.global_redis) {
-    global.global_redis = new Redis({
-      host: envServer.REDIS_HOST,
-      port: envServer.REDIS_PORT,
-    })
-    process.once('SIGINT', () => {
-      global.global_redis!.quit()
-      console.info('Redis connection closed.')
-    })
-    process.once('SIGTERM', () => {
-      global.global_redis!.quit()
-      console.info('Redis connection closed.')
-    })
-    await redisPing()
+  if (global.global_redis && global.global_redis.status === 'ready') {
+    return global.global_redis
   }
+
+  global.global_redis = new Redis({
+    host: envServer.REDIS_HOST,
+    port: envServer.REDIS_PORT,
+  })
+  process.once('SIGINT', () => {
+    global.global_redis!.quit()
+    console.info('Redis connection closed.')
+  })
+  process.once('SIGTERM', () => {
+    global.global_redis!.quit()
+    console.info('Redis connection closed.')
+  })
+  await redisPing()
 
   return global.global_redis
 }
