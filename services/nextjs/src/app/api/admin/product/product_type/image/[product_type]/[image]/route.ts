@@ -24,7 +24,7 @@ export async function GET(
   if (error) {
     const err = JSON.stringify(error.issues)
     const location = 'GET ZOD request params'
-    await handleError(location, err)
+    handleError(location, err)
 
     return NextResponse.json({ err }, { status: 400 })
   }
@@ -44,13 +44,13 @@ export async function GET(
     } else {
       const err = `status ${res.status}`
       const location = 'GET MINIO fetch image'
-      await handleError(location, err)
+      handleError(location, err)
 
       return NextResponse.json({ err: location }, { status: 400 })
     }
   } catch (err) {
     const location = 'GET AXIOS get product image'
-    await handleError(location, err)
+    handleError(location, err)
 
     return NextResponse.json({ err: location }, { status: 500 })
   }

@@ -30,7 +30,7 @@ export async function getProductTypesCached(): Promise<typeProductTypes> {
       product_types = await redis.get('product_types')
     } catch (err) {
       const location = 'REDIS get product_types'
-      await handleError(location, err)
+      handleError(location, err)
     }
 
     if (product_types) {
@@ -40,7 +40,7 @@ export async function getProductTypesCached(): Promise<typeProductTypes> {
         product_types = await getProductTypes()
       } catch (err) {
         const location = 'POSTGRES get product_types'
-        await handleError(location, err)
+        handleError(location, err)
 
         throw err
       }
@@ -50,7 +50,7 @@ export async function getProductTypesCached(): Promise<typeProductTypes> {
       .set('product_types', JSON.stringify(product_types), 'EX', 3600)
       .catch(async (err) => {
         const location = 'REDIS set product_types'
-        await handleError(location, err)
+        handleError(location, err)
       })
 
     return product_types
@@ -67,7 +67,7 @@ export async function getVariantsCached(): Promise<typeVariant[]> {
       variants = await redis.get('variants')
     } catch (err) {
       const location = 'REDIS get variants'
-      await handleError(location, err)
+      handleError(location, err)
     }
 
     if (variants) {
@@ -77,7 +77,7 @@ export async function getVariantsCached(): Promise<typeVariant[]> {
         variants = await getVariants()
       } catch (err) {
         const location = 'POSTGRES get variants'
-        await handleError(location, err)
+        handleError(location, err)
 
         throw err
       }
@@ -87,7 +87,7 @@ export async function getVariantsCached(): Promise<typeVariant[]> {
       .set('variants', JSON.stringify(variants), 'EX', 3600)
       .catch(async (err) => {
         const location = 'REDIS set variants'
-        await handleError(location, err)
+        handleError(location, err)
       })
 
     return variants
@@ -104,7 +104,7 @@ export async function getPagesCached(): Promise<typeProductPage[]> {
       pages = await redis.get('pages')
     } catch (err) {
       const location = 'REDIS get pages'
-      await handleError(location, err)
+      handleError(location, err)
     }
 
     if (pages) {
@@ -114,7 +114,7 @@ export async function getPagesCached(): Promise<typeProductPage[]> {
         pages = await getPages()
       } catch (err) {
         const location = 'POSTGRES get pages'
-        await handleError(location, err)
+        handleError(location, err)
 
         throw err
       }
@@ -124,7 +124,7 @@ export async function getPagesCached(): Promise<typeProductPage[]> {
       .set('pages', JSON.stringify(pages), 'EX', 3600)
       .catch(async (err) => {
         const location = 'REDIS set pages'
-        await handleError(location, err)
+        handleError(location, err)
       })
 
     return pages
@@ -141,7 +141,7 @@ export async function getReviewsCached(): Promise<typeReview[]> {
       reviews = await redis.get('reviews')
     } catch (err) {
       const location = 'REDIS get reviews'
-      await handleError(location, err)
+      handleError(location, err)
     }
 
     if (reviews) {
@@ -151,7 +151,7 @@ export async function getReviewsCached(): Promise<typeReview[]> {
         reviews = await getReviews()
       } catch (err) {
         const location = 'POSTGRES get reviews'
-        await handleError(location, err)
+        handleError(location, err)
 
         throw err
       }
@@ -161,7 +161,7 @@ export async function getReviewsCached(): Promise<typeReview[]> {
       .set('reviews', JSON.stringify(reviews), 'EX', 3600)
       .catch(async (err) => {
         const location = 'REDIS set reviews'
-        await handleError(location, err)
+        handleError(location, err)
       })
 
     return reviews
@@ -178,7 +178,7 @@ export async function getShippingCached(): Promise<typeShipping> {
       shipping = await redis.get('shipping')
     } catch (err) {
       const location = 'REDIS get shipping'
-      await handleError(location, err)
+      handleError(location, err)
     }
 
     if (shipping) {
@@ -188,7 +188,7 @@ export async function getShippingCached(): Promise<typeShipping> {
         shipping = await getShipping()
       } catch (err) {
         const location = 'POSTGRES get shipping'
-        await handleError(location, err)
+        handleError(location, err)
 
         throw err
       }
@@ -198,7 +198,7 @@ export async function getShippingCached(): Promise<typeShipping> {
       .set('shipping', JSON.stringify(shipping), 'EX', 3600)
       .catch(async (err) => {
         const location = 'REDIS set shipping'
-        await handleError(location, err)
+        handleError(location, err)
       })
 
     return shipping
@@ -220,7 +220,7 @@ export async function getHomePageCached(): Promise<typeHomePage> {
       home_page = await redis.get('home_page')
     } catch (err) {
       const location = 'REDIS get home_page'
-      await handleError(location, err)
+      handleError(location, err)
     }
 
     if (home_page) {
@@ -230,7 +230,7 @@ export async function getHomePageCached(): Promise<typeHomePage> {
         home_page = await getHomePage()
       } catch (err) {
         const location = 'POSTGRES get home_page'
-        await handleError(location, err)
+        handleError(location, err)
 
         throw err
       }
@@ -240,7 +240,7 @@ export async function getHomePageCached(): Promise<typeHomePage> {
       .set('home_page', JSON.stringify(home_page), 'EX', 3600)
       .catch(async (err) => {
         const location = 'REDIS set home_page'
-        await handleError(location, err)
+        handleError(location, err)
       })
 
     return home_page
@@ -264,7 +264,7 @@ export async function getHomePageVariantsCached(): Promise<typeHomePageVariants>
       home_page_variants = await redis.get('home_page_variants')
     } catch (err) {
       const location = 'REDIS get home_page_variants'
-      await handleError(location, err)
+      handleError(location, err)
     }
 
     if (home_page_variants) {
@@ -274,7 +274,7 @@ export async function getHomePageVariantsCached(): Promise<typeHomePageVariants>
         home_page_variants = await getHomePageVariants()
       } catch (err) {
         const location = 'POSTGRES get home_page_variants'
-        await handleError(location, err)
+        handleError(location, err)
 
         throw err
       }
@@ -284,7 +284,7 @@ export async function getHomePageVariantsCached(): Promise<typeHomePageVariants>
       .set('home_page_variants', JSON.stringify(home_page_variants), 'EX', 3600)
       .catch(async (err) => {
         const location = 'REDIS set home_page_variants'
-        await handleError(location, err)
+        handleError(location, err)
       })
 
     return home_page_variants

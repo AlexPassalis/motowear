@@ -42,16 +42,16 @@ export async function updateTypesense(product_type: string) {
 
   if (resolved[0].status === 'rejected') {
     const location = '@/lib/typesense/server.ts updateTypesense() postgres'
-    await handleError(location, resolved[0].reason)
+    handleError(location, resolved[0].reason)
 
     throw resolved[0].reason
   }
 
   if (resolved[1].status === 'rejected') {
     const location = '@/lib/typesense/server.ts updateTypesense() delete'
-    await handleError(location, resolved[1].reason)
+    handleError(location, resolved[1].reason)
 
-    throw resolved[1]
+    throw resolved[1].reason
   }
 
   const upsertedVersions = [] as string[]
@@ -67,7 +67,7 @@ export async function updateTypesense(product_type: string) {
         await typesense.collections(collectionName).documents().upsert(document)
       } catch (err) {
         const location = '@/lib/typesense/server.ts updateTypesense() upsert'
-        await handleError(location, err)
+        handleError(location, err)
 
         throw err
       }

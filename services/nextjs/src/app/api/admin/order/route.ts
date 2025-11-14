@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
   if (error) {
     const err = JSON.stringify(error.issues)
     const location = 'POST ZOD request body'
-    await handleError(location, err)
+    handleError(location, err)
     return NextResponse.json({ err }, { status: 400 })
   }
 
@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
     )
   } catch (err) {
     const location = 'POST POSTGRES insert order'
-    await handleError(location, err)
+    handleError(location, err)
     return NextResponse.json({ err: location }, { status: 500 })
   }
 
@@ -80,7 +80,7 @@ export async function DELETE(req: NextRequest) {
   if (error) {
     const err = JSON.stringify(error.issues)
     const location = 'DELETE ZOD request body'
-    await handleError(location, err)
+    handleError(location, err)
     return NextResponse.json({ err }, { status: 400 })
   }
 
@@ -88,7 +88,7 @@ export async function DELETE(req: NextRequest) {
     await postgres.delete(order).where(eq(order.id, validatedBody.id))
   } catch (err) {
     const location = 'DELETE POSTGRES delete order'
-    await handleError(location, err)
+    handleError(location, err)
     return NextResponse.json({ err: location }, { status: 500 })
   }
 

@@ -492,9 +492,7 @@ export function CheckoutPageClient({
                       .safeParse(res.data)
 
                     if (error) {
-                      router.push(
-                        `${ROUTE_ERROR}?message=${'Invalid response'}`,
-                      )
+                      router.push(`${ROUTE_ERROR}?message=Invalid response`)
                       return
                     }
 
@@ -509,9 +507,7 @@ export function CheckoutPageClient({
                       .safeParse(res.data)
 
                     if (error) {
-                      router.push(
-                        `${ROUTE_ERROR}?message=${'Invalid response'}`,
-                      )
+                      router.push(`${ROUTE_ERROR}?message=Invalid response`)
 
                       return
                     }
@@ -692,7 +688,8 @@ export function CheckoutPageClient({
                                 <div className="flex gap-1">
                                   <h2>
                                     {`${
-                                      product.product_type !== specialProductType
+                                      product.product_type !==
+                                      specialProductType
                                         ? 'Μέγεθος'
                                         : 'Συσκευή'
                                     }:`}{' '}
@@ -931,7 +928,7 @@ export function CheckoutPageClient({
 
                               if (error) {
                                 router.push(
-                                  `${ROUTE_ERROR}?message=${'Invalid response'}`,
+                                  `${ROUTE_ERROR}?message=Invalid response`,
                                 )
 
                                 return

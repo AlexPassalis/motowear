@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
   if (error) {
     const err = JSON.stringify(error.issues)
     const location = 'POST ZOD request body'
-    await handleError(location, err)
+    handleError(location, err)
 
     return NextResponse.json({ err }, { status: 400 })
   }
@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
       })
   } catch (err) {
     const location = 'POST POSTGRES insert product_pages'
-    await handleError(location, err)
+    handleError(location, err)
 
     return NextResponse.json({ err: location }, { status: 500 })
   }
@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
     pages_postgres = await getPages()
   } catch (err) {
     const location = 'POST GET getPages'
-    await handleError(location, err)
+    handleError(location, err)
 
     return NextResponse.json({ err: location }, { status: 500 })
   }
@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
     await redis.set('pages', JSON.stringify(pages_postgres), 'EX', 3600)
   } catch (err) {
     const location = 'POST REDIS set pages'
-    await handleError(location, err)
+    handleError(location, err)
 
     return NextResponse.json({ err: location }, { status: 500 })
   }

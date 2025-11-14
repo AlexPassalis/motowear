@@ -18,7 +18,7 @@ export async function DELETE(req: NextRequest) {
   if (error) {
     const err = JSON.stringify(error.issues)
     const location = 'DELETE ZOD request body'
-    await handleError(location, err)
+    handleError(location, err)
 
     return NextResponse.json({ err }, { status: 400 })
   }
@@ -29,7 +29,7 @@ export async function DELETE(req: NextRequest) {
       .where(eq(coupon.coupon_code, validatedBody.coupon_code))
   } catch (err) {
     const location = 'DELETE POSTGRES delete coupon'
-    await handleError(location, err)
+    handleError(location, err)
 
     return NextResponse.json({ err: location }, { status: 500 })
   }

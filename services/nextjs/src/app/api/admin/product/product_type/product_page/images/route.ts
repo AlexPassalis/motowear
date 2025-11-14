@@ -23,7 +23,7 @@ export async function DELETE(req: NextRequest) {
   if (error) {
     const err = JSON.stringify(error.issues)
     const location = 'DELETE ZOD request body'
-    await handleError(location, err)
+    handleError(location, err)
 
     return NextResponse.json({ err }, { status: 400 })
   }
@@ -45,7 +45,7 @@ export async function DELETE(req: NextRequest) {
     )
   } catch (err) {
     const location = 'DELETE POSTGRES update product_pages images'
-    await handleError(location, err)
+    handleError(location, err)
 
     return NextResponse.json({ err: location }, { status: 500 })
   }
@@ -55,7 +55,7 @@ export async function DELETE(req: NextRequest) {
     pages_postgres = await getPages()
   } catch (err) {
     const location = 'DELETE GET getPages'
-    await handleError(location, err)
+    handleError(location, err)
 
     return NextResponse.json({ err: location }, { status: 500 })
   }
@@ -64,7 +64,7 @@ export async function DELETE(req: NextRequest) {
     await redis.set('pages', JSON.stringify(pages_postgres), 'EX', 3600)
   } catch (err) {
     const location = 'DELETE REDIS set pages'
-    await handleError(location, err)
+    handleError(location, err)
 
     return NextResponse.json({ err: location }, { status: 500 })
   }

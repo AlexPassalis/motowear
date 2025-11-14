@@ -94,7 +94,7 @@ export function ReviewPageClient({
                   res.data,
                 )
                 if (error) {
-                  router.push(`${ROUTE_ERROR}?message=${'Invalid response'}`)
+                  router.push(`${ROUTE_ERROR}?message=Invalid response`)
                   return
                 }
                 setReviewSubmittedSuccessfully(validatedResponse)

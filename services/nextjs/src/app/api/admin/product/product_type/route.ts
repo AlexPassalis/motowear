@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
   if (error) {
     const err = JSON.stringify(error.issues)
     const location = 'POST ZOD request body'
-    await handleError(location, err)
+    handleError(location, err)
 
     return NextResponse.json({ err }, { status: 400 })
   }
@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
     })
   } catch (err) {
     const location = 'POST POSTGRES insert product_pages'
-    await handleError(location, err)
+    handleError(location, err)
 
     return NextResponse.json({ err: location }, { status: 500 })
   }
@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
     pages_postgres = await getPages()
   } catch (err) {
     const location = 'POST GET postgresql caches'
-    await handleError(location, err)
+    handleError(location, err)
 
     return NextResponse.json({ err: location }, { status: 500 })
   }
@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
     await redis.set('pages', JSON.stringify(pages_postgres), 'EX', 3600)
   } catch (err) {
     const location = 'POST REDIS set product_types/pages'
-    await handleError(location, err)
+    handleError(location, err)
 
     return NextResponse.json({ err: location }, { status: 500 })
   }
@@ -91,7 +91,7 @@ export async function DELETE(req: NextRequest) {
   if (error) {
     const err = JSON.stringify(error.issues)
     const location = 'DELETE ZOD request body'
-    await handleError(location, err)
+    handleError(location, err)
 
     return NextResponse.json({ err }, { status: 400 })
   }
@@ -103,7 +103,7 @@ export async function DELETE(req: NextRequest) {
     `)
   } catch (err) {
     const location = 'DELETE POSTGRES drop table'
-    await handleError(location, err)
+    handleError(location, err)
 
     return NextResponse.json({ err: location }, { status: 500 })
   }
@@ -112,7 +112,7 @@ export async function DELETE(req: NextRequest) {
     await deleteTypeImages(`${productType}`)
   } catch (err) {
     const location = 'DELETE MINIO deleteTypeImages'
-    await handleError(location, err)
+    handleError(location, err)
 
     return NextResponse.json({ err: location }, { status: 500 })
   }
@@ -121,7 +121,7 @@ export async function DELETE(req: NextRequest) {
     await updateTypesense(productType)
   } catch (err) {
     const location = 'DELETE TYPESENSE updateTypesense'
-    await handleError(location, err)
+    handleError(location, err)
 
     return NextResponse.json({ err: location }, { status: 500 })
   }
@@ -137,7 +137,7 @@ export async function DELETE(req: NextRequest) {
     home_page_variants = await getHomePageVariants()
   } catch (err) {
     const location = 'DELETE GET postgresql caches'
-    await handleError(location, err)
+    handleError(location, err)
 
     return NextResponse.json({ err: location }, { status: 500 })
   }
@@ -154,7 +154,7 @@ export async function DELETE(req: NextRequest) {
     )
   } catch (err) {
     const location = 'DELETE REDIS set caches'
-    await handleError(location, err)
+    handleError(location, err)
 
     return NextResponse.json({ err: location }, { status: 500 })
   }

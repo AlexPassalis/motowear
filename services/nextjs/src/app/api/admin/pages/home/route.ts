@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
   if (error) {
     const err = JSON.stringify(error.issues)
     const location = 'POST ZOD request body'
-    await handleError(location, err)
+    handleError(location, err)
 
     return NextResponse.json({ err }, { status: 400 })
   }
@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
       })
   } catch (err) {
     const location = 'POST POSTGRES insert home_page'
-    await handleError(location, err)
+    handleError(location, err)
 
     return NextResponse.json({ err: location }, { status: 500 })
   }
@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
     home_page_cache = await getHomePage()
   } catch (err) {
     const location = 'POST REDIS getHomePage'
-    await handleError(location, err)
+    handleError(location, err)
 
     return NextResponse.json({ err: location }, { status: 500 })
   }
@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
     await redis.set('home_page', JSON.stringify(home_page_cache), 'EX', 3600)
   } catch (err) {
     const location = 'POST REDIS set home_page'
-    await handleError(location, err)
+    handleError(location, err)
 
     return NextResponse.json({ err: location }, { status: 500 })
   }

@@ -1,7 +1,6 @@
 import type { typeOrder } from '@/lib/postgres/data/type'
 
 import { envClient } from '@/envClient'
-import { envServer } from '@/envServer'
 
 const options = {
   autoConfig: false,
@@ -26,7 +25,7 @@ function getReactPixel() {
   return pixelPromise
 }
 
-const isProduction = envServer.NODE_ENV === 'production'
+const isProduction = envClient.NODE_ENV === 'production'
 
 export async function facebookPixelPageView() {
   if (!isProduction) {

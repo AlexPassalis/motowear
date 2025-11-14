@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
   if (error) {
     const err = JSON.stringify(error.issues)
     const location = 'POST ZOD request body'
-    await handleError(location, err)
+    handleError(location, err)
 
     return NextResponse.json({ err }, { status: 400 })
   }
@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
     )
   } catch (err) {
     const location = 'POST POSTGRES insert variants'
-    await handleError(location, err)
+    handleError(location, err)
 
     return NextResponse.json({ err: location }, { status: 500 })
   }
@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
     await updateTypesense(validatedBody.variants[0].product_type)
   } catch (err) {
     const location = 'POST TYPESENSE updateTypesense'
-    await handleError(location, err)
+    handleError(location, err)
 
     return NextResponse.json({ err: location }, { status: 500 })
   }
@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
     variants_postgres = await getVariants()
   } catch (err) {
     const location = 'POST GET getVariants'
-    await handleError(location, err)
+    handleError(location, err)
 
     return NextResponse.json({ err: location }, { status: 500 })
   }
@@ -95,7 +95,7 @@ export async function POST(req: NextRequest) {
     await redis.set('variants', JSON.stringify(variants_postgres), 'EX', 3600)
   } catch (err) {
     const location = 'POST REDIS set variants'
-    await handleError(location, err)
+    handleError(location, err)
 
     return NextResponse.json({ err: location }, { status: 500 })
   }
@@ -116,7 +116,7 @@ export async function DELETE(req: NextRequest) {
   if (error) {
     const err = JSON.stringify(error.issues)
     const location = 'DELETE ZOD request body'
-    await handleError(location, err)
+    handleError(location, err)
 
     return NextResponse.json({ err }, { status: 400 })
   }
@@ -125,7 +125,7 @@ export async function DELETE(req: NextRequest) {
     await postgres.delete(variant).where(eq(variant.id, validatedBody.id))
   } catch (err) {
     const location = 'DELETE POSTGRES delete variant'
-    await handleError(location, err)
+    handleError(location, err)
 
     return NextResponse.json({ err: location }, { status: 500 })
   }
@@ -134,7 +134,7 @@ export async function DELETE(req: NextRequest) {
     await updateTypesense(validatedBody.product_type)
   } catch (err) {
     const location = 'DELETE TYPESENSE updateTypesense'
-    await handleError(location, err)
+    handleError(location, err)
 
     return NextResponse.json({ err: location }, { status: 500 })
   }
@@ -144,7 +144,7 @@ export async function DELETE(req: NextRequest) {
     variants_postgres = await getVariants()
   } catch (err) {
     const location = 'DELETE GET getVariants'
-    await handleError(location, err)
+    handleError(location, err)
 
     return NextResponse.json({ err: location }, { status: 500 })
   }
@@ -153,7 +153,7 @@ export async function DELETE(req: NextRequest) {
     await redis.set('variants', JSON.stringify(variants_postgres), 'EX', 3600)
   } catch (err) {
     const location = 'DELETE REDIS set variants'
-    await handleError(location, err)
+    handleError(location, err)
 
     return NextResponse.json({ err: location }, { status: 500 })
   }

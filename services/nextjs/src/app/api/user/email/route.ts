@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
   if (error) {
     const err = JSON.stringify(error.issues)
     const location = 'POST ZOD request body'
-    await handleError(location, err)
+    handleError(location, err)
 
     return NextResponse.json({ err }, { status: 400 })
   }
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({}, { status: 209 })
     } else {
       const location = 'POST POSTGRES insert email'
-      await handleError(location, err)
+      handleError(location, err)
 
       return NextResponse.json({ err: location }, { status: 500 })
     }

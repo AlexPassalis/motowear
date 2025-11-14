@@ -7,6 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 This is the full-stack e-commerce website for motowear.gr, a Greek motorcycle accessories and apparel store. The application is deployed using Docker Stack with container orchestration.
 
 **Stack:**
+
 - **Next.js 15** (React 19) - Full-stack application at `services/nextjs/`
 - **PostgreSQL** - Relational database with Drizzle ORM
 - **Typesense** - Search engine
@@ -15,6 +16,7 @@ This is the full-stack e-commerce website for motowear.gr, a Greek motorcycle ac
 - **Nginx** - Reverse proxy and TLS termination
 
 **Key integrations:**
+
 - Viva.com (payments)
 - Aftersales/EasyShipping (logistics)
 - Prosvasis Go (invoicing)
@@ -70,6 +72,7 @@ make lines-code   # Count lines of code
 ```
 
 The Docker build process is defined in:
+
 - `docker-stack-dev.yaml` - Development configuration
 - `docker-stack.yaml` - Production configuration
 - Individual Dockerfiles in each service directory
@@ -130,6 +133,7 @@ The database uses **Drizzle ORM** with PostgreSQL schemas:
 - `other` - Misc data (shipping, daily_session)
 
 Schema is defined in `services/nextjs/src/lib/postgres/schema.ts`. After making changes, run:
+
 1. `pnpm postgres:generate` to create migrations
 2. `pnpm postgres:migrate` to apply changes
 
@@ -148,6 +152,7 @@ Build-time operations set `BUILD_TIME=true` to bypass secret reading (returns du
 ### Environment Configuration
 
 Three environment files:
+
 - `env.ts` - Shared constants
 - `envClient.ts` - Client-side environment variables
 - `envServer.ts` - Server-side configuration (secrets, API keys)
@@ -167,6 +172,7 @@ Some legacy endpoints still use Pages Router at `src/pages/api/admin/`.
 ### Client/Server Pattern
 
 Pages use a common pattern:
+
 - `page.tsx` - Server component (data fetching)
 - `client.tsx` - Client component (interactivity)
 
@@ -187,6 +193,7 @@ Husky + lint-staged runs `pnpm lint` on staged Next.js files before commits. Con
 When writing or modifying code in this repository, follow these conventions:
 
 ### Control Flow Braces
+
 **ALWAYS use curly braces `{}` for all control structures**, even single-line statements:
 
 ```typescript
@@ -210,6 +217,7 @@ for (const item of items) process(item)
 ```
 
 This applies to:
+
 - `if`, `else if`, `else` statements
 - `for`, `while`, `do-while` loops
 - `switch` cases (when containing single statements)
@@ -217,6 +225,7 @@ This applies to:
 This convention prevents bugs when adding additional statements and maintains consistent code style throughout the codebase.
 
 ### Exit Point Spacing
+
 **ALWAYS add a blank line before `throw` or `return` statements** when there is code above them in the same block scope:
 
 ```typescript
@@ -225,7 +234,7 @@ try {
   const result = await someOperation()
 } catch (err) {
   const location = 'POSTGRES get data'
-  await handleError(location, err)
+  handleError(location, err)
 
   throw errorPostgres
 }
@@ -241,7 +250,7 @@ try {
   const result = await someOperation()
 } catch (err) {
   const location = 'POSTGRES get data'
-  await handleError(location, err)
+  handleError(location, err)
   throw errorPostgres
 }
 
@@ -256,6 +265,7 @@ This visual separation makes it immediately clear where execution exits the curr
 ## Common Workflows
 
 ### Adding a new product type
+
 1. Update database schema in `lib/postgres/schema.ts`
 2. Run `pnpm postgres:generate && pnpm postgres:migrate`
 3. Update Zod schemas in `lib/postgres/data/zod.ts`
@@ -264,17 +274,20 @@ This visual separation makes it immediately clear where execution exits the curr
 6. Update Typesense index if searchable
 
 ### Adding a new API endpoint
+
 1. Create route handler at `app/api/{admin|user}/[endpoint]/route.ts`
 2. Use `postgres` client from `@/lib/postgres` for database operations
 3. Handle errors with `formatMessage()` and `sendTelegramMessage()`
 4. For admin endpoints, verify session with `isSession()` from `@/lib/better-auth/isSession`
 
 ### Modifying email templates
+
 1. Edit or create templates in `lib/react-email/`
 2. Run `pnpm react-email` to preview changes
 3. Templates are compiled at build time and sent via Nodemailer + Amazon SES
 
 ### Working with images
+
 - Images uploaded to MinIO (S3-compatible)
 - Public access at `https://motowear.gr/motowear/`
 - Use `MINIO_PUBLIC_URL` from `envServer`
@@ -287,6 +300,7 @@ The codebase does not currently have a test suite. Manual testing is performed l
 ## Deployment
 
 CI/CD via GitHub Actions deploys to VPS using Docker Stack. The deployment:
+
 1. Builds images for postgres, typesense, nextjs, and nginx
 2. Pushes to GitHub Container Registry
 3. Deploys via `docker stack deploy` with production configuration

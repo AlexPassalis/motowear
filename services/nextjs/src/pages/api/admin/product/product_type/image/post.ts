@@ -65,7 +65,7 @@ export default async function handler(
         )
       } catch (err) {
         const location = 'POST MINIO upload'
-        await handleError(location, err)
+        handleError(location, err)
 
         return res.status(500).json({ err: location })
       }
@@ -73,7 +73,7 @@ export default async function handler(
       return res.status(200).json({})
     } catch (err) {
       const location = 'POST formidable parse'
-      await handleError(location, err)
+      handleError(location, err)
 
       return res.status(500).json({ err: location })
     }

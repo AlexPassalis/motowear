@@ -12,12 +12,12 @@ async function establishRedis() {
     host: envServer.REDIS_HOST,
     port: envServer.REDIS_PORT,
   })
-  process.once('SIGINT', () => {
-    global.global_redis!.quit()
+  process.once('SIGINT', async () => {
+    await global.global_redis!.quit()
     console.info('Redis connection closed.')
   })
-  process.once('SIGTERM', () => {
-    global.global_redis!.quit()
+  process.once('SIGTERM', async () => {
+    await global.global_redis!.quit()
     console.info('Redis connection closed.')
   })
   await redisPing()

@@ -3,6 +3,7 @@ import { isSessionRSC } from '@/lib/better-auth/isSession'
 import { redirect } from 'next/navigation'
 import { AdminProductProductTypeReviewsClientPage } from '@/app/admin/product/[product_type]/reviews/client/index'
 import { getProductReviews } from '@/utils/getPostgres'
+import { handleError } from '@/utils/error/handleError'
 
 type AdminProductProductTypeReviewsPageProps = {
   params: Promise<{ product_type: string }>
@@ -19,7 +20,9 @@ export default async function AdminProductProductTypeReviewsPage({
   let product_reviews
   try {
     product_reviews = await getProductReviews(productType)
-  } catch {
+  } catch (err) {
+    const location = 'AdminProductProductTypeReviewsPage getProductReviews'
+    handleError(location, err)
     redirect(`${ROUTE_ERROR}?message=POSTGRES`)
   }
 

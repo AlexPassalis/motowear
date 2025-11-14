@@ -19,7 +19,7 @@ export async function DELETE(req: NextRequest) {
   if (error) {
     const err = JSON.stringify(error.issues)
     const location = 'DELETE ZOD request body'
-    await handleError(location, err)
+    handleError(location, err)
 
     return NextResponse.json({ err }, { status: 400 })
   }
@@ -31,7 +31,7 @@ export async function DELETE(req: NextRequest) {
       .execute()
   } catch (err) {
     const location = 'DELETE POSTGRES delete brand'
-    await handleError(location, err)
+    handleError(location, err)
 
     return NextResponse.json({ err: location }, { status: 500 })
   }
@@ -41,7 +41,7 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({}, { status: 200 })
   } catch (err) {
     const location = 'DELETE MINIO deleteFile brand'
-    await handleError(location, err)
+    handleError(location, err)
 
     return NextResponse.json({ err: location }, { status: 500 })
   }

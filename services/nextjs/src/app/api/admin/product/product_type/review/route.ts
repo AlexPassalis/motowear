@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
   if (error) {
     const err = JSON.stringify(error.issues)
     const location = 'POST ZOD request body'
-    await handleError(location, err)
+    handleError(location, err)
 
     return NextResponse.json({ err }, { status: 400 })
   }
@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
     )
   } catch (err) {
     const location = 'POST POSTGRES insert review'
-    await handleError(location, err)
+    handleError(location, err)
 
     return NextResponse.json({ err: location }, { status: 500 })
   }
@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
     reviews_postgres = await getReviews()
   } catch (err) {
     const location = 'POST GET getReviews'
-    await handleError(location, err)
+    handleError(location, err)
 
     return NextResponse.json({ err: location }, { status: 500 })
   }
@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
     await redis.set('reviews', JSON.stringify(reviews_postgres), 'EX', 3600)
   } catch (err) {
     const location = 'POST REDIS set reviews'
-    await handleError(location, err)
+    handleError(location, err)
 
     return NextResponse.json({ err: location }, { status: 500 })
   }

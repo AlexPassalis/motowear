@@ -16,7 +16,7 @@ export async function DELETE(req: NextRequest) {
   if (error) {
     const err = JSON.stringify(error.issues)
     const location = 'DELETE ZOD request body'
-    await handleError(location, err)
+    handleError(location, err)
 
     return NextResponse.json({ err }, { status: 400 })
   }
@@ -25,7 +25,7 @@ export async function DELETE(req: NextRequest) {
     await deleteFile('home_page', validatedBody.image)
   } catch (err) {
     const location = 'DELETE MINIO deleteFile'
-    await handleError(location, err)
+    handleError(location, err)
 
     return NextResponse.json({ err: location }, { status: 500 })
   }

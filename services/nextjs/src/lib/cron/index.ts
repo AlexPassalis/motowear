@@ -25,7 +25,7 @@ async function cronSendAbandonCartEmail() {
       .where(lt(abandoned_cart.date, oneDayAgo))
   } catch (err) {
     const location = 'CRON select abandoned_cart'
-    await handleError(location, err)
+    handleError(location, err)
 
     return
   }
@@ -41,7 +41,7 @@ async function cronSendAbandonCartEmail() {
           .where(eq(abandoned_cart.email, ab_cart.email))
       } catch (err) {
         const location = `CRON delete abandoned_cart email: ${ab_cart.email}`
-        await handleError(location, err)
+        handleError(location, err)
       }
     }),
   )
@@ -68,7 +68,7 @@ async function cronSendOrderLateEmail() {
       )
   } catch (err) {
     const location = 'CRON select late orders'
-    await handleError(location, err)
+    handleError(location, err)
 
     return
   }
@@ -93,7 +93,7 @@ async function cronSendOrderLateEmail() {
           )
       } catch (err) {
         const location = `CRON update order_late_email_sent order_id: ${ord.id}`
-        await handleError(location, err)
+        handleError(location, err)
       }
     }),
   )
@@ -119,7 +119,7 @@ async function cronSendOrderReviewEmail() {
       )
   } catch (err) {
     const location = 'CRON select orders for review email'
-    await handleError(location, err)
+    handleError(location, err)
 
     return
   }
@@ -140,7 +140,7 @@ async function cronSendOrderReviewEmail() {
           .where(and(eq(order.id, ord.id), eq(order.review_email, false)))
       } catch (err) {
         const location = `CRON update review_email order_id: ${ord.id}`
-        await handleError(location, err)
+        handleError(location, err)
       }
     }),
   )
@@ -162,7 +162,7 @@ async function establishCron() {
       console.info('Cron sendAbandonCartEmail connected successfully.')
     } catch (err) {
       const location = 'CRON establish sendAbandonCartEmail'
-      await handleError(location, err)
+      handleError(location, err)
 
       process.exit(1)
     }
@@ -181,7 +181,7 @@ async function establishCron() {
       console.info('Cron sendOrderLateEmail connected successfully.')
     } catch (err) {
       const location = 'CRON establish sendOrderLateEmail'
-      await handleError(location, err)
+      handleError(location, err)
 
       process.exit(1)
     }
@@ -200,7 +200,7 @@ async function establishCron() {
       console.info('Cron sendOrderReviewEmail connected successfully.')
     } catch (err) {
       const location = 'CRON establish sendOrderReviewEmail'
-      await handleError(location, err)
+      handleError(location, err)
 
       process.exit(1)
     }

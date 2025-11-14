@@ -57,7 +57,7 @@ export async function sendAbandonCartEmail(cart: typeCart, email: string) {
       })
     } catch (err) {
       const location = `NODEMAILER fetch image ${item.image}`
-      await handleError(location, err)
+      handleError(location, err)
     }
   }
 
@@ -66,7 +66,7 @@ export async function sendAbandonCartEmail(cart: typeCart, email: string) {
     emailHtml = await render(<AbandonCartEmail cart={cart} email={email} />)
   } catch (err) {
     const location = `NODEMAILER render AbandonCartEmail email: ${email}`
-    await handleError(location, err)
+    handleError(location, err)
 
     return
   }
@@ -81,7 +81,7 @@ export async function sendAbandonCartEmail(cart: typeCart, email: string) {
     await transporter.sendMail(options)
   } catch (err) {
     const location = `NODEMAILER sendAbandonCartEmail email: ${email}`
-    await handleError(location, err)
+    handleError(location, err)
 
     return
   }
@@ -117,7 +117,7 @@ export async function sendOrderConfirmationEmail(
       })
     } catch (err) {
       const location = 'NODEMAILER fetch order image'
-      await handleError(location, err)
+      handleError(location, err)
     }
   }
 
@@ -133,7 +133,7 @@ export async function sendOrderConfirmationEmail(
     )
   } catch (err) {
     const location = 'NODEMAILER render OrderConfirmationEmail'
-    await handleError(location, err)
+    handleError(location, err)
 
     return
   }
@@ -149,7 +149,7 @@ export async function sendOrderConfirmationEmail(
     await transporter.sendMail(options)
   } catch (err) {
     const location = 'NODEMAILER sendOrderConfirmationEmail'
-    await handleError(location, err)
+    handleError(location, err)
 
     return
   }
@@ -185,7 +185,7 @@ export async function sendOrderLateEmail(
       })
     } catch (err) {
       const location = 'NODEMAILER fetch late order image'
-      await handleError(location, err)
+      handleError(location, err)
     }
   }
 
@@ -201,7 +201,7 @@ export async function sendOrderLateEmail(
     )
   } catch (err) {
     const location = 'NODEMAILER render OrderLateEmail'
-    await handleError(location, err)
+    handleError(location, err)
 
     return
   }
@@ -217,7 +217,7 @@ export async function sendOrderLateEmail(
     await transporter.sendMail(options)
   } catch (err) {
     const location = 'NODEMAILER sendOrderLateEmail'
-    await handleError(location, err)
+    handleError(location, err)
 
     return
   }
@@ -255,7 +255,7 @@ export async function sendOrderFulfilledEmail(
       })
     } catch (err) {
       const location = 'NODEMAILER fetch fulfilled order image'
-      await handleError(location, err)
+      handleError(location, err)
 
       return
     }
@@ -275,7 +275,7 @@ export async function sendOrderFulfilledEmail(
     )
   } catch (err) {
     const location = `NODEMAILER render OrderFullfilledEmail order_id: ${order_id}`
-    await handleError(location, err)
+    handleError(location, err)
 
     return
   }
@@ -291,7 +291,7 @@ export async function sendOrderFulfilledEmail(
     await transporter.sendMail(options)
   } catch (err) {
     const location = `NODEMAILER sendOrderFulfilledEmail order_id: ${order_id}`
-    await handleError(location, err)
+    handleError(location, err)
 
     return
   }
@@ -303,7 +303,7 @@ export async function sendContentRequestEmail(email: typeEmail) {
     emailHtml = await render(<ContentRequestEmail email={email} />)
   } catch (err) {
     const location = `NODEMAILER render ContentRequestEmail email: ${email}`
-    await handleError(location, err)
+    handleError(location, err)
 
     return
   }
@@ -324,7 +324,7 @@ export async function sendContentRequestEmail(email: typeEmail) {
     await transporter.sendMail(options)
   } catch (err) {
     const location = `NODEMAILER sendContentRequestEmail email: ${email}`
-    await handleError(location, err)
+    handleError(location, err)
 
     return
   }
@@ -342,7 +342,7 @@ export async function sendOrderReviewEmail(
     )
   } catch (err) {
     const location = `NODEMAILER render OrderReviewEmail order_id: ${order_id}`
-    await handleError(location, err)
+    handleError(location, err)
 
     return
   }
@@ -363,7 +363,7 @@ export async function sendOrderReviewEmail(
     await transporter.sendMail(options)
   } catch (err) {
     const location = `NODEMAILER sendOrderReviewEmail order_id: ${order_id}`
-    await handleError(location, err)
+    handleError(location, err)
 
     return
   }
@@ -388,7 +388,7 @@ async function sendMistakeEmail(email: string) {
     emailHtml = await render(<MistakeEmail email={email} />)
   } catch (err) {
     const location = `NODEMAILER render MistakeEmail email: ${email}`
-    await handleError(location, err)
+    handleError(location, err)
 
     return
   }
@@ -403,7 +403,7 @@ async function sendMistakeEmail(email: string) {
     await transporter.sendMail(options)
   } catch (err) {
     const location = `NODEMAILER sendMistakeEmail email: ${email}`
-    await handleError(location, err)
+    handleError(location, err)
 
     return
   }
@@ -423,7 +423,7 @@ export async function sendMistakeEmails() {
       )
   } catch (err) {
     const location = 'NODEMAILER select orders for mistake emails'
-    await handleError(location, err)
+    handleError(location, err)
 
     return
   }
