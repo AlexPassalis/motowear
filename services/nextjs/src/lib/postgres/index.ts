@@ -5,7 +5,7 @@ import { envServer } from '@/envServer'
 import { drizzle } from 'drizzle-orm/node-postgres'
 import * as schema from '@/lib/postgres/schema'
 import { sql } from 'drizzle-orm'
-import { formatMessage } from '@/utils/formatMessage'
+import { formatMessage } from '@/utils/error/formatMessage'
 import { sendTelegramMessage } from '@/lib/telegram/index'
 
 async function establishPostgres() {

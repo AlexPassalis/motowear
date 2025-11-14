@@ -30,7 +30,6 @@ import axios from 'axios'
 import { zodCoupon } from '@/lib/postgres/data/zod'
 import { useRouter } from 'next/navigation'
 import { ROUTE_ERROR, ROUTE_PRODUCT } from '@/data/routes'
-import { errorAxios, errorInvalidResponse } from '@/data/error'
 import Link from 'next/link'
 import { Image } from '@mantine/core'
 import NextImage from 'next/image'
@@ -180,7 +179,7 @@ export default function HeaderProvider({
                   .safeParse(res.data)
                 if (err) {
                   router.push(
-                    `${ROUTE_ERROR}?message=${errorInvalidResponse}-email`,
+                    `${ROUTE_ERROR}?message=Invalid response-email`,
                   )
                 } else {
                   setEmailResponse(validatedResponse.coupon)
@@ -191,7 +190,7 @@ export default function HeaderProvider({
               } else {
               }
             } catch {
-              router.push(`${ROUTE_ERROR}?message=${errorAxios}`)
+              router.push(`${ROUTE_ERROR}?message=AXIOS`)
             } finally {
               close()
             }

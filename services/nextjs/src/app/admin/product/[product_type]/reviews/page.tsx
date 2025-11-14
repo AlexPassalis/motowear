@@ -1,4 +1,3 @@
-import { errorPostgres } from '@/data/error'
 import { ROUTE_ERROR } from '@/data/routes'
 import { isSessionRSC } from '@/lib/better-auth/isSession'
 import { redirect } from 'next/navigation'
@@ -21,7 +20,7 @@ export default async function AdminProductProductTypeReviewsPage({
   try {
     product_reviews = await getProductReviews(productType)
   } catch {
-    redirect(`${ROUTE_ERROR}?message=${errorPostgres}`)
+    redirect(`${ROUTE_ERROR}?message=POSTGRES`)
   }
 
   return (

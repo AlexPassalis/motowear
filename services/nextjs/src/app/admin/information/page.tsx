@@ -5,14 +5,13 @@ import { getCustomerDetails, getEmails, getPhones } from '@/utils/getPostgres'
 import { redirect } from 'next/navigation'
 import { AdminInformationPageClient } from '@/app/admin/information/client'
 import { isSessionRSC } from '@/lib/better-auth/isSession'
-import { errorPostgres } from '@/data/error'
 
 export default async function AdminInformationPage() {
   await isSessionRSC()
 
   const resolved = await Promise.allSettled([getEmails(), getPhones()])
   if (resolved[0].status === 'rejected' || resolved[1].status === 'rejected') {
-    redirect(`${ROUTE_ERROR}?message=${errorPostgres}`)
+    redirect(`${ROUTE_ERROR}?message=POSTGRES`)
   }
 
   const emails = resolved[0].value
@@ -26,7 +25,7 @@ export default async function AdminInformationPage() {
     )
     customerDetails = customerDetails.filter((details) => details) // filter out all falsy (undefined, because the order was deleted) values
   } catch {
-    redirect(`${ROUTE_ERROR}?message=${errorPostgres}`)
+    redirect(`${ROUTE_ERROR}?message=POSTGRES`)
   }
 
   const customerPhones = resolved[1].value

@@ -1,10 +1,4 @@
-import {
-  errorFormidable,
-  errorInvalidBody,
-  errorInvalidRequest,
-  errorMinio,
-  errorPostgres,
-} from '@/data/error'
+import { handleError } from '@/utils/error/handleError'
 import { isSessionPages } from '@/lib/better-auth/isSession'
 import { uploadFile } from '@/lib/minio'
 import { postgres } from '@/lib/postgres'
@@ -51,13 +45,13 @@ export default async function handler(
       const imageNew = files?.imageNew
 
       if (!brandNew) {
-        return res.status(400).json({ message: errorInvalidBody })
+        return res.status(400).json({ err: 'POST invalid body' })
       }
       const { data: validatedBrandNew } = z
         .array(z.string())
         .safeParse(JSON.parse(brandNew))
       if (!validatedBrandNew) {
-        return res.status(400).json({ message: errorInvalidBody })
+        return res.status(400).json({ err: 'POST invalid body' })
       }
 
       if (imageNew && imageNew.length > 0) {
@@ -69,8 +63,10 @@ export default async function handler(
             ),
           )
         } catch (err) {
-          console.error(errorMinio, err)
-          return res.status(500).json({ message: errorMinio })
+          const location = 'POST MINIO upload'
+          await handleError(location, err)
+
+          return res.status(500).json({ err: location })
         }
       }
 
@@ -94,16 +90,20 @@ export default async function handler(
           }),
         )
       } catch (err) {
-        console.error(errorPostgres, err)
-        return res.status(500).json({ message: errorPostgres })
+        const location = 'POST POSTGRES insert brand'
+        await handleError(location, err)
+
+        return res.status(500).json({ err: location })
       }
 
       return res.status(200).json({})
     } catch (err) {
-      console.error(errorFormidable, err)
-      return res.status(500).json({ message: errorFormidable })
+      const location = 'POST formidable parse'
+      await handleError(location, err)
+
+      return res.status(500).json({ err: location })
     }
   } else {
-    return res.status(400).json({ message: errorInvalidRequest })
+    return res.status(400).json({ err: 'INVALID request method' })
   }
 }

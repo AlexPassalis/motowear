@@ -5,7 +5,6 @@ import { ROUTE_ERROR } from '@/data/routes'
 import { getShippingCached, getVariantsCached } from '@/app/(user)/cache'
 import { redirect } from 'next/navigation'
 import { getOrderByOrderCode } from '@/utils/getPostgres'
-import { errorPostgres } from '@/data/error'
 
 type CheckoutPageProps = {
   searchParams: Promise<{ abandon_cart?: string; s?: string }>
@@ -20,10 +19,10 @@ export default async function CheckoutPage({
     getShippingCached(),
   ])
   if (resolved[1].status === 'rejected') {
-    redirect(`${ROUTE_ERROR}?message=${resolved[1].reason}`)
+    redirect(`${ROUTE_ERROR}?message=POSTGRES`)
   }
   if (resolved[2].status === 'rejected') {
-    redirect(`${ROUTE_ERROR}?message=${resolved[2].reason}`)
+    redirect(`${ROUTE_ERROR}?message=POSTGRES`)
   }
 
   const resolvedSearchParams = (
@@ -51,7 +50,7 @@ export default async function CheckoutPage({
       }
     } catch (err) {
       console.error(err)
-      redirect(`${ROUTE_ERROR}?message=${errorPostgres}`)
+      redirect(`${ROUTE_ERROR}?message=POSTGRES`)
     }
   }
 

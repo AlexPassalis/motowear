@@ -1,4 +1,4 @@
-import { formatMessage } from '@/utils/formatMessage'
+import { formatMessage } from '@/utils/error/formatMessage'
 import Redis from 'ioredis'
 import { sendTelegramMessage } from '@/lib/telegram/index'
 import { envServer } from '@/envServer'

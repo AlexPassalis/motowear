@@ -1,4 +1,3 @@
-import { errorUnexpected } from '@/data/error'
 import { ROUTE_ADMIN_HOME } from '@/data/routes'
 import { zodImage } from '@/data/zod'
 import { envClient } from '@/envClient'
@@ -99,7 +98,7 @@ export function Home({
                       } else {
                         alert(
                           `Error deleting ${image}: ${
-                            res.data?.message || errorUnexpected
+                            res.data?.message || 'Unexpected error'
                           }`,
                         )
                         console.error(res)
@@ -193,7 +192,7 @@ export function Home({
               } else {
                 alert(
                   `Error creating brands: ${
-                    res.data?.message || errorUnexpected
+                    res.data?.message || 'Unexpected error'
                   }`,
                 )
                 console.error(res)

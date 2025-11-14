@@ -7,7 +7,6 @@ import {
   getVariantsCached,
 } from '@/app/(user)/cache'
 import { ROUTE_ERROR } from '@/data/routes'
-import { errorPostgres } from '@/data/error'
 import { envServer } from '@/envServer'
 
 import { CollectionPageClient } from '@/app/(user)/collection/[type]/client'
@@ -32,11 +31,11 @@ export async function generateMetadata({
   ])
   if (resolved[0].status === 'rejected') {
     console.error(resolved[0].reason)
-    redirect(`${ROUTE_ERROR}?message=${errorPostgres}`)
+    redirect(`${ROUTE_ERROR}?message=POSTGRES`)
   }
   if (resolved[1].status === 'rejected') {
     console.error(resolved[1].reason)
-    redirect(`${ROUTE_ERROR}?message=${errorPostgres}`)
+    redirect(`${ROUTE_ERROR}?message=POSTGRES`)
   }
 
   const description = resolved[0].value.find(
@@ -94,13 +93,13 @@ export default async function CollectionPage({ params }: ProductPageProps) {
     getShippingCached(),
   ])
   if (resolved[1].status === 'rejected') {
-    redirect(`${ROUTE_ERROR}?message=${resolved[1].reason}`)
+    redirect(`${ROUTE_ERROR}?message=POSTGRES`)
   }
   if (resolved[2].status === 'rejected') {
-    redirect(`${ROUTE_ERROR}?message=${resolved[2].reason}`)
+    redirect(`${ROUTE_ERROR}?message=POSTGRES`)
   }
   if (resolved[3].status === 'rejected') {
-    redirect(`${ROUTE_ERROR}?message=${resolved[3].reason}`)
+    redirect(`${ROUTE_ERROR}?message=POSTGRES`)
   }
 
   const resolvedParams = (resolved[0] as PromiseFulfilledResult<typeParams>)

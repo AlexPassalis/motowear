@@ -22,7 +22,6 @@ import Link from 'next/link'
 import { ROUTE_CHECKOUT, ROUTE_ERROR, ROUTE_PRODUCT } from '@/data/routes'
 import { useDisclosure } from '@mantine/hooks'
 import axios from 'axios'
-import { errorAxios, errorInvalidResponse, errorUnexpected } from '@/data/error'
 import { z } from 'zod'
 import { useRouter } from 'next/navigation'
 import { zodCoupon } from '@/lib/postgres/data/zod'
@@ -354,7 +353,7 @@ export function Cart({
                       if (res.status !== 200) {
                         router.push(
                           `${ROUTE_ERROR}?message=${
-                            res?.data?.message || errorUnexpected
+                            res?.data?.message || 'Unexpected error'
                           }`,
                         )
                       }
@@ -364,7 +363,7 @@ export function Cart({
                         .safeParse(res?.data)
                       if (!validatedResponse) {
                         router.push(
-                          `${ROUTE_ERROR}?message=${errorInvalidResponse}-coupon_code`,
+                          `${ROUTE_ERROR}?message=Invalid response-coupon_code`,
                         )
                       }
                       if (couponCodeRef?.current?.value) {
@@ -376,7 +375,7 @@ export function Cart({
                         setCoupon(null)
                       }
                     } catch {
-                      router.push(`${ROUTE_ERROR}?message=${errorAxios}`)
+                      router.push(`${ROUTE_ERROR}?message=AXIOS`)
                     } finally {
                       closeCouponLoadingOverlay()
                     }

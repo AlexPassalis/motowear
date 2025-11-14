@@ -1,30 +1,24 @@
-import { errorInvalidBody, errorPostgres } from '@/data/error'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { postgres } from '@/lib/postgres/index'
 import { coupon } from '@/lib/postgres/schema'
 import { eq } from 'drizzle-orm'
-import { formatMessage } from '@/utils/formatMessage'
-import { sendTelegramMessage } from '@/lib/telegram'
+import { handleError } from '@/utils/error/handleError'
 
 export { OPTIONS } from '@/utils/OPTIONS'
 
 export async function POST(req: NextRequest) {
-  let validatedBody
-  try {
-    validatedBody = z
-      .object({ coupon_code: z.string() })
-      .parse(await req.json())
-  } catch (err) {
-    const message = formatMessage(
-      '@/app/api/user/coupon_code/route.ts POST',
-      errorInvalidBody,
-      err,
-    )
-    console.error(message)
-    await sendTelegramMessage('ERROR', message)
+  const requestBodySchema = z.object({ coupon_code: z.string() })
+  const requestBody = await req.json()
 
-    return NextResponse.json({ message: errorInvalidBody }, { status: 400 })
+  const { error, data: validatedBody } =
+    requestBodySchema.safeParse(requestBody)
+  if (error) {
+    const err = JSON.stringify(error.issues)
+    const location = 'POST ZOD request body'
+    await handleError(location, err)
+
+    return NextResponse.json({ err }, { status: 400 })
   }
 
   let couponArray
@@ -40,15 +34,10 @@ export async function POST(req: NextRequest) {
       )
       .limit(1)
   } catch (err) {
-    const message = formatMessage(
-      '@/app/api/user/coupon_code/route.ts POST',
-      errorPostgres,
-      err,
-    )
-    console.error(message)
-    await sendTelegramMessage('ERROR', message)
+    const location = 'POST POSTGRES select coupon'
+    await handleError(location, err)
 
-    return NextResponse.json({ message: errorPostgres }, { status: 500 })
+    return NextResponse.json({ err: location }, { status: 500 })
   }
 
   return NextResponse.json({ couponArray: couponArray }, { status: 200 })

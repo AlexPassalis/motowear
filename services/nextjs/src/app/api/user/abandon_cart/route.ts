@@ -1,32 +1,28 @@
-import { errorInvalidBody, errorPostgres } from '@/data/error'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { postgres } from '@/lib/postgres/index'
 import { abandoned_cart } from '@/lib/postgres/schema'
-import { formatMessage } from '@/utils/formatMessage'
-import { sendTelegramMessage } from '@/lib/telegram'
+import { handleError } from '@/utils/error/handleError'
 import { zodCart } from '@/lib/postgres/data/zod'
 import { toZonedTime } from 'date-fns-tz'
 
 export { OPTIONS } from '@/utils/OPTIONS'
 
 export async function POST(req: NextRequest) {
-  const { error, data: validatedBody } = z
-    .object({
-      email: z.string().email(),
-      cart: zodCart,
-    })
-    .safeParse(await req.json())
-  if (error) {
-    const message = formatMessage(
-      '@/app/api/user/abandon_cart/route.ts POST zod',
-      errorInvalidBody,
-      error,
-    )
-    console.error(message)
-    await sendTelegramMessage('ERROR', message)
+  const requestBodySchema = z.object({
+    email: z.string().email(),
+    cart: zodCart,
+  })
+  const requestBody = await req.json()
 
-    return NextResponse.json({ message: errorInvalidBody }, { status: 400 })
+  const { error, data: validatedBody } =
+    requestBodySchema.safeParse(requestBody)
+  if (error) {
+    const err = JSON.stringify(error.issues)
+    const location = 'POST ZOD request body'
+    await handleError(location, err)
+
+    return NextResponse.json({ err }, { status: 400 })
   }
 
   const { email, cart } = validatedBody
@@ -46,15 +42,10 @@ export async function POST(req: NextRequest) {
         },
       })
   } catch (err) {
-    const message = formatMessage(
-      '@/app/api/user/abandon_cart/route.ts POST',
-      errorPostgres,
-      err,
-    )
-    console.error(message)
-    await sendTelegramMessage('ERROR', message)
+    const location = 'POST POSTGRES insert abandoned_cart'
+    await handleError(location, err)
 
-    return NextResponse.json({ message: errorPostgres }, { status: 500 })
+    return NextResponse.json({ err: location }, { status: 500 })
   }
 
   return NextResponse.json({}, { status: 200 })

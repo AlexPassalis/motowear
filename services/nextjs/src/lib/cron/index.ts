@@ -1,12 +1,11 @@
 import { CronJob } from 'cron'
 import { subDays } from 'date-fns'
 import { toZonedTime } from 'date-fns-tz'
-import { formatMessage } from '@/utils/formatMessage'
-import { sendTelegramMessage } from '@/lib/telegram/index'
+import { handleError } from '@/utils/error/handleError'
 import { postgres } from '@/lib/postgres/index'
 import { abandoned_cart, order } from '@/lib/postgres/schema'
 import { and, eq, lt, or, isNotNull, isNull } from 'drizzle-orm'
-import { errorCron, errorPostgres } from '@/data/error'
+
 import {
   sendOrderReviewEmail,
   sendOrderLateEmail,
@@ -25,13 +24,9 @@ async function cronSendAbandonCartEmail() {
       .from(abandoned_cart)
       .where(lt(abandoned_cart.date, oneDayAgo))
   } catch (err) {
-    const message = formatMessage(
-      '@/lib/cron/index cronSendAbandonCartEmail',
-      errorCron,
-      err,
-    )
-    console.error(message)
-    await sendTelegramMessage('ERROR', message)
+    const location = 'CRON select abandoned_cart'
+    await handleError(location, err)
+
     return
   }
 
@@ -45,13 +40,8 @@ async function cronSendAbandonCartEmail() {
           .delete(abandoned_cart)
           .where(eq(abandoned_cart.email, ab_cart.email))
       } catch (err) {
-        const message = formatMessage(
-          `@/lib/cron/index cronSendAbandonCartEmail() email: ${ab_cart.email}`,
-          errorPostgres,
-          err,
-        )
-        console.error(message)
-        await sendTelegramMessage('ERROR', message)
+        const location = `CRON delete abandoned_cart email: ${ab_cart.email}`
+        await handleError(location, err)
       }
     }),
   )
@@ -77,13 +67,9 @@ async function cronSendOrderLateEmail() {
         ),
       )
   } catch (err) {
-    const message = formatMessage(
-      '@/lib/cron/index cronSendOrderLateEmail',
-      errorCron,
-      err,
-    )
-    console.error(message)
-    await sendTelegramMessage('ERROR', message)
+    const location = 'CRON select late orders'
+    await handleError(location, err)
+
     return
   }
 
@@ -106,13 +92,8 @@ async function cronSendOrderLateEmail() {
             and(eq(order.id, ord.id), eq(order.order_late_email_sent, false)),
           )
       } catch (err) {
-        const message = formatMessage(
-          `@/lib/cron/index cronSendOrderLateEmail() email: ${ord.checkout.email}`,
-          errorPostgres,
-          err,
-        )
-        console.error(message)
-        await sendTelegramMessage('ERROR', message)
+        const location = `CRON update order_late_email_sent order_id: ${ord.id}`
+        await handleError(location, err)
       }
     }),
   )
@@ -137,13 +118,9 @@ async function cronSendOrderReviewEmail() {
         ),
       )
   } catch (err) {
-    const message = formatMessage(
-      '@/lib/cron/index sendOrderReviewEmail',
-      errorCron,
-      err,
-    )
-    console.error(message)
-    await sendTelegramMessage('ERROR', message)
+    const location = 'CRON select orders for review email'
+    await handleError(location, err)
+
     return
   }
 
@@ -162,13 +139,8 @@ async function cronSendOrderReviewEmail() {
           .set({ review_email: true })
           .where(and(eq(order.id, ord.id), eq(order.review_email, false)))
       } catch (err) {
-        const message = formatMessage(
-          `@/lib/cron/index cronSendOrderReviewEmail() order_id: #${ord.id}`,
-          errorPostgres,
-          err,
-        )
-        console.error(message)
-        await sendTelegramMessage('ERROR', message)
+        const location = `CRON update review_email order_id: ${ord.id}`
+        await handleError(location, err)
       }
     }),
   )
@@ -189,13 +161,8 @@ async function establishCron() {
 
       console.info('Cron sendAbandonCartEmail connected successfully.')
     } catch (err) {
-      const message = formatMessage(
-        '@/lib/cron/index.ts establishCron()',
-        'Cron sendAbandonCartEmail connection failed.',
-        err,
-      )
-      console.error(message)
-      await sendTelegramMessage('ERROR', message)
+      const location = 'CRON establish sendAbandonCartEmail'
+      await handleError(location, err)
 
       process.exit(1)
     }
@@ -213,13 +180,8 @@ async function establishCron() {
 
       console.info('Cron sendOrderLateEmail connected successfully.')
     } catch (err) {
-      const message = formatMessage(
-        '@/lib/cron/index.ts establishCron()',
-        'Cron sendOrderLateEmail connection failed.',
-        err,
-      )
-      console.error(message)
-      await sendTelegramMessage('ERROR', message)
+      const location = 'CRON establish sendOrderLateEmail'
+      await handleError(location, err)
 
       process.exit(1)
     }
@@ -237,13 +199,8 @@ async function establishCron() {
 
       console.info('Cron sendOrderReviewEmail connected successfully.')
     } catch (err) {
-      const message = formatMessage(
-        '@/lib/cron/index.ts establishCron()',
-        'Cron sendOrderReviewEmail connection failed.',
-        err,
-      )
-      console.error(message)
-      await sendTelegramMessage('ERROR', message)
+      const location = 'CRON establish sendOrderReviewEmail'
+      await handleError(location, err)
 
       process.exit(1)
     }

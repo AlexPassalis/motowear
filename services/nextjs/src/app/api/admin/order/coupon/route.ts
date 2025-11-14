@@ -1,34 +1,29 @@
 import { zodCoupons } from '@/lib/postgres/data/zod'
 
 import { postgres } from '@/lib/postgres/index'
-import { formatMessage } from '@/utils/formatMessage'
-import { errorInvalidBody, errorPostgres } from '@/data/error'
-import { sendTelegramMessage } from '@/lib/telegram'
 import { NextRequest, NextResponse } from 'next/server'
 import { coupon } from '@/lib/postgres/schema'
 import { z } from 'zod'
 import { isSessionAPI } from '@/lib/better-auth/isSession'
 import { headers } from 'next/headers'
+import { handleError } from '@/utils/error/handleError'
 
 export { OPTIONS } from '@/utils/OPTIONS'
 
 export async function POST(req: NextRequest) {
   await isSessionAPI(await headers())
 
-  const { error: err, data: validatedBody } = z
-    .object({ coupons: zodCoupons })
-    .safeParse(await req.json())
+  const requestBodySchema = z.object({ coupons: zodCoupons })
+  const requestBody = await req.json()
 
-  if (err) {
-    const message = formatMessage(
-      '@/app/api/admin/order/coupon/route.ts POST',
-      errorInvalidBody,
-      err,
-    )
-    console.error(message)
-    await sendTelegramMessage('ERROR', message)
+  const { error, data: validatedBody } =
+    requestBodySchema.safeParse(requestBody)
+  if (error) {
+    const err = JSON.stringify(error.issues)
+    const location = 'POST ZOD request body'
+    await handleError(location, err)
 
-    return NextResponse.json({ message: errorInvalidBody }, { status: 400 })
+    return NextResponse.json({ err }, { status: 400 })
   }
 
   try {
@@ -46,15 +41,10 @@ export async function POST(req: NextRequest) {
         })
     }
   } catch (err) {
-    const message = formatMessage(
-      '@/app/api/admin/order/coupon/route.ts POST',
-      errorPostgres,
-      err,
-    )
-    console.error(message)
-    await sendTelegramMessage('ERROR', message)
+    const location = 'POST POSTGRES insert coupon'
+    await handleError(location, err)
 
-    return NextResponse.json({ message: errorPostgres }, { status: 500 })
+    return NextResponse.json({ err: location }, { status: 500 })
   }
 
   return NextResponse.json({}, { status: 200 })

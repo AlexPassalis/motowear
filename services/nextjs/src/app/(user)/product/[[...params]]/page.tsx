@@ -10,7 +10,6 @@ import { notFound, redirect } from 'next/navigation'
 import { ROUTE_ERROR } from '@/data/routes'
 import { Metadata } from 'next'
 import { specialVariant } from '@/data/magic'
-import { errorPostgres } from '@/data/error'
 import { envServer } from '@/envServer'
 
 type typeParams = { params?: [type?: string, version?: string] }
@@ -51,15 +50,15 @@ export async function generateMetadata({
   ])
   if (resolved[0].status === 'rejected') {
     console.error(resolved[0].reason)
-    redirect(`${ROUTE_ERROR}?message=${errorPostgres}`)
+    redirect(`${ROUTE_ERROR}?message=POSTGRES`)
   }
   if (resolved[1].status === 'rejected') {
     console.error(resolved[1].reason)
-    redirect(`${ROUTE_ERROR}?message=${errorPostgres}`)
+    redirect(`${ROUTE_ERROR}?message=POSTGRES`)
   }
   if (resolved[2].status === 'rejected') {
     console.error(resolved[2].reason)
-    redirect(`${ROUTE_ERROR}?message=${errorPostgres}`)
+    redirect(`${ROUTE_ERROR}?message=POSTGRES`)
   }
 
   const postgresVariants = resolved[1].value

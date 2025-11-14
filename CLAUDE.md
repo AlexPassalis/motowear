@@ -216,6 +216,43 @@ This applies to:
 
 This convention prevents bugs when adding additional statements and maintains consistent code style throughout the codebase.
 
+### Exit Point Spacing
+**ALWAYS add a blank line before `throw` or `return` statements** when there is code above them in the same block scope:
+
+```typescript
+// ✅ CORRECT - Blank line before throw/return
+try {
+  const result = await someOperation()
+} catch (err) {
+  const location = 'POSTGRES get data'
+  await handleError(location, err)
+
+  throw errorPostgres
+}
+
+if (data) {
+  await processData(data)
+
+  return result
+}
+
+// ❌ INCORRECT - No blank line before throw/return
+try {
+  const result = await someOperation()
+} catch (err) {
+  const location = 'POSTGRES get data'
+  await handleError(location, err)
+  throw errorPostgres
+}
+
+if (data) {
+  await processData(data)
+  return result
+}
+```
+
+This visual separation makes it immediately clear where execution exits the current scope, improving code readability and maintainability.
+
 ## Common Workflows
 
 ### Adding a new product type

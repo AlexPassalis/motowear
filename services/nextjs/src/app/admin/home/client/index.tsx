@@ -3,7 +3,7 @@
 import classes from '@/css/DndList.module.css'
 import cx from 'clsx'
 
-import { errorUnexpected } from '@/data/error'
+import { ROUTE_ERROR } from '@/data/routes'
 import { envClient } from '@/envClient'
 import { zodHomePage } from '@/lib/postgres/data/zod'
 import { typeHomePage } from '@/utils/getPostgres'
@@ -198,7 +198,7 @@ export function AdminHomePageClient({
                                       } else {
                                         alert(
                                           `Error deleting smaller image ${smaller_image}: ${
-                                            res.data?.message || errorUnexpected
+                                            res.data?.message || 'Unexpected error'
                                           }`,
                                         )
                                         console.error(res)
@@ -336,7 +336,7 @@ export function AdminHomePageClient({
                                       } else {
                                         alert(
                                           `Error deleting quote: ${
-                                            res.data?.message || errorUnexpected
+                                            res.data?.message || 'Unexpected error'
                                           }`,
                                         )
                                         console.error(res)
@@ -473,7 +473,7 @@ export function AdminHomePageClient({
                                       } else {
                                         alert(
                                           `Error deleting ${'question'}: ${
-                                            res.data?.message || errorUnexpected
+                                            res.data?.message || 'Unexpected error'
                                           }`,
                                         )
                                         console.error(res)
@@ -550,7 +550,7 @@ export function AdminHomePageClient({
               } else {
                 alert(
                   `Error updating page: ${
-                    res.data?.message || errorUnexpected
+                    res.data?.message || 'Unexpected error'
                   }`,
                 )
                 console.error(res)
@@ -709,7 +709,7 @@ export function AdminHomePageClient({
                           } else {
                             alert(
                               `Error updating page: ${
-                                res.data?.message || errorUnexpected
+                                res.data?.message || 'Unexpected error'
                               }`,
                             )
                             console.error(res)

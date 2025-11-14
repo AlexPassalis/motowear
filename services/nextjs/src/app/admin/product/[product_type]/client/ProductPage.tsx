@@ -3,7 +3,6 @@ import { zodProductPage } from '@/lib/postgres/data/zod'
 
 import classes from '@/css/DndList.module.css'
 import cx from 'clsx'
-import { errorUnexpected } from '@/data/error'
 import { envClient } from '@/envClient'
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd'
 import { Button, Modal, Select, Textarea, TextInput } from '@mantine/core'
@@ -218,7 +217,7 @@ export function ProductPageComponent({
                                       } else {
                                         alert(
                                           `Error deleting ${image}: ${
-                                            res.data?.message || errorUnexpected
+                                            res.data?.message || 'Unexpected error'
                                           }`,
                                         )
                                         console.error(res)
@@ -357,7 +356,7 @@ export function ProductPageComponent({
                                       } else {
                                         alert(
                                           `Error deleting ${faq.question}: ${
-                                            res.data?.message || errorUnexpected
+                                            res.data?.message || 'Unexpected error'
                                           }`,
                                         )
                                         console.error(res)
@@ -507,7 +506,7 @@ export function ProductPageComponent({
                                       } else {
                                         alert(
                                           `Error deleting ${carousel.image}: ${
-                                            res.data?.message || errorUnexpected
+                                            res.data?.message || 'Unexpected error'
                                           }`,
                                         )
                                         console.error(res)
@@ -588,7 +587,7 @@ export function ProductPageComponent({
               } else {
                 alert(
                   `Error updating page: ${
-                    res.data?.message || errorUnexpected
+                    res.data?.message || 'Unexpected error'
                   }`,
                 )
                 console.error(res)

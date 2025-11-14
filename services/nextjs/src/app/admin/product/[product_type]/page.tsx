@@ -1,4 +1,3 @@
-import { errorMinio, errorPostgres } from '@/data/error'
 import { ROUTE_ERROR } from '@/data/routes'
 import { isSessionRSC } from '@/lib/better-auth/isSession'
 import { getBrands, getProductPage, getVariants } from '@/utils/getPostgres'
@@ -24,7 +23,7 @@ export default async function AdminProductProductTypePage({
     resolvedFirst[1].status === 'rejected' ||
     resolvedFirst[2].status === 'rejected'
   ) {
-    redirect(`${ROUTE_ERROR}?message=${errorPostgres}`)
+    redirect(`${ROUTE_ERROR}?message=POSTGRES`)
   }
   const product_type = decodeURIComponent(
     (resolvedFirst[0] as PromiseFulfilledResult<{ product_type: string }>).value
@@ -36,10 +35,10 @@ export default async function AdminProductProductTypePage({
     getProductPage(product_type),
   ])
   if (resolvedSecond[0].status === 'rejected') {
-    redirect(`${ROUTE_ERROR}?message=${errorMinio}`)
+    redirect(`${ROUTE_ERROR}?message=MINIO`)
   }
   if (resolvedSecond[1].status === 'rejected') {
-    redirect(`${ROUTE_ERROR}?message=${errorPostgres}`)
+    redirect(`${ROUTE_ERROR}?message=POSTGRES`)
   }
 
   if (!resolvedSecond[1].value) {

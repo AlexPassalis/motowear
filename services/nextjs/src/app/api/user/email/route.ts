@@ -1,31 +1,27 @@
 import type { typeCoupon } from '@/lib/postgres/data/type'
 
-import { errorInvalidBody, errorPostgres } from '@/data/error'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { postgres } from '@/lib/postgres/index'
 import { email } from '@/lib/postgres/schema'
-import { formatMessage } from '@/utils/formatMessage'
-import { sendTelegramMessage } from '@/lib/telegram'
 import { DatabaseError } from 'pg'
 import { couponCodeMPRELOK } from '@/data/magic'
+import { handleError } from '@/utils/error/handleError'
 
 export { OPTIONS } from '@/utils/OPTIONS'
 
 export async function POST(req: NextRequest) {
-  const { error, data: validatedBody } = z
-    .object({ email: z.string().email() })
-    .safeParse(await req.json())
-  if (error) {
-    const message = formatMessage(
-      '@/app/api/user/email/route.ts POST',
-      errorInvalidBody,
-      error,
-    )
-    console.error(message)
-    await sendTelegramMessage('ERROR', message)
+  const requestBodySchema = z.object({ email: z.string().email() })
+  const requestBody = await req.json()
 
-    return NextResponse.json({ message: errorInvalidBody }, { status: 400 })
+  const { error, data: validatedBody } =
+    requestBodySchema.safeParse(requestBody)
+  if (error) {
+    const err = JSON.stringify(error.issues)
+    const location = 'POST ZOD request body'
+    await handleError(location, err)
+
+    return NextResponse.json({ err }, { status: 400 })
   }
 
   try {
@@ -34,15 +30,10 @@ export async function POST(req: NextRequest) {
     if (err instanceof DatabaseError && err.code === '23505') {
       return NextResponse.json({}, { status: 209 })
     } else {
-      const message = formatMessage(
-        '@/app/api/user/email/route.ts POST',
-        errorPostgres,
-        err,
-      )
-      console.error(message)
-      await sendTelegramMessage('ERROR', message)
+      const location = 'POST POSTGRES insert email'
+      await handleError(location, err)
 
-      return NextResponse.json({ message: errorPostgres }, { status: 500 })
+      return NextResponse.json({ err: location }, { status: 500 })
     }
   }
 

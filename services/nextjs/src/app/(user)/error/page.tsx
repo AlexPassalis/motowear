@@ -1,5 +1,4 @@
 import { ErrorPageClient } from '@/app/(user)/error/client'
-import { errorUnexpected } from '@/data/error'
 import { ROUTE_ERROR } from '@/data/routes'
 import {
   getVariantsCached,
@@ -20,19 +19,19 @@ export default async function ErrorPage({ searchParams }: ErrorPageProps) {
     getShippingCached(),
   ])
   if (resolved[1].status === 'rejected') {
-    redirect(`${ROUTE_ERROR}?message=${resolved[1].reason}`)
+    redirect(`${ROUTE_ERROR}?message=POSTGRES`)
   }
   if (resolved[2].status === 'rejected') {
-    redirect(`${ROUTE_ERROR}?message=${resolved[2].reason}`)
+    redirect(`${ROUTE_ERROR}?message=POSTGRES`)
   }
   if (resolved[3].status === 'rejected') {
-    redirect(`${ROUTE_ERROR}?message=${resolved[3].reason}`)
+    redirect(`${ROUTE_ERROR}?message=POSTGRES`)
   }
 
   const resolvedSearchParams = (
     resolved[0] as PromiseFulfilledResult<{ message?: string }>
   ).value
-  const message = resolvedSearchParams?.message || errorUnexpected
+  const message = resolvedSearchParams?.message || 'Unexpected error'
 
   return (
     <ErrorPageClient

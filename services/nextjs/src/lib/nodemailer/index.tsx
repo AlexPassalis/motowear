@@ -3,7 +3,7 @@ import type {
   typeCheckout,
   typeEmail,
   typeOrder,
-} from '../postgres/data/type'
+} from '@/lib/postgres/data/type'
 
 import React from 'react'
 
@@ -11,9 +11,7 @@ import nodemailer from 'nodemailer'
 import { Attachment } from 'nodemailer/lib/mailer'
 import { envServer } from '@/envServer'
 import { render } from '@react-email/components'
-import { formatMessage } from '@/utils/formatMessage'
-import { errorAxios, errorNodemailer, errorReactEmail } from '@/data/error'
-import { sendTelegramMessage } from '@/lib/telegram/index'
+import { handleError } from '@/utils/error/handleError'
 import AbandonCartEmail from '@/lib/react-email/AbandonCartEmail'
 import OrderConfirmationEmail from '@/lib/react-email/OrderConfirmationEmail'
 import OrderLateEmail from '@/lib/react-email/OrderLateEmail'
@@ -58,13 +56,8 @@ export async function sendAbandonCartEmail(cart: typeCart, email: string) {
         contentType: mime.getType(item.image) || undefined,
       })
     } catch (err) {
-      const message = formatMessage(
-        `@/lib/nodemailer/index.tsx sendOrderConfirmationEmail() image: ${item.image}`,
-        errorAxios,
-        err,
-      )
-      console.error(message)
-      await sendTelegramMessage('ERROR', message)
+      const location = `NODEMAILER fetch image ${item.image}`
+      await handleError(location, err)
     }
   }
 
@@ -72,13 +65,8 @@ export async function sendAbandonCartEmail(cart: typeCart, email: string) {
   try {
     emailHtml = await render(<AbandonCartEmail cart={cart} email={email} />)
   } catch (err) {
-    const message = formatMessage(
-      `@/lib/nodemailer/sendAbandonCartEmail email: ${email}`,
-      errorReactEmail,
-      err,
-    )
-    console.error(message)
-    await sendTelegramMessage('ERROR', message)
+    const location = `NODEMAILER render AbandonCartEmail email: ${email}`
+    await handleError(location, err)
 
     return
   }
@@ -92,13 +80,8 @@ export async function sendAbandonCartEmail(cart: typeCart, email: string) {
   try {
     await transporter.sendMail(options)
   } catch (err) {
-    const message = formatMessage(
-      `@/lib/nodemailer/sendAbandonCartEmail email: ${email}`,
-      errorNodemailer,
-      err,
-    )
-    console.error(message)
-    await sendTelegramMessage('ERROR', message)
+    const location = `NODEMAILER sendAbandonCartEmail email: ${email}`
+    await handleError(location, err)
 
     return
   }
@@ -133,13 +116,8 @@ export async function sendOrderConfirmationEmail(
         contentType: mime.getType(item.image) || undefined,
       })
     } catch (err) {
-      const message = formatMessage(
-        '@/lib/nodemailer/index.tsx sendOrderConfirmationEmail()',
-        errorAxios,
-        err,
-      )
-      console.error(message)
-      await sendTelegramMessage('ERROR', message)
+      const location = 'NODEMAILER fetch order image'
+      await handleError(location, err)
     }
   }
 
@@ -154,13 +132,8 @@ export async function sendOrderConfirmationEmail(
       />,
     )
   } catch (err) {
-    const message = formatMessage(
-      '@/lib/nodemailer/index.tsx sendOrderConfirmationEmail()',
-      errorReactEmail,
-      err,
-    )
-    console.error(message)
-    await sendTelegramMessage('ERROR', message)
+    const location = 'NODEMAILER render OrderConfirmationEmail'
+    await handleError(location, err)
 
     return
   }
@@ -175,13 +148,8 @@ export async function sendOrderConfirmationEmail(
   try {
     await transporter.sendMail(options)
   } catch (err) {
-    const message = formatMessage(
-      '@/lib/nodemailer/index.tsx sendOrderConfirmationEmail()',
-      errorNodemailer,
-      err,
-    )
-    console.error(message)
-    await sendTelegramMessage('ERROR', message)
+    const location = 'NODEMAILER sendOrderConfirmationEmail'
+    await handleError(location, err)
 
     return
   }
@@ -216,13 +184,8 @@ export async function sendOrderLateEmail(
         contentType: mime.getType(item.image) || undefined,
       })
     } catch (err) {
-      const message = formatMessage(
-        '@/lib/nodemailer/index.tsx sendOrderLateEmail()',
-        errorAxios,
-        err,
-      )
-      console.error(message)
-      await sendTelegramMessage('ERROR', message)
+      const location = 'NODEMAILER fetch late order image'
+      await handleError(location, err)
     }
   }
 
@@ -237,13 +200,8 @@ export async function sendOrderLateEmail(
       />,
     )
   } catch (err) {
-    const message = formatMessage(
-      '@/lib/nodemailer/index.tsx sendOrderLateEmail()',
-      errorReactEmail,
-      err,
-    )
-    console.error(message)
-    await sendTelegramMessage('ERROR', message)
+    const location = 'NODEMAILER render OrderLateEmail'
+    await handleError(location, err)
 
     return
   }
@@ -258,13 +216,8 @@ export async function sendOrderLateEmail(
   try {
     await transporter.sendMail(options)
   } catch (err) {
-    const message = formatMessage(
-      '@/lib/nodemailer/index.tsx sendOrderLateEmail()',
-      errorNodemailer,
-      err,
-    )
-    console.error(message)
-    await sendTelegramMessage('ERROR', message)
+    const location = 'NODEMAILER sendOrderLateEmail'
+    await handleError(location, err)
 
     return
   }
@@ -301,13 +254,8 @@ export async function sendOrderFulfilledEmail(
         contentType: mime.getType(item.image) || undefined,
       })
     } catch (err) {
-      const message = formatMessage(
-        '@/lib/nodemailer/index.tsx sendOrderConfirmationEmail()',
-        errorAxios,
-        err,
-      )
-      console.error(message)
-      await sendTelegramMessage('ERROR', message)
+      const location = 'NODEMAILER fetch fulfilled order image'
+      await handleError(location, err)
 
       return
     }
@@ -326,13 +274,8 @@ export async function sendOrderFulfilledEmail(
       />,
     )
   } catch (err) {
-    const message = formatMessage(
-      `@/lib/nodemailer/sendOrderFulfilledEmail for order with id: #${order_id}`,
-      errorReactEmail,
-      err,
-    )
-    console.error(message)
-    await sendTelegramMessage('ERROR', message)
+    const location = `NODEMAILER render OrderFullfilledEmail order_id: ${order_id}`
+    await handleError(location, err)
 
     return
   }
@@ -347,13 +290,8 @@ export async function sendOrderFulfilledEmail(
   try {
     await transporter.sendMail(options)
   } catch (err) {
-    const message = formatMessage(
-      `@/lib/nodemailer/sendOrderFulfilledEmail for order with id: #${order_id}`,
-      errorNodemailer,
-      err,
-    )
-    console.error(message)
-    await sendTelegramMessage('ERROR', message)
+    const location = `NODEMAILER sendOrderFulfilledEmail order_id: ${order_id}`
+    await handleError(location, err)
 
     return
   }
@@ -364,13 +302,8 @@ export async function sendContentRequestEmail(email: typeEmail) {
   try {
     emailHtml = await render(<ContentRequestEmail email={email} />)
   } catch (err) {
-    const message = formatMessage(
-      `@/lib/nodemailer/sendContentRequestEmail for email: ${email}`,
-      errorReactEmail,
-      err,
-    )
-    console.error(message)
-    await sendTelegramMessage('ERROR', message)
+    const location = `NODEMAILER render ContentRequestEmail email: ${email}`
+    await handleError(location, err)
 
     return
   }
@@ -390,13 +323,8 @@ export async function sendContentRequestEmail(email: typeEmail) {
   try {
     await transporter.sendMail(options)
   } catch (err) {
-    const message = formatMessage(
-      `@/lib/nodemailer/sendContentRequestEmail for email: ${email}`,
-      errorNodemailer,
-      err,
-    )
-    console.error(message)
-    await sendTelegramMessage('ERROR', message)
+    const location = `NODEMAILER sendContentRequestEmail email: ${email}`
+    await handleError(location, err)
 
     return
   }
@@ -413,13 +341,8 @@ export async function sendOrderReviewEmail(
       <OrderReviewEmail first_name={first_name} order_id={order_id} />,
     )
   } catch (err) {
-    const message = formatMessage(
-      `@/lib/nodemailer/sendOrderReviewEmail order_id: #${order_id}`,
-      errorReactEmail,
-      err,
-    )
-    console.error(message)
-    await sendTelegramMessage('ERROR', message)
+    const location = `NODEMAILER render OrderReviewEmail order_id: ${order_id}`
+    await handleError(location, err)
 
     return
   }
@@ -439,13 +362,8 @@ export async function sendOrderReviewEmail(
   try {
     await transporter.sendMail(options)
   } catch (err) {
-    const message = formatMessage(
-      `@/lib/nodemailer/sendOrderReviewEmail order_id: #${order_id}`,
-      errorNodemailer,
-      err,
-    )
-    console.error(message)
-    await sendTelegramMessage('ERROR', message)
+    const location = `NODEMAILER sendOrderReviewEmail order_id: ${order_id}`
+    await handleError(location, err)
 
     return
   }
@@ -454,7 +372,6 @@ export async function sendOrderReviewEmail(
 import { postgres } from '@/lib/postgres/index'
 import { order } from '@/lib/postgres/schema'
 import { and, eq, isNotNull } from 'drizzle-orm'
-import { errorCron } from '@/data/error'
 import pLimit from 'p-limit'
 
 async function sendMistakeEmail(email: string) {
@@ -470,13 +387,8 @@ async function sendMistakeEmail(email: string) {
   try {
     emailHtml = await render(<MistakeEmail email={email} />)
   } catch (err) {
-    const message = formatMessage(
-      `@/lib/nodemailer/sendMistakeEmail email: ${email}`,
-      errorReactEmail,
-      err,
-    )
-    console.error(message)
-    await sendTelegramMessage('ERROR', message)
+    const location = `NODEMAILER render MistakeEmail email: ${email}`
+    await handleError(location, err)
 
     return
   }
@@ -490,13 +402,8 @@ async function sendMistakeEmail(email: string) {
   try {
     await transporter.sendMail(options)
   } catch (err) {
-    const message = formatMessage(
-      `@/lib/nodemailer/sendMistakeEmail email: ${email}`,
-      errorNodemailer,
-      err,
-    )
-    console.error(message)
-    await sendTelegramMessage('ERROR', message)
+    const location = `NODEMAILER sendMistakeEmail email: ${email}`
+    await handleError(location, err)
 
     return
   }
@@ -515,13 +422,9 @@ export async function sendMistakeEmails() {
         ),
       )
   } catch (err) {
-    const message = formatMessage(
-      '@/lib/cron/index cronSendOrderLateEmail',
-      errorCron,
-      err,
-    )
-    console.error(message)
-    await sendTelegramMessage('ERROR', message)
+    const location = 'NODEMAILER select orders for mistake emails'
+    await handleError(location, err)
+
     return
   }
 

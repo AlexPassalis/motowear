@@ -10,7 +10,6 @@ import type { typeUniqueVariantNames } from '@/utils/getPostgres'
 
 import { zodOrder } from '@/lib/postgres/data/zod'
 
-import { errorUnexpected } from '@/data/error'
 import { envClient } from '@/envClient'
 import { order } from '@/lib/postgres/schema'
 import {
@@ -638,7 +637,7 @@ export function AdminOrderPageClient({
                     } else {
                       alert(
                         `Error deleting ${order.id}: ${
-                          res.data?.message || errorUnexpected
+                          res.data?.message || 'Unexpected error'
                         }`,
                       )
                       console.error(res)
@@ -987,7 +986,7 @@ export function AdminOrderPageClient({
                         } else {
                           alert(
                             `Error creating New Orders: ${
-                              res.data?.message || errorUnexpected
+                              res.data?.message || 'Unexpected error'
                             }`,
                           )
                           console.error(res)

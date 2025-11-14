@@ -6,7 +6,6 @@ import NextImage from 'next/image'
 import { envClient } from '@/envClient'
 import { sanitizeFilename } from '@/utils/sanitize'
 import axios from 'axios'
-import { errorUnexpected } from '@/data/error'
 import { z } from 'zod'
 import Link from 'next/link'
 import { ROUTE_ADMIN_PRODUCT } from '@/data/routes'
@@ -64,7 +63,7 @@ export function ProductType({
                 } else {
                   alert(
                     `Error deleting ${modalState}: ${
-                      res.data?.message || errorUnexpected
+                      res.data?.message || 'Unexpected error'
                     }`,
                   )
                   console.error(res)
@@ -178,7 +177,7 @@ export function ProductType({
                         } else {
                           alert(
                             `Error deleting ${image}: ${
-                              res.data?.message || errorUnexpected
+                              res.data?.message || 'Unexpected error'
                             }`,
                           )
                           console.error(res)
@@ -289,7 +288,7 @@ export function ProductType({
                 } else {
                   alert(
                     `Error creating brands: ${
-                      res.data?.message || errorUnexpected
+                      res.data?.message || 'Unexpected error'
                     }`,
                   )
                   console.error(res)

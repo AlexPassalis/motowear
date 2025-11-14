@@ -1,9 +1,7 @@
 import Typesense from 'typesense'
 import { getVariantsProductType } from '@/utils/getPostgres'
 import { envServer } from '@/envServer'
-import { formatMessage } from '@/utils/formatMessage'
-import { errorPostgres, errorTypesense } from '@/data/error'
-import { sendTelegramMessage } from '@/lib/telegram/index'
+import { handleError } from '@/utils/error/handleError'
 import pLimit from 'p-limit'
 
 const typesense = new Typesense.Client({
@@ -43,27 +41,17 @@ export async function updateTypesense(product_type: string) {
   ])
 
   if (resolved[0].status === 'rejected') {
-    const message = formatMessage(
-      '@/lib/typesense/server.ts updateTypesense()',
-      errorPostgres,
-      resolved[0].reason,
-    )
-    console.error(message)
-    await sendTelegramMessage('ERROR', message)
+    const location = '@/lib/typesense/server.ts updateTypesense() postgres'
+    await handleError(location, resolved[0].reason)
 
-    throw errorPostgres
+    throw resolved[0].reason
   }
 
   if (resolved[1].status === 'rejected') {
-    const message = formatMessage(
-      '@/lib/typesense/server.ts updateTypesense() delete',
-      errorTypesense,
-      resolved[1].reason,
-    )
-    console.error(message)
-    await sendTelegramMessage('ERROR', message)
+    const location = '@/lib/typesense/server.ts updateTypesense() delete'
+    await handleError(location, resolved[1].reason)
 
-    throw errorTypesense
+    throw resolved[1]
   }
 
   const upsertedVersions = [] as string[]
@@ -78,15 +66,10 @@ export async function updateTypesense(product_type: string) {
       try {
         await typesense.collections(collectionName).documents().upsert(document)
       } catch (err) {
-        const message = formatMessage(
-          '@/lib/typesense/server.ts updateTypesense() upsert',
-          errorTypesense,
-          err,
-        )
-        console.error(message)
-        await sendTelegramMessage('ERROR', message)
+        const location = '@/lib/typesense/server.ts updateTypesense() upsert'
+        await handleError(location, err)
 
-        throw errorTypesense
+        throw err
       }
       upsertedVersions.push(variant.name)
     }
