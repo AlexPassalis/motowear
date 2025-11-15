@@ -5,6 +5,7 @@ export const ERROR = {
   minio: 'MINIO',
   axios: 'AXIOS',
   zod: 'ZOD',
+  prometheus: 'PROMETHEUS',
 } as const
 
 export const specialVariant = [
