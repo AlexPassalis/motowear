@@ -54,12 +54,13 @@ async function postgresPing() {
   }
 }
 
-export const postgres =
+const result =
   process.env.BUILD_TIME !== 'true'
-    ? (await establishPostgres()).postgres
-    : ({} as NodePgDatabase<typeof schema> & { $client: Pool })
+    ? await establishPostgres()
+    : {
+        postgres: {} as NodePgDatabase<typeof schema> & { $client: Pool },
+        postgres_pool: {} as Pool,
+      }
 
-export const postgres_pool =
-  process.env.BUILD_TIME !== 'true'
-    ? (await establishPostgres()).postgres_pool
-    : ({} as Pool)
+export const postgres = result.postgres
+export const postgres_pool = result.postgres_pool
