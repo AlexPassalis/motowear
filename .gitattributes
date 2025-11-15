@@ -10,6 +10,7 @@ SSH.md filter=git-crypt diff=git-crypt
 *.pem filter=git-crypt diff=git-crypt
 *.conf filter=git-crypt diff=git-crypt
 
+bin/ssh filter=git-crypt diff=git-crypt
 bin/clone_prod_db filter=git-crypt diff=git-crypt
 
 services/nextjs/src/utils/readSecret.ts filter=git-crypt diff=git-crypt
