@@ -21,11 +21,11 @@ import {
   Table,
   TextInput,
 } from '@mantine/core'
-import { errorUnexpected } from '@/data/error'
 import { envClient } from '@/envClient'
 import axios from 'axios'
 import { ProductVariantRowWrapper } from '@/app/admin/product/[product_type]/client/ProductVariantRowWrapper'
 import { normalise } from '@/utils/normalise'
+import { ERROR } from '@/data/magic'
 
 type ProductVariantsTableProps = {
   product_type: string
@@ -498,7 +498,7 @@ export function ProductVariantsTable({
                         } else {
                           alert(
                             `Error creating New Versions: ${
-                              res.data?.message || errorUnexpected
+                              res.data?.message || ERROR.unexpected
                             }`,
                           )
                           console.error(res)

@@ -1,9 +1,10 @@
-import { errorPostgres } from '@/data/error'
 import { ROUTE_ERROR } from '@/data/routes'
 import { isSessionRSC } from '@/lib/better-auth/isSession'
 import { redirect } from 'next/navigation'
 import { AdminProductProductTypeReviewsClientPage } from '@/app/admin/product/[product_type]/reviews/client/index'
 import { getProductReviews } from '@/utils/getPostgres'
+import { handleError } from '@/utils/error/handleError'
+import { ERROR } from '@/data/magic'
 
 type AdminProductProductTypeReviewsPageProps = {
   params: Promise<{ product_type: string }>
@@ -20,8 +21,10 @@ export default async function AdminProductProductTypeReviewsPage({
   let product_reviews
   try {
     product_reviews = await getProductReviews(productType)
-  } catch {
-    redirect(`${ROUTE_ERROR}?message=${errorPostgres}`)
+  } catch (err) {
+    const location = `${ERROR.postgres} getProductReviews`
+    handleError(location, err)
+    redirect(`${ROUTE_ERROR}?message=${ERROR.postgres}`)
   }
 
   return (

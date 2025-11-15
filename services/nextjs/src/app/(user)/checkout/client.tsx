@@ -27,7 +27,6 @@ import { zodResolver } from 'mantine-form-zod-resolver'
 import { z } from 'zod'
 import { MdDiscount } from 'react-icons/md'
 import { ROUTE_ERROR, ROUTE_HOME } from '@/data/routes'
-import { errorAxios, errorInvalidResponse } from '@/data/error'
 import { Footer } from '@/components/Footer'
 import {
   getLocalStorageCart,
@@ -38,7 +37,7 @@ import axios from 'axios'
 import Link from 'next/link'
 import { facebookPixelPurchase } from '@/lib/facebook-pixel/index'
 import { googleAnalyticsPurchase } from '@/lib/google-analytics'
-import { couponCodeMPRELOK, specialProductType } from '@/data/magic'
+import { couponCodeMPRELOK, ERROR, specialProductType } from '@/data/magic'
 import Script from 'next/script'
 
 type CheckoutPageProps = {
@@ -113,6 +112,7 @@ export function CheckoutPageClient({
     const localStorageCart = getLocalStorageCart()
     if (!orderCompleteResponse && localStorageCart.length < 1) {
       router.push(ROUTE_HOME)
+      return
     }
     setCart(localStorageCart)
   }, [])
@@ -493,9 +493,7 @@ export function CheckoutPageClient({
                       .safeParse(res.data)
 
                     if (error) {
-                      router.push(
-                        `${ROUTE_ERROR}?message=${errorInvalidResponse}`,
-                      )
+                      router.push(`${ROUTE_ERROR}?message=Invalid response`)
                       return
                     }
 
@@ -510,10 +508,7 @@ export function CheckoutPageClient({
                       .safeParse(res.data)
 
                     if (error) {
-                      router.push(
-                        `${ROUTE_ERROR}?message=${errorInvalidResponse}`,
-                      )
-
+                      router.push(`${ROUTE_ERROR}?message=Invalid response`)
                       return
                     }
 
@@ -532,7 +527,8 @@ export function CheckoutPageClient({
                     console.error(err)
                   }
 
-                  router.push(`${ROUTE_ERROR}?message=${errorAxios}`)
+                  router.push(`${ROUTE_ERROR}?message=${ERROR.axios}}`)
+                  return
                 } finally {
                   closeFormLoadingOverlay()
                 }
@@ -693,7 +689,8 @@ export function CheckoutPageClient({
                                 <div className="flex gap-1">
                                   <h2>
                                     {`${
-                                      product.product_type !== specialProductType
+                                      product.product_type !==
+                                      specialProductType
                                         ? 'Μέγεθος'
                                         : 'Συσκευή'
                                     }:`}{' '}
@@ -932,9 +929,8 @@ export function CheckoutPageClient({
 
                               if (error) {
                                 router.push(
-                                  `${ROUTE_ERROR}?message=${errorInvalidResponse}`,
+                                  `${ROUTE_ERROR}?message=Invalid response`,
                                 )
-
                                 return
                               }
 
@@ -957,7 +953,8 @@ export function CheckoutPageClient({
                               console.error(err)
                             }
 
-                            router.push(`${ROUTE_ERROR}?message=${errorAxios}`)
+                            router.push(`${ROUTE_ERROR}?message=${ERROR.axios}`)
+                            return
                           } finally {
                             closeCouponLoadingOverlay()
                           }

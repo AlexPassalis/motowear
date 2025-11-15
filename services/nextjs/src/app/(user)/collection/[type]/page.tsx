@@ -7,10 +7,11 @@ import {
   getVariantsCached,
 } from '@/app/(user)/cache'
 import { ROUTE_ERROR } from '@/data/routes'
-import { errorPostgres } from '@/data/error'
 import { envServer } from '@/envServer'
 
 import { CollectionPageClient } from '@/app/(user)/collection/[type]/client'
+import { ERROR } from '@/data/magic'
+import { handleError } from '@/utils/error/handleError'
 
 type typeParams = { type?: string }
 type ProductPageProps = {
@@ -26,26 +27,38 @@ export async function generateMetadata({
   }
   const paramsProduct_type = decodeURIComponent(resolvedParams.type)
 
-  const resolved = await Promise.allSettled([
-    getPagesCached(),
-    getVariantsCached(),
-  ])
-  if (resolved[0].status === 'rejected') {
-    console.error(resolved[0].reason)
-    redirect(`${ROUTE_ERROR}?message=${errorPostgres}`)
-  }
-  if (resolved[1].status === 'rejected') {
-    console.error(resolved[1].reason)
-    redirect(`${ROUTE_ERROR}?message=${errorPostgres}`)
-  }
+  const asyncFunctions = [getPagesCached, getVariantsCached]
+  const resolved = await Promise.allSettled(
+    asyncFunctions.map((asyncFunction) => asyncFunction()),
+  )
+  resolved.forEach((result, index) => {
+    if (result.status === 'rejected') {
+      const location = `${ERROR.postgres} ${asyncFunctions[index].name}`
+      const err = result.reason
+      handleError(location, err)
 
-  const description = resolved[0].value.find(
+      redirect(`${ROUTE_ERROR}?message=${ERROR.postgres}`)
+    }
+  })
+
+  const pages = (
+    resolved[0] as PromiseFulfilledResult<
+      Awaited<ReturnType<typeof getPagesCached>>
+    >
+  ).value
+  const variants = (
+    resolved[1] as PromiseFulfilledResult<
+      Awaited<ReturnType<typeof getVariantsCached>>
+    >
+  ).value
+
+  const description = pages.find(
     (page) => page.product_type === paramsProduct_type,
   )!.product_description
   const canonical = `/collection/${paramsProduct_type}`
 
   const firstProductImageFileName = decodeURIComponent(
-    resolved[1].value
+    variants
       .filter((variant) => variant.product_type === paramsProduct_type)
       .filter(
         (variant, index, self) =>
@@ -87,36 +100,60 @@ export async function generateMetadata({
 }
 
 export default async function CollectionPage({ params }: ProductPageProps) {
+  const asyncFunctions = [
+    getProductTypesCached,
+    getVariantsCached,
+    getShippingCached,
+  ]
   const resolved = await Promise.allSettled([
     params,
-    getProductTypesCached(),
-    getVariantsCached(),
-    getShippingCached(),
+    ...asyncFunctions.map((asyncFunction) => asyncFunction()),
   ])
-  if (resolved[1].status === 'rejected') {
-    redirect(`${ROUTE_ERROR}?message=${resolved[1].reason}`)
-  }
-  if (resolved[2].status === 'rejected') {
-    redirect(`${ROUTE_ERROR}?message=${resolved[2].reason}`)
-  }
-  if (resolved[3].status === 'rejected') {
-    redirect(`${ROUTE_ERROR}?message=${resolved[3].reason}`)
-  }
+  resolved.forEach((result, index) => {
+    if (result.status === 'rejected') {
+      if (index === 0) {
+        notFound()
+      } else {
+        const location = `${ERROR.postgres} ${asyncFunctions[index - 1].name}`
+        const err = result.reason
+        handleError(location, err)
 
-  const resolvedParams = (resolved[0] as PromiseFulfilledResult<typeParams>)
+        redirect(`${ROUTE_ERROR}?message=${ERROR.postgres}`)
+      }
+    }
+  })
+
+  const resolved_params = (resolved[0] as PromiseFulfilledResult<typeParams>)
     .value
-  if (!resolvedParams?.type) {
+  const product_types = (
+    resolved[1] as PromiseFulfilledResult<
+      Awaited<ReturnType<typeof getProductTypesCached>>
+    >
+  ).value
+  const variants = (
+    resolved[2] as PromiseFulfilledResult<
+      Awaited<ReturnType<typeof getVariantsCached>>
+    >
+  ).value
+  const shipping = (
+    resolved[3] as PromiseFulfilledResult<
+      Awaited<ReturnType<typeof getShippingCached>>
+    >
+  ).value
+
+  if (!resolved_params?.type) {
     notFound()
   }
-  const paramsProduct_type = decodeURIComponent(resolvedParams.type)
 
-  const postgresVariants = resolved[2].value.filter(
-    (variant) => variant.product_type === paramsProduct_type,
+  const paramsProductType = decodeURIComponent(resolved_params.type)
+
+  const postgresVariants = variants.filter(
+    (variant) => variant.product_type === paramsProductType,
   )
 
   if (
     !postgresVariants.find(
-      (variant) => variant.product_type === paramsProduct_type,
+      (variant) => variant.product_type === paramsProductType,
     )
   ) {
     notFound()
@@ -149,9 +186,9 @@ export default async function CollectionPage({ params }: ProductPageProps) {
 
   return (
     <CollectionPageClient
-      paramsProduct_type={paramsProduct_type}
-      product_types={resolved[1].value}
-      shipping={resolved[3].value}
+      paramsProduct_type={paramsProductType}
+      product_types={product_types}
+      shipping={shipping}
       uniqueVariants={uniqueVariants}
       uniqueBrands={uniqueBrands}
     />

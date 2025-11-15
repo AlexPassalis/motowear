@@ -3,20 +3,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { postgres } from '@/lib/postgres/index'
 import { sql } from 'drizzle-orm'
-import {
-  errorInvalidBody,
-  errorMinio,
-  errorPostgres,
-  errorRedis,
-  errorTypesense,
-} from '@/data/error'
 import { headers } from 'next/headers'
 import { deleteTypeImages } from '@/lib/minio'
 import { updateTypesense } from '@/lib/typesense/server'
 import { product_pages } from '@/lib/postgres/schema'
-import { formatMessage } from '@/utils/formatMessage'
-import { sendTelegramMessage } from '@/lib/telegram'
 import { redis } from '@/lib/redis/index'
+import { handleError } from '@/utils/error/handleError'
 import {
   getHomePageVariants,
   getPages,
@@ -29,21 +21,25 @@ export { OPTIONS } from '@/utils/OPTIONS'
 export async function POST(req: NextRequest) {
   await isSessionAPI(await headers())
 
-  let validatedBody
+  let requestBody
   try {
-    validatedBody = z
-      .object({ product_type: z.string() })
-      .parse(await req.json())
+    requestBody = await req.json()
   } catch (err) {
-    const message = formatMessage(
-      '@/app/api/product/product_type/route.ts POST',
-      errorInvalidBody,
-      err,
-    )
-    console.error(message)
-    await sendTelegramMessage('ERROR', message)
+    const location = 'POST parse request body'
+    handleError(location, err)
 
-    return NextResponse.json({ message: errorInvalidBody }, { status: 400 })
+    return NextResponse.json({ err: location }, { status: 400 })
+  }
+
+  const requestBodySchema = z.object({ product_type: z.string() })
+  const { error, data: validatedBody } =
+    requestBodySchema.safeParse(requestBody)
+  if (error) {
+    const err = JSON.stringify(error.issues)
+    const location = 'POST ZOD request body'
+    handleError(location, err)
+
+    return NextResponse.json({ err }, { status: 400 })
   }
 
   try {
@@ -56,15 +52,10 @@ export async function POST(req: NextRequest) {
       upsell: '',
     })
   } catch (err) {
-    const message = formatMessage(
-      '@/app/api/product/product_type/route.ts POST',
-      errorPostgres,
-      err,
-    )
-    console.error(message)
-    await sendTelegramMessage('ERROR', message)
+    const location = 'POST POSTGRES insert product_pages'
+    handleError(location, err)
 
-    return NextResponse.json({ message: errorPostgres }, { status: 500 })
+    return NextResponse.json({ err: location }, { status: 500 })
   }
 
   let product_types_postgres
@@ -73,7 +64,10 @@ export async function POST(req: NextRequest) {
     product_types_postgres = await getProductTypes()
     pages_postgres = await getPages()
   } catch (err) {
-    return NextResponse.json({ message: err }, { status: 500 })
+    const location = 'POST GET postgresql caches'
+    handleError(location, err)
+
+    return NextResponse.json({ err: location }, { status: 500 })
   }
 
   try {
@@ -85,15 +79,10 @@ export async function POST(req: NextRequest) {
     )
     await redis.set('pages', JSON.stringify(pages_postgres), 'EX', 3600)
   } catch (err) {
-    const message = formatMessage(
-      '@/app/api/product/product_type/route.ts POST',
-      errorRedis,
-      err,
-    )
-    console.error(message)
-    await sendTelegramMessage('ERROR', message)
+    const location = 'POST REDIS set product_types/pages'
+    handleError(location, err)
 
-    return NextResponse.json({ message: errorRedis }, { status: 500 })
+    return NextResponse.json({ err: location }, { status: 500 })
   }
 
   return NextResponse.json({}, { status: 200 })
@@ -102,11 +91,25 @@ export async function POST(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   await isSessionAPI(await headers())
 
-  const bodyType = z.object({ productType: z.string() })
-  const body = await req.json()
-  const { data: validatedBody } = bodyType.safeParse(body)
-  if (!validatedBody) {
-    return NextResponse.json({ message: errorInvalidBody }, { status: 400 })
+  let requestBody
+  try {
+    requestBody = await req.json()
+  } catch (err) {
+    const location = 'DELETE parse request body'
+    handleError(location, err)
+
+    return NextResponse.json({ err: location }, { status: 400 })
+  }
+
+  const requestBodySchema = z.object({ productType: z.string() })
+  const { error, data: validatedBody } =
+    requestBodySchema.safeParse(requestBody)
+  if (error) {
+    const err = JSON.stringify(error.issues)
+    const location = 'DELETE ZOD request body'
+    handleError(location, err)
+
+    return NextResponse.json({ err }, { status: 400 })
   }
 
   const { productType } = validatedBody
@@ -115,22 +118,28 @@ export async function DELETE(req: NextRequest) {
       DROP TABLE IF EXISTS product."${sql.raw(productType)}"
     `)
   } catch (err) {
-    console.error(errorPostgres, err)
-    return NextResponse.json({ message: errorPostgres }, { status: 500 })
+    const location = 'DELETE POSTGRES drop table'
+    handleError(location, err)
+
+    return NextResponse.json({ err: location }, { status: 500 })
   }
 
   try {
     await deleteTypeImages(`${productType}`)
   } catch (err) {
-    console.error(errorMinio, err)
-    return NextResponse.json({ message: errorMinio }, { status: 500 })
+    const location = 'DELETE MINIO deleteTypeImages'
+    handleError(location, err)
+
+    return NextResponse.json({ err: location }, { status: 500 })
   }
 
   try {
     await updateTypesense(productType)
   } catch (err) {
-    console.error(errorTypesense, err)
-    return NextResponse.json({ message: errorTypesense }, { status: 500 })
+    const location = 'DELETE TYPESENSE updateTypesense'
+    handleError(location, err)
+
+    return NextResponse.json({ err: location }, { status: 500 })
   }
 
   let product_types
@@ -143,7 +152,10 @@ export async function DELETE(req: NextRequest) {
     pages = await getPages()
     home_page_variants = await getHomePageVariants()
   } catch (err) {
-    return NextResponse.json({ message: err }, { status: 500 })
+    const location = 'DELETE GET postgresql caches'
+    handleError(location, err)
+
+    return NextResponse.json({ err: location }, { status: 500 })
   }
 
   try {
@@ -157,15 +169,10 @@ export async function DELETE(req: NextRequest) {
       3600,
     )
   } catch (err) {
-    const message = formatMessage(
-      '@/app/api/admin/product/product_type/route.ts DELETE',
-      errorRedis,
-      err,
-    )
-    console.error(message)
-    await sendTelegramMessage('ERROR', message)
+    const location = 'DELETE REDIS set caches'
+    handleError(location, err)
 
-    return NextResponse.json({ message: errorRedis }, { status: 500 })
+    return NextResponse.json({ err: location }, { status: 500 })
   }
 
   return NextResponse.json({}, { status: 200 })

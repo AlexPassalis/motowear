@@ -25,7 +25,7 @@ function getReactPixel() {
   return pixelPromise
 }
 
-const isProduction = envClient.HOST !== 'localhost'
+const isProduction = envClient.NODE_ENV === 'production'
 
 export async function facebookPixelPageView() {
   if (!isProduction) {

@@ -10,7 +10,6 @@ import type { typeUniqueVariantNames } from '@/utils/getPostgres'
 
 import { zodOrder } from '@/lib/postgres/data/zod'
 
-import { errorUnexpected } from '@/data/error'
 import { envClient } from '@/envClient'
 import { order } from '@/lib/postgres/schema'
 import {
@@ -34,6 +33,7 @@ import { z } from 'zod'
 import { AdminProvider } from '@/app/admin/components/AdminProvider'
 import { regexOrderFirstLastName, regexOrderId } from '@/data/regex'
 import { normalise } from '@/utils/normalise'
+import { ERROR } from '@/data/magic'
 
 type AdminOrderPageClientProps = {
   postgres_orders: typeOrder[]
@@ -638,7 +638,7 @@ export function AdminOrderPageClient({
                     } else {
                       alert(
                         `Error deleting ${order.id}: ${
-                          res.data?.message || errorUnexpected
+                          res.data?.message || ERROR.unexpected
                         }`,
                       )
                       console.error(res)
@@ -987,7 +987,7 @@ export function AdminOrderPageClient({
                         } else {
                           alert(
                             `Error creating New Orders: ${
-                              res.data?.message || errorUnexpected
+                              res.data?.message || ERROR.unexpected
                             }`,
                           )
                           console.error(res)

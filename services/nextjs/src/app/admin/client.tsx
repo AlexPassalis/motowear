@@ -15,9 +15,9 @@ import { addDays, startOfDay } from 'date-fns'
 import { toZonedTime, format } from 'date-fns-tz'
 import { Button, NumberInput, TextInput } from '@mantine/core'
 import { envClient } from '@/envClient'
-import { errorUnexpected } from '@/data/error'
 import { zodCoupons, zodShipping } from '@/lib/postgres/data/zod'
 import { AdminProvider } from '@/app/admin/components/AdminProvider'
+import { ERROR } from '@/data/magic'
 
 type AdminPageClientProps = {
   orders: typeOrder[]
@@ -278,7 +278,7 @@ export function AdminPageClient({
                 } else {
                   alert(
                     `Error creating New Versions: ${
-                      res.data?.message || errorUnexpected
+                      res.data?.message || ERROR.unexpected
                     }`,
                   )
                   console.error(res)
@@ -372,7 +372,7 @@ export function AdminPageClient({
                     } else {
                       alert(
                         `Error deleting coupon: ${
-                          res.data?.message || errorUnexpected
+                          res.data?.message || ERROR.unexpected
                         }`,
                       )
                       console.error(res)
@@ -435,7 +435,7 @@ export function AdminPageClient({
                 } else {
                   alert(
                     `Error creating New coupons: ${
-                      res.data?.message || errorUnexpected
+                      res.data?.message || ERROR.unexpected
                     }`,
                   )
                   console.error(res)

@@ -3,10 +3,10 @@ import { zodTypeReviews } from '@/lib/postgres/data/zod'
 
 import { Dispatch, memo, SetStateAction, useState } from 'react'
 import { Button, Table } from '@mantine/core'
-import { errorUnexpected } from '@/data/error'
 import { envClient } from '@/envClient'
 import axios from 'axios'
 import { ProductReview } from '@/app/admin/product/[product_type]/reviews/client/ProductReview'
+import { ERROR } from '@/data/magic'
 
 export const ProductReviewsTable = memo(ProductReviewsTableNotMemoised)
 
@@ -121,7 +121,7 @@ function ProductReviewsTableNotMemoised({
                       } else {
                         alert(
                           `Error creating updating the reviews: ${
-                            res.data?.message || errorUnexpected
+                            res.data?.message || ERROR.unexpected
                           }`,
                         )
                         console.error(res)

@@ -1,42 +1,41 @@
-import { errorInvalidBody, errorMinio } from '@/data/error'
 import { isSessionAPI } from '@/lib/better-auth/isSession'
 import { deleteFile } from '@/lib/minio'
-import { formatMessage } from '@/utils/formatMessage'
 import { headers } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { sendTelegramMessage } from '@/lib/telegram'
+import { handleError } from '@/utils/error/handleError'
 
 export async function DELETE(req: NextRequest) {
   await isSessionAPI(await headers())
 
-  const body = await req.json()
-  const { data: validatedBody } = z
-    .object({ image: z.string() })
-    .safeParse(body)
-  if (!validatedBody) {
-    const message = formatMessage(
-      '/api/admin/pages/home/image/delete/route.ts DELETE',
-      errorInvalidBody,
-    )
-    console.error(message)
-    await sendTelegramMessage('ERROR', message)
+  let requestBody
+  try {
+    requestBody = await req.json()
+  } catch (err) {
+    const location = 'DELETE parse request body'
+    handleError(location, err)
 
-    return NextResponse.json({ message: errorInvalidBody }, { status: 400 })
+    return NextResponse.json({ err: location }, { status: 400 })
+  }
+
+  const requestBodySchema = z.object({ image: z.string() })
+  const { error, data: validatedBody } =
+    requestBodySchema.safeParse(requestBody)
+  if (error) {
+    const err = JSON.stringify(error.issues)
+    const location = 'DELETE ZOD request body'
+    handleError(location, err)
+
+    return NextResponse.json({ err }, { status: 400 })
   }
 
   try {
     await deleteFile('home_page', validatedBody.image)
   } catch (err) {
-    const message = formatMessage(
-      '/api/admin/pages/home/image/delete/route.ts DELETE',
-      errorMinio,
-      err,
-    )
-    console.error(message)
-    await sendTelegramMessage('ERROR', message)
+    const location = 'DELETE MINIO deleteFile'
+    handleError(location, err)
 
-    return NextResponse.json({ message: errorMinio }, { status: 500 })
+    return NextResponse.json({ err: location }, { status: 500 })
   }
 
   return NextResponse.json({}, { status: 200 })

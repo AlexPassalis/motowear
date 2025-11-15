@@ -3,38 +3,39 @@ import { zodHomePage } from '@/lib/postgres/data/zod'
 import { isSessionAPI } from '@/lib/better-auth/isSession'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { errorInvalidBody, errorPostgres, errorRedis } from '@/data/error'
 import { headers } from 'next/headers'
 import { postgres } from '@/lib/postgres/index'
 import { home_page } from '@/lib/postgres/schema'
 import { redis } from '@/lib/redis/index'
-import { formatMessage } from '@/utils/formatMessage'
-import { sendTelegramMessage } from '@/lib/telegram'
 import { getHomePage } from '@/utils/getPostgres'
 import { v4 } from 'uuid'
+
+import { handleError } from '@/utils/error/handleError'
 
 export { OPTIONS } from '@/utils/OPTIONS'
 
 export async function POST(req: NextRequest) {
   await isSessionAPI(await headers())
 
-  let validatedBody
+  let requestBody
   try {
-    validatedBody = z
-      .object({
-        home_page: zodHomePage,
-      })
-      .parse(await req.json())
+    requestBody = await req.json()
   } catch (err) {
-    const message = formatMessage(
-      '@/app/api/admin/pages/home/image/route.ts POST',
-      errorInvalidBody,
-      err,
-    )
-    console.error(message)
-    await sendTelegramMessage('ERROR', message)
+    const location = 'POST parse request body'
+    handleError(location, err)
 
-    return NextResponse.json({ message: errorInvalidBody }, { status: 400 })
+    return NextResponse.json({ err: location }, { status: 400 })
+  }
+
+  const requestBodySchema = z.object({ home_page: zodHomePage })
+  const { error, data: validatedBody } =
+    requestBodySchema.safeParse(requestBody)
+  if (error) {
+    const err = JSON.stringify(error.issues)
+    const location = 'POST ZOD request body'
+    handleError(location, err)
+
+    return NextResponse.json({ err }, { status: 400 })
   }
 
   try {
@@ -56,37 +57,29 @@ export async function POST(req: NextRequest) {
         },
       })
   } catch (err) {
-    const message = formatMessage(
-      '@/app/api/admin/pages/home/image/route.ts POST',
-      errorPostgres,
-      err,
-    )
-    console.error(message)
-    await sendTelegramMessage('ERROR', message)
+    const location = 'POST POSTGRES insert home_page'
+    handleError(location, err)
 
-    return NextResponse.json({ message: errorPostgres }, { status: 500 })
+    return NextResponse.json({ err: location }, { status: 500 })
   }
 
   let home_page_cache
   try {
     home_page_cache = await getHomePage()
   } catch (err) {
-    console.error(err)
-    return NextResponse.json({ message: errorPostgres }, { status: 500 })
+    const location = 'POST REDIS getHomePage'
+    handleError(location, err)
+
+    return NextResponse.json({ err: location }, { status: 500 })
   }
 
   try {
     await redis.set('home_page', JSON.stringify(home_page_cache), 'EX', 3600)
   } catch (err) {
-    const message = formatMessage(
-      '@/app/api/admin/pages/home/image/route.ts POST',
-      errorRedis,
-      err,
-    )
-    console.error(message)
-    await sendTelegramMessage('ERROR', message)
+    const location = 'POST REDIS set home_page'
+    handleError(location, err)
 
-    return NextResponse.json({ message: errorRedis }, { status: 500 })
+    return NextResponse.json({ err: location }, { status: 500 })
   }
 
   return NextResponse.json({}, { status: 200 })

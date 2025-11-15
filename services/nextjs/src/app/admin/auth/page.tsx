@@ -12,7 +12,7 @@ export default function AdminAuthPage() {
   return (
     <div className="flex items-center justify-center h-screen text-black">
       <form
-        onSubmit={async e => {
+        onSubmit={async (e) => {
           e.preventDefault()
           const emailSubmitted = e.currentTarget.email.value
           const passwordSubmitted = e.currentTarget.password.value
@@ -23,7 +23,7 @@ export default function AdminAuthPage() {
               onRequest: () => {
                 setOnRequest(true)
               },
-              onError: response => {
+              onError: (response) => {
                 setOnRequest(false)
                 alert('Try again ...')
                 console.error(response)
@@ -31,8 +31,9 @@ export default function AdminAuthPage() {
               onSuccess: () => {
                 setOnRequest(false)
                 router.push(ROUTE_ADMIN)
+                return
               },
-            }
+            },
           )
         }}
         className="flex flex-col border border-neutral-300 rounded-lg bg-white px-4 py-2"

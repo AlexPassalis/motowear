@@ -1,7 +1,6 @@
 import { envServer } from '@/envServer'
 import { Telegraf } from 'telegraf'
-import { formatMessage } from '@/utils/formatMessage'
-import { inspect } from 'node:util'
+import { formatMessage } from '@/utils/error/formatMessage'
 
 const chatIds = {
   ERROR: envServer.TELEGRAM_ERROR_CHAT_ID,
@@ -11,11 +10,12 @@ const chatIds = {
 }
 
 async function establishTelegram() {
-  if (!global.global_telegram_bot) {
-    const telegram_bot = new Telegraf(envServer.TELEGRAM_BOT_TOKEN)
-    global.global_telegram_bot = telegram_bot
-    await telegramPing()
+  if (global.global_telegram_bot) {
+    return global.global_telegram_bot
   }
+
+  global.global_telegram_bot = new Telegraf(envServer.TELEGRAM_BOT_TOKEN)
+  await telegramPing()
 
   return global.global_telegram_bot
 }
@@ -25,11 +25,7 @@ async function telegramPing() {
     await global.global_telegram_bot!.telegram.getMe()
     console.info('Telegram connected successfully.')
   } catch (err) {
-    const message = formatMessage(
-      '@/lib/telegram/index.ts telegramPing()',
-      'Telegram connection failed.',
-      err,
-    )
+    const message = formatMessage(__filename, 'telegramPing()', err)
     console.error(message)
 
     process.exit(1)
@@ -53,10 +49,8 @@ export async function sendTelegramMessage(
       return
     } catch (err) {
       if (attempt === max_attempts) {
-        console.error(
-          '@/lib/telegram/index.ts sendTelegramMessage()',
-          inspect(err, { depth: null, colors: false }),
-        )
+        const message = formatMessage(__filename, 'sendTelegramMessage()', err)
+        console.error(message)
       } else {
         await new Promise((resolve) => setTimeout(resolve, 3000 * attempt))
       }

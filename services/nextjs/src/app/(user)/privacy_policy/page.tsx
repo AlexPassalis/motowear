@@ -9,6 +9,8 @@ import {
 import { redirect } from 'next/navigation'
 import { ROUTE_ERROR } from '@/data/routes'
 import type { Metadata } from 'next'
+import { handleError } from '@/utils/error/handleError'
+import { ERROR } from '@/data/magic'
 
 export const metadata: Metadata = {
   title: 'Πολιτική Απορρήτου',
@@ -23,25 +25,39 @@ export const metadata: Metadata = {
 }
 
 export default async function PrivacyPolicyPage() {
-  const resolved = await Promise.allSettled([
-    getProductTypesCached(),
-    getVariantsCached(),
-    getShippingCached(),
-  ])
-  if (resolved[0].status === 'rejected') {
-    redirect(`${ROUTE_ERROR}?message=${resolved[0].reason}`)
-  }
-  if (resolved[1].status === 'rejected') {
-    redirect(`${ROUTE_ERROR}?message=${resolved[1].reason}`)
-  }
-  if (resolved[2].status === 'rejected') {
-    redirect(`${ROUTE_ERROR}?message=${resolved[2].reason}`)
-  }
+  const asyncFunctions = [
+    getProductTypesCached,
+    getVariantsCached,
+    getShippingCached,
+  ]
+  const resolved = await Promise.allSettled(
+    asyncFunctions.map((asyncFunction) => asyncFunction()),
+  )
+  resolved.forEach((result, index) => {
+    if (result.status === 'rejected') {
+      const location = `${ERROR.postgres} ${asyncFunctions[index].name}`
+      const err = result.reason
+      handleError(location, err)
+
+      redirect(`${ROUTE_ERROR}?message=${ERROR.postgres}`)
+    }
+  })
+
+  const product_types = (
+    resolved[0] as PromiseFulfilledResult<
+      Awaited<ReturnType<typeof getProductTypesCached>>
+    >
+  ).value
+  const shipping = (
+    resolved[2] as PromiseFulfilledResult<
+      Awaited<ReturnType<typeof getShippingCached>>
+    >
+  ).value
 
   return (
     <PrivacyPolicyPageClient
-      product_types={resolved[0].value}
-      shipping={resolved[2].value}
+      product_types={product_types}
+      shipping={shipping}
     />
   )
 }
