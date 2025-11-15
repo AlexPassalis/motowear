@@ -1,8 +1,7 @@
-import { redis } from '@/lib/redis/index'
-
 import { envServer } from '@/envServer'
 import { Telegraf } from 'telegraf'
 import { formatMessage } from '@/utils/error/formatMessage'
+import { redis } from '@/lib/redis/index'
 
 const chatIds = {
   ERROR: envServer.TELEGRAM_ERROR_CHAT_ID,
@@ -24,7 +23,11 @@ const RATE_LIMIT_SCRIPT = `
   end
 
   local count = redis.call('INCR', key)
-  redis.call('EXPIRE', key, ttl)
+  if count == 1 then
+    redis.call('EXPIRE', key, ttl)
+  elseif redis.call('TTL', key) == -1 then
+    redis.call('EXPIRE', key, ttl)
+  end
 
   return 1
 `
@@ -109,4 +112,4 @@ if (process.env.BUILD_TIME !== 'true') {
   await establishTelegram()
 }
 
-export {} // Initialize at application startup
+export {} // Initialize at startup
