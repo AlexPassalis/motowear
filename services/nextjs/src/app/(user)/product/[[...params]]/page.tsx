@@ -62,13 +62,18 @@ export async function generateMetadata({
     }
   })
 
-  const variants = (
+  const product_types = (
     resolved[0] as PromiseFulfilledResult<
+      Awaited<ReturnType<typeof getProductTypesCached>>
+    >
+  ).value
+  const variants = (
+    resolved[1] as PromiseFulfilledResult<
       Awaited<ReturnType<typeof getVariantsCached>>
     >
   ).value
   const pages = (
-    resolved[1] as PromiseFulfilledResult<
+    resolved[2] as PromiseFulfilledResult<
       Awaited<ReturnType<typeof getPagesCached>>
     >
   ).value
