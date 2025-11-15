@@ -1,4 +1,4 @@
-import type { Hit } from '../../node_modules/.pnpm/instantsearch.js@4.78.0_algoliasearch@5.21.0/node_modules/instantsearch.js/es/types/results'
+import type { Hit } from '.pnpm/instantsearch.js@4.83.0_algoliasearch@5.43.0/node_modules/instantsearch.js/es/types/results.d.ts'
 
 import { useHeaderContext } from '@/context/useHeaderContext'
 import { ROUTE_PRODUCT } from '@/data/routes'
@@ -98,7 +98,13 @@ function Instant() {
   )
 }
 
-function SearchHit({ hit }: { hit: Hit }) {
+type ProductHit = {
+  product_type: string
+  variant: string
+  image: string
+}
+
+function SearchHit({ hit }: { hit: Hit<ProductHit> }) {
   const { setIsSearchOpen } = useHeaderContext()
   const { refine } = useSearchBox()
 

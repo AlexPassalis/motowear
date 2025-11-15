@@ -11,6 +11,24 @@ const chatIds = {
   REVIEW: envServer.TELEGRAM_REVIEW_CHAT_ID,
 }
 
+// Lua script for atomic rate limiting
+// Returns 1 if allowed, 0 if rate limited
+const RATE_LIMIT_SCRIPT = `
+  local key = KEYS[1]
+  local limit = tonumber(ARGV[1])
+  local ttl = tonumber(ARGV[2])
+
+  local current = redis.call('GET', key)
+  if current and tonumber(current) >= limit then
+    return 0
+  end
+
+  local count = redis.call('INCR', key)
+  redis.call('EXPIRE', key, ttl)
+
+  return 1
+`
+
 async function establishTelegram() {
   if (global.global_telegram_bot) {
     return global.global_telegram_bot
@@ -44,12 +62,24 @@ export async function sendTelegramMessage(
 
   const ERROR_REDIS_KEY = 'TELEGRAM_ERRORS_IN_LAST_MIN'
   const ERROR_LIMIT_PER_MINUTE = 5
-  if (chat === 'ERROR') {
-    const errorCount = await redis.get(ERROR_REDIS_KEY)
-    const count = errorCount ? parseInt(errorCount, 10) : 0
 
-    if (count >= ERROR_LIMIT_PER_MINUTE) {
-      return
+  if (chat === 'ERROR') {
+    try {
+      const allowed = await redis.eval(
+        RATE_LIMIT_SCRIPT,
+        1,
+        ERROR_REDIS_KEY,
+        ERROR_LIMIT_PER_MINUTE.toString(),
+        '60',
+      )
+
+      if (!allowed) {
+        return
+      }
+    } catch (err) {
+      const location = `${ERROR_REDIS_KEY} sendTelegramMessage()`
+      const errorMessage = formatMessage(__filename, location, err)
+      console.error(errorMessage)
     }
   }
 
@@ -62,20 +92,6 @@ export async function sendTelegramMessage(
       await telegram_bot.telegram.sendMessage(chatId, message, {
         parse_mode: 'HTML',
       })
-
-      if (chat === 'ERROR') {
-        try {
-          await redis.incr(ERROR_REDIS_KEY)
-          await redis.expire(ERROR_REDIS_KEY, 60)
-        } catch (err) {
-          const message = formatMessage(
-            __filename,
-            'sendTelegramMessage()',
-            err,
-          )
-          console.error(message)
-        }
-      }
 
       return
     } catch (err) {
