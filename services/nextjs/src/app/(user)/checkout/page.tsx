@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { CheckoutPageClient } from '@/app/(user)/checkout/client'
 import { ROUTE_ERROR } from '@/data/routes'
-import { getShippingCached, getVariantsCached } from '@/app/(user)/cache'
+import { getShippingCached } from '@/app/(user)/cache'
 import { redirect } from 'next/navigation'
 import { getOrderByOrderCode } from '@/utils/getPostgres'
 import { ERROR } from '@/data/magic'
@@ -15,7 +15,7 @@ type CheckoutPageProps = {
 export default async function CheckoutPage({
   searchParams,
 }: CheckoutPageProps) {
-  const asyncFunctions = [getVariantsCached, getShippingCached]
+  const asyncFunctions = [getShippingCached]
   const resolved = await Promise.allSettled([
     searchParams,
     ...asyncFunctions.map((asyncFunction) => asyncFunction()),
@@ -43,11 +43,6 @@ export default async function CheckoutPage({
       abandon_cart?: string
       s?: string
     }>
-  ).value
-  const variants = (
-    resolved[1] as PromiseFulfilledResult<
-      Awaited<ReturnType<typeof getVariantsCached>>
-    >
   ).value
   const shipping = (
     resolved[2] as PromiseFulfilledResult<
