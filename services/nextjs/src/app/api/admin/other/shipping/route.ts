@@ -1,35 +1,30 @@
 import { zodShipping } from '@/lib/postgres/data/zod'
 
 import { postgres } from '@/lib/postgres/index'
-import { formatMessage } from '@/utils/formatMessage'
-import { errorInvalidBody, errorPostgres, errorRedis } from '@/data/error'
-import { sendTelegramMessage } from '@/lib/telegram'
 import { NextRequest, NextResponse } from 'next/server'
 import { shipping } from '@/lib/postgres/schema'
 import { z } from 'zod'
 import { redis } from '@/lib/redis/index'
 import { isSessionAPI } from '@/lib/better-auth/isSession'
 import { headers } from 'next/headers'
+import { handleError } from '@/utils/error/handleError'
 
 export { OPTIONS } from '@/utils/OPTIONS'
 
 export async function POST(req: NextRequest) {
   await isSessionAPI(await headers())
 
-  const { error, data: validatedBody } = z
-    .object({ shipping: zodShipping })
-    .safeParse(await req.json())
+  const requestBodySchema = z.object({ shipping: zodShipping })
+  const requestBody = await req.json()
 
+  const { error, data: validatedBody } =
+    requestBodySchema.safeParse(requestBody)
   if (error) {
-    const message = formatMessage(
-      '@/app/api/admin/other/shipping/route.ts POST',
-      errorInvalidBody,
-      error,
-    )
-    console.error(message)
-    await sendTelegramMessage('ERROR', message)
+    const err = JSON.stringify(error.issues)
+    const location = 'POST ZOD request body'
+    handleError(location, err)
 
-    return NextResponse.json({ message: errorInvalidBody }, { status: 400 })
+    return NextResponse.json({ err }, { status: 400 })
   }
 
   try {
@@ -52,15 +47,10 @@ export async function POST(req: NextRequest) {
         },
       })
   } catch (err) {
-    const message = formatMessage(
-      '@/app/api/admin/other/shipping/route.ts POST',
-      errorPostgres,
-      err,
-    )
-    console.error(message)
-    await sendTelegramMessage('ERROR', message)
+    const location = 'POST POSTGRES insert shipping'
+    handleError(location, err)
 
-    return NextResponse.json({ message: errorPostgres }, { status: 500 })
+    return NextResponse.json({ err: location }, { status: 500 })
   }
 
   try {
@@ -76,15 +66,10 @@ export async function POST(req: NextRequest) {
       3600,
     )
   } catch (err) {
-    const message = formatMessage(
-      '@/app/api/admin/other/shipping/route.ts POST',
-      errorRedis,
-      err,
-    )
-    console.error(message)
-    await sendTelegramMessage('ERROR', message)
+    const location = 'POST REDIS set shipping'
+    handleError(location, err)
 
-    return NextResponse.json({ message: errorRedis }, { status: 500 })
+    return NextResponse.json({ err: location }, { status: 500 })
   }
 
   return NextResponse.json({}, { status: 200 })

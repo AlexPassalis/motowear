@@ -1,45 +1,52 @@
 import type { typeCoupon } from '@/lib/postgres/data/type'
 
-import { errorInvalidBody, errorPostgres } from '@/data/error'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { postgres } from '@/lib/postgres/index'
 import { order, review } from '@/lib/postgres/schema'
 import { eq } from 'drizzle-orm'
-import { formatMessage, formatReviewMessage } from '@/utils/formatMessage'
 import { sendTelegramMessage } from '@/lib/telegram'
 import pLimit from 'p-limit'
 import { v4 } from 'uuid'
 import { couponCodeReview } from '@/data/magic'
+import { handleError } from '@/utils/error/handleError'
+import { formatReviewMessage } from '@/utils/error/formatMessage'
 
 export { OPTIONS } from '@/utils/OPTIONS'
 
 export async function POST(req: NextRequest) {
-  const { error, data: validatedBody } = z
-    .object({
-      id: z.number(),
-      full_name: z.string(),
-      values: z.record(
-        z.object({
-          rating: z.number().min(1).max(5),
-          review: z.string().refine((value) => {
-            const length = value.replace(/\s+/g, '').length
-            return length >= 5 && length <= 150
-          }),
-        }),
-      ),
-    })
-    .safeParse(await req.json())
-  if (error) {
-    const message = formatMessage(
-      '@/app/api/user/review/route.ts POST',
-      errorInvalidBody,
-      error,
-    )
-    console.error(message)
-    await sendTelegramMessage('ERROR', message)
+  let requestBody
+  try {
+    requestBody = await req.json()
+  } catch (err) {
+    const location = 'POST parse request body'
+    handleError(location, err)
 
-    return NextResponse.json({ message: errorInvalidBody }, { status: 400 })
+    return NextResponse.json({ err: location }, { status: 400 })
+  }
+
+  const requestBodySchema = z.object({
+    id: z.number(),
+    full_name: z.string(),
+    values: z.record(
+      z.object({
+        rating: z.number().min(1).max(5),
+        review: z.string().refine((value) => {
+          const length = value.replace(/\s+/g, '').length
+          return length >= 5 && length <= 150
+        }),
+      }),
+    ),
+  })
+  const { error, data: validatedBody } =
+    requestBodySchema.safeParse(requestBody)
+
+  if (error) {
+    const err = JSON.stringify(error.issues)
+    const location = 'POST ZOD request body'
+    handleError(location, err)
+
+    return NextResponse.json({ err }, { status: 400 })
   }
 
   try {
@@ -78,15 +85,10 @@ export async function POST(req: NextRequest) {
       ),
     )
   } catch (err) {
-    const message = formatMessage(
-      '@/app/api/admin/review/route.ts POST',
-      errorPostgres,
-      err,
-    )
-    console.error(message)
-    await sendTelegramMessage('ERROR', message)
+    const location = 'POST POSTGRES insert review'
+    handleError(location, err)
 
-    return NextResponse.json({ message: errorPostgres }, { status: 500 })
+    return NextResponse.json({ err: location }, { status: 500 })
   }
 
   return NextResponse.json(

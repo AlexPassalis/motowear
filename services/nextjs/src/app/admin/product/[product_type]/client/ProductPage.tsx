@@ -3,7 +3,6 @@ import { zodProductPage } from '@/lib/postgres/data/zod'
 
 import classes from '@/css/DndList.module.css'
 import cx from 'clsx'
-import { errorUnexpected } from '@/data/error'
 import { envClient } from '@/envClient'
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd'
 import { Button, Modal, Select, Textarea, TextInput } from '@mantine/core'
@@ -11,6 +10,7 @@ import axios from 'axios'
 import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { RxDragHandleDots2 } from 'react-icons/rx'
 import { useDisclosure, useListState } from '@mantine/hooks'
+import { ERROR } from '@/data/magic'
 
 type ProductPageComponentProps = {
   product_type: string
@@ -190,7 +190,9 @@ export function ProductPageComponent({
                                       ? prev.images.map((img, i) =>
                                           i === index ? e.target.value : img,
                                         )
-                                      : prev.images.filter((_, i) => i !== index),
+                                      : prev.images.filter(
+                                          (_, i) => i !== index,
+                                        ),
                                   }))
                                 }
                                 disabled={onRequest}
@@ -218,7 +220,8 @@ export function ProductPageComponent({
                                       } else {
                                         alert(
                                           `Error deleting ${image}: ${
-                                            res.data?.message || errorUnexpected
+                                            res.data?.message ||
+                                            ERROR.unexpected
                                           }`,
                                         )
                                         console.error(res)
@@ -357,7 +360,8 @@ export function ProductPageComponent({
                                       } else {
                                         alert(
                                           `Error deleting ${faq.question}: ${
-                                            res.data?.message || errorUnexpected
+                                            res.data?.message ||
+                                            ERROR.unexpected
                                           }`,
                                         )
                                         console.error(res)
@@ -507,7 +511,8 @@ export function ProductPageComponent({
                                       } else {
                                         alert(
                                           `Error deleting ${carousel.image}: ${
-                                            res.data?.message || errorUnexpected
+                                            res.data?.message ||
+                                            ERROR.unexpected
                                           }`,
                                         )
                                         console.error(res)
@@ -588,7 +593,7 @@ export function ProductPageComponent({
               } else {
                 alert(
                   `Error updating page: ${
-                    res.data?.message || errorUnexpected
+                    res.data?.message || ERROR.unexpected
                   }`,
                 )
                 console.error(res)

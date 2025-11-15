@@ -1,50 +1,68 @@
 export const dynamic = 'force-dynamic'
 
 import { UnsubscribePageClient } from '@/app/(user)/unsubscribe/client'
-import {
-  getProductTypesCached,
-  getShippingCached,
-  getVariantsCached,
-} from '../cache'
+import { getProductTypesCached, getShippingCached } from '@/app/(user)/cache'
 import { notFound, redirect } from 'next/navigation'
 import { ROUTE_ERROR } from '@/data/routes'
 import { unsubscribe } from '@/utils/getPostgres'
+import { handleError } from '@/utils/error/handleError'
+import { ERROR } from '@/data/magic'
 
-type ReviewPageProps = {
+type UnsubscribePageProps = {
   searchParams: Promise<{ email?: string }>
 }
 
 export default async function UnsubscribePage({
   searchParams,
-}: ReviewPageProps) {
+}: UnsubscribePageProps) {
+  const asyncFunctions = [getProductTypesCached, getShippingCached]
   const resolved = await Promise.allSettled([
     searchParams,
-    getProductTypesCached(),
-    getVariantsCached(),
-    getShippingCached(),
+    ...asyncFunctions.map((asyncFunction) => asyncFunction()),
   ])
-  if (resolved[0].status === 'rejected') {
-    redirect(`${ROUTE_ERROR}?message=${resolved[0].reason}`)
-  }
-  if (resolved[1].status === 'rejected') {
-    redirect(`${ROUTE_ERROR}?message=${resolved[1].reason}`)
-  }
-  if (resolved[2].status === 'rejected') {
-    redirect(`${ROUTE_ERROR}?message=${resolved[2].reason}`)
-  }
-  if (resolved[3].status === 'rejected') {
-    redirect(`${ROUTE_ERROR}?message=${resolved[3].reason}`)
-  }
+  resolved.forEach((result, index) => {
+    if (result.status === 'rejected') {
+      const err = result.reason
+      if (index === 0) {
+        const location = `${ERROR.unexpected} searchParams rejected`
+        handleError(location, err)
 
-  if (!resolved[0].value?.email) {
+        redirect(`${ROUTE_ERROR}?message=${ERROR.unexpected}`)
+      } else {
+        const location = `${ERROR.postgres} ${asyncFunctions[index - 1].name}`
+        handleError(location, err)
+
+        redirect(`${ROUTE_ERROR}?message=${ERROR.postgres}`)
+      }
+    }
+  })
+
+  const resolved_search_params = (
+    resolved[0] as PromiseFulfilledResult<{ email?: string }>
+  ).value
+  const product_types = (
+    resolved[1] as PromiseFulfilledResult<
+      Awaited<ReturnType<typeof getProductTypesCached>>
+    >
+  ).value
+  const shipping = (
+    resolved[2] as PromiseFulfilledResult<
+      Awaited<ReturnType<typeof getShippingCached>>
+    >
+  ).value
+
+  if (!resolved_search_params?.email) {
     notFound()
   }
 
   let deletedCount
   try {
-    deletedCount = await unsubscribe(resolved[0].value.email)
+    deletedCount = await unsubscribe(resolved_search_params.email)
   } catch (err) {
-    redirect(`${ROUTE_ERROR}?message=${err}`)
+    const location = `${ERROR.postgres} unsubscribe`
+    handleError(location, err)
+
+    redirect(`${ROUTE_ERROR}?message=${ERROR.postgres}`)
   }
 
   if (deletedCount.rowCount !== 1) {
@@ -53,9 +71,9 @@ export default async function UnsubscribePage({
 
   return (
     <UnsubscribePageClient
-      email={resolved[0].value.email}
-      product_types={resolved[1].value}
-      shipping={resolved[3].value}
+      email={resolved_search_params.email}
+      product_types={product_types}
+      shipping={shipping}
     />
   )
 }

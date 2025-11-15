@@ -6,6 +6,8 @@ import { redirect } from 'next/navigation'
 import { ROUTE_ERROR } from '@/data/routes'
 import { getFileNames } from '@/lib/minio'
 import { isSessionRSC } from '@/lib/better-auth/isSession'
+import { handleError } from '@/utils/error/handleError'
+import { ERROR } from '@/data/magic'
 
 export default async function AdminHomePage() {
   await isSessionRSC()
@@ -14,17 +16,32 @@ export default async function AdminHomePage() {
     getHomePage(),
     getFileNames('home_page'),
   ])
-  if (resolved[0].status === 'rejected') {
-    redirect(`${ROUTE_ERROR}?message=${resolved[0].reason}`)
-  }
-  if (resolved[1].status === 'rejected') {
-    redirect(`${ROUTE_ERROR}?message=${resolved[1].reason}`)
-  }
+  resolved.forEach((result, index) => {
+    if (result.status === 'rejected') {
+      const err = result.reason
+      if (index === 0) {
+        const location = `${ERROR.postgres} getHomePage`
+        handleError(location, err)
+        redirect(`${ROUTE_ERROR}?message=${ERROR.postgres}`)
+      } else {
+        const location = `${ERROR.minio} getFileNames`
+        handleError(location, err)
+        redirect(`${ROUTE_ERROR}?message=${ERROR.minio}`)
+      }
+    }
+  })
+
+  const home_page = (
+    resolved[0] as PromiseFulfilledResult<Awaited<ReturnType<typeof getHomePage>>>
+  ).value
+  const images_home_page_minio = (
+    resolved[1] as PromiseFulfilledResult<Awaited<ReturnType<typeof getFileNames>>>
+  ).value
 
   return (
     <AdminHomePageClient
-      home_page={resolved[0].value}
-      imagesHomePageMinio={resolved[1].value}
+      home_page={home_page}
+      imagesHomePageMinio={images_home_page_minio}
     />
   )
 }

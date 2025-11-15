@@ -1,3 +1,5 @@
+import type { Hit } from '../../node_modules/.pnpm/instantsearch.js@4.78.0_algoliasearch@5.21.0/node_modules/instantsearch.js/es/types/results'
+
 import { useHeaderContext } from '@/context/useHeaderContext'
 import { ROUTE_PRODUCT } from '@/data/routes'
 import { envClient } from '@/envClient'
@@ -15,7 +17,6 @@ import {
   useInstantSearch,
   useSearchBox,
 } from 'react-instantsearch'
-import type { Hit } from '../../node_modules/.pnpm/instantsearch.js@4.78.0_algoliasearch@5.21.0/node_modules/instantsearch.js/es/types/results'
 import { facebookPixelSearch } from '@/lib/facebook-pixel'
 import { googleAnalyticsSearch } from '@/lib/google-analytics'
 

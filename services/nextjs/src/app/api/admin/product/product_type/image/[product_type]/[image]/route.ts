@@ -1,4 +1,4 @@
-import { errorAxios, errorInvalidParams, errorMinio } from '@/data/error'
+import { handleError } from '@/utils/error/handleError'
 import { envServer } from '@/envServer'
 import { isSessionAPI } from '@/lib/better-auth/isSession'
 import axios from 'axios'
@@ -13,11 +13,20 @@ export async function GET(
   await isSessionAPI(await headers())
   const resolvedParams = await route.params
 
-  const { data: validatedParams } = z
-    .object({ product_type: z.string(), image: z.string() })
-    .safeParse(resolvedParams)
-  if (!validatedParams) {
-    return NextResponse.json({ message: errorInvalidParams }, { status: 400 })
+  const requestBodySchema = z.object({
+    product_type: z.string(),
+    image: z.string(),
+  })
+  const requestBody = resolvedParams
+
+  const { error, data: validatedParams } =
+    requestBodySchema.safeParse(requestBody)
+  if (error) {
+    const err = JSON.stringify(error.issues)
+    const location = 'GET ZOD request params'
+    handleError(location, err)
+
+    return NextResponse.json({ err }, { status: 400 })
   }
 
   try {
@@ -33,10 +42,16 @@ export async function GET(
         },
       })
     } else {
-      return NextResponse.json({ message: errorMinio }, { status: 400 })
+      const err = `status ${res.status}`
+      const location = 'GET MINIO fetch image'
+      handleError(location, err)
+
+      return NextResponse.json({ err: location }, { status: 400 })
     }
   } catch (err) {
-    console.error(err)
-    return NextResponse.json({ message: errorAxios }, { status: 500 })
+    const location = 'GET AXIOS get product image'
+    handleError(location, err)
+
+    return NextResponse.json({ err: location }, { status: 500 })
   }
 }

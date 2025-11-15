@@ -1,48 +1,66 @@
 export const dynamic = 'force-dynamic'
 
 import { ReviewPageClient } from '@/app/(user)/review/client'
-import {
-  getProductTypesCached,
-  getShippingCached,
-  getVariantsCached,
-} from '../cache'
+import { getProductTypesCached, getShippingCached } from '@/app/(user)/cache'
 import { notFound, redirect } from 'next/navigation'
 import { ROUTE_ERROR } from '@/data/routes'
 import { getOrder } from '@/utils/getPostgres'
+import { handleError } from '@/utils/error/handleError'
+import { ERROR } from '@/data/magic'
 
 type ReviewPageProps = {
   searchParams: Promise<{ order_id?: string }>
 }
 
 export default async function ReviewPage({ searchParams }: ReviewPageProps) {
+  const asyncFunctions = [getProductTypesCached, getShippingCached]
   const resolved = await Promise.allSettled([
     searchParams,
-    getProductTypesCached(),
-    getVariantsCached(),
-    getShippingCached(),
+    ...asyncFunctions.map((asyncFunction) => asyncFunction()),
   ])
-  if (resolved[0].status === 'rejected') {
-    redirect(`${ROUTE_ERROR}?message=${resolved[0].reason}`)
-  }
-  if (resolved[1].status === 'rejected') {
-    redirect(`${ROUTE_ERROR}?message=${resolved[1].reason}`)
-  }
-  if (resolved[2].status === 'rejected') {
-    redirect(`${ROUTE_ERROR}?message=${resolved[2].reason}`)
-  }
-  if (resolved[3].status === 'rejected') {
-    redirect(`${ROUTE_ERROR}?message=${resolved[3].reason}`)
-  }
+  resolved.forEach((result, index) => {
+    if (result.status === 'rejected') {
+      const err = result.reason
+      if (index === 0) {
+        const location = `${ERROR.unexpected} searchParams rejected`
+        handleError(location, err)
 
-  if (!resolved[0].value?.order_id) {
+        redirect(`${ROUTE_ERROR}?message=${ERROR.unexpected}`)
+      } else {
+        const location = `${ERROR.postgres} ${asyncFunctions[index - 1].name}`
+        handleError(location, err)
+
+        redirect(`${ROUTE_ERROR}?message=${ERROR.postgres}`)
+      }
+    }
+  })
+
+  const resolved_search_params = (
+    resolved[0] as PromiseFulfilledResult<{ order_id?: string }>
+  ).value
+  const product_types = (
+    resolved[1] as PromiseFulfilledResult<
+      Awaited<ReturnType<typeof getProductTypesCached>>
+    >
+  ).value
+  const shipping = (
+    resolved[2] as PromiseFulfilledResult<
+      Awaited<ReturnType<typeof getShippingCached>>
+    >
+  ).value
+
+  if (!resolved_search_params?.order_id) {
     notFound()
   }
 
   let array
   try {
-    array = await getOrder(resolved[0].value.order_id)
+    array = await getOrder(resolved_search_params.order_id)
   } catch (err) {
-    redirect(`${ROUTE_ERROR}?message=${err}`)
+    const location = `${ERROR.postgres} getOrder`
+    handleError(location, err)
+
+    redirect(`${ROUTE_ERROR}?message=${ERROR.postgres}`)
   }
 
   if (array.length !== 1) {
@@ -61,10 +79,10 @@ export default async function ReviewPage({ searchParams }: ReviewPageProps) {
   return (
     <ReviewPageClient
       orderId={orderId}
+      product_types={product_types}
+      shipping={shipping}
       unique_product_types={unique_product_types}
       full_name={full_name}
-      product_types={resolved[1].value}
-      shipping={resolved[3].value}
     />
   )
 }

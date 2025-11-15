@@ -1,36 +1,37 @@
 import { isSessionAPI } from '@/lib/better-auth/isSession'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { errorInvalidBody, errorPostgres, errorRedis } from '@/data/error'
 import { headers } from 'next/headers'
+import { handleError } from '@/utils/error/handleError'
 import { postgres } from '@/lib/postgres/index'
 import { home_page } from '@/lib/postgres/schema'
 import { redis } from '@/lib/redis/index'
-import { formatMessage } from '@/utils/formatMessage'
-import { sendTelegramMessage } from '@/lib/telegram'
 import { getHomePage } from '@/utils/getPostgres'
 import { sql } from 'drizzle-orm'
+import { ERROR } from '@/data/magic'
 
 export async function DELETE(req: NextRequest) {
   await isSessionAPI(await headers())
 
-  let validatedBody
+  let requestBody
   try {
-    validatedBody = z
-      .object({
-        question: z.string(),
-      })
-      .parse(await req.json())
+    requestBody = await req.json()
   } catch (err) {
-    const message = formatMessage(
-      '@/app/api/admin/pages/home/faq/route.ts DELETE',
-      errorInvalidBody,
-      err,
-    )
-    console.error(message)
-    await sendTelegramMessage('ERROR', message)
+    const location = 'DELETE parse request body'
+    handleError(location, err)
 
-    return NextResponse.json({ message: errorInvalidBody }, { status: 400 })
+    return NextResponse.json({ err: location }, { status: 400 })
+  }
+
+  const requestBodySchema = z.object({ question: z.string() })
+  const { error, data: validatedBody } =
+    requestBodySchema.safeParse(requestBody)
+  if (error) {
+    const err = JSON.stringify(error.issues)
+    const location = `DELETE ${ERROR.zod} request body`
+    handleError(location, err)
+
+    return NextResponse.json({ err }, { status: 400 })
   }
 
   try {
@@ -48,37 +49,29 @@ export async function DELETE(req: NextRequest) {
       `,
     )
   } catch (err) {
-    const message = formatMessage(
-      '@/app/api/admin/pages/home/faq/route.ts DELETE',
-      errorPostgres,
-      err,
-    )
-    console.error(message)
-    await sendTelegramMessage('ERROR', message)
+    const location = 'DELETE POSTGRES update home_page faq'
+    handleError(location, err)
 
-    return NextResponse.json({ message: errorPostgres }, { status: 500 })
+    return NextResponse.json({ err: location }, { status: 500 })
   }
 
   let home_page_cache
   try {
     home_page_cache = await getHomePage()
   } catch (err) {
-    console.error(err)
-    return NextResponse.json({ message: errorPostgres }, { status: 500 })
+    const location = `DELETE ${ERROR.postgres} getHomePage`
+    handleError(location, err)
+
+    return NextResponse.json({ err: location }, { status: 500 })
   }
 
   try {
     await redis.set('home_page', JSON.stringify(home_page_cache), 'EX', 3600)
   } catch (err) {
-    const message = formatMessage(
-      '@/app/api/admin/pages/home/faq/route.ts DELETE',
-      errorRedis,
-      err,
-    )
-    console.error(message)
-    await sendTelegramMessage('ERROR', message)
+    const location = `DELETE ${ERROR.redis} set home_page`
+    handleError(location, err)
 
-    return NextResponse.json({ message: errorRedis }, { status: 500 })
+    return NextResponse.json({ err: location }, { status: 500 })
   }
 
   return NextResponse.json({}, { status: 200 })

@@ -1,3 +1,12 @@
+export const ERROR = {
+  unexpected: 'UNEXPECTED',
+  postgres: 'POSTGRES',
+  redis: 'REDIS',
+  minio: 'MINIO',
+  axios: 'AXIOS',
+  zod: 'ZOD',
+} as const
+
 export const specialVariant = [
   'Δεν βρίσκω την μηχανή μου (custom σχέδιο)',
   'Δεν βρίσκω την μηχανή μου (custom σχέδιο) v2',
