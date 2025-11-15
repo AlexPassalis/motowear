@@ -64,10 +64,16 @@ export async function sendTelegramMessage(
       })
 
       if (chat === 'ERROR') {
-        const newCount = await redis.incr(ERROR_REDIS_KEY)
-
-        if (newCount === 1) {
+        try {
+          await redis.incr(ERROR_REDIS_KEY)
           await redis.expire(ERROR_REDIS_KEY, 60)
+        } catch (err) {
+          const message = formatMessage(
+            __filename,
+            'sendTelegramMessage()',
+            err,
+          )
+          console.error(message)
         }
       }
 
