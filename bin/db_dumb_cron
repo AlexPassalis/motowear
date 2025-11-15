@@ -1,0 +1,10 @@
+#!/bin/bash
+BACKUP_DIR=~/backups
+mkdir -p $BACKUP_DIR
+
+# Create backup
+docker exec 4ab8568a70e2 pg_dump -U postgres_user -d postgres_db | gzip > $BACKUP_DIR/motowear_>
+
+# Keep only the latest 3 backups
+cd $BACKUP_DIR
+ls -t motowear_*.sql.gz | tail -n +4 | xargs -r rm
