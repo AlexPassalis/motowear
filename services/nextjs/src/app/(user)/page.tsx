@@ -2,7 +2,6 @@ export const dynamic = 'force-dynamic'
 
 import {
   getHomePageCached,
-  getVariantsCached,
   getProductTypesCached,
   getShippingCached,
   getHomePageVariantsCached,
@@ -18,7 +17,6 @@ export default async function HomePage() {
     getHomePageCached,
     getHomePageVariantsCached,
     getProductTypesCached,
-    getVariantsCached,
     getShippingCached,
   ]
   const resolved = await Promise.allSettled(
@@ -47,11 +45,6 @@ export default async function HomePage() {
   const product_types = (
     resolved[2] as PromiseFulfilledResult<
       Awaited<ReturnType<typeof getProductTypesCached>>
-    >
-  ).value
-  const variants = (
-    resolved[3] as PromiseFulfilledResult<
-      Awaited<ReturnType<typeof getVariantsCached>>
     >
   ).value
   const shipping = (
