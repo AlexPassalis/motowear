@@ -1,3 +1,5 @@
+import { redis } from '@/lib/redis/index'
+
 import { envServer } from '@/envServer'
 import { Telegraf } from 'telegraf'
 import { formatMessage } from '@/utils/error/formatMessage'
@@ -40,6 +42,17 @@ export async function sendTelegramMessage(
     return
   }
 
+  const ERROR_REDIS_KEY = 'TELEGRAM_ERRORS_IN_LAST_MIN'
+  const ERROR_LIMIT_PER_MINUTE = 5
+  if (chat === 'ERROR') {
+    const errorCount = await redis.get(ERROR_REDIS_KEY)
+    const count = errorCount ? parseInt(errorCount, 10) : 0
+
+    if (count >= ERROR_LIMIT_PER_MINUTE) {
+      return
+    }
+  }
+
   const telegram_bot = await establishTelegram()
   const chatId = chatIds[chat]
 
@@ -49,6 +62,14 @@ export async function sendTelegramMessage(
       await telegram_bot.telegram.sendMessage(chatId, message, {
         parse_mode: 'HTML',
       })
+
+      if (chat === 'ERROR') {
+        const newCount = await redis.incr(ERROR_REDIS_KEY)
+
+        if (newCount === 1) {
+          await redis.expire(ERROR_REDIS_KEY, 60)
+        }
+      }
 
       return
     } catch (err) {

@@ -4,6 +4,8 @@ import '@/lib/postgres/index'
 import '@/lib/redis/index'
 
 import client from 'prom-client'
+import { ERROR } from '@/data/magic'
+import { handleError } from '@/utils/error/handleError'
 
 async function establishPrometheus() {
   if (global.global_prometheus_registry) {
@@ -18,8 +20,13 @@ async function establishPrometheus() {
     help: 'Number of active PostgreSQL connections',
     registers: [global.global_prometheus_registry],
     collect() {
-      if (global.global_postgres_pool) {
-        this.set(global.global_postgres_pool.totalCount)
+      try {
+        if (global.global_postgres_pool) {
+          this.set(global.global_postgres_pool.totalCount)
+        }
+      } catch (err) {
+        const location = `${ERROR.postgres} nextjs_postgres_connections`
+        handleError(location, err)
       }
     },
   })
@@ -29,12 +36,17 @@ async function establishPrometheus() {
     help: 'Redis memory usage in bytes',
     registers: [global.global_prometheus_registry],
     async collect() {
-      if (global.global_redis) {
-        const info = await global.global_redis.info('memory')
-        const match = info.match(/used_memory:(\d+)/)
-        if (match) {
-          this.set(parseInt(match[1]))
+      try {
+        if (global.global_redis) {
+          const info = await global.global_redis.info('memory')
+          const match = info.match(/used_memory:(\d+)/)
+          if (match) {
+            this.set(parseInt(match[1], 10))
+          }
         }
+      } catch (err) {
+        const location = `${ERROR.redis} nextjs_redis_memory_bytes`
+        handleError(location, err)
       }
     },
   })

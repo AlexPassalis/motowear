@@ -153,7 +153,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           host: ${{ secrets.VPS_IP }}
           passphrase: ${{ secrets.VPS_PASSPHRASE }}
-          source: './bin/db_dumb_cron'
+          source: './bin/db_dump_cron'
           target: '/home/${{ secrets.VPS_USER }}/'
 
       - name: Create pre-deployment backup
@@ -165,8 +165,8 @@ jobs:
           passphrase: ${{ secrets.VPS_PASSPHRASE }}
           script: |
             # Update and run backup script
-            chmod +x /home/${{ secrets.VPS_USER }}/bin/db_dumb_cron
-            cp /home/${{ secrets.VPS_USER }}/bin/db_dumb_cron /home/${{ secrets.VPS_USER }}/backup_db.sh
+            chmod +x /home/${{ secrets.VPS_USER }}/bin/db_dump_cron
+            cp /home/${{ secrets.VPS_USER }}/bin/db_dump_cron /home/${{ secrets.VPS_USER }}/backup_db.sh
             /home/${{ secrets.VPS_USER }}/backup_db.sh
 
       - name: Copy-paste files from github repository to VPS

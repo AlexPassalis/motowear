@@ -7,7 +7,7 @@ SERVICE_NAME="nextjs"
 CONTAINER_ID=$(docker ps -q -f "name=${STACK_NAME}_${SERVICE_NAME}")
 if [ -z "$CONTAINER_ID" ]; then
     echo "\"$SERVICE_NAME\" service is not running."
-    make start
+    exit 1
 fi
 
 if tty -s; then

@@ -35,8 +35,5 @@ lines-code:
 ssh:
 	@bash ./bin/ssh
 
-db-backup-cron:
-	@bash ./bin/db_dumb_cron
-
 clone-prod-db:
 	@bash ./bin/clone_prod_db
