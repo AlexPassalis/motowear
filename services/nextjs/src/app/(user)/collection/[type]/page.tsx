@@ -112,7 +112,11 @@ export default async function CollectionPage({ params }: ProductPageProps) {
   resolved.forEach((result, index) => {
     if (result.status === 'rejected') {
       if (index === 0) {
-        notFound()
+        const location = `${ERROR.unexpected} searchParams rejected`
+        const err = result.reason
+        handleError(location, err)
+
+        redirect(`${ROUTE_ERROR}?message=${ERROR.unexpected}`)
       } else {
         const location = `${ERROR.postgres} ${asyncFunctions[index - 1].name}`
         const err = result.reason

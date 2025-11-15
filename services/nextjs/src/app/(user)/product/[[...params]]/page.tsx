@@ -62,18 +62,13 @@ export async function generateMetadata({
     }
   })
 
-  const product_types = (
-    resolved[0] as PromiseFulfilledResult<
-      Awaited<ReturnType<typeof getProductTypesCached>>
-    >
-  ).value
   const variants = (
-    resolved[1] as PromiseFulfilledResult<
+    resolved[0] as PromiseFulfilledResult<
       Awaited<ReturnType<typeof getVariantsCached>>
     >
   ).value
   const pages = (
-    resolved[2] as PromiseFulfilledResult<
+    resolved[1] as PromiseFulfilledResult<
       Awaited<ReturnType<typeof getPagesCached>>
     >
   ).value
@@ -167,7 +162,19 @@ export default async function ProductPage({
   ])
   resolved.forEach((result, index) => {
     if (result.status === 'rejected') {
-      if (index > 1) {
+      if (index === 0) {
+        const location = `${ERROR.unexpected} params rejected`
+        const err = result.reason
+        handleError(location, err)
+
+        redirect(`${ROUTE_ERROR}?message=${ERROR.unexpected}`)
+      } else if (index === 1) {
+        const location = `${ERROR.unexpected} searchParams rejected`
+        const err = result.reason
+        handleError(location, err)
+
+        redirect(`${ROUTE_ERROR}?message=${ERROR.unexpected}`)
+      } else {
         const location = `${ERROR.postgres} ${asyncFunctions[index - 2].name}`
         const err = result.reason
         handleError(location, err)
