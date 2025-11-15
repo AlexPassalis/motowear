@@ -7,6 +7,7 @@ volumes:
   redis:
   minio:
   typesense:
+  prometheus:
 
 secrets:
   POSTGRES_DB:
@@ -52,6 +53,10 @@ secrets:
   PROSVASIS_GO_TOKEN:
     external: true
   PROSVASIS_GO_S1CODE:
+    external: true
+  GRAFANA_ADMIN_USER:
+    external: true
+  GRAFANA_ADMIN_PASSWORD:
     external: true
 
 services:
@@ -261,6 +266,61 @@ services:
         [
           'CMD-SHELL',
           'curl -f http://localhost:3000/api/nextjs | grep ok || exit 1',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 2
+
+  prometheus:
+    deploy:
+      restart_policy:
+        condition: any
+      update_config:
+        order: start-first
+        failure_action: rollback
+    image: ghcr.io/alexpassalis/image-motowear-prometheus:latest
+    networks:
+      - network-motowear
+    volumes:
+      - prometheus:/prometheus
+    healthcheck:
+      start_period: 30s
+      start_interval: 5s
+      test:
+        [
+          'CMD-SHELL',
+          'wget --no-verbose --tries=1 --spider http://localhost:9090/-/healthy || exit 1',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 2
+
+  grafana:
+    deploy:
+      restart_policy:
+        condition: any
+      update_config:
+        order: start-first
+        failure_action: rollback
+    image: ghcr.io/alexpassalis/image-motowear-grafana:latest
+    networks:
+      - network-motowear
+    environment:
+      - GF_SECURITY_ADMIN_USER__FILE=/run/secrets/GRAFANA_ADMIN_USER
+      - GF_SECURITY_ADMIN_PASSWORD__FILE=/run/secrets/GRAFANA_ADMIN_PASSWORD
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=https://motowear.gr/admin/overview/
+      - GF_SERVER_SERVE_FROM_SUB_PATH=false
+    secrets:
+      - GRAFANA_ADMIN_USER
+      - GRAFANA_ADMIN_PASSWORD
+    healthcheck:
+      start_period: 30s
+      start_interval: 5s
+      test:
+        [
+          'CMD-SHELL',
+          'wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1',
         ]
       interval: 10s
       timeout: 5s
