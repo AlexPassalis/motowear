@@ -211,8 +211,6 @@ export async function getShippingCached(): Promise<typeShipping> {
 }
 
 export async function getHomePageCached(): Promise<typeHomePage> {
-  throw new Error('This is just a test error.')
-
   if (process.env.BUILD_TIME !== 'true') {
     let home_page
 
