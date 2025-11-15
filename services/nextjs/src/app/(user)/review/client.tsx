@@ -101,6 +101,7 @@ export function ReviewPageClient({
                 setReviewSubmittedSuccessfully(validatedResponse)
               } catch {
                 router.push(`${ROUTE_ERROR}?message=${ERROR.axios}`)
+                return
               } finally {
                 closeFormLoadingOverlay()
               }

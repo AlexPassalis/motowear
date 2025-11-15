@@ -1,11 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import { ReviewPageClient } from '@/app/(user)/review/client'
-import {
-  getProductTypesCached,
-  getShippingCached,
-  getVariantsCached,
-} from '@/app/(user)/cache'
+import { getProductTypesCached, getShippingCached } from '@/app/(user)/cache'
 import { notFound, redirect } from 'next/navigation'
 import { ROUTE_ERROR } from '@/data/routes'
 import { getOrder } from '@/utils/getPostgres'
@@ -17,11 +13,7 @@ type ReviewPageProps = {
 }
 
 export default async function ReviewPage({ searchParams }: ReviewPageProps) {
-  const asyncFunctions = [
-    getProductTypesCached,
-    getVariantsCached,
-    getShippingCached,
-  ]
+  const asyncFunctions = [getProductTypesCached, getShippingCached]
   const resolved = await Promise.allSettled([
     searchParams,
     ...asyncFunctions.map((asyncFunction) => asyncFunction()),
@@ -51,13 +43,8 @@ export default async function ReviewPage({ searchParams }: ReviewPageProps) {
       Awaited<ReturnType<typeof getProductTypesCached>>
     >
   ).value
-  const variants = (
-    resolved[2] as PromiseFulfilledResult<
-      Awaited<ReturnType<typeof getVariantsCached>>
-    >
-  ).value
   const shipping = (
-    resolved[3] as PromiseFulfilledResult<
+    resolved[2] as PromiseFulfilledResult<
       Awaited<ReturnType<typeof getShippingCached>>
     >
   ).value
@@ -70,6 +57,9 @@ export default async function ReviewPage({ searchParams }: ReviewPageProps) {
   try {
     array = await getOrder(resolved_search_params.order_id)
   } catch (err) {
+    const location = `${ERROR.postgres} getOrder`
+    handleError(location, err)
+
     redirect(`${ROUTE_ERROR}?message=${ERROR.postgres}`)
   }
 

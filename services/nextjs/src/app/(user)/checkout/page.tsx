@@ -45,7 +45,7 @@ export default async function CheckoutPage({
     }>
   ).value
   const shipping = (
-    resolved[2] as PromiseFulfilledResult<
+    resolved[1] as PromiseFulfilledResult<
       Awaited<ReturnType<typeof getShippingCached>>
     >
   ).value
@@ -58,9 +58,8 @@ export default async function CheckoutPage({
       : undefined
   let orderDetails
   if (orderCode) {
-    const orderCode = resolved_search_params.s!
     try {
-      const order = await getOrderByOrderCode(orderCode)
+      const order = await getOrderByOrderCode(resolved_search_params.s!)
       orderDetails = {
         first_name: order.checkout.first_name,
         id: order.id,

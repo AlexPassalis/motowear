@@ -179,6 +179,7 @@ export default function HeaderProvider({
                   .safeParse(res.data)
                 if (err) {
                   router.push(`${ROUTE_ERROR}?message=${ERROR.unexpected}`)
+                  return
                 } else {
                   setEmailResponse(validatedResponse.coupon)
                   setCoupon(validatedResponse.coupon)
@@ -188,7 +189,8 @@ export default function HeaderProvider({
               } else {
               }
             } catch {
-              router.push(`${ROUTE_ERROR}?message=AXIOS`)
+              router.push(`${ROUTE_ERROR}?message=${ERROR.axios}`)
+              return
             } finally {
               close()
             }

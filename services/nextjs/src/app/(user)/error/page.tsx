@@ -1,10 +1,6 @@
 import { ErrorPageClient } from '@/app/(user)/error/client'
 import { ROUTE_ERROR } from '@/data/routes'
-import {
-  getVariantsCached,
-  getProductTypesCached,
-  getShippingCached,
-} from '@/app/(user)/cache'
+import { getProductTypesCached, getShippingCached } from '@/app/(user)/cache'
 import { redirect } from 'next/navigation'
 import { ERROR } from '@/data/magic'
 import { handleError } from '@/utils/error/handleError'
@@ -14,11 +10,7 @@ type ErrorPageProps = {
 }
 
 export default async function ErrorPage({ searchParams }: ErrorPageProps) {
-  const asyncFunctions = [
-    getProductTypesCached,
-    getVariantsCached,
-    getShippingCached,
-  ]
+  const asyncFunctions = [getProductTypesCached, getShippingCached]
   const resolved = await Promise.allSettled([
     searchParams,
     ...asyncFunctions.map((asyncFunction) => asyncFunction()),
@@ -43,13 +35,8 @@ export default async function ErrorPage({ searchParams }: ErrorPageProps) {
       Awaited<ReturnType<typeof getProductTypesCached>>
     >
   ).value
-  const variants = (
-    resolved[2] as PromiseFulfilledResult<
-      Awaited<ReturnType<typeof getVariantsCached>>
-    >
-  ).value
   const shipping = (
-    resolved[3] as PromiseFulfilledResult<
+    resolved[2] as PromiseFulfilledResult<
       Awaited<ReturnType<typeof getShippingCached>>
     >
   ).value

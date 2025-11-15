@@ -112,6 +112,7 @@ export function CheckoutPageClient({
     const localStorageCart = getLocalStorageCart()
     if (!orderCompleteResponse && localStorageCart.length < 1) {
       router.push(ROUTE_HOME)
+      return
     }
     setCart(localStorageCart)
   }, [])
@@ -508,7 +509,6 @@ export function CheckoutPageClient({
 
                     if (error) {
                       router.push(`${ROUTE_ERROR}?message=Invalid response`)
-
                       return
                     }
 
@@ -528,6 +528,7 @@ export function CheckoutPageClient({
                   }
 
                   router.push(`${ROUTE_ERROR}?message=${ERROR.axios}}`)
+                  return
                 } finally {
                   closeFormLoadingOverlay()
                 }
@@ -930,7 +931,6 @@ export function CheckoutPageClient({
                                 router.push(
                                   `${ROUTE_ERROR}?message=Invalid response`,
                                 )
-
                                 return
                               }
 
@@ -954,6 +954,7 @@ export function CheckoutPageClient({
                             }
 
                             router.push(`${ROUTE_ERROR}?message=${ERROR.axios}`)
+                            return
                           } finally {
                             closeCouponLoadingOverlay()
                           }

@@ -356,6 +356,7 @@ export function Cart({
                             res?.data?.message || ERROR.unexpected
                           }`,
                         )
+                        return
                       }
 
                       const { data: validatedResponse } = z
@@ -363,7 +364,7 @@ export function Cart({
                         .safeParse(res?.data)
                       if (!validatedResponse) {
                         router.push(
-                          `${ROUTE_ERROR}?message=Invalid response-coupon_code`,
+                          `${ROUTE_ERROR}?message=${ERROR.unexpected}`,
                         )
                         return
                       }
@@ -376,7 +377,8 @@ export function Cart({
                         setCoupon(null)
                       }
                     } catch {
-                      router.push(`${ROUTE_ERROR}?message=AXIOS`)
+                      router.push(`${ROUTE_ERROR}?message=${ERROR.axios}}`)
+                      return
                     } finally {
                       closeCouponLoadingOverlay()
                     }

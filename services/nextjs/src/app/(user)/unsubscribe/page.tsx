@@ -1,29 +1,21 @@
 export const dynamic = 'force-dynamic'
 
 import { UnsubscribePageClient } from '@/app/(user)/unsubscribe/client'
-import {
-  getProductTypesCached,
-  getShippingCached,
-  getVariantsCached,
-} from '@/app/(user)/cache'
+import { getProductTypesCached, getShippingCached } from '@/app/(user)/cache'
 import { notFound, redirect } from 'next/navigation'
 import { ROUTE_ERROR } from '@/data/routes'
 import { unsubscribe } from '@/utils/getPostgres'
 import { handleError } from '@/utils/error/handleError'
 import { ERROR } from '@/data/magic'
 
-type ReviewPageProps = {
+type UnsubscribePageProps = {
   searchParams: Promise<{ email?: string }>
 }
 
 export default async function UnsubscribePage({
   searchParams,
-}: ReviewPageProps) {
-  const asyncFunctions = [
-    getProductTypesCached,
-    getVariantsCached,
-    getShippingCached,
-  ]
+}: UnsubscribePageProps) {
+  const asyncFunctions = [getProductTypesCached, getShippingCached]
   const resolved = await Promise.allSettled([
     searchParams,
     ...asyncFunctions.map((asyncFunction) => asyncFunction()),
@@ -53,13 +45,8 @@ export default async function UnsubscribePage({
       Awaited<ReturnType<typeof getProductTypesCached>>
     >
   ).value
-  const variants = (
-    resolved[2] as PromiseFulfilledResult<
-      Awaited<ReturnType<typeof getVariantsCached>>
-    >
-  ).value
   const shipping = (
-    resolved[3] as PromiseFulfilledResult<
+    resolved[2] as PromiseFulfilledResult<
       Awaited<ReturnType<typeof getShippingCached>>
     >
   ).value

@@ -48,7 +48,7 @@ export default async function HomePage() {
     >
   ).value
   const shipping = (
-    resolved[4] as PromiseFulfilledResult<
+    resolved[3] as PromiseFulfilledResult<
       Awaited<ReturnType<typeof getShippingCached>>
     >
   ).value
