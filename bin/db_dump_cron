@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+BACKUP_DIR=~/backups
+SERVICE_NAME="stack-motowear_postgres"
+TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+
+# Create the directory if it doesn't exist
+mkdir -p $BACKUP_DIR
+
+CONTAINER_ID=$(docker ps --filter "name=$SERVICE_NAME" --format "{{.ID}}" | head -n 1)
+if ! [ -n "$CONTAINER_ID" ]; then
+    echo "\"$SERVICE_NAME\" service is not running."
+    exit 1
+fi
+echo "Creating backup from container: $CONTAINER_ID"
+
+# Get database credentials from secrets
+DB_NAME=$(docker exec $CONTAINER_ID cat /run/secrets/POSTGRES_DB 2>/dev/null || echo "postgres_db")
+DB_USER=$(docker exec $CONTAINER_ID cat /run/secrets/POSTGRES_USER 2>/dev/null || echo "postgres_user")
+
+# Create backup - dump entire database with all schemas
+docker exec $CONTAINER_ID pg_dump -U $DB_USER -d $DB_NAME --clean --if-exists | \
+    gzip > $BACKUP_DIR/motowear_${TIMESTAMP}.sql.gz
+
+if [ $? -eq 0 ]; then
+    echo "Backup created successfully: $BACKUP_DIR/motowear_${TIMESTAMP}.sql.gz"
+
+    # Keep only the latest 3 backups
+    cd $BACKUP_DIR
+    ls -t motowear_*.sql.gz | tail -n +4 | xargs -r rm
+
+    echo "Current backups:"
+    ls -lh motowear_*.sql.gz
+else
+    echo "Backup failed"
+    exit 1
+fi
