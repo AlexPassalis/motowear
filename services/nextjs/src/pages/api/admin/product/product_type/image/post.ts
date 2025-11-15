@@ -78,6 +78,6 @@ export default async function handler(
       return res.status(500).json({ err: location })
     }
   } else {
-    return res.status(400).json({ err: 'INVALID request method' })
+    return res.status(400).json({ err: 'invalid request method' })
   }
 }

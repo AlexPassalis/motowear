@@ -16,6 +16,7 @@ import { z } from 'zod'
 import axios from 'axios'
 import { envClient } from '@/envClient'
 import { useListState } from '@mantine/hooks'
+import { ERROR } from '@/data/magic'
 
 type BrandsComponentProps = {
   brandsPostgres: typeBrands
@@ -146,7 +147,7 @@ export function BrandsComponent({
                                     } else {
                                       alert(
                                         `Error deleting ${brand}: ${
-                                          res.data?.message || 'Unexpected error'
+                                          res.data?.message || ERROR.unexpected
                                         }`,
                                       )
                                       console.error(res)
@@ -261,7 +262,7 @@ export function BrandsComponent({
               } else {
                 alert(
                   `Error creating brands: ${
-                    res.data?.message || 'Unexpected error'
+                    res.data?.message || ERROR.unexpected
                   }`,
                 )
                 console.error(res)

@@ -8,9 +8,17 @@ import { handleError } from '@/utils/error/handleError'
 export async function DELETE(req: NextRequest) {
   await isSessionAPI(await headers())
 
-  const requestBodySchema = z.object({ image: z.string() })
-  const requestBody = await req.json()
+  let requestBody
+  try {
+    requestBody = await req.json()
+  } catch (err) {
+    const location = 'DELETE parse request body'
+    handleError(location, err)
 
+    return NextResponse.json({ err: location }, { status: 400 })
+  }
+
+  const requestBodySchema = z.object({ image: z.string() })
   const { error, data: validatedBody } =
     requestBodySchema.safeParse(requestBody)
   if (error) {

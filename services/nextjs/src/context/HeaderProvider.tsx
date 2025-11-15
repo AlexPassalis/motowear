@@ -33,7 +33,7 @@ import { ROUTE_ERROR, ROUTE_PRODUCT } from '@/data/routes'
 import Link from 'next/link'
 import { Image } from '@mantine/core'
 import NextImage from 'next/image'
-import { couponCodeMPRELOK } from '@/data/magic'
+import { couponCodeMPRELOK, ERROR } from '@/data/magic'
 
 type HeaderContext = {
   setCart: Dispatch<SetStateAction<typeCartLocalStorage>>
@@ -178,9 +178,7 @@ export default function HeaderProvider({
                   })
                   .safeParse(res.data)
                 if (err) {
-                  router.push(
-                    `${ROUTE_ERROR}?message=Invalid response-email`,
-                  )
+                  router.push(`${ROUTE_ERROR}?message=${ERROR.unexpected}`)
                 } else {
                   setEmailResponse(validatedResponse.coupon)
                   setCoupon(validatedResponse.coupon)

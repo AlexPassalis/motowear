@@ -24,7 +24,7 @@ export async function GET(
     const location = 'GET ZOD request params'
     handleError(location, err)
 
-    return NextResponse.json({ err: location }, { status: 400 })
+    return NextResponse.json({ err }, { status: 400 })
   }
 
   try {

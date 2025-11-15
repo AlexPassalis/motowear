@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { AdminProductProductTypeReviewsClientPage } from '@/app/admin/product/[product_type]/reviews/client/index'
 import { getProductReviews } from '@/utils/getPostgres'
 import { handleError } from '@/utils/error/handleError'
+import { ERROR } from '@/data/magic'
 
 type AdminProductProductTypeReviewsPageProps = {
   params: Promise<{ product_type: string }>
@@ -21,9 +22,9 @@ export default async function AdminProductProductTypeReviewsPage({
   try {
     product_reviews = await getProductReviews(productType)
   } catch (err) {
-    const location = 'AdminProductProductTypeReviewsPage getProductReviews'
+    const location = `${ERROR.postgres} getProductReviews`
     handleError(location, err)
-    redirect(`${ROUTE_ERROR}?message=POSTGRES`)
+    redirect(`${ROUTE_ERROR}?message=${ERROR.postgres}`)
   }
 
   return (

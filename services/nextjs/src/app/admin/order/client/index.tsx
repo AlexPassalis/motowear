@@ -33,6 +33,7 @@ import { z } from 'zod'
 import { AdminProvider } from '@/app/admin/components/AdminProvider'
 import { regexOrderFirstLastName, regexOrderId } from '@/data/regex'
 import { normalise } from '@/utils/normalise'
+import { ERROR } from '@/data/magic'
 
 type AdminOrderPageClientProps = {
   postgres_orders: typeOrder[]
@@ -637,7 +638,7 @@ export function AdminOrderPageClient({
                     } else {
                       alert(
                         `Error deleting ${order.id}: ${
-                          res.data?.message || 'Unexpected error'
+                          res.data?.message || ERROR.unexpected
                         }`,
                       )
                       console.error(res)
@@ -986,7 +987,7 @@ export function AdminOrderPageClient({
                         } else {
                           alert(
                             `Error creating New Orders: ${
-                              res.data?.message || 'Unexpected error'
+                              res.data?.message || ERROR.unexpected
                             }`,
                           )
                           console.error(res)

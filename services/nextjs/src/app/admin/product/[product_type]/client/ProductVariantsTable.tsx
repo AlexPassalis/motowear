@@ -25,6 +25,7 @@ import { envClient } from '@/envClient'
 import axios from 'axios'
 import { ProductVariantRowWrapper } from '@/app/admin/product/[product_type]/client/ProductVariantRowWrapper'
 import { normalise } from '@/utils/normalise'
+import { ERROR } from '@/data/magic'
 
 type ProductVariantsTableProps = {
   product_type: string
@@ -497,7 +498,7 @@ export function ProductVariantsTable({
                         } else {
                           alert(
                             `Error creating New Versions: ${
-                              res.data?.message || 'Unexpected error'
+                              res.data?.message || ERROR.unexpected
                             }`,
                           )
                           console.error(res)

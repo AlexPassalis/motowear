@@ -4,6 +4,7 @@ import { Button, TextInput } from '@mantine/core'
 import { envClient } from '@/envClient'
 import axios from 'axios'
 import { Dispatch, SetStateAction, useRef } from 'react'
+import { ERROR } from '@/data/magic'
 
 type NewProductTypeProps = {
   productTypesPostgres: typeProductTypes
@@ -47,7 +48,7 @@ export function NewProductType({
             } else {
               alert(
                 `Error creating product type: ${
-                  res.data?.message || 'Unexpected error'
+                  res.data?.message || ERROR.unexpected
                 }`,
               )
               console.error(res)

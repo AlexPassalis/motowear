@@ -8,35 +8,51 @@ import {
 } from '@/utils/getPostgres'
 import { redirect } from 'next/navigation'
 import { ROUTE_ERROR } from '@/data/routes'
+import { ERROR } from '@/data/magic'
+import { handleError } from '@/utils/error/handleError'
 
 export default async function AdminPage() {
   await isSessionRSC()
 
-  const resolved = await Promise.allSettled([
-    getOrders(),
-    getDailySessions(),
-    getShipping(),
-    getCoupons(),
-  ])
-  if (resolved[0].status === 'rejected') {
-    redirect(`${ROUTE_ERROR}?message=${resolved[0].reason}`)
-  }
-  if (resolved[1].status === 'rejected') {
-    redirect(`${ROUTE_ERROR}?message=${resolved[1].reason}`)
-  }
-  if (resolved[2].status === 'rejected') {
-    redirect(`${ROUTE_ERROR}?message=${resolved[2].reason}`)
-  }
-  if (resolved[3].status === 'rejected') {
-    redirect(`${ROUTE_ERROR}?message=${resolved[3].reason}`)
-  }
+  const asyncFunctions = [getOrders, getDailySessions, getShipping, getCoupons]
+  const resolved = await Promise.allSettled(
+    asyncFunctions.map((asyncFunction) => asyncFunction()),
+  )
+  resolved.forEach((result, index) => {
+    if (result.status === 'rejected') {
+      const location = `${ERROR.postgres} ${asyncFunctions[index].name}`
+      const err = result.reason
+      handleError(location, err)
+
+      redirect(`${ROUTE_ERROR}?message=${ERROR.postgres}`)
+    }
+  })
+
+  const orders = (
+    resolved[0] as PromiseFulfilledResult<Awaited<ReturnType<typeof getOrders>>>
+  ).value
+  const daily_sessions = (
+    resolved[1] as PromiseFulfilledResult<
+      Awaited<ReturnType<typeof getDailySessions>>
+    >
+  ).value
+  const shipping = (
+    resolved[2] as PromiseFulfilledResult<
+      Awaited<ReturnType<typeof getShipping>>
+    >
+  ).value
+  const postgres_coupons = (
+    resolved[3] as PromiseFulfilledResult<
+      Awaited<ReturnType<typeof getCoupons>>
+    >
+  ).value
 
   return (
     <AdminPageClient
-      orders={resolved[0].value}
-      daily_sessions={resolved[1].value}
-      shippingPostgres={resolved[2].value}
-      postgres_coupons={resolved[3].value}
+      orders={orders}
+      daily_sessions={daily_sessions}
+      shippingPostgres={shipping}
+      postgres_coupons={postgres_coupons}
     />
   )
 }

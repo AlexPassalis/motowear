@@ -27,7 +27,7 @@ import { useRouter } from 'next/navigation'
 import { zodCoupon } from '@/lib/postgres/data/zod'
 import { MdDiscount } from 'react-icons/md'
 import { facebookPixelInitiateCheckout } from '@/lib/facebook-pixel'
-import { couponCodeMPRELOK, specialProductType } from '@/data/magic'
+import { couponCodeMPRELOK, ERROR, specialProductType } from '@/data/magic'
 import { googleAnalyticsBeginCheckout } from '@/lib/google-analytics'
 
 type CartProps = {
@@ -353,7 +353,7 @@ export function Cart({
                       if (res.status !== 200) {
                         router.push(
                           `${ROUTE_ERROR}?message=${
-                            res?.data?.message || 'Unexpected error'
+                            res?.data?.message || ERROR.unexpected
                           }`,
                         )
                       }
@@ -365,6 +365,7 @@ export function Cart({
                         router.push(
                           `${ROUTE_ERROR}?message=Invalid response-coupon_code`,
                         )
+                        return
                       }
                       if (couponCodeRef?.current?.value) {
                         couponCodeRef.current.value = ''

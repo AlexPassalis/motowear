@@ -9,12 +9,20 @@ import { toZonedTime } from 'date-fns-tz'
 export { OPTIONS } from '@/utils/OPTIONS'
 
 export async function POST(req: NextRequest) {
+  let requestBody
+  try {
+    requestBody = await req.json()
+  } catch (err) {
+    const location = 'POST parse request body'
+    handleError(location, err)
+
+    return NextResponse.json({ err: location }, { status: 400 })
+  }
+
   const requestBodySchema = z.object({
     email: z.string().email(),
     cart: zodCart,
   })
-  const requestBody = await req.json()
-
   const { error, data: validatedBody } =
     requestBodySchema.safeParse(requestBody)
   if (error) {

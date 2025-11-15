@@ -15,6 +15,16 @@ import { formatReviewMessage } from '@/utils/error/formatMessage'
 export { OPTIONS } from '@/utils/OPTIONS'
 
 export async function POST(req: NextRequest) {
+  let requestBody
+  try {
+    requestBody = await req.json()
+  } catch (err) {
+    const location = 'POST parse request body'
+    handleError(location, err)
+
+    return NextResponse.json({ err: location }, { status: 400 })
+  }
+
   const requestBodySchema = z.object({
     id: z.number(),
     full_name: z.string(),
@@ -28,8 +38,6 @@ export async function POST(req: NextRequest) {
       }),
     ),
   })
-  const requestBody = await req.json()
-
   const { error, data: validatedBody } =
     requestBodySchema.safeParse(requestBody)
 

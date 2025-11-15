@@ -37,7 +37,7 @@ import axios from 'axios'
 import Link from 'next/link'
 import { facebookPixelPurchase } from '@/lib/facebook-pixel/index'
 import { googleAnalyticsPurchase } from '@/lib/google-analytics'
-import { couponCodeMPRELOK, specialProductType } from '@/data/magic'
+import { couponCodeMPRELOK, ERROR, specialProductType } from '@/data/magic'
 import Script from 'next/script'
 
 type CheckoutPageProps = {
@@ -527,7 +527,7 @@ export function CheckoutPageClient({
                     console.error(err)
                   }
 
-                  router.push(`${ROUTE_ERROR}?message=${'AXIOS'}`)
+                  router.push(`${ROUTE_ERROR}?message=${ERROR.axios}}`)
                 } finally {
                   closeFormLoadingOverlay()
                 }
@@ -953,7 +953,7 @@ export function CheckoutPageClient({
                               console.error(err)
                             }
 
-                            router.push(`${ROUTE_ERROR}?message=${'AXIOS'}`)
+                            router.push(`${ROUTE_ERROR}?message=${ERROR.axios}`)
                           } finally {
                             closeCouponLoadingOverlay()
                           }

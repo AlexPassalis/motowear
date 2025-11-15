@@ -48,7 +48,7 @@ export async function getProductTypesCached(): Promise<typeProductTypes> {
 
     void redis
       .set('product_types', JSON.stringify(product_types), 'EX', 3600)
-      .catch(async (err) => {
+      .catch((err) => {
         const location = 'REDIS set product_types'
         handleError(location, err)
       })
@@ -85,7 +85,7 @@ export async function getVariantsCached(): Promise<typeVariant[]> {
 
     void redis
       .set('variants', JSON.stringify(variants), 'EX', 3600)
-      .catch(async (err) => {
+      .catch((err) => {
         const location = 'REDIS set variants'
         handleError(location, err)
       })
@@ -120,12 +120,10 @@ export async function getPagesCached(): Promise<typeProductPage[]> {
       }
     }
 
-    void redis
-      .set('pages', JSON.stringify(pages), 'EX', 3600)
-      .catch(async (err) => {
-        const location = 'REDIS set pages'
-        handleError(location, err)
-      })
+    void redis.set('pages', JSON.stringify(pages), 'EX', 3600).catch((err) => {
+      const location = 'REDIS set pages'
+      handleError(location, err)
+    })
 
     return pages
   } else {
@@ -159,7 +157,7 @@ export async function getReviewsCached(): Promise<typeReview[]> {
 
     void redis
       .set('reviews', JSON.stringify(reviews), 'EX', 3600)
-      .catch(async (err) => {
+      .catch((err) => {
         const location = 'REDIS set reviews'
         handleError(location, err)
       })
@@ -196,7 +194,7 @@ export async function getShippingCached(): Promise<typeShipping> {
 
     void redis
       .set('shipping', JSON.stringify(shipping), 'EX', 3600)
-      .catch(async (err) => {
+      .catch((err) => {
         const location = 'REDIS set shipping'
         handleError(location, err)
       })
@@ -213,6 +211,8 @@ export async function getShippingCached(): Promise<typeShipping> {
 }
 
 export async function getHomePageCached(): Promise<typeHomePage> {
+  throw new Error('This is just a test error.')
+
   if (process.env.BUILD_TIME !== 'true') {
     let home_page
 
@@ -238,7 +238,7 @@ export async function getHomePageCached(): Promise<typeHomePage> {
 
     void redis
       .set('home_page', JSON.stringify(home_page), 'EX', 3600)
-      .catch(async (err) => {
+      .catch((err) => {
         const location = 'REDIS set home_page'
         handleError(location, err)
       })
@@ -282,7 +282,7 @@ export async function getHomePageVariantsCached(): Promise<typeHomePageVariants>
 
     void redis
       .set('home_page_variants', JSON.stringify(home_page_variants), 'EX', 3600)
-      .catch(async (err) => {
+      .catch((err) => {
         const location = 'REDIS set home_page_variants'
         handleError(location, err)
       })

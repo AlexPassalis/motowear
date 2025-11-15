@@ -10,6 +10,7 @@ import axios from 'axios'
 import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { RxDragHandleDots2 } from 'react-icons/rx'
 import { useDisclosure, useListState } from '@mantine/hooks'
+import { ERROR } from '@/data/magic'
 
 type ProductPageComponentProps = {
   product_type: string
@@ -189,7 +190,9 @@ export function ProductPageComponent({
                                       ? prev.images.map((img, i) =>
                                           i === index ? e.target.value : img,
                                         )
-                                      : prev.images.filter((_, i) => i !== index),
+                                      : prev.images.filter(
+                                          (_, i) => i !== index,
+                                        ),
                                   }))
                                 }
                                 disabled={onRequest}
@@ -217,7 +220,8 @@ export function ProductPageComponent({
                                       } else {
                                         alert(
                                           `Error deleting ${image}: ${
-                                            res.data?.message || 'Unexpected error'
+                                            res.data?.message ||
+                                            ERROR.unexpected
                                           }`,
                                         )
                                         console.error(res)
@@ -356,7 +360,8 @@ export function ProductPageComponent({
                                       } else {
                                         alert(
                                           `Error deleting ${faq.question}: ${
-                                            res.data?.message || 'Unexpected error'
+                                            res.data?.message ||
+                                            ERROR.unexpected
                                           }`,
                                         )
                                         console.error(res)
@@ -506,7 +511,8 @@ export function ProductPageComponent({
                                       } else {
                                         alert(
                                           `Error deleting ${carousel.image}: ${
-                                            res.data?.message || 'Unexpected error'
+                                            res.data?.message ||
+                                            ERROR.unexpected
                                           }`,
                                         )
                                         console.error(res)
@@ -587,7 +593,7 @@ export function ProductPageComponent({
               } else {
                 alert(
                   `Error updating page: ${
-                    res.data?.message || 'Unexpected error'
+                    res.data?.message || ERROR.unexpected
                   }`,
                 )
                 console.error(res)

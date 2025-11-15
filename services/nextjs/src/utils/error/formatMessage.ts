@@ -2,8 +2,11 @@ import { typeCart } from '@/lib/postgres/data/type'
 
 function escHtml(str: string) {
   return str.replace(
-    /[&<>"]/g,
-    (s) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[s]!),
+    /[&<>"']/g,
+    (s) =>
+      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[
+        s
+      ]!),
   )
 }
 

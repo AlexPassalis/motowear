@@ -17,6 +17,7 @@ import { Button, NumberInput, TextInput } from '@mantine/core'
 import { envClient } from '@/envClient'
 import { zodCoupons, zodShipping } from '@/lib/postgres/data/zod'
 import { AdminProvider } from '@/app/admin/components/AdminProvider'
+import { ERROR } from '@/data/magic'
 
 type AdminPageClientProps = {
   orders: typeOrder[]
@@ -277,7 +278,7 @@ export function AdminPageClient({
                 } else {
                   alert(
                     `Error creating New Versions: ${
-                      res.data?.message || 'Unexpected error'
+                      res.data?.message || ERROR.unexpected
                     }`,
                   )
                   console.error(res)
@@ -371,7 +372,7 @@ export function AdminPageClient({
                     } else {
                       alert(
                         `Error deleting coupon: ${
-                          res.data?.message || 'Unexpected error'
+                          res.data?.message || ERROR.unexpected
                         }`,
                       )
                       console.error(res)
@@ -434,7 +435,7 @@ export function AdminPageClient({
                 } else {
                   alert(
                     `Error creating New coupons: ${
-                      res.data?.message || 'Unexpected error'
+                      res.data?.message || ERROR.unexpected
                     }`,
                   )
                   console.error(res)

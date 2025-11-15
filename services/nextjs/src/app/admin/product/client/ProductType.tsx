@@ -10,6 +10,7 @@ import { z } from 'zod'
 import Link from 'next/link'
 import { ROUTE_ADMIN_PRODUCT } from '@/data/routes'
 import { useDisclosure } from '@mantine/hooks'
+import { ERROR } from '@/data/magic'
 
 type ProductTypeProps = {
   product_type: string
@@ -63,7 +64,7 @@ export function ProductType({
                 } else {
                   alert(
                     `Error deleting ${modalState}: ${
-                      res.data?.message || 'Unexpected error'
+                      res.data?.message || ERROR.unexpected
                     }`,
                   )
                   console.error(res)
@@ -177,7 +178,7 @@ export function ProductType({
                         } else {
                           alert(
                             `Error deleting ${image}: ${
-                              res.data?.message || 'Unexpected error'
+                              res.data?.message || ERROR.unexpected
                             }`,
                           )
                           console.error(res)
@@ -288,7 +289,7 @@ export function ProductType({
                 } else {
                   alert(
                     `Error creating brands: ${
-                      res.data?.message || 'Unexpected error'
+                      res.data?.message || ERROR.unexpected
                     }`,
                   )
                   console.error(res)

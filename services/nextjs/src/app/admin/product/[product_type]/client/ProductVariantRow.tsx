@@ -13,6 +13,7 @@ import { Dispatch, memo, SetStateAction } from 'react'
 
 import axios from 'axios'
 import { envClient } from '@/envClient'
+import { ERROR } from '@/data/magic'
 
 export const ProductVariantRow = memo(
   ProductVariantRowNotMemoised,
@@ -236,7 +237,7 @@ function ProductVariantRowNotMemoised({
                 } else {
                   alert(
                     `Error deleting ${variant.id}: ${
-                      res.data?.message || 'Unexpected error'
+                      res.data?.message || ERROR.unexpected
                     }`,
                   )
                   console.error(res)

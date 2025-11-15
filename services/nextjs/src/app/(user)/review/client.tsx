@@ -16,6 +16,7 @@ import { z } from 'zod'
 import { useDisclosure } from '@mantine/hooks'
 import { useRouter } from 'next/navigation'
 import { ROUTE_ERROR } from '@/data/routes'
+import { ERROR } from '@/data/magic'
 
 type FormValues = Record<string, { rating: number; review: string }>
 
@@ -99,7 +100,7 @@ export function ReviewPageClient({
                 }
                 setReviewSubmittedSuccessfully(validatedResponse)
               } catch {
-                router.push(`${ROUTE_ERROR}?message=${'AXIOS'}`)
+                router.push(`${ROUTE_ERROR}?message=${ERROR.axios}`)
               } finally {
                 closeFormLoadingOverlay()
               }

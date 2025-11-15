@@ -8,12 +8,22 @@ import { home_page } from '@/lib/postgres/schema'
 import { redis } from '@/lib/redis/index'
 import { getHomePage } from '@/utils/getPostgres'
 import { sql } from 'drizzle-orm'
+import { ERROR } from '@/data/magic'
 
 export async function DELETE(req: NextRequest) {
   await isSessionAPI(await headers())
 
+  let requestBody
+  try {
+    requestBody = await req.json()
+  } catch (err) {
+    const location = 'DELETE parse request body'
+    handleError(location, err)
+
+    return NextResponse.json({ err: location }, { status: 400 })
+  }
+
   const requestBodySchema = z.object({ review_id: z.string() })
-  const requestBody = await req.json()
   const { error, data: validatedBody } =
     requestBodySchema.safeParse(requestBody)
   if (error) {
@@ -52,7 +62,7 @@ export async function DELETE(req: NextRequest) {
   try {
     home_page_cache = await getHomePage()
   } catch (err) {
-    const location = 'DELETE REDIS getHomePage'
+    const location = `DELETE ${ERROR.postgres} getHomePage`
     handleError(location, err)
 
     return NextResponse.json({ err: location }, { status: 500 })

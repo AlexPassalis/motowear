@@ -4,7 +4,7 @@ import { sendTelegramMessage } from '@/lib/telegram/index'
 import { envServer } from '@/envServer'
 
 async function establishRedis() {
-  if (global.global_redis && global.global_redis.status === 'ready') {
+  if (global.global_redis) {
     return global.global_redis
   }
 

@@ -14,17 +14,26 @@ export { OPTIONS } from '@/utils/OPTIONS'
 export async function POST(req: NextRequest) {
   await isSessionAPI(await headers())
 
+  let requestBody
+  try {
+    requestBody = await req.json()
+  } catch (err) {
+    const location = 'POST parse request body'
+    handleError(location, err)
+
+    return NextResponse.json({ err: location }, { status: 400 })
+  }
+
   const requestBodySchema = z.object({
     orders: z.array(zodOrderServer),
   })
-  const requestBody = await req.json()
-
   const { error, data: validatedBody } =
     requestBodySchema.safeParse(requestBody)
   if (error) {
     const err = JSON.stringify(error.issues)
     const location = 'POST ZOD request body'
     handleError(location, err)
+
     return NextResponse.json({ err }, { status: 400 })
   }
 
@@ -72,15 +81,24 @@ export async function POST(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   await isSessionAPI(await headers())
 
-  const requestBodySchema = z.object({ id: z.number() })
-  const requestBody = await req.json()
+  let requestBody
+  try {
+    requestBody = await req.json()
+  } catch (err) {
+    const location = 'DELETE parse request body'
+    handleError(location, err)
 
+    return NextResponse.json({ err: location }, { status: 400 })
+  }
+
+  const requestBodySchema = z.object({ id: z.number() })
   const { error, data: validatedBody } =
     requestBodySchema.safeParse(requestBody)
   if (error) {
     const err = JSON.stringify(error.issues)
     const location = 'DELETE ZOD request body'
     handleError(location, err)
+
     return NextResponse.json({ err }, { status: 400 })
   }
 

@@ -9,8 +9,9 @@ import {
 import { notFound, redirect } from 'next/navigation'
 import { ROUTE_ERROR } from '@/data/routes'
 import { Metadata } from 'next'
-import { specialVariant } from '@/data/magic'
+import { specialVariant, ERROR } from '@/data/magic'
 import { envServer } from '@/envServer'
+import { handleError } from '@/utils/error/handleError'
 
 type typeParams = { params?: [type?: string, version?: string] }
 type typeSearchParams = { color?: string }
@@ -43,25 +44,41 @@ export async function generateMetadata({
     ? decodeURIComponent(resolvedSearchParams.color)
     : undefined
 
-  const resolved = await Promise.allSettled([
-    getProductTypesCached(),
-    getVariantsCached(),
-    getPagesCached(),
-  ])
-  if (resolved[0].status === 'rejected') {
-    console.error(resolved[0].reason)
-    redirect(`${ROUTE_ERROR}?message=POSTGRES`)
-  }
-  if (resolved[1].status === 'rejected') {
-    console.error(resolved[1].reason)
-    redirect(`${ROUTE_ERROR}?message=POSTGRES`)
-  }
-  if (resolved[2].status === 'rejected') {
-    console.error(resolved[2].reason)
-    redirect(`${ROUTE_ERROR}?message=POSTGRES`)
-  }
+  const asyncFunctions = [
+    getProductTypesCached,
+    getVariantsCached,
+    getPagesCached,
+  ]
+  const resolved = await Promise.allSettled(
+    asyncFunctions.map((asyncFunction) => asyncFunction()),
+  )
+  resolved.forEach((result, index) => {
+    if (result.status === 'rejected') {
+      const location = `${ERROR.postgres} ${asyncFunctions[index].name}`
+      const err = result.reason
+      handleError(location, err)
 
-  const postgresVariants = resolved[1].value
+      redirect(`${ROUTE_ERROR}?message=${ERROR.postgres}`)
+    }
+  })
+
+  const product_types = (
+    resolved[0] as PromiseFulfilledResult<
+      Awaited<ReturnType<typeof getProductTypesCached>>
+    >
+  ).value
+  const variants = (
+    resolved[1] as PromiseFulfilledResult<
+      Awaited<ReturnType<typeof getVariantsCached>>
+    >
+  ).value
+  const pages = (
+    resolved[2] as PromiseFulfilledResult<
+      Awaited<ReturnType<typeof getPagesCached>>
+    >
+  ).value
+
+  const postgresVariants = variants
     .filter((variant) => variant.product_type === paramsProduct_type)
     .sort(({ name: aName }, { name: bName }) => {
       if (aName === 'Επίλεξε μηχανή') {
@@ -100,9 +117,7 @@ export async function generateMetadata({
       ? `${paramsProduct_type} - ${paramsVariant.name}`
       : paramsProduct_type
   }`
-  const page = resolved[2].value.find(
-    (page) => page.product_type === paramsProduct_type,
-  )
+  const page = pages.find((page) => page.product_type === paramsProduct_type)
   const description = page ? page.product_description : ''
   const canonical = `/product/${paramsProduct_type}/${
     paramsProduct_version ? paramsProduct_version : ''
@@ -138,42 +153,69 @@ export default async function ProductPage({
   params,
   searchParams,
 }: ProductPageProps) {
+  const asyncFunctions = [
+    getProductTypesCached,
+    getVariantsCached,
+    getPagesCached,
+    getReviewsCached,
+    getShippingCached,
+  ]
   const resolved = await Promise.allSettled([
     params,
     searchParams,
-    getProductTypesCached(),
-    getVariantsCached(),
-    getPagesCached(),
-    getReviewsCached(),
-    getShippingCached(),
+    ...asyncFunctions.map((asyncFunction) => asyncFunction()),
   ])
-  if (resolved[2].status === 'rejected') {
-    redirect(`${ROUTE_ERROR}?message=${resolved[2].reason}`)
-  }
-  if (resolved[3].status === 'rejected') {
-    redirect(`${ROUTE_ERROR}?message=${resolved[3].reason}`)
-  }
-  if (resolved[4].status === 'rejected') {
-    redirect(`${ROUTE_ERROR}?message=${resolved[4].reason}`)
-  }
-  if (resolved[5].status === 'rejected') {
-    redirect(`${ROUTE_ERROR}?message=${resolved[5].reason}`)
-  }
-  if (resolved[6].status === 'rejected') {
-    redirect(`${ROUTE_ERROR}?message=${resolved[6].reason}`)
-  }
+  resolved.forEach((result, index) => {
+    if (result.status === 'rejected') {
+      if (index > 1) {
+        const location = `${ERROR.postgres} ${asyncFunctions[index - 2].name}`
+        const err = result.reason
+        handleError(location, err)
 
-  const resolvedParams = (
+        redirect(`${ROUTE_ERROR}?message=${ERROR.postgres}`)
+      }
+    }
+  })
+
+  const resolved_params = (
     resolved[0] as PromiseFulfilledResult<{
       params?: [type: string, version?: string]
     }>
   ).value
-  if (!resolvedParams.params || resolvedParams.params.length < 1) {
+
+  if (!resolved_params.params || resolved_params.params.length < 1) {
     notFound()
   }
-  const paramsProduct_type = decodeURIComponent(resolvedParams.params[0])
 
-  const postgresVariants = resolved[3].value
+  const paramsProduct_type = decodeURIComponent(resolved_params.params[0])
+
+  const product_types = (
+    resolved[2] as PromiseFulfilledResult<
+      Awaited<ReturnType<typeof getProductTypesCached>>
+    >
+  ).value
+  const variants = (
+    resolved[3] as PromiseFulfilledResult<
+      Awaited<ReturnType<typeof getVariantsCached>>
+    >
+  ).value
+  const pages = (
+    resolved[4] as PromiseFulfilledResult<
+      Awaited<ReturnType<typeof getPagesCached>>
+    >
+  ).value
+  const reviews = (
+    resolved[5] as PromiseFulfilledResult<
+      Awaited<ReturnType<typeof getReviewsCached>>
+    >
+  ).value
+  const shipping = (
+    resolved[6] as PromiseFulfilledResult<
+      Awaited<ReturnType<typeof getShippingCached>>
+    >
+  ).value
+
+  const postgresVariants = variants
     .filter((variant) => variant.product_type === paramsProduct_type)
     .sort(({ name: aName }, { name: bName }) => {
       if (aName === 'Επίλεξε μηχανή') {
@@ -198,14 +240,15 @@ export default async function ProductPage({
     notFound()
   }
 
-  const variant = resolvedParams.params?.[1]
-    ? decodeURIComponent(resolvedParams.params?.[1])
+  const variant = resolved_params.params?.[1]
+    ? decodeURIComponent(resolved_params.params?.[1])
     : undefined
-  const resolvedSearchParamsColor = (
+  const resolved_search_params = (
     resolved[1] as PromiseFulfilledResult<{
       color?: string
     }>
-  ).value?.color
+  ).value
+  const resolvedSearchParamsColor = resolved_search_params?.color
   const paramsVariant = variant
     ? postgresVariants.find((v) =>
         resolvedSearchParamsColor
@@ -227,7 +270,7 @@ export default async function ProductPage({
         ),
     )
 
-  const upsellVariants = resolved[3].value.filter((variant) =>
+  const upsellVariants = variants.filter((variant) =>
     upsells.some(
       (upsell) =>
         upsell.product_type === variant.product_type &&
@@ -235,21 +278,19 @@ export default async function ProductPage({
     ),
   )
 
-  const page = resolved[4].value.find(
-    (page) => page.product_type === paramsProduct_type,
-  )!
+  const page = pages.find((page) => page.product_type === paramsProduct_type)!
 
-  const postgres_reviews = resolved[5].value.filter(
+  const postgres_reviews = reviews.filter(
     (review) => review.product_type === paramsProduct_type,
   )
 
   return (
     <ProductPageClient
-      product_types={resolved[2].value}
+      product_types={product_types}
       upsellVariants={upsellVariants}
       page={page}
       postgres_reviews={postgres_reviews}
-      shipping={resolved[6].value}
+      shipping={shipping}
       paramsProduct_type={paramsProduct_type}
       paramsVariant={paramsVariant}
       postgresVariants={postgresVariants}

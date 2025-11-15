@@ -9,12 +9,22 @@ import { getHomePage } from '@/utils/getPostgres'
 import { sql } from 'drizzle-orm'
 
 import { handleError } from '@/utils/error/handleError'
+import { ERROR } from '@/data/magic'
 
 export async function DELETE(req: NextRequest) {
   await isSessionAPI(await headers())
 
+  let requestBody
+  try {
+    requestBody = await req.json()
+  } catch (err) {
+    const location = 'DELETE parse request body'
+    handleError(location, err)
+
+    return NextResponse.json({ err: location }, { status: 400 })
+  }
+
   const requestBodySchema = z.object({ quote: z.string() })
-  const requestBody = await req.json()
   const { error, data: validatedBody } =
     requestBodySchema.safeParse(requestBody)
   if (error) {
@@ -50,7 +60,7 @@ export async function DELETE(req: NextRequest) {
   try {
     home_page_cache = await getHomePage()
   } catch (err) {
-    const location = 'DELETE REDIS getHomePage'
+    const location = `DELETE ${ERROR.postgres} getHomePage`
     handleError(location, err)
 
     return NextResponse.json({ err: location }, { status: 500 })
@@ -59,7 +69,7 @@ export async function DELETE(req: NextRequest) {
   try {
     await redis.set('home_page', JSON.stringify(home_page_cache), 'EX', 3600)
   } catch (err) {
-    const location = 'DELETE REDIS set home_page'
+    const location = `DELETE ${ERROR.redis} set home_page`
     handleError(location, err)
 
     return NextResponse.json({ err: location }, { status: 500 })

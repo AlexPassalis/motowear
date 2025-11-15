@@ -21,9 +21,17 @@ export { OPTIONS } from '@/utils/OPTIONS'
 export async function POST(req: NextRequest) {
   await isSessionAPI(await headers())
 
-  const requestBodySchema = z.object({ product_type: z.string() })
-  const requestBody = await req.json()
+  let requestBody
+  try {
+    requestBody = await req.json()
+  } catch (err) {
+    const location = 'POST parse request body'
+    handleError(location, err)
 
+    return NextResponse.json({ err: location }, { status: 400 })
+  }
+
+  const requestBodySchema = z.object({ product_type: z.string() })
   const { error, data: validatedBody } =
     requestBodySchema.safeParse(requestBody)
   if (error) {
@@ -83,9 +91,17 @@ export async function POST(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   await isSessionAPI(await headers())
 
-  const requestBodySchema = z.object({ productType: z.string() })
-  const requestBody = await req.json()
+  let requestBody
+  try {
+    requestBody = await req.json()
+  } catch (err) {
+    const location = 'DELETE parse request body'
+    handleError(location, err)
 
+    return NextResponse.json({ err: location }, { status: 400 })
+  }
+
+  const requestBodySchema = z.object({ productType: z.string() })
   const { error, data: validatedBody } =
     requestBodySchema.safeParse(requestBody)
   if (error) {
