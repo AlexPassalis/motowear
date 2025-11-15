@@ -1,4 +1,4 @@
-.PHONY: default start stop 64 git-crypt lines-code backup-db restore-db
+.PHONY: default start stop postgres-generate postgres-migrate 64 git-crypt lines-code ssh db-backup-cron clone-prod-db
 
 default: start
 
@@ -15,6 +15,14 @@ start:
 stop:
 	docker stack rm stack-motowear
 
+postgres-generate:
+	@echo "*** Creating database migrations."
+	@bin/dockerize pnpm run postgres:generate
+
+postgres-migrate:
+	@echo "*** Applying database migrations."
+	@bin/dockerize pnpm run postgres:migrate
+
 64:
 	openssl rand -base64 64
 
@@ -23,6 +31,9 @@ git-crypt:
 
 lines-code:
 	git ls-files | xargs wc -l
+
+ssh:
+	@bash ./bin/ssh
 
 db-backup-cron:
 	@bash ./bin/db_dumb_cron

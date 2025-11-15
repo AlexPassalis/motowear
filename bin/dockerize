@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+STACK_NAME="stack-motowear"
+SERVICE_NAME="nextjs"
+
+CONTAINER_ID=$(docker ps -q -f "name=${STACK_NAME}_${SERVICE_NAME}")
+if [ -z "$CONTAINER_ID" ]; then
+    echo "\"$SERVICE_NAME\" service is not running."
+    make start
+fi
+
+if tty -s; then
+    USE_TTY="-it"
+else
+    USE_TTY="-T"
+fi
+
+docker exec $USE_TTY "$CONTAINER_ID" "$@"

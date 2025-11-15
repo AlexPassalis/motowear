@@ -17,6 +17,7 @@ RUN rm -rf /app/deps
 
 ENV WATCHPACK_POLLING=true
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=development
 
 CMD ["pnpm", "run", "dev"]
 

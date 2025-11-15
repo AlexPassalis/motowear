@@ -37,6 +37,8 @@ jobs:
           # echo "IMAGE_TYPESENSE=ghcr.io/$OWNER/image-motowear-typesense" >> $GITHUB_ENV
           echo "IMAGE_NEXTJS=ghcr.io/$OWNER/image-motowear-nextjs" >> $GITHUB_ENV
           echo "IMAGE_NGINX=ghcr.io/$OWNER/image-motowear-nginx" >> $GITHUB_ENV
+          echo "IMAGE_PROMETHEUS=ghcr.io/$OWNER/image-motowear-prometheus" >> $GITHUB_ENV
+          echo "IMAGE_GRAFANA=ghcr.io/$OWNER/image-motowear-grafana" >> $GITHUB_ENV
 
       # - name: image-postgres (build and tag)
       #   run: |
@@ -82,6 +84,28 @@ jobs:
           $IMAGE_NGINX:latest \
           $IMAGE_NGINX:${{ github.sha }}
 
+      - name: image-prometheus (build and tag)
+        run: |
+          docker build \
+          -t $IMAGE_PROMETHEUS:latest \
+          -f ./services/prometheus/Dockerfile \
+          ./services/prometheus
+
+          docker tag \
+          $IMAGE_PROMETHEUS:latest \
+          $IMAGE_PROMETHEUS:${{ github.sha }}
+
+      - name: image-grafana (build and tag)
+        run: |
+          docker build \
+          -t $IMAGE_GRAFANA:latest \
+          -f ./services/grafana/Dockerfile \
+          ./services/grafana
+
+          docker tag \
+          $IMAGE_GRAFANA:latest \
+          $IMAGE_GRAFANA:${{ github.sha }}
+
       - name: Log in to GHCR
         uses: docker/login-action@v2
         with:
@@ -102,6 +126,12 @@ jobs:
 
           docker push $IMAGE_NGINX:latest
           docker push $IMAGE_NGINX:${{ github.sha }}
+
+          docker push $IMAGE_PROMETHEUS:latest
+          docker push $IMAGE_PROMETHEUS:${{ github.sha }}
+
+          docker push $IMAGE_GRAFANA:latest
+          docker push $IMAGE_GRAFANA:${{ github.sha }}
 
   Deploy:
     needs: Build-and-Push

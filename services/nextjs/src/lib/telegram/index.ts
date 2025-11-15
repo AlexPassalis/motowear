@@ -36,6 +36,10 @@ export async function sendTelegramMessage(
   chat: keyof typeof chatIds,
   message: string,
 ) {
+  if (envServer.NODE_ENV !== 'production') {
+    return
+  }
+
   const telegram_bot = await establishTelegram()
   const chatId = chatIds[chat]
 

@@ -10,4 +10,3 @@ scrape_configs:
       - targets: ['nextjs:3000']
         labels:
           service: 'nextjs'
-          environment: 'development'
