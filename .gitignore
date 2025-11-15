@@ -1,4 +1,5 @@
 secrets/
+backups/
 
 ### Everywhere ###
 .DS_Store

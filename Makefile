@@ -1,4 +1,4 @@
-.PHONY: default start 64 git-crypt lines-code
+.PHONY: default start stop 64 git-crypt lines-code backup-db restore-db
 
 default: start
 
@@ -23,3 +23,9 @@ git-crypt:
 
 lines-code:
 	git ls-files | xargs wc -l
+
+db-backup-cron:
+	@bash ./bin/db_dumb_cron
+
+clone-prod-db:
+	@bash ./bin/clone_prod_db
