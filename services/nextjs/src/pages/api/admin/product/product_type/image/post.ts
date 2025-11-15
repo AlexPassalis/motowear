@@ -1,9 +1,4 @@
-import {
-  errorFormidable,
-  errorInvalidBody,
-  errorInvalidRequest,
-  errorMinio,
-} from '@/data/error'
+import { handleError } from '@/utils/error/handleError'
 import { isSessionPages } from '@/lib/better-auth/isSession'
 import { uploadFile } from '@/lib/minio'
 import formidable, { Fields, Files } from 'formidable'
@@ -48,7 +43,7 @@ export default async function handler(
       const imagesNewFiles = files?.imagesNewFiles
 
       if (!product_type) {
-        return res.status(400).json({ message: errorInvalidBody })
+        return res.status(400).json({ err: 'POST invalid body' })
       }
       const { data: validatedProductType } = z
         .string()
@@ -58,7 +53,7 @@ export default async function handler(
         !imagesNewFiles ||
         imagesNewFiles.length < 1
       ) {
-        return res.status(400).json({ message: errorInvalidBody })
+        return res.status(400).json({ err: 'POST invalid body' })
       }
 
       try {
@@ -69,16 +64,20 @@ export default async function handler(
           ),
         )
       } catch (err) {
-        console.error(errorMinio, err)
-        return res.status(500).json({ message: errorMinio })
+        const location = 'POST MINIO upload'
+        handleError(location, err)
+
+        return res.status(500).json({ err: location })
       }
 
       return res.status(200).json({})
     } catch (err) {
-      console.error(errorFormidable, err)
-      return res.status(500).json({ message: errorFormidable })
+      const location = 'POST formidable parse'
+      handleError(location, err)
+
+      return res.status(500).json({ err: location })
     }
   } else {
-    return res.status(400).json({ message: errorInvalidRequest })
+    return res.status(400).json({ err: 'invalid request method' })
   }
 }

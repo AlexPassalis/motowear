@@ -15,8 +15,8 @@ import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { z } from 'zod'
 import axios from 'axios'
 import { envClient } from '@/envClient'
-import { errorUnexpected } from '@/data/error'
 import { useListState } from '@mantine/hooks'
+import { ERROR } from '@/data/magic'
 
 type BrandsComponentProps = {
   brandsPostgres: typeBrands
@@ -147,7 +147,7 @@ export function BrandsComponent({
                                     } else {
                                       alert(
                                         `Error deleting ${brand}: ${
-                                          res.data?.message || errorUnexpected
+                                          res.data?.message || ERROR.unexpected
                                         }`,
                                       )
                                       console.error(res)
@@ -262,7 +262,7 @@ export function BrandsComponent({
               } else {
                 alert(
                   `Error creating brands: ${
-                    res.data?.message || errorUnexpected
+                    res.data?.message || ERROR.unexpected
                   }`,
                 )
                 console.error(res)

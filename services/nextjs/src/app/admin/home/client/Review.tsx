@@ -6,7 +6,7 @@ import { Dispatch, memo, SetStateAction } from 'react'
 import { DateInput } from '@mantine/dates'
 import axios from 'axios'
 import { envClient } from '@/envClient'
-import { errorUnexpected } from '@/data/error'
+import { ERROR } from '@/data/magic'
 
 export const Review = memo(reviewNotMemoised)
 
@@ -114,7 +114,7 @@ function reviewNotMemoised({
                 } else {
                   alert(
                     `Error deleting review ${reviewsState[index].review}: ${
-                      res.data?.message || errorUnexpected
+                      res.data?.message || ERROR.unexpected
                     }`,
                   )
                   console.error(res)

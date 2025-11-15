@@ -3,29 +3,27 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { postgres } from '@/lib/postgres/index'
 import { and, eq } from 'drizzle-orm'
-import { errorInvalidBody, errorPostgres } from '@/data/error'
 import { headers } from 'next/headers'
 import { review } from '@/lib/postgres/schema'
-import { formatMessage } from '@/utils/formatMessage'
-import { sendTelegramMessage } from '@/lib/telegram'
+import { handleError } from '@/utils/error/handleError'
 
 export async function DELETE(req: NextRequest) {
   await isSessionAPI(await headers())
 
-  const { error: err, data: validatedBody } = z
-    .object({ product_type: z.string(), id: z.string() })
-    .safeParse(await req.json())
+  const requestBodySchema = z.object({
+    product_type: z.string(),
+    id: z.string(),
+  })
+  const requestBody = await req.json()
 
-  if (err) {
-    const message = formatMessage(
-      '@/app/api/admin/product/product_type/review/delete/route.ts DELETE',
-      errorInvalidBody,
-      err,
-    )
-    console.error(message)
-    await sendTelegramMessage('ERROR', message)
+  const { error, data: validatedBody } =
+    requestBodySchema.safeParse(requestBody)
+  if (error) {
+    const err = JSON.stringify(error.issues)
+    const location = 'DELETE ZOD request body'
+    handleError(location, err)
 
-    return NextResponse.json({ message: errorInvalidBody }, { status: 400 })
+    return NextResponse.json({ err }, { status: 400 })
   }
 
   try {
@@ -38,15 +36,10 @@ export async function DELETE(req: NextRequest) {
         ),
       )
   } catch (err) {
-    const message = formatMessage(
-      '@/app/api/admin/product/product_type/review/delete/route.ts DELETE product_pages',
-      errorPostgres,
-      err,
-    )
-    console.error(message)
-    await sendTelegramMessage('ERROR', message)
+    const location = 'DELETE POSTGRES delete review'
+    handleError(location, err)
 
-    return NextResponse.json({ message: errorPostgres }, { status: 500 })
+    return NextResponse.json({ err: location }, { status: 500 })
   }
 
   return NextResponse.json({}, { status: 200 })

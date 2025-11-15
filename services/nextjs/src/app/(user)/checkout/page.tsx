@@ -2,10 +2,11 @@ export const dynamic = 'force-dynamic'
 
 import { CheckoutPageClient } from '@/app/(user)/checkout/client'
 import { ROUTE_ERROR } from '@/data/routes'
-import { getShippingCached, getVariantsCached } from '@/app/(user)/cache'
+import { getShippingCached } from '@/app/(user)/cache'
 import { redirect } from 'next/navigation'
 import { getOrderByOrderCode } from '@/utils/getPostgres'
-import { errorPostgres } from '@/data/error'
+import { ERROR } from '@/data/magic'
+import { handleError } from '@/utils/error/handleError'
 
 type CheckoutPageProps = {
   searchParams: Promise<{ abandon_cart?: string; s?: string }>
@@ -14,44 +15,61 @@ type CheckoutPageProps = {
 export default async function CheckoutPage({
   searchParams,
 }: CheckoutPageProps) {
+  const asyncFunctions = [getShippingCached]
   const resolved = await Promise.allSettled([
     searchParams,
-    getVariantsCached(),
-    getShippingCached(),
+    ...asyncFunctions.map((asyncFunction) => asyncFunction()),
   ])
-  if (resolved[1].status === 'rejected') {
-    redirect(`${ROUTE_ERROR}?message=${resolved[1].reason}`)
-  }
-  if (resolved[2].status === 'rejected') {
-    redirect(`${ROUTE_ERROR}?message=${resolved[2].reason}`)
-  }
+  resolved.forEach((result, index) => {
+    if (result.status === 'rejected') {
+      if (index === 0) {
+        const location = `${ERROR.unexpected} searchParams rejected`
+        const err = result.reason
+        handleError(location, err)
 
-  const resolvedSearchParams = (
+        redirect(`${ROUTE_ERROR}?message=${ERROR.unexpected}`)
+      } else {
+        const location = `${ERROR.postgres} ${asyncFunctions[index - 1].name}`
+        const err = result.reason
+        handleError(location, err)
+
+        redirect(`${ROUTE_ERROR}?message=${ERROR.postgres}`)
+      }
+    }
+  })
+
+  const resolved_search_params = (
     resolved[0] as PromiseFulfilledResult<{
       abandon_cart?: string
       s?: string
     }>
   ).value
+  const shipping = (
+    resolved[1] as PromiseFulfilledResult<
+      Awaited<ReturnType<typeof getShippingCached>>
+    >
+  ).value
 
-  const isAbandonCart = resolvedSearchParams?.abandon_cart === 'true'
+  const isAbandonCart = resolved_search_params?.abandon_cart === 'true'
 
   const orderCode =
-    typeof resolvedSearchParams.s === 'string'
-      ? resolvedSearchParams.s
+    typeof resolved_search_params.s === 'string'
+      ? resolved_search_params.s
       : undefined
   let orderDetails
   if (orderCode) {
-    const orderCode = resolvedSearchParams.s!
     try {
-      const order = await getOrderByOrderCode(orderCode)
+      const order = await getOrderByOrderCode(resolved_search_params.s!)
       orderDetails = {
         first_name: order.checkout.first_name,
         id: order.id,
         email: order.checkout.email,
       }
     } catch (err) {
-      console.error(err)
-      redirect(`${ROUTE_ERROR}?message=${errorPostgres}`)
+      const location = `${ERROR.postgres} getOrderByOrderCode`
+      handleError(location, err)
+
+      redirect(`${ROUTE_ERROR}?message=${ERROR.postgres}`)
     }
   }
 
@@ -59,7 +77,7 @@ export default async function CheckoutPage({
     <CheckoutPageClient
       isAbandonCart={isAbandonCart}
       orderDetails={orderDetails}
-      shipping={resolved[2].value}
+      shipping={shipping}
     />
   )
 }

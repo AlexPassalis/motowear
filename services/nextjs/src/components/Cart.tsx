@@ -22,13 +22,12 @@ import Link from 'next/link'
 import { ROUTE_CHECKOUT, ROUTE_ERROR, ROUTE_PRODUCT } from '@/data/routes'
 import { useDisclosure } from '@mantine/hooks'
 import axios from 'axios'
-import { errorAxios, errorInvalidResponse, errorUnexpected } from '@/data/error'
 import { z } from 'zod'
 import { useRouter } from 'next/navigation'
 import { zodCoupon } from '@/lib/postgres/data/zod'
 import { MdDiscount } from 'react-icons/md'
 import { facebookPixelInitiateCheckout } from '@/lib/facebook-pixel'
-import { couponCodeMPRELOK, specialProductType } from '@/data/magic'
+import { couponCodeMPRELOK, ERROR, specialProductType } from '@/data/magic'
 import { googleAnalyticsBeginCheckout } from '@/lib/google-analytics'
 
 type CartProps = {
@@ -354,9 +353,10 @@ export function Cart({
                       if (res.status !== 200) {
                         router.push(
                           `${ROUTE_ERROR}?message=${
-                            res?.data?.message || errorUnexpected
+                            res?.data?.message || ERROR.unexpected
                           }`,
                         )
+                        return
                       }
 
                       const { data: validatedResponse } = z
@@ -364,8 +364,9 @@ export function Cart({
                         .safeParse(res?.data)
                       if (!validatedResponse) {
                         router.push(
-                          `${ROUTE_ERROR}?message=${errorInvalidResponse}-coupon_code`,
+                          `${ROUTE_ERROR}?message=${ERROR.unexpected}`,
                         )
+                        return
                       }
                       if (couponCodeRef?.current?.value) {
                         couponCodeRef.current.value = ''
@@ -376,7 +377,8 @@ export function Cart({
                         setCoupon(null)
                       }
                     } catch {
-                      router.push(`${ROUTE_ERROR}?message=${errorAxios}`)
+                      router.push(`${ROUTE_ERROR}?message=${ERROR.axios}}`)
+                      return
                     } finally {
                       closeCouponLoadingOverlay()
                     }

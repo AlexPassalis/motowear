@@ -1,10 +1,10 @@
-import { formatMessage } from '@/utils/formatMessage'
+import { formatMessage } from '@/utils/error/formatMessage'
 import Redis from 'ioredis'
 import { sendTelegramMessage } from '@/lib/telegram/index'
 import { envServer } from '@/envServer'
 
 async function establishRedis() {
-  if (global.global_redis && global.global_redis.status === 'ready') {
+  if (global.global_redis) {
     return global.global_redis
   }
 
@@ -12,12 +12,12 @@ async function establishRedis() {
     host: envServer.REDIS_HOST,
     port: envServer.REDIS_PORT,
   })
-  process.once('SIGINT', () => {
-    global.global_redis!.quit()
+  process.once('SIGINT', async () => {
+    await global.global_redis!.quit()
     console.info('Redis connection closed.')
   })
-  process.once('SIGTERM', () => {
-    global.global_redis!.quit()
+  process.once('SIGTERM', async () => {
+    await global.global_redis!.quit()
     console.info('Redis connection closed.')
   })
   await redisPing()
