@@ -1,7 +1,6 @@
-import { formatMessage } from '@/utils/error/formatMessage'
 import Redis from 'ioredis'
-import { sendTelegramMessage } from '@/lib/telegram/index'
 import { envServer } from '@/envServer'
+import { formatMessage } from '@/utils/error/formatMessage'
 
 async function establishRedis() {
   if (global.global_redis) {
@@ -38,7 +37,6 @@ async function redisPing() {
       err,
     )
     console.error(message)
-    await sendTelegramMessage('ERROR', message)
 
     process.exit(1)
   }

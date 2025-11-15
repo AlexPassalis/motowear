@@ -9,8 +9,11 @@ import { formatMessage } from '@/utils/error/formatMessage'
 import { sendTelegramMessage } from '@/lib/telegram/index'
 
 async function establishPostgres() {
-  if (global.global_postgres) {
-    return global.global_postgres
+  if (global.global_postgres_pool && global.global_postgres) {
+    return {
+      postgres_pool: global.global_postgres_pool,
+      postgres: global.global_postgres,
+    }
   }
 
   global.global_postgres_pool = new Pool({
@@ -28,7 +31,10 @@ async function establishPostgres() {
   global.global_postgres = drizzle(global.global_postgres_pool, { schema })
   await postgresPing()
 
-  return global.global_postgres
+  return {
+    postgres_pool: global.global_postgres_pool,
+    postgres: global.global_postgres,
+  }
 }
 
 async function postgresPing() {
@@ -48,7 +54,13 @@ async function postgresPing() {
   }
 }
 
-export const postgres =
+const result =
   process.env.BUILD_TIME !== 'true'
     ? await establishPostgres()
-    : ({} as NodePgDatabase<typeof schema> & { $client: Pool })
+    : {
+        postgres: {} as NodePgDatabase<typeof schema> & { $client: Pool },
+        postgres_pool: {} as Pool,
+      }
+
+export const postgres = result.postgres
+export const postgres_pool = result.postgres_pool
