@@ -278,7 +278,13 @@ function Main({
           )!
           const displayedSizes = postgresVariants
             .filter((product) => product.name === displayedVariants[0])
-            .filter((product) => product.color === displayedColors[0])
+            .filter((product) => {
+              if (product.product_type === specialProductType) {
+                return true
+              }
+
+              return product.color === displayedColors[0]
+            })
             .map((product) => product.size)
             .filter(Boolean)
             .filter(
@@ -324,7 +330,13 @@ function Main({
         )!
         const displayedSizes = postgresVariants
           .filter((product) => product.name === selectedVariant)
-          .filter((product) => product.color === displayedColors[0])
+          .filter((product) => {
+            if (product.product_type === specialProductType) {
+              return true
+            }
+
+            return product.color === displayedColors[0]
+          })
           .map((product) => product.size)
           .filter(Boolean)
           .filter(
