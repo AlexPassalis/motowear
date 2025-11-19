@@ -15,25 +15,25 @@ start:
 stop:
 	docker stack rm stack-motowear
 
-postgres-generate:
+postgres_generate:
 	@echo "*** Creating database migrations."
 	@bin/dockerize pnpm run postgres:generate
 
-postgres-migrate:
+postgres_migrate:
 	@echo "*** Applying database migrations."
 	@bin/dockerize pnpm run postgres:migrate
 
 64:
 	openssl rand -base64 64
 
-git-crypt:
+git_crypt:
 	git-crypt status -e
 
-lines-code:
+lines_code:
 	git ls-files | xargs wc -l
 
 ssh:
 	@bash ./bin/ssh
 
-clone-prod-db:
+clone_prod_db:
 	@bash ./bin/clone_prod_db
