@@ -153,10 +153,10 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           host: ${{ secrets.VPS_IP }}
           passphrase: ${{ secrets.VPS_PASSPHRASE }}
-          source: './bin/db_dump_cron,./docker-stack.yaml'
+          source: './bin/db_dump_cron,./bin/db_dump_cron_init,./docker-stack.yaml'
           target: '/home/${{ secrets.VPS_USER }}/motowear/'
 
-      - name: Create pre-deployment backup
+      - name: Create pre-deployment backup and setup cron
         uses: appleboy/ssh-action@v1.2.1
         with:
           key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
@@ -164,10 +164,12 @@ jobs:
           host: ${{ secrets.VPS_IP }}
           passphrase: ${{ secrets.VPS_PASSPHRASE }}
           script: |
-            # Update and run backup script
+            # Step 1: Run backup script before deployment
             chmod +x /home/${{ secrets.VPS_USER }}/motowear/bin/db_dump_cron
-            cp /home/${{ secrets.VPS_USER }}/motowear/bin/db_dump_cron /home/${{ secrets.VPS_USER }}/backup_db.sh
-            /home/${{ secrets.VPS_USER }}/backup_db.sh
+            /home/${{ secrets.VPS_USER }}/motowear/bin/db_dump_cron
+            # Step 2: Setup cron job for hourly backups
+            chmod +x /home/${{ secrets.VPS_USER }}/motowear/bin/db_dump_cron_init
+            /home/${{ secrets.VPS_USER }}/motowear/bin/db_dump_cron_init
 
       - name: Docker stack deploy
         uses: appleboy/ssh-action@v1.2.1

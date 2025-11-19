@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BACKUP_DIR=~/backups
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BACKUP_DIR="$SCRIPT_DIR/../backups"
 SERVICE_NAME="stack-motowear_postgres"
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 
@@ -26,9 +27,13 @@ docker exec $CONTAINER_ID pg_dump -U $DB_USER -d $DB_NAME --clean --if-exists | 
 if [ $? -eq 0 ]; then
     echo "Backup created successfully: $BACKUP_DIR/motowear_${TIMESTAMP}.sql.gz"
 
-    # Keep only the latest 3 backups
+    # Create/update symlink to latest backup
+    ln -sf $BACKUP_DIR/motowear_${TIMESTAMP}.sql.gz $BACKUP_DIR/motowear_latest.sql.gz
+    echo "Updated symlink: motowear_latest.sql.gz -> motowear_${TIMESTAMP}.sql.gz"
+
+    # Keep only the latest 6 backups (excluding symlink)
     cd $BACKUP_DIR
-    ls -t motowear_*.sql.gz | tail -n +4 | xargs -r rm
+    ls -t motowear_*.sql.gz | grep -v 'motowear_latest.sql.gz' | tail -n +7 | xargs -r rm
 
     echo "Current backups:"
     ls -lh motowear_*.sql.gz

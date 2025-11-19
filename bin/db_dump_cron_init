@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_NAME="db_dump_cron"
+CRON_SCRIPT="$SCRIPT_DIR/$SCRIPT_NAME"
+
+# Create cron job if it doesn't already exist
+if ! crontab -l 2>/dev/null | grep -q "$CRON_SCRIPT"; then
+    (crontab -l 2>/dev/null; echo "0 * * * * $CRON_SCRIPT") | crontab -
+    echo "Cron job created: runs every hour at minute 0"
+    echo "Cron job will execute: $CRON_SCRIPT"
+else
+    echo "Cron job already exists for $SCRIPT_NAME"
+fi
+
+echo "Current crontab:"
+crontab -l
