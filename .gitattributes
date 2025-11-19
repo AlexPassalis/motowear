@@ -1,3 +1,4 @@
+SQL/** filter=git-crypt diff=git-crypt
 hashPassword.js filter=git-crypt diff=git-crypt
 SETUP.md filter=git-crypt diff=git-crypt
 SSH.md filter=git-crypt diff=git-crypt
