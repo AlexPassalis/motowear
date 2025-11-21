@@ -10,9 +10,10 @@ import { variant } from '@/lib/postgres/schema'
 import pLimit from 'p-limit'
 import { eq } from 'drizzle-orm'
 import { redis } from '@/lib/redis/index'
-import { getVariants } from '@/utils/getPostgres'
 import { v4 as id } from 'uuid'
 import { handleError } from '@/utils/error/handleError'
+import { revalidatePath } from 'next/cache'
+import { ERROR } from '@/data/magic'
 
 export { OPTIONS } from '@/utils/OPTIONS'
 
@@ -89,24 +90,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ err: location }, { status: 500 })
   }
 
-  let variants_postgres
   try {
-    variants_postgres = await getVariants()
+    await redis.del(`product_page_data_${validatedBody.variants[0].product_type}`)
   } catch (err) {
-    const location = 'POST GET getVariants'
+    const location = `${ERROR.redis} POST delete product_page_data cache`
     handleError(location, err)
-
-    return NextResponse.json({ err: location }, { status: 500 })
   }
 
-  try {
-    await redis.set('variants', JSON.stringify(variants_postgres), 'EX', 3600)
-  } catch (err) {
-    const location = 'POST REDIS set variants'
-    handleError(location, err)
-
-    return NextResponse.json({ err: location }, { status: 500 })
-  }
+  revalidatePath('/product', 'layout')
 
   return NextResponse.json({}, { status: 200 })
 }
@@ -156,24 +147,14 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ err: location }, { status: 500 })
   }
 
-  let variants_postgres
   try {
-    variants_postgres = await getVariants()
+    await redis.del(`product_page_data_${validatedBody.product_type}`)
   } catch (err) {
-    const location = 'DELETE GET getVariants'
+    const location = `${ERROR.redis} DELETE delete product_page_data cache`
     handleError(location, err)
-
-    return NextResponse.json({ err: location }, { status: 500 })
   }
 
-  try {
-    await redis.set('variants', JSON.stringify(variants_postgres), 'EX', 3600)
-  } catch (err) {
-    const location = 'DELETE REDIS set variants'
-    handleError(location, err)
-
-    return NextResponse.json({ err: location }, { status: 500 })
-  }
+  revalidatePath('/product', 'layout')
 
   return NextResponse.json({}, { status: 200 })
 }

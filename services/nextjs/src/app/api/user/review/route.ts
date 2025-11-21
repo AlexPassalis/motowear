@@ -8,9 +8,11 @@ import { eq } from 'drizzle-orm'
 import { sendTelegramMessage } from '@/lib/telegram'
 import pLimit from 'p-limit'
 import { v4 } from 'uuid'
-import { couponCodeReview } from '@/data/magic'
+import { couponCodeReview, ERROR } from '@/data/magic'
 import { handleError } from '@/utils/error/handleError'
 import { formatReviewMessage } from '@/utils/error/formatMessage'
+import { redis } from '@/lib/redis/index'
+import { revalidatePath } from 'next/cache'
 
 export { OPTIONS } from '@/utils/OPTIONS'
 
@@ -49,11 +51,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ err }, { status: 400 })
   }
 
+  const product_types: string[] = []
+
   try {
     const limit = pLimit(10)
     await Promise.all(
       Object.entries(validatedBody.values).map((array) =>
         limit(async () => {
+          product_types.push(array[0])
+
           await postgres.insert(review).values({
             id: v4(),
             product_type: array[0],
@@ -90,6 +96,17 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ err: location }, { status: 500 })
   }
+
+  for (const product_type of product_types) {
+    try {
+      await redis.del(`reviews_${product_type}`)
+    } catch (err) {
+      const location = `${ERROR.redis} POST delete reviews cache`
+      handleError(location, err)
+    }
+  }
+
+  revalidatePath('/product', 'layout')
 
   return NextResponse.json(
     {

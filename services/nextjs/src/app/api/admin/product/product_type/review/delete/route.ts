@@ -6,6 +6,9 @@ import { and, eq } from 'drizzle-orm'
 import { headers } from 'next/headers'
 import { review } from '@/lib/postgres/schema'
 import { handleError } from '@/utils/error/handleError'
+import { redis } from '@/lib/redis/index'
+import { revalidatePath } from 'next/cache'
+import { ERROR } from '@/data/magic'
 
 export async function DELETE(req: NextRequest) {
   await isSessionAPI(await headers())
@@ -41,6 +44,15 @@ export async function DELETE(req: NextRequest) {
 
     return NextResponse.json({ err: location }, { status: 500 })
   }
+
+  try {
+    await redis.del(`reviews_${validatedBody.product_type}`)
+  } catch (err) {
+    const location = `${ERROR.redis} DELETE delete reviews cache`
+    handleError(location, err)
+  }
+
+  revalidatePath('/product', 'layout')
 
   return NextResponse.json({}, { status: 200 })
 }
