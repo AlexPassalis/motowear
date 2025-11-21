@@ -29,16 +29,26 @@ const nextConfig: NextConfig = {
     ],
     minimumCacheTTL: 31536000, // Set TTL to 1 year for Cloudflare
   },
+  async headers() {
+    return [
+      {
+        source: '/product/:productType/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=3600, stale-while-revalidate=86400',
+          },
+          {
+            key: 'Cache-Tag',
+            value: ':productType',
+          },
+        ],
+      },
+    ]
+  },
   /* Remove next.js compression, so that nginx can do the compression using gzip 
   and therefore prevent buffering (and use streaming instead). */
   compress: false,
-  /* Redirect the old Shopify links from Google to the home page, until it re-crawls.*/
-  async redirects() {
-    return [
-      { source: '/products/:path*', destination: '/', permanent: true },
-      { source: '/collections/:path*', destination: '/', permanent: true },
-    ]
-  },
 }
 
 export default nextConfig

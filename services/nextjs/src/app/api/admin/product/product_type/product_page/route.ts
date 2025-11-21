@@ -9,6 +9,7 @@ import { product_pages } from '@/lib/postgres/schema'
 import { redis } from '@/lib/redis/index'
 import { getPages } from '@/utils/getPostgres'
 import { handleError } from '@/utils/error/handleError'
+import { revalidatePath } from 'next/cache'
 
 export { OPTIONS } from '@/utils/OPTIONS'
 
@@ -70,6 +71,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ err: location }, { status: 500 })
   }
+
+  revalidatePath('/product', 'layout')
 
   return NextResponse.json({}, { status: 200 })
 }
