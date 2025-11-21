@@ -140,16 +140,12 @@ export default async function ProductPage({
 
   const page = pages.find((page) => page.product_type === params_product_type)!
 
-  const postgres_reviews = reviews.filter(
-    (review) => review.product_type === params_product_type,
-  )
-
   return (
     <ProductPageClient
       product_types={product_types}
       upsellVariants={upsellVariants}
       page={page}
-      postgres_reviews={postgres_reviews}
+      postgres_reviews={reviews}
       shipping={shipping}
       paramsProduct_type={params_product_type}
       paramsVariant={paramsVariant}

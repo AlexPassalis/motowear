@@ -232,7 +232,7 @@ export async function getProductTypeReviewsCached(
     let reviews
 
     try {
-      reviews = await redis.get('reviews')
+      reviews = await redis.get(`reviews_${product_type}`)
     } catch (err) {
       const location = 'REDIS get reviews'
       handleError(location, err)
@@ -252,7 +252,7 @@ export async function getProductTypeReviewsCached(
     }
 
     void redis
-      .set('reviews', JSON.stringify(reviews), 'EX', 3600)
+      .set(`reviews_${product_type}`, JSON.stringify(reviews), 'EX', 3600)
       .catch((err) => {
         const location = 'REDIS set reviews'
         handleError(location, err)
