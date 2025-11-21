@@ -1,4 +1,5 @@
 import type { SQL } from 'drizzle-orm'
+import type { typeReview, typeVariant } from '@/lib/postgres/data/type'
 
 import { postgres } from '@/lib/postgres'
 import {
@@ -15,6 +16,7 @@ import {
   phone,
 } from '@/lib/postgres/schema'
 import { eq, and, sql, not, or, isNull, desc } from 'drizzle-orm'
+import { specialVariant } from '@/data/magic'
 
 export async function getProductTypes() {
   const array = await postgres
@@ -83,11 +85,15 @@ export type typeHomePageVariants = Awaited<
   ReturnType<typeof getHomePageVariants>
 >
 
-export async function getReviews() {
-  return await postgres.select().from(review).orderBy(desc(review.date))
+export async function getProductTypeReviews(
+  product_type: typeReview['product_type'],
+) {
+  return await postgres
+    .select()
+    .from(review)
+    .where(eq(review.product_type, product_type))
+    .orderBy(desc(review.date))
 }
-
-// ### ADMIN QUERIES FROM NOW ON ###
 
 export async function getBrands() {
   const array = await postgres
@@ -185,6 +191,63 @@ export async function getVariantsProductType(product_type: string) {
     .orderBy(variant.index)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   return array.map(({ index, ...rest }) => rest)
+}
+
+export async function getDataCollectionPage(
+  product_type: typeVariant['product_type'],
+) {
+  const product_type_variants = await getVariantsProductType(product_type)
+
+  const variants = product_type_variants
+    .filter(
+      (variant, index, self) =>
+        self.findIndex(
+          (v) => v.name === variant.name && v.color === variant.color,
+        ) === index,
+    )
+    .map((variant) => {
+      return {
+        name: variant.name,
+        color: variant.color,
+        brand: variant.brand,
+        image: variant.images[0],
+      }
+    })
+    .sort((a, b) => a.name.localeCompare(b.name))
+
+  const brands = variants
+    .map((variant) => variant.brand)
+    .filter(Boolean) // remove empty strings ('')
+    .filter(
+      (item, index, self) =>
+        index === self.findIndex((other) => other === item),
+    )
+
+  return { variants, brands }
+}
+
+export async function getVariantsProductPage(
+  product_type: typeVariant['product_type'],
+) {
+  const product_type_variants = await getVariantsProductType(product_type)
+  const sorted_variants = product_type_variants.sort(
+    ({ name: name_a }, { name: name_b }) => {
+      if (name_a === 'Επίλεξε μηχανή') {
+        return -1
+      }
+      if (name_b === 'Επίλεξε μηχανή') {
+        return 1
+      }
+      if (specialVariant.includes(name_a)) {
+        return 1
+      }
+      if (specialVariant.includes(name_b)) {
+        return -1
+      }
+      return name_a.localeCompare(name_b)
+    },
+  )
+  return sorted_variants
 }
 
 export async function getUniqueVariantNames() {

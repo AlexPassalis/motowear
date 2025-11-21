@@ -8,7 +8,7 @@ import { review } from '@/lib/postgres/schema'
 import pLimit from 'p-limit'
 import { redis } from '@/lib/redis/index'
 import { handleError } from '@/utils/error/handleError'
-import { getReviews } from '@/utils/getPostgres'
+import { getProductTypeReviews } from '@/utils/getPostgres'
 import { v4 as id } from 'uuid'
 
 export { OPTIONS } from '@/utils/OPTIONS'
@@ -71,9 +71,11 @@ export async function POST(req: NextRequest) {
 
   let reviews_postgres
   try {
-    reviews_postgres = await getReviews()
+    reviews_postgres = await getProductTypeReviews(
+      validatedBody.reviews[0].product_type,
+    )
   } catch (err) {
-    const location = 'POST GET getReviews'
+    const location = 'POST POSTGRES getProductTypeReviews'
     handleError(location, err)
 
     return NextResponse.json({ err: location }, { status: 500 })
