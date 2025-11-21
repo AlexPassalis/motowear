@@ -10,6 +10,9 @@
 - [**Typesense**](https://typesense.org/): Search engine.
 - [**Nginx**](https://nginx.org/): Reverse proxy and TLS termination.
 - [**Redis**](https://redis.io/): In-memory cache and queue.
+- [**Cloudflare**](https://www.cloudflare.com/): CDN and edge caching.
+- [**Prometheus**](https://prometheus.io/): Metrics collection and monitoring.
+- [**Grafana**](https://grafana.com/): Metrics visualization and dashboards.
 - [**pgweb**](https://sosedoff.github.io/pgweb/): Web UI for PostgreSQL.
 - [**Dozzle**](https://dozzle.dev/): Container logs viewer.
 
@@ -29,6 +32,8 @@
 
 ### Additional
 
+- [Drizzle ORM](https://orm.drizzle.team/): TypeScript ORM for PostgreSQL.
+- [Zod](https://zod.dev/): TypeScript-first schema validation.
 - [Better Auth](https://www.better-auth.com/): Admin authentication.
 - [React Email](https://react.email/) + [Nodemailer](https://nodemailer.com/) + [Amazon SES](https://aws.amazon.com/ses/): Email templates and delivery.
 - [cron](https://www.npmjs.com/package/cron): Time-scheduled operations.

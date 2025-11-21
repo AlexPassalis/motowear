@@ -247,7 +247,7 @@ export async function getProductPageData(
       return name_a.localeCompare(name_b)
     },
   )
-  
+
   return sorted_variants
 }
 
