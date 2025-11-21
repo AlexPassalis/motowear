@@ -18,11 +18,11 @@ import {
   getProductTypes,
   getProductTypeReviews,
   getShipping,
-  getVariants,
-  getVariantsProductPage,
-  getDataCollectionPage,
+  getProductPageData,
+  getCollectionPageData,
 } from '@/utils/getPostgres'
 import { handleError } from '@/utils/error/handleError'
+import { ERROR } from '@/data/magic'
 
 export async function getProductTypesCached(): Promise<typeProductTypes> {
   if (process.env.BUILD_TIME !== 'true') {
@@ -31,7 +31,7 @@ export async function getProductTypesCached(): Promise<typeProductTypes> {
     try {
       product_types = await redis.get('product_types')
     } catch (err) {
-      const location = 'REDIS get product_types'
+      const location = `${ERROR.redis} get product_types`
       handleError(location, err)
     }
 
@@ -41,7 +41,7 @@ export async function getProductTypesCached(): Promise<typeProductTypes> {
       try {
         product_types = await getProductTypes()
       } catch (err) {
-        const location = 'POSTGRES get product_types'
+        const location = `${ERROR.postgres} get product_types`
         handleError(location, err)
 
         throw err
@@ -51,7 +51,7 @@ export async function getProductTypesCached(): Promise<typeProductTypes> {
     void redis
       .set('product_types', JSON.stringify(product_types), 'EX', 3600)
       .catch((err) => {
-        const location = 'REDIS set product_types'
+        const location = `${ERROR.redis} set product_types`
         handleError(location, err)
       })
 
@@ -61,46 +61,9 @@ export async function getProductTypesCached(): Promise<typeProductTypes> {
   }
 }
 
-export async function getVariantsCached(): Promise<typeVariant[]> {
-  if (process.env.BUILD_TIME !== 'true') {
-    let variants
-
-    try {
-      variants = await redis.get('variants')
-    } catch (err) {
-      const location = 'REDIS get variants'
-      handleError(location, err)
-    }
-
-    if (variants) {
-      return JSON.parse(variants)
-    } else {
-      try {
-        variants = await getVariants()
-      } catch (err) {
-        const location = 'POSTGRES get variants'
-        handleError(location, err)
-
-        throw err
-      }
-    }
-
-    void redis
-      .set('variants', JSON.stringify(variants), 'EX', 3600)
-      .catch((err) => {
-        const location = 'REDIS set variants'
-        handleError(location, err)
-      })
-
-    return variants
-  } else {
-    return []
-  }
-}
-
-export async function getDataCollectionPageCached(
+export async function getCollectionPageDataCached(
   product_type: string,
-): Promise<Awaited<ReturnType<typeof getDataCollectionPage>>> {
+): Promise<Awaited<ReturnType<typeof getCollectionPageData>>> {
   if (process.env.BUILD_TIME !== 'true') {
     let data_collection_page
 
@@ -109,7 +72,7 @@ export async function getDataCollectionPageCached(
         `collection_page_data_${product_type}`,
       )
     } catch (err) {
-      const location = 'REDIS get data_collection_page'
+      const location = `${ERROR.redis} get data_collection_page`
       handleError(location, err)
     }
 
@@ -117,9 +80,9 @@ export async function getDataCollectionPageCached(
       return JSON.parse(data_collection_page)
     } else {
       try {
-        data_collection_page = await getDataCollectionPage(product_type)
+        data_collection_page = await getCollectionPageData(product_type)
       } catch (err) {
-        const location = 'POSTGRES get data_collection_page'
+        const location = `${ERROR.postgres} get data_collection_page`
         handleError(location, err)
 
         throw err
@@ -134,7 +97,7 @@ export async function getDataCollectionPageCached(
         3600,
       )
       .catch((err) => {
-        const location = 'REDIS set data_collection_page'
+        const location = `${ERROR.redis} set data_collection_page`
         handleError(location, err)
       })
 
@@ -144,28 +107,26 @@ export async function getDataCollectionPageCached(
   }
 }
 
-export async function getVariantsProductPageCached(
+export async function getProductPageDataCached(
   product_type: string,
 ): Promise<typeVariant[]> {
   if (process.env.BUILD_TIME !== 'true') {
-    let variants_product_type
+    let product_page_data
 
     try {
-      variants_product_type = await redis.get(
-        `product_page_variants_${product_type}`,
-      )
+      product_page_data = await redis.get(`product_page_data_${product_type}`)
     } catch (err) {
-      const location = 'REDIS get variants product page'
+      const location = `${ERROR.redis} get product_page_data`
       handleError(location, err)
     }
 
-    if (variants_product_type) {
-      return JSON.parse(variants_product_type)
+    if (product_page_data) {
+      return JSON.parse(product_page_data)
     } else {
       try {
-        variants_product_type = await getVariantsProductPage(product_type)
+        product_page_data = await getProductPageData(product_type)
       } catch (err) {
-        const location = 'POSTGRES get variants product page'
+        const location = `${ERROR.postgres} get product_page_data`
         handleError(location, err)
 
         throw err
@@ -174,17 +135,17 @@ export async function getVariantsProductPageCached(
 
     void redis
       .set(
-        `product_page_variants_${product_type}`,
-        JSON.stringify(variants_product_type),
+        `product_page_data_${product_type}`,
+        JSON.stringify(product_page_data),
         'EX',
         3600,
       )
       .catch((err) => {
-        const location = 'REDIS set variants product page'
+        const location = `${ERROR.redis} set product_page_data`
         handleError(location, err)
       })
 
-    return variants_product_type
+    return product_page_data
   } else {
     return []
   }
@@ -197,7 +158,7 @@ export async function getPagesCached(): Promise<typeProductPage[]> {
     try {
       pages = await redis.get('pages')
     } catch (err) {
-      const location = 'REDIS get pages'
+      const location = `${ERROR.redis} get pages`
       handleError(location, err)
     }
 
@@ -207,7 +168,7 @@ export async function getPagesCached(): Promise<typeProductPage[]> {
       try {
         pages = await getPages()
       } catch (err) {
-        const location = 'POSTGRES get pages'
+        const location = `${ERROR.postgres} get pages`
         handleError(location, err)
 
         throw err
@@ -215,7 +176,7 @@ export async function getPagesCached(): Promise<typeProductPage[]> {
     }
 
     void redis.set('pages', JSON.stringify(pages), 'EX', 3600).catch((err) => {
-      const location = 'REDIS set pages'
+      const location = `${ERROR.redis} set pages`
       handleError(location, err)
     })
 
@@ -234,7 +195,7 @@ export async function getProductTypeReviewsCached(
     try {
       reviews = await redis.get(`reviews_${product_type}`)
     } catch (err) {
-      const location = 'REDIS get reviews'
+      const location = `${ERROR.redis} get reviews`
       handleError(location, err)
     }
 
@@ -244,7 +205,7 @@ export async function getProductTypeReviewsCached(
       try {
         reviews = await getProductTypeReviews(product_type)
       } catch (err) {
-        const location = 'POSTGRES get reviews'
+        const location = `${ERROR.postgres} get reviews`
         handleError(location, err)
 
         throw err
@@ -254,7 +215,7 @@ export async function getProductTypeReviewsCached(
     void redis
       .set(`reviews_${product_type}`, JSON.stringify(reviews), 'EX', 3600)
       .catch((err) => {
-        const location = 'REDIS set reviews'
+        const location = `${ERROR.redis} set reviews`
         handleError(location, err)
       })
 
@@ -271,7 +232,7 @@ export async function getShippingCached(): Promise<typeShipping> {
     try {
       shipping = await redis.get('shipping')
     } catch (err) {
-      const location = 'REDIS get shipping'
+      const location = `${ERROR.redis} get shipping`
       handleError(location, err)
     }
 
@@ -281,7 +242,7 @@ export async function getShippingCached(): Promise<typeShipping> {
       try {
         shipping = await getShipping()
       } catch (err) {
-        const location = 'POSTGRES get shipping'
+        const location = `${ERROR.postgres} get shipping`
         handleError(location, err)
 
         throw err
@@ -291,7 +252,7 @@ export async function getShippingCached(): Promise<typeShipping> {
     void redis
       .set('shipping', JSON.stringify(shipping), 'EX', 3600)
       .catch((err) => {
-        const location = 'REDIS set shipping'
+        const location = `${ERROR.redis} set shipping`
         handleError(location, err)
       })
 
@@ -313,7 +274,7 @@ export async function getHomePageCached(): Promise<typeHomePage> {
     try {
       home_page = await redis.get('home_page')
     } catch (err) {
-      const location = 'REDIS get home_page'
+      const location = `${ERROR.redis} get home_page`
       handleError(location, err)
     }
 
@@ -323,7 +284,7 @@ export async function getHomePageCached(): Promise<typeHomePage> {
       try {
         home_page = await getHomePage()
       } catch (err) {
-        const location = 'POSTGRES get home_page'
+        const location = `${ERROR.postgres} get home_page`
         handleError(location, err)
 
         throw err
@@ -333,7 +294,7 @@ export async function getHomePageCached(): Promise<typeHomePage> {
     void redis
       .set('home_page', JSON.stringify(home_page), 'EX', 3600)
       .catch((err) => {
-        const location = 'REDIS set home_page'
+        const location = `${ERROR.redis} set home_page`
         handleError(location, err)
       })
 
@@ -357,7 +318,7 @@ export async function getHomePageVariantsCached(): Promise<typeHomePageVariants>
     try {
       home_page_variants = await redis.get('home_page_variants')
     } catch (err) {
-      const location = 'REDIS get home_page_variants'
+      const location = `${ERROR.redis} get home_page_variants`
       handleError(location, err)
     }
 
@@ -367,7 +328,7 @@ export async function getHomePageVariantsCached(): Promise<typeHomePageVariants>
       try {
         home_page_variants = await getHomePageVariants()
       } catch (err) {
-        const location = 'POSTGRES get home_page_variants'
+        const location = `${ERROR.postgres} get home_page_variants`
         handleError(location, err)
 
         throw err
@@ -377,7 +338,7 @@ export async function getHomePageVariantsCached(): Promise<typeHomePageVariants>
     void redis
       .set('home_page_variants', JSON.stringify(home_page_variants), 'EX', 3600)
       .catch((err) => {
-        const location = 'REDIS set home_page_variants'
+        const location = `${ERROR.redis} set home_page_variants`
         handleError(location, err)
       })
 

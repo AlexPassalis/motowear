@@ -3,13 +3,16 @@ import {
   getShippingCached,
   getPagesCached,
   getProductTypesCached,
-  getVariantsProductPageCached,
+  getProductPageDataCached,
   getProductTypeReviewsCached,
 } from '@/app/(user)/cache'
 import { notFound, redirect } from 'next/navigation'
 import { ROUTE_ERROR } from '@/data/routes'
 import { ERROR } from '@/data/magic'
 import { handleError } from '@/utils/error/handleError'
+
+export const revalidate = 3600
+export const dynamicParams = true
 
 type typeParams = { params?: [type?: string, version?: string] }
 type typeSearchParams = { color?: string }
@@ -82,7 +85,7 @@ export default async function ProductPage({
   ).value
 
   const resolved_2 = await Promise.allSettled([
-    getVariantsProductPageCached(params_product_type),
+    getProductPageDataCached(params_product_type),
     getProductTypeReviewsCached(params_product_type),
   ])
   resolved_2.forEach((result, index) => {
@@ -99,7 +102,7 @@ export default async function ProductPage({
 
   const variants = (
     resolved_2[0] as PromiseFulfilledResult<
-      Awaited<ReturnType<typeof getVariantsProductPageCached>>
+      Awaited<ReturnType<typeof getProductPageDataCached>>
     >
   ).value
 
@@ -109,7 +112,7 @@ export default async function ProductPage({
     >
   ).value
 
-  const paramsVariant = variant
+  const params_variant = variant
     ? variants.find((v) =>
         search_params_color
           ? v.name === variant && v.color === search_params_color
@@ -148,7 +151,7 @@ export default async function ProductPage({
       postgres_reviews={reviews}
       shipping={shipping}
       paramsProduct_type={params_product_type}
-      paramsVariant={paramsVariant}
+      paramsVariant={params_variant}
       postgresVariants={variants}
     />
   )

@@ -10,6 +10,8 @@ import { redis } from '@/lib/redis/index'
 import { handleError } from '@/utils/error/handleError'
 import { getProductTypeReviews } from '@/utils/getPostgres'
 import { v4 as id } from 'uuid'
+import { revalidatePath } from 'next/cache'
+import { ERROR } from '@/data/magic'
 
 export { OPTIONS } from '@/utils/OPTIONS'
 
@@ -82,13 +84,20 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    await redis.set('reviews', JSON.stringify(reviews_postgres), 'EX', 3600)
+    await redis.set(
+      `reviews_${validatedBody.reviews[0].product_type}`,
+      JSON.stringify(reviews_postgres),
+      'EX',
+      3600,
+    )
   } catch (err) {
-    const location = 'POST REDIS set reviews'
+    const location = `${ERROR.redis} POST set reviews`
     handleError(location, err)
 
     return NextResponse.json({ err: location }, { status: 500 })
   }
+
+  revalidatePath('/product', 'layout')
 
   return NextResponse.json({}, { status: 200 })
 }
