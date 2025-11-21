@@ -2,7 +2,7 @@ import { notFound, redirect } from 'next/navigation'
 import {
   getProductTypesCached,
   getShippingCached,
-  getDataCollectionPageCached,
+  getCollectionPageDataCached,
 } from '@/app/(user)/cache'
 import { ROUTE_ERROR } from '@/data/routes'
 
@@ -57,10 +57,10 @@ export default async function CollectionPage({ params }: ProductPageProps) {
     >
   ).value
 
-  const resolved_2 = await getDataCollectionPageCached(
+  const resolved_2 = await getCollectionPageDataCached(
     params_product_type,
   ).catch((err) => {
-    const location = `${ERROR.postgres} getDataCollectionPageCached`
+    const location = `${ERROR.postgres} getCollectionPageDataCached`
     handleError(location, err)
 
     redirect(`${ROUTE_ERROR}?message=${ERROR.postgres}`)

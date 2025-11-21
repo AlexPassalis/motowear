@@ -193,7 +193,7 @@ export async function getVariantsProductType(product_type: string) {
   return array.map(({ index, ...rest }) => rest)
 }
 
-export async function getDataCollectionPage(
+export async function getCollectionPageData(
   product_type: typeVariant['product_type'],
 ) {
   const product_type_variants = await getVariantsProductType(product_type)
@@ -226,7 +226,7 @@ export async function getDataCollectionPage(
   return { variants, brands }
 }
 
-export async function getVariantsProductPage(
+export async function getProductPageData(
   product_type: typeVariant['product_type'],
 ) {
   const product_type_variants = await getVariantsProductType(product_type)
@@ -247,6 +247,7 @@ export async function getVariantsProductPage(
       return name_a.localeCompare(name_b)
     },
   )
+  
   return sorted_variants
 }
 

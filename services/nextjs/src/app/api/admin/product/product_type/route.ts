@@ -160,7 +160,6 @@ export async function DELETE(req: NextRequest) {
 
   try {
     await redis.set('product_types', JSON.stringify(product_types), 'EX', 3600)
-    await redis.set('variants', JSON.stringify(variants), 'EX', 3600)
     await redis.set('pages', JSON.stringify(pages), 'EX', 3600)
     await redis.set(
       'home_page_variants',

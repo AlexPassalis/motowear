@@ -1,11 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import { PrivacyPolicyPageClient } from '@/app/(user)/privacy_policy/client'
-import {
-  getProductTypesCached,
-  getShippingCached,
-  getVariantsCached,
-} from '../cache'
+import { getProductTypesCached, getShippingCached } from '../cache'
 import { redirect } from 'next/navigation'
 import { ROUTE_ERROR } from '@/data/routes'
 import type { Metadata } from 'next'
@@ -25,11 +21,7 @@ export const metadata: Metadata = {
 }
 
 export default async function PrivacyPolicyPage() {
-  const asyncFunctions = [
-    getProductTypesCached,
-    getVariantsCached,
-    getShippingCached,
-  ]
+  const asyncFunctions = [getProductTypesCached, getShippingCached]
   const resolved = await Promise.allSettled(
     asyncFunctions.map((asyncFunction) => asyncFunction()),
   )
@@ -49,7 +41,7 @@ export default async function PrivacyPolicyPage() {
     >
   ).value
   const shipping = (
-    resolved[2] as PromiseFulfilledResult<
+    resolved[1] as PromiseFulfilledResult<
       Awaited<ReturnType<typeof getShippingCached>>
     >
   ).value
