@@ -11,9 +11,6 @@ import { ROUTE_ERROR } from '@/data/routes'
 import { ERROR } from '@/data/magic'
 import { handleError } from '@/utils/error/handleError'
 
-export const revalidate = 3600
-export const dynamicParams = true
-
 type typeParams = { params?: [type?: string, version?: string] }
 type typeSearchParams = { color?: string }
 type ProductPageProps = {
