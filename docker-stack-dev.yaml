@@ -61,6 +61,12 @@ secrets:
 
 services:
   dozzle:
+    deploy:
+      restart_policy:
+        condition: any
+      update_config:
+        order: start-first
+        failure_action: rollback
     image: amir20/dozzle:pr-3710
     networks:
       - network-motowear
@@ -70,8 +76,21 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     ports:
       - '8080:8080'
+    healthcheck:
+      start_period: 30s
+      start_interval: 5s
+      test: ['CMD', '/dozzle', 'healthcheck']
+      interval: 10s
+      timeout: 5s
+      retries: 2
 
   postgres:
+    deploy:
+      restart_policy:
+        condition: any
+      update_config:
+        order: start-first
+        failure_action: rollback
     image: image-motowear-postgres
     networks:
       - network-motowear
@@ -89,8 +108,25 @@ services:
       - postgres:/var/lib/postgresql/data
     ports:
       - '5432:5432' ### ONLY IN DEV FOR pgAdmin 4 ###
+    healthcheck:
+      start_period: 30s
+      start_interval: 5s
+      test:
+        [
+          'CMD-SHELL',
+          'pg_isready -d $$(cat /run/secrets/POSTGRES_DB) -U $$(cat /run/secrets/POSTGRES_USER)',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 2
 
   pgweb:
+    deploy:
+      restart_policy:
+        condition: any
+      update_config:
+        order: start-first
+        failure_action: rollback
     image: sosedoff/pgweb:0.16.2
     networks:
       - network-motowear
@@ -102,8 +138,21 @@ services:
       - 'pgweb --url "$$(cat /run/secrets/POSTGRES_URL)?sslmode=disable" --bind 0.0.0.0 --listen 8081'
     ports:
       - '8081:8081'
+    healthcheck:
+      start_period: 30s
+      start_interval: 5s
+      test: ['CMD', 'nc', '-vz', '127.0.0.1', '8081']
+      interval: 10s
+      timeout: 5s
+      retries: 2
 
   redis:
+    deploy:
+      restart_policy:
+        condition: any
+      update_config:
+        order: start-first
+        failure_action: rollback
     image: redis:7-alpine
     networks:
       - network-motowear
@@ -111,9 +160,26 @@ services:
       - redis:/data
     ports:
       - '6379:6379' ### ONLY IN DEV FOR Redis for VS CODE ###
+    healthcheck:
+      start_period: 30s
+      start_interval: 5s
+      test:
+        [
+          'CMD-SHELL',
+          'redis-cli -h localhost -p 6379 ping | grep PONG || exit 1',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   minio:
-    image: minio/minio:RELEASE.2025-03-12T18-04-18Z-cpuv1
+    deploy:
+      restart_policy:
+        condition: any
+      update_config:
+        order: start-first
+        failure_action: rollback
+    image: minio/minio:RELEASE.2025-09-07T16-13-09Z-cpuv1
     networks:
       - network-motowear
     secrets:
@@ -128,16 +194,46 @@ services:
       - '9001:9001'
     volumes:
       - minio:/data
+    healthcheck:
+      start_period: 60s
+      start_interval: 5s
+      test: ['CMD', 'mc', 'ready', 'local']
+      interval: 10s
+      timeout: 5s
+      retries: 2
 
   typesense:
+    deploy:
+      restart_policy:
+        condition: any
+      update_config:
+        order: start-first
+        failure_action: rollback
     image: image-motowear-typesense
     networks:
       - network-motowear
     command: '--data-dir /data --api-key=typesense_admin_api_key --enable-cors'
     volumes:
       - typesense:/data
+    healthcheck:
+      start_period: 30s
+      start_interval: 5s
+      test:
+        [
+          'CMD-SHELL',
+          'curl -f http://localhost:8108/health | grep ok || exit 1',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 2
 
   nextjs:
+    deploy:
+      restart_policy:
+        condition: any
+      update_config:
+        order: start-first
+        failure_action: rollback
     image: image-motowear-nextjs
     networks:
       - network-motowear
@@ -170,8 +266,25 @@ services:
       PORT: 3000
       NO_PROXY: 'api.telegram.org,.telegram.org'
       no_proxy: 'api.telegram.org,.telegram.org'
+    healthcheck:
+      start_period: 60s
+      start_interval: 5s
+      test:
+        [
+          'CMD-SHELL',
+          'curl -f http://localhost:3000/api/nextjs | grep ok || exit 1',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 2
 
   prometheus:
+    deploy:
+      restart_policy:
+        condition: any
+      update_config:
+        order: start-first
+        failure_action: rollback
     image: image-motowear-prometheus
     networks:
       - network-motowear
@@ -179,8 +292,25 @@ services:
       - prometheus:/prometheus
     ports:
       - '9090:9090'
+    healthcheck:
+      start_period: 30s
+      start_interval: 5s
+      test:
+        [
+          'CMD-SHELL',
+          'wget --no-verbose --tries=1 --spider http://localhost:9090/-/healthy || exit 1',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 2
 
   grafana:
+    deploy:
+      restart_policy:
+        condition: any
+      update_config:
+        order: start-first
+        failure_action: rollback
     image: image-motowear-grafana
     networks:
       - network-motowear
@@ -197,8 +327,25 @@ services:
       - GRAFANA_ADMIN_PASSWORD
     ports:
       - '3001:3000'
+    healthcheck:
+      start_period: 60s
+      start_interval: 5s
+      test:
+        [
+          'CMD-SHELL',
+          'wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 2
 
   nginx:
+    deploy:
+      restart_policy:
+        condition: any
+      update_config:
+        order: stop-first
+        failure_action: rollback
     image: image-motowear-nginx
     networks:
       - network-motowear
@@ -210,3 +357,11 @@ services:
         published: 443
         protocol: tcp
         mode: host
+    healthcheck:
+      start_period: 60s
+      start_interval: 5s
+      test:
+        ['CMD-SHELL', 'curl -kf https://localhost/nginx | grep ok || exit 1']
+      interval: 10s
+      timeout: 5s
+      retries: 2
