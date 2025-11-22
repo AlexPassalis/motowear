@@ -157,6 +157,8 @@ services:
     volumes:
       - redis:/data
     healthcheck:
+      start_period: 30s
+      start_interval: 5s
       test:
         [
           'CMD-SHELL',
@@ -165,7 +167,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
-      start_period: 5s
 
   minio:
     deploy:
@@ -260,7 +261,7 @@ services:
       HOSTNAME: 0.0.0.0
       PORT: 3000
     healthcheck:
-      start_period: 30s
+      start_period: 60s
       start_interval: 5s
       test:
         [
@@ -315,7 +316,7 @@ services:
       - GRAFANA_ADMIN_USER
       - GRAFANA_ADMIN_PASSWORD
     healthcheck:
-      start_period: 30s
+      start_period: 60s
       start_interval: 5s
       test:
         [
