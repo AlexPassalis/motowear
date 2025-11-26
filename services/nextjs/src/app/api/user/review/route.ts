@@ -12,7 +12,6 @@ import { couponCodeReview, ERROR } from '@/data/magic'
 import { handleError } from '@/utils/error/handleError'
 import { formatReviewMessage } from '@/utils/error/formatMessage'
 import { redis } from '@/lib/redis/index'
-import { revalidatePath } from 'next/cache'
 
 export { OPTIONS } from '@/utils/OPTIONS'
 
@@ -105,8 +104,6 @@ export async function POST(req: NextRequest) {
       handleError(location, err)
     }
   }
-
-  revalidatePath('/product', 'layout')
 
   return NextResponse.json(
     {

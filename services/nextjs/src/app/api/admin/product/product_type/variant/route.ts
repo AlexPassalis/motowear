@@ -12,7 +12,6 @@ import { eq } from 'drizzle-orm'
 import { redis } from '@/lib/redis/index'
 import { v4 as id } from 'uuid'
 import { handleError } from '@/utils/error/handleError'
-import { revalidatePath } from 'next/cache'
 import { ERROR } from '@/data/magic'
 
 export { OPTIONS } from '@/utils/OPTIONS'
@@ -92,12 +91,14 @@ export async function POST(req: NextRequest) {
 
   try {
     await redis.del(`product_page_data_${validatedBody.variants[0].product_type}`)
+    await redis.del(
+      `collection_page_data_${validatedBody.variants[0].product_type}`,
+    )
+    await redis.del('home_page_variants')
   } catch (err) {
     const location = `${ERROR.redis} POST delete product_page_data cache`
     handleError(location, err)
   }
-
-  revalidatePath('/product', 'layout')
 
   return NextResponse.json({}, { status: 200 })
 }
@@ -149,12 +150,12 @@ export async function DELETE(req: NextRequest) {
 
   try {
     await redis.del(`product_page_data_${validatedBody.product_type}`)
+    await redis.del(`collection_page_data_${validatedBody.product_type}`)
+    await redis.del('home_page_variants')
   } catch (err) {
     const location = `${ERROR.redis} DELETE delete product_page_data cache`
     handleError(location, err)
   }
-
-  revalidatePath('/product', 'layout')
 
   return NextResponse.json({}, { status: 200 })
 }

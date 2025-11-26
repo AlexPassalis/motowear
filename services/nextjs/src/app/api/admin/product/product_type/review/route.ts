@@ -10,7 +10,6 @@ import { redis } from '@/lib/redis/index'
 import { handleError } from '@/utils/error/handleError'
 import { getProductTypeReviews } from '@/utils/getPostgres'
 import { v4 as id } from 'uuid'
-import { revalidatePath } from 'next/cache'
 import { ERROR } from '@/data/magic'
 
 export { OPTIONS } from '@/utils/OPTIONS'
@@ -96,8 +95,6 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ err: location }, { status: 500 })
   }
-
-  revalidatePath('/product', 'layout')
 
   return NextResponse.json({}, { status: 200 })
 }

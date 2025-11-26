@@ -2,7 +2,7 @@ import { formatMessage } from '@/utils/error/formatMessage'
 import { sendTelegramMessage } from '@/lib/telegram'
 
 export function handleError(location: string, err: unknown | string) {
-  const message = formatMessage(__filename, location, err)
+  const message = formatMessage(location, err)
   console.error(message)
   ;(async () => {
     await sendTelegramMessage('ERROR', message)
