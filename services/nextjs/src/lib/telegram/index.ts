@@ -48,7 +48,7 @@ async function telegramPing() {
     await global.global_telegram_bot!.telegram.getMe()
     console.info('Telegram connected successfully.')
   } catch (err) {
-    const message = formatMessage(__filename, 'telegramPing()', err)
+    const message = formatMessage('telegramPing()', err)
     console.error(message)
 
     process.exit(1)
@@ -81,7 +81,7 @@ export async function sendTelegramMessage(
       }
     } catch (err) {
       const location = `${ERROR_REDIS_KEY} sendTelegramMessage()`
-      const errorMessage = formatMessage(__filename, location, err)
+      const errorMessage = formatMessage(location, err)
       console.error(errorMessage)
     }
   }
@@ -99,7 +99,7 @@ export async function sendTelegramMessage(
       return
     } catch (err) {
       if (attempt === max_attempts) {
-        const message = formatMessage(__filename, 'sendTelegramMessage()', err)
+        const message = formatMessage('sendTelegramMessage()', err)
         console.error(message)
       } else {
         await new Promise((resolve) => setTimeout(resolve, 3000 * attempt))
