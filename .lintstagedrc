@@ -1,3 +1,6 @@
 {
-  "services/nextjs/src/**/*": ["pnpm -F ./services/nextjs run lint --file"]
+  "services/nextjs/src/**/*": [
+    "pnpm -F ./services/nextjs run lint --file",
+    "bash -c 'pnpm -F ./services/nextjs run typecheck'"
+  ]
 }

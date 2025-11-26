@@ -42,11 +42,7 @@ async function postgresPing() {
     await global.global_postgres!.execute(sql`SELECT 1`)
     console.info('Postgres connected successfully.')
   } catch (err) {
-    const message = formatMessage(
-      '@/lib/postgres/index.ts postgresPing()',
-      'Postgres connection failed.',
-      err,
-    )
+    const message = formatMessage('Postgres connection failed.', err)
     console.error(message)
     await sendTelegramMessage('ERROR', message)
 
