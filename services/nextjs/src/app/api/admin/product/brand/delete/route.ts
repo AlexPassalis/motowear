@@ -7,6 +7,8 @@ import { headers } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { handleError } from '@/utils/error/handleError'
+import { redis } from '@/lib/redis/index'
+import { ERROR } from '@/data/magic'
 
 export async function DELETE(req: NextRequest) {
   await isSessionAPI(await headers())
@@ -45,7 +47,15 @@ export async function DELETE(req: NextRequest) {
   }
 
   try {
+    await redis.del('home_page_variants')
+  } catch (err) {
+    const location = `${ERROR.redis} DELETE delete home_page_variants`
+    handleError(location, err)
+  }
+
+  try {
     await deleteFile('brand', validatedBody.brand)
+
     return NextResponse.json({}, { status: 200 })
   } catch (err) {
     const location = 'DELETE MINIO deleteFile brand'

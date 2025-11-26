@@ -36,7 +36,7 @@ export async function updateTypesense(product_type: string) {
       typesense
         .collections(collectionName)
         .documents()
-        .delete({ filter_by: `product_type:=${product_type}` }),
+        .delete({ filter_by: `product_type:=\`${product_type}\`` }),
     ),
   ])
 
@@ -83,7 +83,7 @@ export async function deleteTypesense(product_type: string) {
       typesense
         .collections(collectionName)
         .documents()
-        .delete({ filter_by: `product_type:=${product_type}` }),
+        .delete({ filter_by: `product_type:=\`${product_type}\`` }),
     ),
   ])
 }

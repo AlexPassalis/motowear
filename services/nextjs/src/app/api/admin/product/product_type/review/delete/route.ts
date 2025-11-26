@@ -7,7 +7,6 @@ import { headers } from 'next/headers'
 import { review } from '@/lib/postgres/schema'
 import { handleError } from '@/utils/error/handleError'
 import { redis } from '@/lib/redis/index'
-import { revalidatePath } from 'next/cache'
 import { ERROR } from '@/data/magic'
 
 export async function DELETE(req: NextRequest) {
@@ -51,8 +50,6 @@ export async function DELETE(req: NextRequest) {
     const location = `${ERROR.redis} DELETE delete reviews cache`
     handleError(location, err)
   }
-
-  revalidatePath('/product', 'layout')
 
   return NextResponse.json({}, { status: 200 })
 }

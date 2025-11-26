@@ -10,11 +10,7 @@ function escHtml(str: string) {
   )
 }
 
-export function formatMessage(
-  file: string,
-  location: string,
-  err: unknown | string,
-) {
+export function formatMessage(location: string, err: unknown | string) {
   let error: string
   if (typeof err === 'string') {
     error = err
@@ -23,7 +19,6 @@ export function formatMessage(
   }
 
   return [
-    `<b>File:</b> ${escHtml(file)}`,
     `<b>Location:</b> ${escHtml(location)}`,
     `<pre>${escHtml(error)}</pre>`,
   ].join('\n')
