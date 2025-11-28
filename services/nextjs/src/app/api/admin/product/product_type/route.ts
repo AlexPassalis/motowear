@@ -13,7 +13,6 @@ import {
   getHomePageVariants,
   getPages,
   getProductTypes,
-  getVariants,
 } from '@/utils/getPostgres'
 
 export { OPTIONS } from '@/utils/OPTIONS'
@@ -143,12 +142,10 @@ export async function DELETE(req: NextRequest) {
   }
 
   let product_types
-  let variants
   let pages
   let home_page_variants
   try {
     product_types = await getProductTypes()
-    variants = await getVariants()
     pages = await getPages()
     home_page_variants = await getHomePageVariants()
   } catch (err) {

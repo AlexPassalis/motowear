@@ -2,6 +2,7 @@ import { envServer } from '@/envServer'
 import { Telegraf } from 'telegraf'
 import { formatMessage } from '@/utils/error/formatMessage'
 import { redis } from '@/lib/redis/index'
+import { ERROR } from '@/data/magic'
 
 const chatIds = {
   ERROR: envServer.TELEGRAM_ERROR_CHAT_ID,
@@ -46,9 +47,9 @@ async function establishTelegram() {
 async function telegramPing() {
   try {
     await global.global_telegram_bot!.telegram.getMe()
-    console.info('Telegram connected successfully.')
+    console.info(`${ERROR.telegram} connected successfully`)
   } catch (err) {
-    const message = formatMessage('telegramPing()', err)
+    const message = formatMessage(`${ERROR.telegram} telegramPing()`, err)
     console.error(message)
 
     process.exit(1)
@@ -80,8 +81,9 @@ export async function sendTelegramMessage(
         return
       }
     } catch (err) {
-      const location = `${ERROR_REDIS_KEY} sendTelegramMessage()`
+      const location = `${ERROR.telegram} sendTelegramMessage()`
       const errorMessage = formatMessage(location, err)
+
       console.error(errorMessage)
     }
   }
@@ -99,7 +101,10 @@ export async function sendTelegramMessage(
       return
     } catch (err) {
       if (attempt === max_attempts) {
-        const message = formatMessage('sendTelegramMessage()', err)
+        const message = formatMessage(
+          `${ERROR.telegram} sendTelegramMessage()`,
+          err,
+        )
         console.error(message)
       } else {
         await new Promise((resolve) => setTimeout(resolve, 3000 * attempt))
@@ -111,5 +116,3 @@ export async function sendTelegramMessage(
 if (process.env.BUILD_TIME !== 'true') {
   await establishTelegram()
 }
-
-export {} // Initialize at startup

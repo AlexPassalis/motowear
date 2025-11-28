@@ -159,7 +159,7 @@ async function establishCron() {
         'Europe/Athens',
       )
 
-      console.info('Cron sendAbandonCartEmail connected successfully.')
+      console.info('Cron sendAbandonCartEmail connected successfully')
     } catch (err) {
       const location = 'CRON establish sendAbandonCartEmail'
       handleError(location, err)
@@ -178,7 +178,7 @@ async function establishCron() {
         'Europe/Athens',
       )
 
-      console.info('Cron sendOrderLateEmail connected successfully.')
+      console.info('Cron sendOrderLateEmail connected successfully')
     } catch (err) {
       const location = 'CRON establish sendOrderLateEmail'
       handleError(location, err)
@@ -197,7 +197,7 @@ async function establishCron() {
         'Europe/Athens',
       )
 
-      console.info('Cron sendOrderReviewEmail connected successfully.')
+      console.info('Cron sendOrderReviewEmail connected successfully')
     } catch (err) {
       const location = 'CRON establish sendOrderReviewEmail'
       handleError(location, err)
@@ -209,4 +209,5 @@ async function establishCron() {
 
 if (process.env.BUILD_TIME !== 'true') {
   await establishCron()
+  console.info('Cron jobs established')
 }

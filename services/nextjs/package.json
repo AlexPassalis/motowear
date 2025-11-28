@@ -4,12 +4,12 @@
   "scripts": {
     "dev": "next dev",
     "react-email": "cross-env BUILD_TIME=true email dev --dir ./src/lib/react-email",
-    "postgres:generate": "drizzle-kit generate",
-    "postgres:migrate": "drizzle-kit push",
     "lint": "next lint",
     "typecheck": "tsc -p tsconfig.json --noEmit --incremental false",
     "build": "cross-env NODE_ENV=production BUILD_TIME=true next build",
-    "start": "next start"
+    "start": "next start",
+    "postgres:generate": "drizzle-kit generate",
+    "postgres:migrate": "drizzle-kit push"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",

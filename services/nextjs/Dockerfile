@@ -3,20 +3,21 @@ FROM node:20-alpine3.20 AS base
 RUN apk add --no-cache curl
 
 FROM base AS deps
-WORKDIR /app/deps
+WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
+
+ENV NEXT_TELEMETRY_DISABLED=1
+
 RUN corepack enable && corepack prepare pnpm@10.15.0 --activate && pnpm i --frozen-lockfile
 
 
 
 FROM deps AS dev
 WORKDIR /app
-COPY . . 
-COPY --from=deps /app/deps/node_modules ./node_modules
-RUN rm -rf /app/deps
+COPY . .
+COPY --from=deps /app/node_modules ./node_modules
 
 ENV WATCHPACK_POLLING=true
-ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=development
 
 CMD ["pnpm", "run", "dev"]
@@ -24,20 +25,9 @@ CMD ["pnpm", "run", "dev"]
 
 
 FROM deps AS build
-WORKDIR /app/migrate
-COPY --from=deps /app/deps/package.json ./
-COPY --from=deps /app/deps/pnpm-lock.yaml ./
-COPY --from=deps /app/deps/node_modules ./node_modules
-COPY ./drizzle.config.ts ./
-COPY ./src/utils/readSecret.ts ./src/utils/
-COPY ./src/lib/postgres/ ./src/lib/postgres/
-
-WORKDIR /app/build
+WORKDIR /app
 COPY . .
-COPY --from=deps /app/deps/node_modules ./node_modules
-RUN rm -rf /app/deps
-
-ENV NEXT_TELEMETRY_DISABLED=1
+COPY --from=deps /app/node_modules ./node_modules
 
 RUN pnpm run build
 
@@ -49,14 +39,12 @@ WORKDIR /app
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-COPY --from=build --chown=nextjs:nodejs /app/migrate ./migrate
-COPY --from=build --chown=nextjs:nodejs /app/build/.next/standalone ./
-COPY --from=build --chown=nextjs:nodejs /app/build/.next/static ./.next/static
-COPY --chown=nextjs:nodejs ./public ./public
-RUN rm -rf /app/build
+COPY --from=build --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=build --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=build --chown=nextjs:nodejs /app/public ./public
+COPY --from=build --chown=nextjs:nodejs /app/src/lib/postgres/migrations ./src/lib/postgres/migrations
 
 USER nextjs
-ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
 CMD ["node", "server.js"]

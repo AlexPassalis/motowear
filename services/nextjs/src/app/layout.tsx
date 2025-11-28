@@ -146,8 +146,6 @@ import NextTopLoader from 'nextjs-toploader'
 import { GoogleAnalytics } from '@next/third-parties/google'
 import { Track } from '@/app/Track'
 
-import '@/lib/cron/index'
-
 export default function RootLayout({
   children,
 }: Readonly<{

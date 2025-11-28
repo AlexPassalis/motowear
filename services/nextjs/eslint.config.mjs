@@ -10,6 +10,7 @@ export default [
   ...compat.extends('next/core-web-vitals', 'next/typescript'),
   {
     files: ['src/**/*.{js,jsx,ts,tsx,mjs,cjs}'],
+    ignores: ['src/lib/postgres/migrations/**'],
     rules: {
       'react-hooks/exhaustive-deps': 'off',
       'no-unused-disable': 'off',
