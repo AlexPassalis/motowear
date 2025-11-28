@@ -33,10 +33,6 @@ async function establishPrometheus() {
     collect() {
       try {
         this.set(postgres_pool.totalCount)
-
-        console.info(
-          `${ERROR.postgres} ${ERROR.prometheus} client connected successfully`,
-        )
       } catch (err) {
         const location = `${ERROR.postgres} nextjs_postgres_connections`
         handleError(location, err)
@@ -55,10 +51,6 @@ async function establishPrometheus() {
         if (match) {
           this.set(parseInt(match[1], 10))
         }
-
-        console.info(
-          `${ERROR.redis} ${ERROR.prometheus} client connected successfully`,
-        )
       } catch (err) {
         const location = `${ERROR.redis} nextjs_redis_memory_bytes`
         handleError(location, err)

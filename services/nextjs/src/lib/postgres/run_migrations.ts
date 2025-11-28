@@ -7,7 +7,7 @@ import { handleError } from '@/utils/error/handleError'
 export async function run_migrations() {
   try {
     await migrate(postgres, {
-      migrationsFolder: path.join(process.cwd(), 'migrations'),
+      migrationsFolder: path.join(process.cwd(), 'src/lib/postgres/migrations'),
     })
 
     console.info('Migrations ran successfully')

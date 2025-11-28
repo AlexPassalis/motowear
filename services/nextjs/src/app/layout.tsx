@@ -141,9 +141,6 @@ const customTheme = createTheme({
   primaryColor: 'red',
 })
 
-import { startup } from '@/startup'
-startup()
-
 import NextTopLoader from 'nextjs-toploader'
 
 import { GoogleAnalytics } from '@next/third-parties/google'

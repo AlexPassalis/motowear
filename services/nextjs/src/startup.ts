@@ -6,23 +6,11 @@ import '@/lib/cron/index'
 import '@/lib/prometheus/index'
 
 import { run_migrations } from '@/lib/postgres/run_migrations'
-import { redis } from '@/lib/redis/index'
-import { ERROR } from './data/magic'
-import { formatMessage } from '@/utils/error/formatMessage'
+import { flush_all } from './lib/redis/flush_all'
 
 export async function startup() {
   await run_migrations()
-
-  try {
-    await redis.flushall()
-
-    console.info('Redis cache cleared successfully')
-  } catch (err) {
-    const location = `${ERROR.redis} startup() flushall`
-    const message = formatMessage(location, err)
-
-    console.error(message)
-  }
+  await flush_all()
 
   console.info('Startup completed successfully')
 }

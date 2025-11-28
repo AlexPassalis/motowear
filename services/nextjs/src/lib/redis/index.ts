@@ -20,10 +20,6 @@ async function establishRedis() {
     await global.global_redis!.quit()
     console.info(`${ERROR.redis} connection closed.`)
   })
-  process.once('SIGTERM', async () => {
-    await global.global_redis!.quit()
-    console.info(`${ERROR.redis} connection closed.`)
-  })
 
   await redisPing()
 
