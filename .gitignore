@@ -9,5 +9,4 @@ node_modules/
 ### services/nextjs ###
 .next/
 .pnpm-store/
-migrations/
 *.tsbuildinfo

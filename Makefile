@@ -2,7 +2,12 @@
 
 default: start
 
+init:
+	@echo "--> Initializing git hooks"
+	git config core.hooksPath bin/.githooks
+
 start:
+	@echo "--> Starting Docker swarm stack"
 	docker build -t image-motowear-postgres -f ./services/postgres/Dockerfile ./services/postgres
 	docker build -t image-motowear-typesense -f ./services/typesense/Dockerfile ./services/typesense
 	docker build --target dev -t image-motowear-nextjs -f ./services/nextjs/Dockerfile ./services/nextjs
@@ -13,14 +18,20 @@ start:
 	docker stack deploy -c ./docker-stack-dev.yaml --detach=false --with-registry-auth stack-motowear
 
 stop:
+	@echo "--> Stopping Docker swarm stack"
 	docker stack rm stack-motowear
 
+lint:
+	@echo "--> Linting services/nextjs"
+	@pnpm -F ./services/nextjs run lint
+	@bash -c 'pnpm -F ./services/nextjs run typecheck'
+
 postgres_generate:
-	@echo "*** Creating database migrations."
+	@echo "--> Creating database migrations"
 	@bin/dockerize pnpm run postgres:generate
 
 postgres_migrate:
-	@echo "*** Applying database migrations."
+	@echo "--> Applying database migrations"
 	@bin/dockerize pnpm run postgres:migrate
 
 64:
@@ -37,3 +48,6 @@ ssh:
 
 clone_prod_db:
 	@bash ./bin/clone_prod_db
+
+check_missing_migration_file:
+	@bash ./bin/check_missing_migration_file

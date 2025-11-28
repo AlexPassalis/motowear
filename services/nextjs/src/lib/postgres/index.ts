@@ -5,8 +5,8 @@ import { envServer } from '@/envServer'
 import { drizzle } from 'drizzle-orm/node-postgres'
 import * as schema from '@/lib/postgres/schema'
 import { sql } from 'drizzle-orm'
-import { formatMessage } from '@/utils/error/formatMessage'
-import { sendTelegramMessage } from '@/lib/telegram/index'
+import { handleError } from '@/utils/error/handleError'
+import { ERROR } from '@/data/magic'
 
 async function establishPostgres() {
   if (global.global_postgres_pool && global.global_postgres) {
@@ -22,12 +22,13 @@ async function establishPostgres() {
   })
   process.once('SIGINT', async () => {
     await global.global_postgres_pool!.end()
-    console.info('Postgres connection closed.')
+    console.info(`${ERROR.postgres} connection closed.`)
   })
   process.once('SIGTERM', async () => {
     await global.global_postgres_pool!.end()
-    console.info('Postgres connection closed.')
+    console.info(`${ERROR.postgres} connection closed.`)
   })
+
   global.global_postgres = drizzle(global.global_postgres_pool, { schema })
   await postgresPing()
 
@@ -40,11 +41,11 @@ async function establishPostgres() {
 async function postgresPing() {
   try {
     await global.global_postgres!.execute(sql`SELECT 1`)
-    console.info('Postgres connected successfully.')
+
+    console.info(`${ERROR.postgres} connected successfully`)
   } catch (err) {
-    const message = formatMessage('Postgres connection failed.', err)
-    console.error(message)
-    await sendTelegramMessage('ERROR', message)
+    const location = `${ERROR.postgres} connection failed.`
+    handleError(location, err)
 
     process.exit(1)
   }

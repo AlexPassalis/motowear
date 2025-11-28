@@ -1,6 +1,7 @@
 import Redis from 'ioredis'
 import { envServer } from '@/envServer'
 import { formatMessage } from '@/utils/error/formatMessage'
+import { ERROR } from '@/data/magic'
 
 async function establishRedis() {
   if (global.global_redis) {
@@ -13,12 +14,17 @@ async function establishRedis() {
   })
   process.once('SIGINT', async () => {
     await global.global_redis!.quit()
-    console.info('Redis connection closed.')
+    console.info(`${ERROR.redis} connection closed.`)
   })
   process.once('SIGTERM', async () => {
     await global.global_redis!.quit()
-    console.info('Redis connection closed.')
+    console.info(`${ERROR.redis} connection closed.`)
   })
+  process.once('SIGTERM', async () => {
+    await global.global_redis!.quit()
+    console.info(`${ERROR.redis} connection closed.`)
+  })
+
   await redisPing()
 
   return global.global_redis
@@ -28,12 +34,12 @@ async function redisPing() {
   try {
     const result = await global.global_redis!.ping()
     if (result === 'PONG') {
-      console.info('Redis connected successfully.')
+      console.info(`${ERROR.redis} connected successfully`)
     }
   } catch (err) {
-    const message = formatMessage('Redis connection failed.', err)
+    const location = `${ERROR.redis} connection failed.`
+    const message = formatMessage(location, err)
     console.error(message)
-
     process.exit(1)
   }
 }

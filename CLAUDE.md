@@ -24,6 +24,52 @@ This is the full-stack e-commerce website for motowear.gr, a Greek motorcycle ac
 - Better Auth (admin authentication)
 - Telegram (notifications via Telegraf)
 
+## Task Log
+
+To maintain continuity across different shell sessions, **maintain a task log at `docs/claude_log.md`**. This log helps track ongoing work and provides context when resuming tasks.
+
+**When to update the log:**
+
+- At the start of each session: Review the log to understand what was being worked on
+- After completing significant tasks: Document what was accomplished
+- When starting new work: Add the current task or feature being developed
+- When encountering blockers: Note any issues or dependencies that need resolution
+- At the end of a work session: Summarize progress and next steps
+
+**What to include:**
+
+- Current tasks in progress with brief descriptions
+- Recently completed tasks (keep last 3-5 for context)
+- Known issues or blockers
+- Next steps or pending work
+- Date stamps for major updates
+
+**Format:**
+
+```markdown
+# Claude Task Log
+
+Last updated: YYYY-MM-DD
+
+## Current Tasks
+
+- [ ] Task description with relevant file paths
+
+## Recently Completed
+
+- [x] Task description (YYYY-MM-DD)
+
+## Blockers / Notes
+
+- Any issues or important context
+
+## Next Steps
+
+- Planned work or follow-ups
+```
+
+Keep the log concise and focused on actionable information. The goal is to enable seamless handoffs between sessions without having to re-analyze the entire codebase.
+
 ## Development Commands
 
 All development happens in the Next.js service at `services/nextjs/`:
@@ -194,6 +240,39 @@ Husky + lint-staged runs `pnpm lint` on staged Next.js files before commits. Con
 ## Code Style Guidelines
 
 When writing or modifying code in this repository, follow these conventions:
+
+### No Code Comments
+
+**NEVER add comments inside code.** Code should be self-explanatory through clear naming and structure. Do not add comments explaining what the code does.
+
+### Naming Conventions
+
+**Use snake_case for variables and function names.** Only use camelCase for React components and when interfacing with libraries that require it.
+
+```typescript
+// ✅ CORRECT
+const most_common_price = findMostCommon(variants, 'price')
+const user_email = getUserEmail()
+
+function process_data(input_value: string) {
+  const parsed_result = parseInput(input_value)
+  return parsed_result
+}
+
+// ❌ INCORRECT - Don't use camelCase for regular variables
+const mostCommonPrice = findMostCommon(variants, 'price')
+const userEmail = getUserEmail()
+
+function processData(inputValue: string) {
+  const parsedResult = parseInput(inputValue)
+  return parsedResult
+}
+
+// ✅ EXCEPTION - React components use PascalCase
+export function UserProfile() {
+  return <div>Profile</div>
+}
+```
 
 ### Control Flow Braces
 

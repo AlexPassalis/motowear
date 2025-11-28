@@ -1,11 +1,12 @@
 export const ERROR = {
   unexpected: 'UNEXPECTED',
-  postgres: 'POSTGRES',
   redis: 'REDIS',
-  minio: 'MINIO',
-  axios: 'AXIOS',
-  zod: 'ZOD',
+  telegram: 'TELEGRAM',
+  postgres: 'POSTGRES',
   prometheus: 'PROMETHEUS',
+  minio: 'MINIO',
+  zod: 'ZOD',
+  axios: 'AXIOS',
 } as const
 
 export const specialVariant = [
