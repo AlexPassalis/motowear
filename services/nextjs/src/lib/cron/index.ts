@@ -209,5 +209,8 @@ async function establishCron() {
 
 if (process.env.BUILD_TIME !== 'true') {
   await establishCron()
+
   console.info('Cron jobs established')
 }
+
+export {} // To make this a module

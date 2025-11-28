@@ -273,7 +273,7 @@ services:
       restart_policy:
         condition: any
       update_config:
-        order: start-first
+        order: stop-first
         failure_action: rollback
     image: ghcr.io/alexpassalis/image-motowear-prometheus:latest
     networks:

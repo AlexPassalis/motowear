@@ -1,4 +1,5 @@
 import '@/envServer'
+console.info('envServer loaded successfully')
 import '@/lib/redis/index'
 import '@/lib/telegram/index'
 import '@/lib/postgres/index'
