@@ -51,8 +51,8 @@ export function googleAnalyticsAddToCart(
   count: number,
   collection: string,
   product: string,
-  color?: string,
-  size?: string,
+  color: null | string,
+  size: null | string,
 ) {
   if (!isProduction) {
     return

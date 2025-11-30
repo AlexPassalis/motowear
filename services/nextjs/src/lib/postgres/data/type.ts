@@ -1,7 +1,6 @@
 import { InferSelectModel } from 'drizzle-orm'
 import {
   abandoned_cart,
-  collection_v2,
   coupon,
   order,
   product_pages,

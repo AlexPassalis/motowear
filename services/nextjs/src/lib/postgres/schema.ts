@@ -65,12 +65,12 @@ export const collection_v2 = productsSchema.table('collection_v2', {
     .references(() => product_pages.product_type, {
       onDelete: 'cascade',
     }),
-  description: text('description').notNull(),
+  description: text('description'),
   price: Numeric('price', { precision: 7, scale: 2 }).notNull(),
-  price_before: Numeric('price_before', { precision: 7, scale: 2 }).notNull(),
+  price_before: Numeric('price_before', { precision: 7, scale: 2 }),
   sizes: text('sizes').array(),
   upsell_id: uuid('upsell_id'),
-  sold_out: boolean('sold_out').default(false).notNull(),
+  sold_out: boolean('sold_out').default(false),
 })
 
 export const product_v2 = productsSchema.table('product_v2', {

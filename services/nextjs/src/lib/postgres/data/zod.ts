@@ -56,18 +56,17 @@ export const zodCheckout = z
   })
 
 export const zodCartItem = z.object({
-  product_type: z.string(),
+  collection: z.string(),
   name: z.string(),
-  color: z.string().optional(),
-  size: z.string().optional(),
+  color: z.string().nullable(),
+  size: z.string().nullable(),
   price: z.number(),
   quantity: z.number(),
-  image: z.string(),
 })
 export const zodCart = z.array(zodCartItem)
 export const zodCartItemLocalStorage = zodCartItem.extend({
   image: z.string(),
-  price_before: z.number(),
+  price_before: z.number().nullable(),
 })
 export const zodCartLocalStorage = z.array(zodCartItemLocalStorage)
 export const zodVariant = createSelectSchema(variant)

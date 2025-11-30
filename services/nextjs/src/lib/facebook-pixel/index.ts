@@ -74,8 +74,8 @@ export async function facebookPixelAddToCart(
   count: number,
   collection: string,
   product: string,
-  color?: string,
-  size?: string,
+  color: null | string,
+  size: null | string,
 ) {
   if (!isProduction) {
     return
@@ -110,7 +110,7 @@ export async function facebookPixelInitiateCheckout(
     currency: 'EUR',
     content_type: 'product',
     contents: cart.map((item) => ({
-      id: `${item.product_type}:${item.name}`,
+      id: `${item.collection}:${item.name}`,
       item_price: item.price,
       quantity: item.quantity,
       ...(item.color ? { color: item.color } : {}),
@@ -132,7 +132,7 @@ export async function facebookPixelPurchase(
     currency: 'EUR',
     content_type: 'product',
     contents: cart.map((item) => ({
-      id: `${item.product_type}:${item.name}`,
+      id: `${item.collection}:${item.name}`,
       item_price: item.price,
       quantity: item.quantity,
       ...(item.color ? { color: item.color } : {}),

@@ -186,36 +186,37 @@ function Main({
   const collection_name = collection.name
 
   const [selectedBrand, setSelectedBrand] = useState('')
-  const [selectedName, setSelectedName] = useState(
-    product ? product : products[0].name,
-  )
+  const [selectedName, setSelectedName] = useState(product ?? products[0].name)
   const [selectedColor, setSelectedColor] = useState(
-    color
-      ? color
-      : products.find((prod) => prod.name === selectedName)?.color || undefined,
+    color ?? products.find((prod) => prod.name === selectedName)?.color ?? null,
   )
   const [selectedSize, setSelectedSize] = useState(
     products.find((prod) => prod.name === selectedName)?.sizes?.[0] ||
       collection.sizes?.[0] ||
-      undefined,
+      null,
   )
+
   const found_product = products.find(
     (prod) =>
       prod.name === selectedName &&
-      (selectedColor === undefined || prod.color === selectedColor) &&
-      (selectedSize === undefined ||
+      (selectedColor === null || prod.color === selectedColor) &&
+      (selectedSize === null ||
         prod.sizes?.includes(selectedSize) ||
         collection.sizes?.includes(selectedSize)),
   )!
-
+  console.log('found_product', found_product)
   const selectedProduct = {
-    ...found_product,
+    id: found_product.id,
+    name: found_product.name,
+    brand: found_product.brand ?? null,
     description: found_product.description ?? collection.description,
     price: found_product.price ?? collection.price,
     price_before: found_product.price_before ?? collection.price_before,
+    images: found_product.images,
+    color: found_product.color ?? null,
+    size: selectedSize,
     upsell_id: found_product.upsell_id ?? collection.upsell_id,
     sold_out: found_product.sold_out ?? collection.sold_out,
-    size: selectedSize,
   }
 
   const displayed_brands = brands
@@ -889,7 +890,7 @@ function Main({
                       <div
                         key={index}
                         onClick={() => {
-                          setSelectedColor(color)
+                          setSelectedColor(color ?? null)
                           window.history.pushState(
                             {},
                             '',
@@ -911,7 +912,7 @@ function Main({
                       <div
                         key={index}
                         onClick={() => {
-                          setSelectedColor(color)
+                          setSelectedColor(color ?? null)
                           window.history.pushState(
                             {},
                             '',
@@ -1134,7 +1135,7 @@ function Main({
                   setCart((prev) => {
                     const existingIndex = prev.findIndex(
                       (item) =>
-                        item.product_type === collection_name &&
+                        item.collection === collection_name &&
                         item.name === selectedProduct.name &&
                         item.color === selectedProduct.color &&
                         item.size === selectedProduct.size,
@@ -1151,7 +1152,7 @@ function Main({
                         ...prev,
                         {
                           image: selectedProduct.images[0],
-                          product_type: collection_name,
+                          collection: collection_name,
                           name: special_products.includes(selectedProduct.name)
                             ? customRef.current!.value.trim()
                             : selectedProduct.name,
