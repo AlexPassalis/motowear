@@ -4,11 +4,7 @@ import type {
   typeHomePage,
   typeHomePageVariants,
 } from '@/utils/getPostgres'
-import type {
-  typeProductPage,
-  typeReview,
-  typeVariant,
-} from '@/lib/postgres/data/type'
+import type { typeProductPage } from '@/lib/postgres/data/type'
 
 import { redis } from '@/lib/redis/index'
 import {
@@ -16,7 +12,6 @@ import {
   getHomePageVariants,
   getPages,
   getProductTypes,
-  getProductTypeReviews,
   getShipping,
   getProductPageData,
   getCollectionPageData,
@@ -65,56 +60,44 @@ export async function getCollectionPageDataCached(
   product_type: string,
 ): Promise<Awaited<ReturnType<typeof getCollectionPageData>>> {
   if (process.env.BUILD_TIME !== 'true') {
-    let data_collection_page
+    let collection_page_data
+    let redis_key = `collection_page_data_${product_type}`
 
     try {
-      data_collection_page = await redis.get(
-        `collection_page_data_${product_type}`,
-      )
+      collection_page_data = await redis.get(redis_key)
     } catch (err) {
-      const location = `${ERROR.redis} get data_collection_page`
+      const location = `${ERROR.redis} get collection_page_data`
       handleError(location, err)
     }
 
-    if (data_collection_page) {
-      return JSON.parse(data_collection_page)
+    if (collection_page_data) {
+      return JSON.parse(collection_page_data)
     } else {
-      try {
-        data_collection_page = await getCollectionPageData(product_type)
-      } catch (err) {
-        const location = `${ERROR.postgres} get data_collection_page`
-        handleError(location, err)
-
-        throw err
-      }
+      collection_page_data = await getCollectionPageData(product_type)
     }
 
     void redis
-      .set(
-        `collection_page_data_${product_type}`,
-        JSON.stringify(data_collection_page),
-        'EX',
-        3600,
-      )
+      .set(redis_key, JSON.stringify(collection_page_data), 'EX', 3600)
       .catch((err) => {
-        const location = `${ERROR.redis} set data_collection_page`
+        const location = `${ERROR.redis} set collection_page_data`
         handleError(location, err)
       })
 
-    return data_collection_page
+    return collection_page_data
   } else {
-    return { variants: [], brands: [] }
+    return { brands: [], products: [] }
   }
 }
 
 export async function getProductPageDataCached(
   product_type: string,
-): Promise<typeVariant[]> {
+): Promise<Awaited<ReturnType<typeof getProductPageData>>> {
   if (process.env.BUILD_TIME !== 'true') {
     let product_page_data
+    let redis_key = `product_page_data_${product_type}`
 
     try {
-      product_page_data = await redis.get(`product_page_data_${product_type}`)
+      product_page_data = await redis.get(redis_key)
     } catch (err) {
       const location = `${ERROR.redis} get product_page_data`
       handleError(location, err)
@@ -134,12 +117,7 @@ export async function getProductPageDataCached(
     }
 
     void redis
-      .set(
-        `product_page_data_${product_type}`,
-        JSON.stringify(product_page_data),
-        'EX',
-        3600,
-      )
+      .set(redis_key, JSON.stringify(product_page_data), 'EX', 3600)
       .catch((err) => {
         const location = `${ERROR.redis} set product_page_data`
         handleError(location, err)
@@ -147,7 +125,22 @@ export async function getProductPageDataCached(
 
     return product_page_data
   } else {
-    return []
+    return {
+      collection: {
+        id: '',
+        name: '',
+        description: '',
+        price: 0,
+        price_before: 0,
+        sizes: [],
+        upsell_id: null,
+        sold_out: false,
+      },
+      reviews: [],
+      brands: [],
+      products: [],
+      upsells: [],
+    }
   }
 }
 
@@ -181,45 +174,6 @@ export async function getPagesCached(): Promise<typeProductPage[]> {
     })
 
     return pages
-  } else {
-    return []
-  }
-}
-
-export async function getProductTypeReviewsCached(
-  product_type: typeReview['product_type'],
-): Promise<typeReview[]> {
-  if (process.env.BUILD_TIME !== 'true') {
-    let reviews
-
-    try {
-      reviews = await redis.get(`reviews_${product_type}`)
-    } catch (err) {
-      const location = `${ERROR.redis} get reviews`
-      handleError(location, err)
-    }
-
-    if (reviews) {
-      return JSON.parse(reviews)
-    } else {
-      try {
-        reviews = await getProductTypeReviews(product_type)
-      } catch (err) {
-        const location = `${ERROR.postgres} get reviews`
-        handleError(location, err)
-
-        throw err
-      }
-    }
-
-    void redis
-      .set(`reviews_${product_type}`, JSON.stringify(reviews), 'EX', 3600)
-      .catch((err) => {
-        const location = `${ERROR.redis} set reviews`
-        handleError(location, err)
-      })
-
-    return reviews
   } else {
     return []
   }

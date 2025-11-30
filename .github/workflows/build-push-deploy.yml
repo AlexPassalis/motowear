@@ -183,5 +183,5 @@ jobs:
             echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             # docker network create -d overlay network-motowear
             docker stack deploy -c ./docker-stack.yaml --detach=false --resolve-image always --with-registry-auth stack-motowear
-            # docker system prune -af
+            docker system prune -af
             docker logout ghcr.io

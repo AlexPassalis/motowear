@@ -16,65 +16,66 @@ type ProductPageProps = {
 }
 
 export default async function CollectionPage({ params }: ProductPageProps) {
-  const asyncFunctions = [getProductTypesCached, getShippingCached]
-  const resolved = await Promise.allSettled([
+  const results_1 = await Promise.allSettled([
     params,
-    ...asyncFunctions.map((asyncFunction) => asyncFunction()),
+    getProductTypesCached(),
+    getShippingCached(),
   ])
-  resolved.forEach((result, index) => {
-    if (result.status === 'rejected') {
-      if (index === 0) {
-        const location = `${ERROR.unexpected} params rejected`
-        const err = result.reason
-        handleError(location, err)
 
-        redirect(`${ROUTE_ERROR}?message=${ERROR.unexpected}`)
-      } else {
-        const location = `${ERROR.postgres} ${asyncFunctions[index - 1].name}`
-        const err = result.reason
-        handleError(location, err)
+  if (results_1[0].status === 'rejected') {
+    const location = `${ERROR.unexpected} params rejected`
+    const err = results_1[0].reason
+    handleError(location, err)
 
-        redirect(`${ROUTE_ERROR}?message=${ERROR.postgres}`)
-      }
-    }
-  })
-
-  const resolved_params = (resolved[0] as PromiseFulfilledResult<typeParams>)
-    .value
-  if (!resolved_params.type) {
-    notFound()
+    redirect(`${ROUTE_ERROR}?message=${ERROR.unexpected}`)
   }
-  const params_product_type = decodeURIComponent(resolved_params.type)
 
-  const product_types = (
-    resolved[1] as PromiseFulfilledResult<
-      Awaited<ReturnType<typeof getProductTypesCached>>
-    >
-  ).value
-  const shipping = (
-    resolved[2] as PromiseFulfilledResult<
-      Awaited<ReturnType<typeof getShippingCached>>
-    >
-  ).value
-
-  const resolved_2 = await getCollectionPageDataCached(
-    params_product_type,
-  ).catch((err) => {
-    const location = `${ERROR.postgres} getCollectionPageDataCached`
+  if (results_1[1].status === 'rejected') {
+    const location = `${ERROR.postgres} getProductTypesCached`
+    const err = results_1[1].reason
     handleError(location, err)
 
     redirect(`${ROUTE_ERROR}?message=${ERROR.postgres}`)
-  })
+  }
 
-  const { variants, brands } = resolved_2
+  if (results_1[2].status === 'rejected') {
+    const location = `${ERROR.postgres} getShippingCached`
+    const err = results_1[2].reason
+    handleError(location, err)
+
+    redirect(`${ROUTE_ERROR}?message=${ERROR.postgres}`)
+  }
+
+  const resolved_params = results_1[0].value
+  if (!resolved_params.type) {
+    notFound()
+  }
+  const collection = decodeURIComponent(resolved_params.type)
+
+  const product_types = results_1[1].value
+  const shipping = results_1[2].value
+
+  const results_2 = await getCollectionPageDataCached(collection).catch(
+    (err) => {
+      const location = `${ERROR.postgres} getCollectionPageDataCached`
+      handleError(location, err)
+
+      redirect(`${ROUTE_ERROR}?message=${ERROR.postgres}`)
+    },
+  )
+
+  const { brands, products } = results_2
+  if (products.size === 0) {
+    notFound()
+  }
 
   return (
     <CollectionPageClient
-      paramsProduct_type={params_product_type}
+      collection={collection}
       product_types={product_types}
       shipping={shipping}
-      uniqueVariants={variants}
-      uniqueBrands={brands}
+      brands={brands}
+      products={products}
     />
   )
 }

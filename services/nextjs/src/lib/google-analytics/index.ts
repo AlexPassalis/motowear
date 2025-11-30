@@ -49,10 +49,10 @@ export function googleAnalyticsViewItem(
 export function googleAnalyticsAddToCart(
   price: number,
   count: number,
-  product_type: string,
-  variant: string,
-  color: string,
-  size: string,
+  collection: string,
+  product: string,
+  color?: string,
+  size?: string,
 ) {
   if (!isProduction) {
     return
@@ -63,9 +63,9 @@ export function googleAnalyticsAddToCart(
     value,
     items: [
       {
-        item_id: `${product_type}:${variant}`,
-        item_name: variant,
-        item_category: product_type,
+        item_id: `${collection}:${product}`,
+        item_name: product,
+        item_category: collection,
         item_variant:
           [color, size].filter(Boolean).join(' ').trim() || undefined,
         price,

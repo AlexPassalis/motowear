@@ -72,10 +72,10 @@ export async function facebookPixelViewContent(
 export async function facebookPixelAddToCart(
   price: number,
   count: number,
-  product_type: string,
-  variant: string,
-  color: string,
-  size: string,
+  collection: string,
+  product: string,
+  color?: string,
+  size?: string,
 ) {
   if (!isProduction) {
     return
@@ -87,7 +87,7 @@ export async function facebookPixelAddToCart(
     content_type: 'product',
     contents: [
       {
-        id: `${product_type}:${variant}`,
+        id: `${collection}:${product}`,
         item_price: price,
         quantity: count,
         ...(color ? { color: color } : {}),

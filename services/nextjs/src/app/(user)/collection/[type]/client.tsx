@@ -11,27 +11,26 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { IoIosArrowDown } from 'react-icons/io'
 import { Cart } from '@/app/(user)/collection/[type]/Cart'
 import { useDisclosure } from '@mantine/hooks'
-import { specialBrand, specialVariant } from '@/data/magic'
+import { special_products, special_brand } from '@/data/magic'
 
 type CollectionPageClientProps = {
-  paramsProduct_type: string
+  collection: string
   product_types: string[]
   shipping: typeShipping
-  uniqueVariants: {
+  brands: string[]
+  products: Set<{
     name: string
-    color: string
-    brand: string
+    brand?: string
     image: string
-  }[]
-  uniqueBrands: string[]
+  }>
 }
 
 export function CollectionPageClient({
-  paramsProduct_type,
+  collection,
   product_types,
   shipping,
-  uniqueVariants,
-  uniqueBrands,
+  brands,
+  products,
 }: CollectionPageClientProps) {
   const [brandDropdown, setBrandDropdown] = useState(false)
   const [selectedBrand, setSelectedBrand] = useState('')
@@ -41,32 +40,42 @@ export function CollectionPageClient({
 
   const [modal, { open: openModal, close: closeModal }] = useDisclosure(false)
   useEffect(() => {
-    if (uniqueBrands.length > 1) {
+    if (brands.length > 1) {
       openModal()
     }
   }, [])
 
   const [pageNumber, setPageNumber] = useState(1)
 
-  const filtered = useMemo<typeof uniqueVariants>(() => {
-    const unique = selectedBrand
-      ? uniqueVariants.filter((v) => v.brand === selectedBrand)
-      : uniqueVariants
+  const products_array = useMemo(() => Array.from(products), [products])
 
-    const specialVariants = uniqueVariants.filter((v) =>
-      specialVariant.includes(v.name),
-    )
+  const special_products_set = useMemo(() => new Set(special_products), [])
 
-    if (specialVariants.length === 0 || selectedBrand === specialBrand) {
-      return unique
-    } else {
-      return [
-        ...specialVariants,
-        ...unique.filter((v) => !specialVariant.includes(v.name)),
-        ...specialVariants,
-      ]
+  const filtered = useMemo(() => {
+    if (selectedBrand) {
+      const filtered_by_brand = products_array.filter(
+        (prod) => prod.brand === selectedBrand,
+      )
+
+      // If selected brand is the special brand, don't duplicate special products
+      if (selectedBrand === special_brand) {
+        return filtered_by_brand
+      }
+
+      // Otherwise, duplicate special products at start and end
+      const special_prods = products_array.filter((prod) =>
+        special_products_set.has(prod.name),
+      )
+      const regular_filtered = filtered_by_brand.filter(
+        (prod) => !special_products_set.has(prod.name),
+      )
+
+      return special_prods.length > 0
+        ? [...special_prods, ...regular_filtered, ...special_prods]
+        : filtered_by_brand
     }
-  }, [selectedBrand])
+    return products_array
+  }, [selectedBrand, products_array, special_products_set])
 
   const paginated = useMemo(() => {
     return filtered.slice((pageNumber - 1) * 20, pageNumber * 20)
@@ -111,7 +120,7 @@ export function CollectionPageClient({
           className="flex flex-col gap-1 p-1 border rounded-lg bg-white max-h-96 overflow-y-auto"
           style={{ zIndex: 75 }}
         >
-          {uniqueBrands
+          {brands
             .filter((brand) => brand !== selectedBrand)
             .map((brand, index, array) => (
               <Fragment key={index}>
@@ -147,8 +156,8 @@ export function CollectionPageClient({
       >
         <HeaderProvider product_types={product_types} shipping={shipping}>
           <main className="flex-1 flex flex-col">
-            <h1 className="text-2xl text-center">{paramsProduct_type}</h1>
-            {uniqueBrands.length > 0 && (
+            <h1 className="text-2xl text-center">{collection}</h1>
+            {brands.length > 0 && (
               <div className="ml-2 flex flex-col">
                 <h2 className="text-lg xl:text-xl">Μάρκα</h2>
                 <div className="relative max-w-[408px]">
@@ -225,12 +234,12 @@ export function CollectionPageClient({
                                 Καμία μάρκα
                               </UnstyledButton>
                             </div>
-                            {uniqueBrands.length !== 1 && (
+                            {brands.length !== 1 && (
                               <hr className="w-full border-t-2 border-[var(--mantine-border)]" />
                             )}
                           </>
                         )}
-                        {uniqueBrands
+                        {brands
                           .filter((brand) => brand !== selectedBrand)
                           .map((brand, index, array) => (
                             <Fragment key={index}>
@@ -260,15 +269,14 @@ export function CollectionPageClient({
 
             <div className="p-4">
               <SimpleGrid cols={{ base: 2, md: 3, xl: 4 }} spacing="sm" mb="md">
-                {paginated.map(({ name, color, image }, index) => {
+                {paginated.map(({ name, image }, index) => {
                   return (
                     <Cart
-                      key={`${selectedBrand}-${name}-${color}-${image}-${index}`}
-                      paramsProduct_type={paramsProduct_type}
+                      key={`${selectedBrand}-${name}-${image}-${index}`}
+                      collection={collection}
                       isLoading={loadingImages.has(index)}
                       index={index}
                       name={name}
-                      color={color}
                       image={image}
                       onImageLoad={onImageLoad}
                     />

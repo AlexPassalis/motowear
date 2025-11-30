@@ -2,13 +2,10 @@
 
 import { CSSProperties } from 'react'
 
-import type {
-  typeProductPage,
-  typeReview,
-  typeVariant,
-} from '@/lib/postgres/data/type'
+import type { typeProductPage } from '@/lib/postgres/data/type'
 
 import type { typeShipping } from '@/utils/getPostgres'
+import type { getProductPageDataCached } from '@/app/(user)/cache'
 
 import {
   Dispatch,
@@ -35,7 +32,7 @@ import { ROUTE_COLLECTION, ROUTE_PRODUCT } from '@/data/routes'
 import { envClient } from '@/envClient'
 import { IoIosArrowDown } from 'react-icons/io'
 import { Fragment } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, m, motion } from 'framer-motion'
 import HeaderProvider from '@/context/HeaderProvider'
 import { useHeaderContext } from '@/context/useHeaderContext'
 import { Carousel } from '@mantine/carousel'
@@ -48,7 +45,7 @@ import {
   facebookPixelAddToCart,
   facebookPixelViewContent,
 } from '@/lib/facebook-pixel'
-import { specialVariant, specialProductType } from '@/data/magic'
+import { special_products, specialProductType } from '@/data/magic'
 import {
   googleAnalyticsAddToCart,
   googleAnalyticsViewItem,
@@ -56,24 +53,28 @@ import {
 
 type ProductPageClientProps = {
   product_types: string[]
-  upsellVariants: typeVariant[]
   page: typeProductPage
-  postgres_reviews: typeReview[]
   shipping: typeShipping
-  paramsProduct_type: string
-  paramsVariant: undefined | typeVariant
-  postgresVariants: typeVariant[]
+  collection: Awaited<ReturnType<typeof getProductPageDataCached>>['collection']
+  reviews: Awaited<ReturnType<typeof getProductPageDataCached>>['reviews']
+  brands: Awaited<ReturnType<typeof getProductPageDataCached>>['brands']
+  products: Awaited<ReturnType<typeof getProductPageDataCached>>['products']
+  upsells: Awaited<ReturnType<typeof getProductPageDataCached>>['upsells']
+  product: string | undefined
+  color: string | undefined
 }
 
 export function ProductPageClient({
   product_types,
-  upsellVariants,
   page,
-  postgres_reviews,
   shipping,
-  paramsProduct_type,
-  paramsVariant,
-  postgresVariants,
+  reviews,
+  brands,
+  collection,
+  product,
+  color,
+  products,
+  upsells,
 }: ProductPageClientProps) {
   const [brandDropdown, setBrandDropdown] = useState(false)
   const [variantDropdown, setVariantDropdown] = useState(false)
@@ -95,12 +96,14 @@ export function ProductPageClient({
     >
       <HeaderProvider product_types={product_types} shipping={shipping}>
         <Main
-          paramsProduct_type={paramsProduct_type}
-          paramsVariant={paramsVariant}
-          upsellVariants={upsellVariants}
-          postgresVariants={postgresVariants}
+          collection={collection}
+          product={product}
+          color={color}
+          brands={brands}
+          products={products}
+          upsells={upsells}
           page={page}
-          postgres_reviews={postgres_reviews}
+          reviews={reviews}
           brandDropdown={brandDropdown}
           setBrandDropdown={setBrandDropdown}
           variantDropdown={variantDropdown}
@@ -146,12 +149,14 @@ function ProductImages({
 }
 
 type MainProps = {
-  paramsProduct_type: string
-  paramsVariant: undefined | typeVariant
-  upsellVariants: typeVariant[]
-  postgresVariants: typeVariant[]
+  collection: Awaited<ReturnType<typeof getProductPageDataCached>>['collection']
+  reviews: Awaited<ReturnType<typeof getProductPageDataCached>>['reviews']
+  brands: Awaited<ReturnType<typeof getProductPageDataCached>>['brands']
+  products: Awaited<ReturnType<typeof getProductPageDataCached>>['products']
+  upsells: Awaited<ReturnType<typeof getProductPageDataCached>>['upsells']
+  product: string | undefined
+  color: string | undefined
   page: typeProductPage
-  postgres_reviews: typeReview[]
   brandDropdown: boolean
   setBrandDropdown: Dispatch<SetStateAction<boolean>>
   variantDropdown: boolean
@@ -161,12 +166,14 @@ type MainProps = {
 }
 
 function Main({
-  paramsProduct_type,
-  paramsVariant,
-  upsellVariants,
-  postgresVariants,
+  collection,
+  product,
+  color,
+  brands,
+  products,
+  upsells,
   page,
-  postgres_reviews,
+  reviews: postgres_reviews,
   brandDropdown,
   setBrandDropdown,
   variantDropdown,
@@ -176,230 +183,54 @@ function Main({
 }: MainProps) {
   const { setCart, setIsCartOpen } = useHeaderContext()
 
-  const fallbackVariant = postgresVariants[0]
-  const initialState = {
-    displayedBrands: postgresVariants
-      .map((product) => product.brand)
-      .filter(Boolean)
-      .filter(
-        (item, index, self) =>
-          index === self.findIndex((other) => other === item),
-      ),
-    selectedBrand: '',
-    displayedVariants: postgresVariants
-      .map((product) => product.name)
-      .filter(
-        (item, index, self) =>
-          index === self.findIndex((other) => other === item),
-      ),
-    selectedVariant: paramsVariant ? paramsVariant.name : fallbackVariant.name,
-    displayedColors: paramsVariant
-      ? postgresVariants
-          .filter((variant) => variant.name === paramsVariant.name)
-          .map((product) => product.color)
-          .filter(Boolean)
-          .filter(
-            (item, index, self) =>
-              index === self.findIndex((other) => other === item),
-          )
-      : postgresVariants
-          .filter((variant) => variant.name === fallbackVariant.name)
-          .map((product) => product.color)
-          .filter(Boolean)
-          .filter(
-            (item, index, self) =>
-              index === self.findIndex((other) => other === item),
-          ),
-    selectedColor: paramsVariant ? paramsVariant.color : fallbackVariant.color,
-    displayedSizes: paramsVariant
-      ? postgresVariants
-          .filter((variant) => variant.name === paramsVariant.name)
-          .filter((variant) => variant.color === paramsVariant.color)
-          .map((product) => product.size)
-          .filter(Boolean)
-          .filter(
-            (item, index, self) =>
-              index === self.findIndex((other) => other === item),
-          )
-      : postgresVariants
-          .filter((variant) => variant.name === fallbackVariant.name)
-          .filter((variant) => variant.color === fallbackVariant.color)
-          .map((product) => product.size)
-          .filter(Boolean)
-          .filter(
-            (item, index, self) =>
-              index === self.findIndex((other) => other === item),
-          ),
-    selectedSize: paramsVariant ? paramsVariant.size : fallbackVariant.size,
-    images: paramsVariant ? paramsVariant.images : fallbackVariant.images,
-    description: paramsVariant
-      ? paramsVariant.description
-      : fallbackVariant.description,
-    price: paramsVariant ? paramsVariant.price : fallbackVariant.price,
-    price_before: paramsVariant
-      ? paramsVariant.price_before
-      : fallbackVariant.price_before,
+  const collection_name = collection.name
+
+  const [selectedBrand, setSelectedBrand] = useState('')
+  const [selectedName, setSelectedName] = useState(
+    product ? product : products[0].name,
+  )
+  const [selectedColor, setSelectedColor] = useState(
+    color
+      ? color
+      : products.find((prod) => prod.name === selectedName)?.color || undefined,
+  )
+  const [selectedSize, setSelectedSize] = useState(
+    products.find((prod) => prod.name === selectedName)?.sizes?.[0] ||
+      collection.sizes?.[0] ||
+      undefined,
+  )
+  const found_product = products.find(
+    (prod) =>
+      prod.name === selectedName &&
+      (selectedColor === undefined || prod.color === selectedColor) &&
+      (selectedSize === undefined ||
+        prod.sizes?.includes(selectedSize) ||
+        collection.sizes?.includes(selectedSize)),
+  )!
+
+  const selectedProduct = {
+    ...found_product,
+    description: found_product.description ?? collection.description,
+    price: found_product.price ?? collection.price,
+    price_before: found_product.price_before ?? collection.price_before,
+    upsell_id: found_product.upsell_id ?? collection.upsell_id,
+    sold_out: found_product.sold_out ?? collection.sold_out,
+    size: selectedSize,
   }
 
-  type State = typeof initialState
-  type Action =
-    | { type: 'brand'; payload: { selectedBrand: string } }
-    | { type: 'variant'; payload: { selectedVariant: string } }
-    | { type: 'color'; payload: { selectedColor: string } }
-    | { type: 'size'; payload: { selectedSize: string } }
-  function reducer(state: State, action: Action) {
-    switch (action.type) {
-      case 'brand': {
-        const selectedBrand = action.payload.selectedBrand
-        if (selectedBrand) {
-          const displayedVariants = postgresVariants
-            .filter(
-              (product) =>
-                product.brand === selectedBrand ||
-                specialVariant.includes(product.name),
-            )
-            .map((product) => product.name)
-            .filter(
-              (item, index, self) =>
-                index === self.findIndex((other) => other === item),
-            )
+  const displayed_brands = brands
 
-          const displayedColors = postgresVariants
-            .filter((product) => product.name === displayedVariants[0])
-            .map((product) => product.color)
-            .filter(Boolean)
-            .filter(
-              (item, index, self) =>
-                index === self.findIndex((other) => other === item),
-            )
+  const displayed_products = selectedBrand
+    ? products.filter((prod) => prod.brand === selectedBrand)
+    : products
 
-          const foundVariant = postgresVariants.find(
-            (product) => product.brand === selectedBrand,
-          )!
-          const displayedSizes = postgresVariants
-            .filter((product) => product.name === displayedVariants[0])
-            .filter((product) => {
-              if (product.product_type === specialProductType) {
-                return true
-              }
+  const displayed_colors = displayed_products.filter(
+    (prod) => prod.name === selectedName,
+  )
 
-              return product.color === displayedColors[0]
-            })
-            .map((product) => product.size)
-            .filter(Boolean)
-            .filter(
-              (item, index, self) =>
-                index === self.findIndex((other) => other === item),
-            )
-
-          return {
-            ...state,
-            selectedBrand: selectedBrand,
-            displayedVariants: displayedVariants,
-            selectedVariant: displayedVariants[0],
-            displayedColors: displayedColors,
-            selectedColor: displayedColors[0],
-            images: foundVariant.images,
-            description: foundVariant.description,
-            price: foundVariant.price,
-            price_before: foundVariant.price_before,
-            displayedSizes: displayedSizes,
-            selectedSize: displayedSizes[0],
-          }
-        } else {
-          return {
-            ...state,
-            selectedBrand: selectedBrand,
-            displayedVariants: initialState.displayedVariants,
-          }
-        }
-      }
-      case 'variant': {
-        const selectedVariant = action.payload.selectedVariant
-        const displayedColors = postgresVariants
-          .filter((product) => product.name === selectedVariant)
-          .map((product) => product.color)
-          .filter(Boolean)
-          .filter(
-            (item, index, self) =>
-              index === self.findIndex((other) => other === item),
-          )
-
-        const foundVariant = postgresVariants.find(
-          (product) => product.name === selectedVariant,
-        )!
-        const displayedSizes = postgresVariants
-          .filter((product) => product.name === selectedVariant)
-          .filter((product) => {
-            if (product.product_type === specialProductType) {
-              return true
-            }
-
-            return product.color === displayedColors[0]
-          })
-          .map((product) => product.size)
-          .filter(Boolean)
-          .filter(
-            (item, index, self) =>
-              index === self.findIndex((other) => other === item),
-          )
-
-        return {
-          ...state,
-          selectedVariant: selectedVariant,
-          displayedColors: displayedColors,
-          selectedColor: displayedColors[0],
-          images: foundVariant.images,
-          description: foundVariant.description,
-          price: foundVariant.price,
-          price_before: foundVariant.price_before,
-          displayedSizes: displayedSizes,
-          selectedSize: displayedSizes[0],
-        }
-      }
-      case 'color': {
-        const selectedColor = action.payload.selectedColor
-        const foundVariant = postgresVariants.find(
-          (product) =>
-            product.name === state.selectedVariant &&
-            product.color === selectedColor,
-        )!
-        const displayedSizes = postgresVariants
-          .filter(
-            (product) =>
-              product.name === state.selectedVariant &&
-              product.color === selectedColor,
-          )
-          .map((product) => product.size)
-          .filter(Boolean)
-          .filter(
-            (item, index, self) =>
-              index === self.findIndex((other) => other === item),
-          )
-
-        return {
-          ...state,
-          selectedColor: selectedColor,
-          images: foundVariant.images,
-          description: foundVariant.description,
-          price: foundVariant.price,
-          price_before: foundVariant.price_before,
-          displayedSizes: displayedSizes,
-          selectedSize: displayedSizes[0],
-        }
-      }
-      case 'size': {
-        const selectedSize = action.payload.selectedSize
-        return {
-          ...state,
-          selectedSize: selectedSize,
-        }
-      }
-      default:
-        return state
-    }
-  }
-  const [state, dispatch] = useReducer(reducer, initialState)
+  const displayed_sizes = selectedColor
+    ? displayed_colors.find((prod) => prod.color === selectedColor)?.sizes || []
+    : displayed_colors[0]?.sizes || collection.sizes || []
 
   const [count, handlers] = useCounter(0, { min: 1, max: 9 })
   const [
@@ -407,35 +238,8 @@ function Main({
     { open: openSizeChartModal, close: closeSizeChartModal },
   ] = useDisclosure(false)
 
-  const upsellProductVariant = postgresVariants.find(
-    (variant) =>
-      variant.product_type === paramsProduct_type &&
-      variant.name === state.selectedVariant &&
-      variant.color === state.selectedColor &&
-      variant.size === state.selectedSize,
-  )?.upsell
-  const upsellDisplayedVariants = upsellProductVariant
-    ? upsellVariants
-        .filter(
-          (variant) =>
-            variant.product_type === upsellProductVariant.product_type &&
-            variant.name === upsellProductVariant.name,
-        )
-        .sort((a, b) => a.name.localeCompare(b.name))
-    : null
-  const [upsellSelectedVariant, setUpsellSelectedVariant] = useState(
-    upsellProductVariant
-      ? upsellVariants
-          .filter(
-            (variant) =>
-              variant.product_type === upsellProductVariant.product_type &&
-              variant.name === upsellProductVariant.name,
-          )
-          .sort((a, b) => a.name.localeCompare(b.name))[0]
-      : null,
-  )
-  const [upsellModal, { open: openUpsellModal, close: closeUpsellModal }] =
-    useDisclosure(false)
+  // const [upsellModal, { open: openUpsellModal, close: closeUpsellModal }] =
+  //   useDisclosure(false)
 
   const [reviews, setReviews] = useState(postgres_reviews.slice(0, 5))
 
@@ -444,31 +248,24 @@ function Main({
   const customRef = useRef<null | HTMLTextAreaElement>(null)
   const [customError, setCustomError] = useState<string | null>(null)
 
-  const doNotFindYourMoto = postgresVariants.some((variant) =>
-    specialVariant.includes(variant.name),
+  const doNotFindYourMoto = products.some((prod) =>
+    special_products.includes(prod.name),
   )
 
-  const variantIsSoldOut =
-    postgresVariants.find(
-      (variant) =>
-        variant.product_type === paramsProduct_type &&
-        variant.name === state.selectedVariant &&
-        variant.color === state.selectedColor &&
-        variant.size === state.selectedSize,
-    )?.sold_out === true
+  const variantIsSoldOut = selectedProduct.sold_out === true
 
   useEffect(() => {
     facebookPixelViewContent(
-      paramsProduct_type,
-      state.selectedVariant,
-      state.price,
+      collection_name,
+      selectedProduct.name,
+      selectedProduct.price,
     )
     googleAnalyticsViewItem(
-      paramsProduct_type,
-      state.selectedVariant,
-      state.price,
+      collection_name,
+      selectedProduct.name,
+      selectedProduct.price,
     )
-  }, [paramsProduct_type, state.selectedVariant])
+  }, [collection_name, selectedProduct.name, selectedProduct.price])
 
   return (
     <>
@@ -480,7 +277,7 @@ function Main({
         >
           <div className="relative aspect-square">
             <Image
-              src={`${envClient.MINIO_PRODUCT_URL}/${paramsProduct_type}/${page.size_chart}`}
+              src={`${envClient.MINIO_PRODUCT_URL}/${collection}/${page.size_chart}`}
               alt={page.size_chart}
               fill
               style={{ objectFit: 'cover' }}
@@ -489,7 +286,7 @@ function Main({
         </Modal>
       )}
 
-      <Modal
+      {/* <Modal
         opened={upsellModal}
         onClose={() => {
           closeUpsellModal()
@@ -762,17 +559,17 @@ function Main({
               </div>
             )}
         </>
-      </Modal>
+      </Modal> */}
 
       <main className="flex-1">
         <div className="md:flex">
           <div className="md:w-1/2">
             <Carousel withIndicators>
-              {state.images.map((img) => (
+              {selectedProduct.images.map((img) => (
                 <Carousel.Slide key={img}>
                   <div className="relative aspect-[1/1.15]">
                     <Image
-                      src={`${envClient.MINIO_PRODUCT_URL}/${paramsProduct_type}/${img}`}
+                      src={`${envClient.MINIO_PRODUCT_URL}/${collection_name}/${img}`}
                       alt={img}
                       fill
                       style={{ objectFit: 'cover' }}
@@ -791,15 +588,15 @@ function Main({
           </div>
           <div className="m-4 mb-8 md:w-1/2 md:mt-0 md:flex md:flex-col">
             <div className="flex gap-2 text-xl xl:text-2xl">
-              <Link href={`${ROUTE_COLLECTION}/${paramsProduct_type}`}>
-                {paramsProduct_type}
+              <Link href={`${ROUTE_COLLECTION}/${collection_name}`}>
+                {collection_name}
               </Link>
               <p>/</p>
-              <h1 className="text-xl xl:text-2xl">{state.selectedVariant}</h1>
+              <h1 className="text-xl xl:text-2xl">{selectedName}</h1>
             </div>
 
             <div className="flex items-center mb-4">
-              {postgres_reviews.length > 0 && (
+              {reviews.length > 0 && (
                 <Link
                   href="#reviews"
                   scroll={true}
@@ -808,10 +605,10 @@ function Main({
                   {Array.from(
                     {
                       length: Math.round(
-                        postgres_reviews.reduce(
+                        reviews.reduce(
                           (sum, review) => sum + review.rating,
                           0,
-                        ) / postgres_reviews.length,
+                        ) / reviews.length,
                       ),
                     },
                     (_, i) => (
@@ -823,25 +620,25 @@ function Main({
                     ),
                   )}
                   <span className="ml-2 proxima-nova text-sm xl:text-base">
-                    ({postgres_reviews.length} κριτικές)
+                    ({reviews.length} κριτικές)
                   </span>
                 </Link>
               )}
               <div className="flex gap-2 ml-auto">
-                {state.price_before > 0 && (
-                  <h2 className="text-xl xl:text-2xl text-[var(--mantine-border)] line-through decoration-red-500">{`${state.price_before}€`}</h2>
+                {selectedProduct?.price_before && (
+                  <h2 className="text-xl xl:text-2xl text-[var(--mantine-border)] line-through decoration-red-500">{`${selectedProduct.price_before}€`}</h2>
                 )}
-                <h2 className="text-xl xl:text-2xl">{`${state.price}€`}</h2>
+                <h2 className="text-xl xl:text-2xl">{`${selectedProduct.price}€`}</h2>
               </div>
             </div>
 
-            {state.description && (
+            {selectedProduct.description && (
               <p className="mb-4 whitespace-pre-line proxima-nova xl:text-lg">
-                {state.description}
+                {selectedProduct.description}
               </p>
             )}
 
-            {state.displayedBrands.length > 1 && (
+            {displayed_brands.length > 1 && (
               <div className="mb-2">
                 <h1 className="text-xl xl:text-2xl">Μάρκα</h1>
                 <div
@@ -852,7 +649,7 @@ function Main({
                       : 'border-b-[var(--mantine-border)]'
                   } hover:border-2 hover:rounded-lg hover:border-red-500`}
                 >
-                  {state.selectedBrand === '' ? (
+                  {selectedBrand === '' ? (
                     <UnstyledButton
                       style={{
                         height: '48px',
@@ -870,8 +667,8 @@ function Main({
                   ) : (
                     <div className="relative w-full max-w-96 h-12">
                       <Image
-                        src={`${envClient.MINIO_PRODUCT_URL}/brands/${state.selectedBrand}`}
-                        alt={state.selectedBrand}
+                        src={`${envClient.MINIO_PRODUCT_URL}/brands/${selectedBrand}`}
+                        alt={selectedBrand}
                         fill
                       />
                     </div>
@@ -897,15 +694,10 @@ function Main({
                       }}
                       className="flex flex-col gap-1 max-h-96 overflow-y-auto p-1 border rounded-lg mt-0.5"
                     >
-                      {state.selectedBrand !== '' && (
+                      {selectedBrand !== '' && (
                         <>
                           <div
-                            onClick={() =>
-                              dispatch({
-                                type: 'brand',
-                                payload: { selectedBrand: '' },
-                              })
-                            }
+                            onClick={() => setSelectedBrand('')}
                             className="p-1 border border-white rounded-lg hover:border-red-500"
                           >
                             <UnstyledButton
@@ -921,25 +713,22 @@ function Main({
                               καμία μάρκα
                             </UnstyledButton>
                           </div>
-                          {state.displayedBrands.length !== 1 && (
+                          {displayed_brands.length !== 1 && (
                             <hr className="w-full border-t-2 border-[var(--mantine-border)]" />
                           )}
                         </>
                       )}
-                      {state.displayedBrands
-                        .filter((brand) => brand !== state.selectedBrand)
+                      {displayed_brands
+                        .filter((brand) => brand !== selectedBrand)
                         .map((brand, index, array) => (
                           <Fragment key={index}>
                             <div
                               onClick={() => {
-                                dispatch({
-                                  type: 'brand',
-                                  payload: { selectedBrand: brand },
-                                })
+                                setSelectedBrand(brand)
                                 window.history.pushState(
                                   {},
                                   '',
-                                  `${ROUTE_PRODUCT}/${paramsProduct_type}`,
+                                  `${ROUTE_PRODUCT}/${collection_name}`,
                                 )
                               }}
                               className="p-1 border border-white rounded-lg hover:border-red-500"
@@ -963,23 +752,18 @@ function Main({
               </div>
             )}
 
-            {state.displayedVariants.length > 1 && (
+            {displayed_products.length > 1 && (
               <div id="variant" className="mb-2">
                 <div className="flex gap-2 items-center">
                   <h1 className="text-xl xl:text-2xl">Μοντέλο</h1>
                   {doNotFindYourMoto && (
                     <button
                       onClick={() => {
-                        dispatch({
-                          type: 'variant',
-                          payload: {
-                            selectedVariant: specialVariant[0],
-                          },
-                        })
+                        setSelectedName(special_products[0])
                         window.history.pushState(
                           {},
                           '',
-                          `${ROUTE_PRODUCT}/${paramsProduct_type}/${specialVariant[0]}`,
+                          `${ROUTE_PRODUCT}/${collection_name}/${special_products[0]}`,
                         )
                       }}
                       className="ml-auto proxima-nova !text-xs lg:!text-lg text-red-500 hover:underline hover:cursor-pointer"
@@ -1007,13 +791,11 @@ function Main({
                     className="proxima-nova"
                     classNames={{
                       root: `!text-lg !xl:text-xl ${
-                        specialVariant.includes(state.selectedVariant)
-                          ? '!italic'
-                          : ''
+                        special_products.includes(selectedName) ? '!italic' : ''
                       }`,
                     }}
                   >
-                    {state.selectedVariant}
+                    {selectedName}
                   </UnstyledButton>
                   <motion.span
                     className="ml-auto"
@@ -1036,20 +818,17 @@ function Main({
                       }}
                       className="flex flex-col gap-1 max-h-96 overflow-y-auto p-1 border rounded-lg mt-0.5"
                     >
-                      {state.displayedVariants
-                        .filter((variant) => variant !== state.selectedVariant)
-                        .map((variant, index, array) => (
+                      {displayed_products
+                        .filter((prod) => prod.name !== selectedName)
+                        .map(({ name }, index, array) => (
                           <Fragment key={index}>
                             <div
                               onClick={() => {
-                                dispatch({
-                                  type: 'variant',
-                                  payload: { selectedVariant: variant },
-                                })
+                                setSelectedName(name)
                                 window.history.pushState(
                                   {},
                                   '',
-                                  `${ROUTE_PRODUCT}/${paramsProduct_type}/${variant}`,
+                                  `${ROUTE_PRODUCT}/${collection.name}/${name}`,
                                 )
                               }}
                               className="proxima-nova flex justify-center p-1 border border-white rounded-lg hover:border-red-500"
@@ -1064,13 +843,13 @@ function Main({
                                 className="proxima-nova"
                                 classNames={{
                                   root: `!text-lg !xl:text-xl ${
-                                    specialVariant.includes(variant)
+                                    special_products.includes(name)
                                       ? '!italic'
                                       : ''
                                   }`,
                                 }}
                               >
-                                {variant}
+                                {name}
                               </UnstyledButton>
                             </div>
                             {index !== array.length - 1 && (
@@ -1084,7 +863,7 @@ function Main({
               </div>
             )}
 
-            {specialVariant.includes(state.selectedVariant) && (
+            {special_products.includes(selectedName) && (
               <Textarea
                 ref={customRef}
                 autosize
@@ -1101,27 +880,24 @@ function Main({
               />
             )}
 
-            {state.displayedColors.length > 0 && (
+            {displayed_colors.length > 0 && (
               <div className="mb-2">
                 <h1 className="mb-1 text-xl xl:text-2xl">Χρώμα</h1>
                 <div className="flex gap-2">
-                  {state.displayedColors.map((color, index) => {
-                    return color === state.selectedColor ? (
+                  {displayed_colors.map(({ color }, index) => {
+                    return color === selectedColor ? (
                       <div
                         key={index}
                         onClick={() => {
-                          dispatch({
-                            type: 'color',
-                            payload: { selectedColor: color },
-                          })
+                          setSelectedColor(color)
                           window.history.pushState(
                             {},
                             '',
-                            `${ROUTE_PRODUCT}/${paramsProduct_type}/${state.selectedVariant}?color=${color}`,
+                            `${ROUTE_PRODUCT}/${collection_name}/${selectedName}?color=${color}`,
                           )
                         }}
                         className={`w-11 h-11 rounded-full p-0.5 border-2 ${
-                          state.selectedColor === color
+                          selectedColor === color
                             ? 'border-black'
                             : 'border-[var(--mantine-border)]'
                         } hover:cursor-pointer`}
@@ -1135,14 +911,11 @@ function Main({
                       <div
                         key={index}
                         onClick={() => {
-                          dispatch({
-                            type: 'color',
-                            payload: { selectedColor: color },
-                          })
+                          setSelectedColor(color)
                           window.history.pushState(
                             {},
                             '',
-                            `${ROUTE_PRODUCT}/${paramsProduct_type}/${state.selectedVariant}?color=${color}`,
+                            `${ROUTE_PRODUCT}/${collection_name}/${selectedName}?color=${color}`,
                           )
                         }}
                         style={{ backgroundColor: color }}
@@ -1156,8 +929,8 @@ function Main({
               </div>
             )}
 
-            {state.displayedSizes.length > 0 &&
-              (paramsProduct_type === specialProductType ? (
+            {displayed_sizes.length > 0 &&
+              (collection.name === specialProductType ? (
                 <div>
                   <h1 className="mb-1 text-xl xl:text-2xl">Συσκευή</h1>
                   <div
@@ -1181,7 +954,7 @@ function Main({
                         root: '!text-lg !xl:text-xl',
                       }}
                     >
-                      {state.selectedSize}
+                      {selectedSize}
                     </UnstyledButton>
                     <motion.span
                       className="ml-auto"
@@ -1204,17 +977,12 @@ function Main({
                         }}
                         className="flex flex-col gap-1 max-h-96 overflow-y-auto p-1 border rounded-lg mt-0.5"
                       >
-                        {state.displayedSizes
-                          .filter((size) => size !== state.selectedSize)
+                        {displayed_sizes
+                          .filter((size) => size !== selectedSize)
                           .map((size, index, array) => (
                             <Fragment key={index}>
                               <div
-                                onClick={() => {
-                                  dispatch({
-                                    type: 'size',
-                                    payload: { selectedSize: size },
-                                  })
-                                }}
+                                onClick={() => setSelectedSize(size)}
                                 className="proxima-nova flex justify-center p-1 border border-white rounded-lg hover:border-red-500"
                               >
                                 <UnstyledButton
@@ -1258,27 +1026,21 @@ function Main({
                     )}
                   </div>
                   <div className="flex gap-2">
-                    {state.displayedSizes.map((size, index) => {
+                    {displayed_sizes.map((size, index) => {
                       const sizeVariantIsSoldOut =
-                        postgresVariants.find(
-                          (variant) =>
-                            variant.product_type === paramsProduct_type &&
-                            variant.name === state.selectedVariant &&
-                            variant.color === state.selectedColor &&
-                            variant.size === size,
+                        products.find(
+                          (prod) =>
+                            prod.name === selectedName &&
+                            prod.color === selectedColor &&
+                            size === selectedSize,
                         )?.sold_out === true
 
                       return (
                         <div
                           key={index}
-                          onClick={() =>
-                            dispatch({
-                              type: 'size',
-                              payload: { selectedSize: size },
-                            })
-                          }
+                          onClick={() => setSelectedSize(size)}
                           className={`w-12 h-[42px] border-2 rounded-lg ${
-                            state.selectedSize === size
+                            selectedProduct.size === size
                               ? 'border-black'
                               : 'border-[var(--mantine-border)]'
                           }`}
@@ -1345,7 +1107,7 @@ function Main({
               <Button
                 disabled={variantIsSoldOut}
                 onClick={() => {
-                  if (specialVariant.includes(state.selectedVariant)) {
+                  if (special_products.includes(selectedProduct.name)) {
                     const textAreaValueLength =
                       customRef.current!.value.trim().length
                     if (textAreaValueLength < 3) {
@@ -1362,19 +1124,20 @@ function Main({
                     }
                   }
 
-                  if (upsellProductVariant) {
-                    openUpsellModal()
-                  } else {
-                    setIsCartOpen(true)
-                  }
+                  // if (upsellProductVariant) {
+                  //   openUpsellModal()
+                  // } else {
+                  //   setIsCartOpen(true)
+                  // }
+                  setIsCartOpen(true)
 
                   setCart((prev) => {
                     const existingIndex = prev.findIndex(
                       (item) =>
-                        item.product_type === paramsProduct_type &&
-                        item.name === state.selectedVariant &&
-                        item.color === state.selectedColor &&
-                        item.size === state.selectedSize,
+                        item.product_type === collection_name &&
+                        item.name === selectedProduct.name &&
+                        item.color === selectedProduct.color &&
+                        item.size === selectedProduct.size,
                     )
                     if (existingIndex !== -1) {
                       const updatedCart = [...prev]
@@ -1387,15 +1150,15 @@ function Main({
                       return [
                         ...prev,
                         {
-                          image: state.images[0],
-                          product_type: paramsProduct_type,
-                          name: specialVariant.includes(state.selectedVariant)
+                          image: selectedProduct.images[0],
+                          product_type: collection_name,
+                          name: special_products.includes(selectedProduct.name)
                             ? customRef.current!.value.trim()
-                            : state.selectedVariant,
-                          color: state.selectedColor || '',
-                          size: state.selectedSize || '',
-                          price: state.price,
-                          price_before: state.price_before,
+                            : selectedProduct.name,
+                          color: selectedProduct.color,
+                          size: selectedProduct.size,
+                          price: selectedProduct.price,
+                          price_before: selectedProduct.price_before,
                           quantity: count,
                         },
                       ]
@@ -1404,21 +1167,21 @@ function Main({
                   handlers.reset()
 
                   facebookPixelAddToCart(
-                    state.price,
+                    selectedProduct.price,
                     count,
-                    paramsProduct_type,
-                    state.selectedVariant,
-                    state.selectedColor,
-                    state.selectedSize,
+                    collection_name,
+                    selectedProduct.name,
+                    selectedProduct.color,
+                    selectedProduct.size,
                   )
 
                   googleAnalyticsAddToCart(
-                    state.price,
+                    selectedProduct.price,
                     count,
-                    paramsProduct_type,
-                    state.selectedVariant,
-                    state.selectedColor,
-                    state.selectedSize,
+                    collection_name,
+                    selectedProduct.name,
+                    selectedProduct.color,
+                    selectedProduct.size,
                   )
                 }}
                 color="red"
@@ -1481,13 +1244,13 @@ function Main({
 
         <ProductImages
           images={page.images}
-          productType={paramsProduct_type}
+          productType={collection_name}
           className="md:hidden flex flex-col gap-4 my-8"
         />
 
         <ProductImages
           images={page.images}
-          productType={paramsProduct_type}
+          productType={collection_name}
           className={`hidden md:gap-4 my-8 ${
             page.images.length === 1 ? 'md:flex md:justify-center' : 'md:grid'
           }`}
@@ -1543,7 +1306,7 @@ function Main({
               <h1 className="mb-2 text-center text-xl xl:text-2xl">
                 Αξιολογήσεις
               </h1>
-              {reviews.map((review, index) => (
+              {Array.from(reviews).map((review, index) => (
                 <div
                   key={index}
                   className={`p-2 xl:text-lg border-[var(--mantine-border)] border-b-2 ${
@@ -1575,13 +1338,10 @@ function Main({
                 </div>
               ))}
               <Pagination
-                total={Math.ceil(postgres_reviews.length / 5)}
+                total={Math.ceil(reviews.length / 5)}
                 onChange={(pageNumber) =>
                   setReviews(
-                    postgres_reviews.slice(
-                      (pageNumber - 1) * 5,
-                      pageNumber * 5,
-                    ),
+                    reviews.slice((pageNumber - 1) * 5, pageNumber * 5),
                   )
                 }
                 mt="xs"
@@ -1613,7 +1373,7 @@ function Main({
                       </div>
                       <div className="relative aspect-square">
                         <Image
-                          src={`${envClient.MINIO_PRODUCT_URL}/${paramsProduct_type}/${image}`}
+                          src={`${envClient.MINIO_PRODUCT_URL}/${collection}/${image}`}
                           alt={image}
                           fill
                           style={{ objectFit: 'cover' }}
@@ -1632,16 +1392,12 @@ function Main({
             href="#variant"
             scroll={true}
             onClick={() => {
-              dispatch({
-                type: 'variant',
-                payload: {
-                  selectedVariant: specialVariant[0],
-                },
-              })
+              const special_variant = special_products[0]
+              setSelectedName(special_variant)
               window.history.pushState(
                 {},
                 '',
-                `${ROUTE_PRODUCT}/${paramsProduct_type}/${specialVariant[0]}`,
+                `${ROUTE_PRODUCT}/${collection_name}/${special_variant}`,
               )
             }}
             className="block mx-4 mb-8 text-red-500 text-center text-lg hover:underline"

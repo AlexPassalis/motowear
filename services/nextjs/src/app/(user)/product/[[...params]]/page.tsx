@@ -4,7 +4,7 @@ import {
   getPagesCached,
   getProductTypesCached,
   getProductPageDataCached,
-  getProductTypeReviewsCached,
+  getReviewsCollectionCached,
 } from '@/app/(user)/cache'
 import { notFound, redirect } from 'next/navigation'
 import { ROUTE_ERROR } from '@/data/routes'
@@ -22,134 +22,101 @@ export default async function ProductPage({
   params,
   searchParams,
 }: ProductPageProps) {
-  const resolved_1 = await Promise.allSettled([
+  const results_1 = await Promise.allSettled([
     params,
     searchParams,
     getProductTypesCached(),
     getPagesCached(),
     getShippingCached(),
   ])
-  resolved_1.forEach((result, index) => {
-    if (result.status !== 'rejected') {
-      return
-    }
 
-    const err = result.reason
-    if (index < 2) {
-      const location = `${ERROR.unexpected} resolved_1 index: ${index}`
-      handleError(location, err)
+  if (results_1[0].status === 'rejected') {
+    const location = `${ERROR.unexpected} params rejected`
+    const err = results_1[0].reason
+    handleError(location, err)
 
-      redirect(`${ROUTE_ERROR}?message=${ERROR.unexpected}`)
-    } else {
-      const location = `${ERROR.postgres} resolved_1 index: ${index}`
-      handleError(location, err)
-
-      redirect(`${ROUTE_ERROR}?message=${ERROR.postgres}`)
-    }
-  })
-
-  const resolved_params = (resolved_1[0] as PromiseFulfilledResult<typeParams>)
-    .value
-  if (!resolved_params.params || resolved_params.params.length < 1) {
-    notFound()
+    redirect(`${ROUTE_ERROR}?message=${ERROR.unexpected}`)
   }
-  const params_product_type = decodeURIComponent(resolved_params.params[0]!)
-  const variant = resolved_params.params?.[1]
-    ? decodeURIComponent(resolved_params.params?.[1])
-    : undefined
 
-  const resolved_search_params = (
-    resolved_1[1] as PromiseFulfilledResult<{
-      color?: string
-    }>
-  ).value
-  const search_params_color = resolved_search_params?.color
+  if (results_1[1].status === 'rejected') {
+    const location = `${ERROR.unexpected} searchParams rejected`
+    const err = results_1[1].reason
+    handleError(location, err)
 
-  const product_types = (
-    resolved_1[2] as PromiseFulfilledResult<
-      Awaited<ReturnType<typeof getProductTypesCached>>
-    >
-  ).value
-  const pages = (
-    resolved_1[3] as PromiseFulfilledResult<
-      Awaited<ReturnType<typeof getPagesCached>>
-    >
-  ).value
-  const shipping = (
-    resolved_1[4] as PromiseFulfilledResult<
-      Awaited<ReturnType<typeof getShippingCached>>
-    >
-  ).value
+    redirect(`${ROUTE_ERROR}?message=${ERROR.unexpected}`)
+  }
 
-  const resolved_2 = await Promise.allSettled([
-    getProductPageDataCached(params_product_type),
-    getProductTypeReviewsCached(params_product_type),
-  ])
-  resolved_2.forEach((result, index) => {
-    if (result.status !== 'rejected') {
-      return
-    }
-
-    const err = result.reason
-    const location = `${ERROR.postgres} resolved_2 index: ${index}`
+  if (results_1[2].status === 'rejected') {
+    const location = `${ERROR.postgres} getProductTypesCached`
+    const err = results_1[2].reason
     handleError(location, err)
 
     redirect(`${ROUTE_ERROR}?message=${ERROR.postgres}`)
-  })
+  }
 
-  const variants = (
-    resolved_2[0] as PromiseFulfilledResult<
-      Awaited<ReturnType<typeof getProductPageDataCached>>
-    >
-  ).value
+  if (results_1[3].status === 'rejected') {
+    const location = `${ERROR.postgres} getPagesCached`
+    const err = results_1[3].reason
+    handleError(location, err)
 
-  const reviews = (
-    resolved_2[1] as PromiseFulfilledResult<
-      Awaited<ReturnType<typeof getProductTypeReviewsCached>>
-    >
-  ).value
+    redirect(`${ROUTE_ERROR}?message=${ERROR.postgres}`)
+  }
 
-  const params_variant = variant
-    ? variants.find((v) =>
-        search_params_color
-          ? v.name === variant && v.color === search_params_color
-          : v.name === variant,
-      ) ?? undefined
+  if (results_1[4].status === 'rejected') {
+    const location = `${ERROR.postgres} getShippingCached`
+    const err = results_1[4].reason
+    handleError(location, err)
+
+    redirect(`${ROUTE_ERROR}?message=${ERROR.postgres}`)
+  }
+
+  const resolved_params = results_1[0].value
+  if (!resolved_params.params?.[0]) {
+    notFound()
+  }
+  const collection_name = decodeURIComponent(resolved_params.params[0])
+
+  const product = resolved_params.params?.[1]
+    ? decodeURIComponent(resolved_params.params[1])
     : undefined
 
-  const upsells = variants
-    .map((variant) => variant.upsell)
-    .filter((upsell) => upsell !== null)
-    .filter(
-      (upsell, index, self) =>
-        index ===
-        self.findIndex(
-          (other) =>
-            other.product_type === upsell.product_type &&
-            other.name === upsell.name,
-        ),
-    )
+  const resolved_search_params = results_1[1].value
+  const color = resolved_search_params?.color
+    ? decodeURIComponent(resolved_search_params.color)
+    : undefined
 
-  const upsellVariants = variants.filter((variant) =>
-    upsells.some(
-      (upsell) =>
-        upsell.product_type === variant.product_type &&
-        upsell.name === variant.name,
-    ),
+  const product_types = results_1[2].value
+  const pages = results_1[3].value
+  const shipping = results_1[4].value
+
+  const page = pages.find((page) => page.product_type === collection_name)!
+
+  const result_2 = await getProductPageDataCached(collection_name).catch(
+    (err) => {
+      const location = `${ERROR.postgres} getProductPageDataCached`
+      handleError(location, err)
+
+      redirect(`${ROUTE_ERROR}?message=${ERROR.postgres}`)
+    },
   )
 
-  const page = pages.find((page) => page.product_type === params_product_type)!
+  const { collection, reviews, brands, products, upsells } = result_2
+  if (!collection.name || products.length === 0) {
+    return notFound()
+  }
 
   return (
     <ProductPageClient
       product_types={product_types}
-      upsellVariants={upsellVariants}
       page={page}
-      postgres_reviews={reviews}
       shipping={shipping}
-      paramsProduct_type={params_product_type}
-      paramsVariant={params_variant}
-      postgresVariants={variants}
+      reviews={reviews}
+      collection={collection}
+      brands={brands}
+      product={product}
+      color={color}
+      products={products}
+      upsells={upsells}
     />
   )
 }

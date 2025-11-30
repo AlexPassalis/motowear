@@ -1,3 +1,8 @@
+<<<<<<< Updated upstream
+=======
+import '@/startup'
+
+>>>>>>> Stashed changes
 import '@mantine/core/styles.css'
 import '@mantine/carousel/styles.css'
 import '@mantine/dates/styles.css'

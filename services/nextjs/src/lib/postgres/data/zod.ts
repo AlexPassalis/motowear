@@ -58,8 +58,8 @@ export const zodCheckout = z
 export const zodCartItem = z.object({
   product_type: z.string(),
   name: z.string(),
-  color: z.string().default(''),
-  size: z.string().default(''),
+  color: z.string().optional(),
+  size: z.string().optional(),
   price: z.number(),
   quantity: z.number(),
   image: z.string(),

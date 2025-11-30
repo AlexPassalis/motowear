@@ -1,4 +1,4 @@
-import { sql, InferSelectModel } from 'drizzle-orm'
+import { sql, InferSelectModel, relations } from 'drizzle-orm'
 import {
   pgSchema,
   text,
@@ -57,6 +57,79 @@ export const brand = productsSchema.table('brand', {
   index: integer('index').notNull(),
   image: text('image').primaryKey(),
 })
+
+export const collection_v2 = productsSchema.table('collection_v2', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  name: text('name')
+    .notNull()
+    .references(() => product_pages.product_type, {
+      onDelete: 'cascade',
+    }),
+  description: text('description').notNull(),
+  price: Numeric('price', { precision: 7, scale: 2 }).notNull(),
+  price_before: Numeric('price_before', { precision: 7, scale: 2 }).notNull(),
+  sizes: text('sizes').array(),
+  upsell_id: uuid('upsell_id'),
+  sold_out: boolean('sold_out').default(false).notNull(),
+})
+
+export const product_v2 = productsSchema.table('product_v2', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  collection_id: uuid('collection_id')
+    .notNull()
+    .references(() => collection_v2.id, {
+      onDelete: 'cascade',
+    }),
+  name: text('name').notNull(),
+  brand: text('brand').references(() => brand.image, { onDelete: 'set null' }),
+  description: text('description'),
+  price: Numeric('price', { precision: 7, scale: 2 }),
+  price_before: Numeric('price_before', { precision: 7, scale: 2 }),
+  color: text('color'),
+  images: text('images').array().notNull(),
+  upsell_id: uuid('upsell_id'),
+  sold_out: boolean('sold_out'),
+})
+
+export const variant_v2 = productsSchema.table('variant_v2', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  product_id: uuid('product_id')
+    .notNull()
+    .references(() => product_v2.id, {
+      onDelete: 'cascade',
+    }),
+  sizes: text('sizes').array().notNull(),
+})
+
+export const collection_v2_relations = relations(collection_v2, ({ one }) => ({
+  upsell: one(product_v2, {
+    fields: [collection_v2.upsell_id],
+    references: [product_v2.id],
+  }),
+}))
+
+export const product_v2_relations = relations(product_v2, ({ one, many }) => ({
+  collection: one(collection_v2, {
+    fields: [product_v2.collection_id],
+    references: [collection_v2.id],
+  }),
+  upsell: one(product_v2, {
+    fields: [product_v2.upsell_id],
+    references: [product_v2.id],
+    relationName: 'upsell',
+  }),
+  upsold_by: many(product_v2, {
+    relationName: 'upsell',
+  }),
+  variants: many(variant_v2),
+}))
+
+export const variant_v2_relations = relations(variant_v2, ({ one }) => ({
+  product: one(product_v2, {
+    fields: [variant_v2.product_id],
+    references: [product_v2.id],
+  }),
+}))
 
 export const variant = productsSchema.table('variant', {
   product_type: text('product_type')
