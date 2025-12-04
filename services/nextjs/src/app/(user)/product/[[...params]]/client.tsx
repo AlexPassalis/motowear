@@ -1,20 +1,13 @@
 'use client'
 
-import { CSSProperties } from 'react'
+import { CSSProperties, useMemo } from 'react'
 
 import type { typeProductPage } from '@/lib/postgres/data/type'
 
 import type { typeShipping } from '@/utils/getPostgres'
 import type { getProductPageDataCached } from '@/app/(user)/cache'
 
-import {
-  Dispatch,
-  SetStateAction,
-  useEffect,
-  useReducer,
-  useRef,
-  useState,
-} from 'react'
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react'
 import { useCounter, useDisclosure } from '@mantine/hooks'
 import {
   Accordion,
@@ -185,53 +178,89 @@ function Main({
 
   const collection_name = collection.name
 
+  const displayedBrands = brands
   const [selectedBrand, setSelectedBrand] = useState('')
-  const [selectedName, setSelectedName] = useState(product ?? products[0].name)
+  const is_initial_mount = useRef(true)
+  useEffect(() => {
+    if (is_initial_mount.current) {
+      is_initial_mount.current = false
+      return
+    }
+
+    const displayed_names = selectedBrand // Do not filter for the empty string
+      ? products.filter((prod) => prod.brand === selectedBrand)
+      : products
+    setDisplayedNames(displayed_names)
+    setSelectedName(displayed_names[0].name)
+  }, [selectedBrand])
+
+  const [displayedNames, setDisplayedNames] = useState(
+    products.filter((prod) => prod.name === (product ?? products[0].name)),
+  )
+  const [selectedName, setSelectedName] = useState(displayedNames[0].name)
+  useEffect(() => {
+    const displayed_colors = displayedNames.filter(
+      (prod) => prod.name === selectedName && prod?.color,
+    )
+    setDisplayedColors(displayed_colors)
+    setSelectedColor(displayed_colors[0]?.color ?? null)
+  }, [selectedName])
+
+  const [displayedColors, setDisplayedColors] = useState(
+    displayedNames.filter((prod) => prod.name === selectedName && prod?.color),
+  )
   const [selectedColor, setSelectedColor] = useState(
-    color ?? products.find((prod) => prod.name === selectedName)?.color ?? null,
+    color ?? displayedColors[0]?.color ?? null,
   )
-  const [selectedSize, setSelectedSize] = useState(
-    products.find((prod) => prod.name === selectedName)?.sizes?.[0] ||
-      collection.sizes?.[0] ||
-      null,
+  useEffect(() => {
+    const displayed_sizes =
+      displayedColors.find((prod) => prod?.color === selectedColor)?.sizes ?? []
+    setDisplayedSizes(displayed_sizes)
+    setSelectedSize(displayed_sizes[0] ?? null)
+  }, [selectedColor])
+
+  const [displayedSizes, setDisplayedSizes] = useState(
+    selectedColor
+      ? displayedColors.find((prod) => prod?.color === selectedColor)?.sizes ??
+          []
+      : [],
+  )
+  const [selectedSize, setSelectedSize] = useState(displayedSizes[0] ?? null)
+
+  const found_product = useMemo(
+    () =>
+      products.find(
+        (prod) =>
+          prod.name === selectedName &&
+          (selectedColor === null || prod.color === selectedColor) &&
+          (selectedSize === null ||
+            prod.sizes?.includes(selectedSize) ||
+            collection.sizes?.includes(selectedSize)),
+      )!,
+    [selectedBrand, selectedName, selectedColor, selectedSize],
+  )
+  const selectedProduct = useMemo(
+    () => ({
+      id: found_product.id,
+      name: found_product.name,
+      brand: found_product.brand ?? null,
+      description: found_product.description ?? collection.description,
+      price: found_product.price ?? collection.price,
+      price_before: found_product.price_before ?? collection.price_before,
+      images: found_product.images,
+      color: found_product.color ?? null,
+      size: selectedSize,
+      upsell_id: found_product.upsell_id ?? collection.upsell_id,
+      sold_out: found_product.sold_out ?? collection.sold_out,
+    }),
+    [found_product],
   )
 
-  const found_product = products.find(
-    (prod) =>
-      prod.name === selectedName &&
-      (selectedColor === null || prod.color === selectedColor) &&
-      (selectedSize === null ||
-        prod.sizes?.includes(selectedSize) ||
-        collection.sizes?.includes(selectedSize)),
-  )!
-  console.log('found_product', found_product)
-  const selectedProduct = {
-    id: found_product.id,
-    name: found_product.name,
-    brand: found_product.brand ?? null,
-    description: found_product.description ?? collection.description,
-    price: found_product.price ?? collection.price,
-    price_before: found_product.price_before ?? collection.price_before,
-    images: found_product.images,
-    color: found_product.color ?? null,
-    size: selectedSize,
-    upsell_id: found_product.upsell_id ?? collection.upsell_id,
-    sold_out: found_product.sold_out ?? collection.sold_out,
-  }
-
-  const displayed_brands = brands
-
-  const displayed_products = selectedBrand
-    ? products.filter((prod) => prod.brand === selectedBrand)
-    : products
-
-  const displayed_colors = displayed_products.filter(
-    (prod) => prod.name === selectedName,
-  )
-
-  const displayed_sizes = selectedColor
-    ? displayed_colors.find((prod) => prod.color === selectedColor)?.sizes || []
-    : displayed_colors[0]?.sizes || collection.sizes || []
+  console.log('displayedBrands', displayedBrands)
+  console.log('displayedNames', displayedNames)
+  console.log('displayedColors', displayedColors)
+  console.log('displayedSizes', displayedSizes)
+  console.log('selectedProduct', selectedProduct)
 
   const [count, handlers] = useCounter(0, { min: 1, max: 9 })
   const [
@@ -639,7 +668,7 @@ function Main({
               </p>
             )}
 
-            {displayed_brands.length > 1 && (
+            {displayedBrands.length > 1 && (
               <div className="mb-2">
                 <h1 className="text-xl xl:text-2xl">Μάρκα</h1>
                 <div
@@ -714,12 +743,12 @@ function Main({
                               καμία μάρκα
                             </UnstyledButton>
                           </div>
-                          {displayed_brands.length !== 1 && (
+                          {displayedBrands.length !== 1 && (
                             <hr className="w-full border-t-2 border-[var(--mantine-border)]" />
                           )}
                         </>
                       )}
-                      {displayed_brands
+                      {displayedBrands
                         .filter((brand) => brand !== selectedBrand)
                         .map((brand, index, array) => (
                           <Fragment key={index}>
@@ -753,7 +782,7 @@ function Main({
               </div>
             )}
 
-            {displayed_products.length > 1 && (
+            {displayedNames.length > 1 && (
               <div id="variant" className="mb-2">
                 <div className="flex gap-2 items-center">
                   <h1 className="text-xl xl:text-2xl">Μοντέλο</h1>
@@ -819,7 +848,7 @@ function Main({
                       }}
                       className="flex flex-col gap-1 max-h-96 overflow-y-auto p-1 border rounded-lg mt-0.5"
                     >
-                      {displayed_products
+                      {displayedNames
                         .filter((prod) => prod.name !== selectedName)
                         .map(({ name }, index, array) => (
                           <Fragment key={index}>
@@ -881,11 +910,11 @@ function Main({
               />
             )}
 
-            {displayed_colors.length > 0 && (
+            {displayedColors.length > 0 && (
               <div className="mb-2">
                 <h1 className="mb-1 text-xl xl:text-2xl">Χρώμα</h1>
                 <div className="flex gap-2">
-                  {displayed_colors.map(({ color }, index) => {
+                  {displayedColors.map(({ color }, index) => {
                     return color === selectedColor ? (
                       <div
                         key={index}
@@ -930,7 +959,7 @@ function Main({
               </div>
             )}
 
-            {displayed_sizes.length > 0 &&
+            {displayedSizes.length > 0 &&
               (collection.name === specialProductType ? (
                 <div>
                   <h1 className="mb-1 text-xl xl:text-2xl">Συσκευή</h1>
@@ -978,7 +1007,7 @@ function Main({
                         }}
                         className="flex flex-col gap-1 max-h-96 overflow-y-auto p-1 border rounded-lg mt-0.5"
                       >
-                        {displayed_sizes
+                        {displayedSizes
                           .filter((size) => size !== selectedSize)
                           .map((size, index, array) => (
                             <Fragment key={index}>
@@ -1027,7 +1056,7 @@ function Main({
                     )}
                   </div>
                   <div className="flex gap-2">
-                    {displayed_sizes.map((size, index) => {
+                    {displayedSizes.map((size, index) => {
                       const sizeVariantIsSoldOut =
                         products.find(
                           (prod) =>
