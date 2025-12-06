@@ -1,13 +1,19 @@
 'use client'
 
-import { CSSProperties, useMemo } from 'react'
-
 import type { typeProductPage } from '@/lib/postgres/data/type'
 
 import type { typeShipping } from '@/utils/getPostgres'
 import type { getProductPageDataCached } from '@/app/(user)/cache'
 
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react'
+import {
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useRef,
+  useState,
+  useReducer,
+  CSSProperties,
+} from 'react'
 import { useCounter, useDisclosure } from '@mantine/hooks'
 import {
   Accordion,
@@ -158,6 +164,172 @@ type MainProps = {
   setSizeDropdown: Dispatch<SetStateAction<boolean>>
 }
 
+type ReducerState = {
+  selectedBrand: string
+  displayedNames: MainProps['products']
+  selectedName: string
+  displayedColors: MainProps['products']
+  selectedColor: string | null
+  displayedSizes: string[]
+  selectedSize: string | null
+  selectedProduct: Omit<MainProps['products'][0], 'price' | 'price_before'> & {
+    price: number
+    price_before: number
+  }
+}
+
+type ReducerAction =
+  | { type: 'CHANGE_BRAND'; payload: string }
+  | { type: 'CHANGE_NAME'; payload: string }
+  | { type: 'CHANGE_COLOR'; payload: string | null }
+  | { type: 'CHANGE_SIZE'; payload: string | null }
+
+function create_reducer(
+  collection: MainProps['collection'],
+  products: MainProps['products'],
+) {
+  return function reducer(
+    state: ReducerState,
+    action: ReducerAction,
+  ): ReducerState {
+    switch (action.type) {
+      case 'CHANGE_BRAND': {
+        const selected_brand = action.payload
+
+        const displayed_names = selected_brand
+          ? products.filter((prod) => prod.brand === selected_brand)
+          : products
+
+        const selected_name = displayed_names[0].name
+        const displayed_colors = displayed_names.filter(
+          (prod) => prod.name === selected_name && prod?.color,
+        )
+        const selected_color = displayed_colors[0]?.color ?? null
+
+        let displayed_sizes =
+          displayed_colors.find((prod) => prod?.color === selected_color)
+            ?.sizes ?? []
+        if (displayed_sizes.length === 0 && selected_color === null) {
+          const product_without_color = displayed_names.find(
+            (prod) => prod.name === selected_name,
+          )
+          displayed_sizes = product_without_color?.sizes ?? []
+        }
+
+        const found_product =
+          displayed_colors.find((prod) => prod.color === selected_color) ??
+          displayed_names[0]
+
+        return {
+          ...state,
+          selectedBrand: selected_brand,
+          displayedNames: displayed_names,
+          selectedName: selected_name,
+          displayedColors: displayed_colors,
+          selectedColor: selected_color,
+          displayedSizes: displayed_sizes,
+          selectedSize: displayed_sizes[0] ?? null,
+          selectedProduct: {
+            ...found_product,
+            price: found_product.price ?? collection.price,
+            price_before:
+              found_product.price_before ?? collection.price_before ?? 0,
+          },
+        }
+      }
+      case 'CHANGE_NAME': {
+        const selected_name = action.payload
+
+        const displayed_colors = state.displayedNames.filter(
+          (prod) => prod.name === selected_name && prod?.color,
+        )
+        const selected_color = displayed_colors[0]?.color ?? null
+
+        let displayed_sizes =
+          displayed_colors.find((prod) => prod?.color === selected_color)
+            ?.sizes ?? []
+        if (displayed_sizes.length === 0 && selected_color === null) {
+          const product_without_color = state.displayedNames.find(
+            (prod) => prod.name === selected_name,
+          )
+          displayed_sizes = product_without_color?.sizes ?? []
+        }
+
+        const found_product =
+          displayed_colors.find((prod) => prod.color === selected_color) ??
+          state.displayedNames.find((prod) => prod.name === selected_name)!
+
+        return {
+          ...state,
+          selectedName: selected_name,
+          displayedColors: displayed_colors,
+          selectedColor: selected_color,
+          displayedSizes: displayed_sizes,
+          selectedSize: displayed_sizes[0] ?? null,
+          selectedProduct: {
+            ...found_product,
+            price: found_product.price ?? collection.price,
+            price_before:
+              found_product.price_before ?? collection.price_before ?? 0,
+          },
+        }
+      }
+      case 'CHANGE_COLOR': {
+        const selected_color = action.payload
+
+        let displayed_sizes =
+          state.displayedColors.find((prod) => prod?.color === selected_color)
+            ?.sizes ?? []
+        if (displayed_sizes.length === 0 && selected_color === null) {
+          const product_without_color = state.displayedNames.find(
+            (prod) => prod.name === state.selectedName,
+          )
+          displayed_sizes = product_without_color?.sizes ?? []
+        }
+
+        const found_product = state.displayedColors.find(
+          (prod) => prod.color === selected_color,
+        )!
+
+        return {
+          ...state,
+          selectedColor: selected_color,
+          displayedSizes: displayed_sizes,
+          selectedSize: displayed_sizes[0] ?? null,
+          selectedProduct: {
+            ...found_product,
+            price: found_product.price ?? collection.price,
+            price_before:
+              found_product.price_before ?? collection.price_before ?? 0,
+          },
+        }
+      }
+      case 'CHANGE_SIZE': {
+        const selected_size = action.payload
+
+        const found_product =
+          state.displayedColors.find(
+            (prod) => prod.color === state.selectedColor,
+          ) ??
+          state.displayedNames.find((prod) => prod.name === state.selectedName)!
+
+        return {
+          ...state,
+          selectedSize: selected_size,
+          selectedProduct: {
+            ...found_product,
+            price: found_product.price ?? collection.price,
+            price_before:
+              found_product.price_before ?? collection.price_before ?? 0,
+          },
+        }
+      }
+      default:
+        return state
+    }
+  }
+}
+
 function Main({
   collection,
   product,
@@ -179,88 +351,61 @@ function Main({
   const collection_name = collection.name
 
   const displayedBrands = brands
-  const [selectedBrand, setSelectedBrand] = useState('')
-  const is_initial_mount = useRef(true)
-  useEffect(() => {
-    if (is_initial_mount.current) {
-      is_initial_mount.current = false
-      return
-    }
 
-    const displayed_names = selectedBrand // Do not filter for the empty string
-      ? products.filter((prod) => prod.brand === selectedBrand)
-      : products
-    setDisplayedNames(displayed_names)
-    setSelectedName(displayed_names[0].name)
-  }, [selectedBrand])
+  const [state, dispatch] = useReducer(
+    create_reducer(collection, products),
+    null,
+    () => {
+      const initial_displayed_colors = products.filter(
+        (prod) => prod.name === (product ?? products[0].name) && prod?.color,
+      )
+      const initial_selected_color =
+        color ?? initial_displayed_colors[0]?.color ?? null
 
-  const [displayedNames, setDisplayedNames] = useState(
-    products.filter((prod) => prod.name === (product ?? products[0].name)),
-  )
-  const [selectedName, setSelectedName] = useState(displayedNames[0].name)
-  useEffect(() => {
-    const displayed_colors = displayedNames.filter(
-      (prod) => prod.name === selectedName && prod?.color,
-    )
-    setDisplayedColors(displayed_colors)
-    setSelectedColor(displayed_colors[0]?.color ?? null)
-  }, [selectedName])
+      let initial_displayed_sizes =
+        initial_displayed_colors.find(
+          (prod) => prod?.color === initial_selected_color,
+        )?.sizes ?? []
+      if (
+        initial_displayed_sizes.length === 0 &&
+        initial_selected_color === null
+      ) {
+        const product_without_color = products.find(
+          (prod) => prod.name === (product ?? products[0].name),
+        )
+        initial_displayed_sizes = product_without_color?.sizes ?? []
+      }
 
-  const [displayedColors, setDisplayedColors] = useState(
-    displayedNames.filter((prod) => prod.name === selectedName && prod?.color),
-  )
-  const [selectedColor, setSelectedColor] = useState(
-    color ?? displayedColors[0]?.color ?? null,
-  )
-  useEffect(() => {
-    const displayed_sizes =
-      displayedColors.find((prod) => prod?.color === selectedColor)?.sizes ?? []
-    setDisplayedSizes(displayed_sizes)
-    setSelectedSize(displayed_sizes[0] ?? null)
-  }, [selectedColor])
+      const initial_found_product =
+        products.find(
+          (prod) =>
+            prod.name === (product ?? products[0].name) &&
+            (initial_selected_color === null ||
+              prod.color === initial_selected_color) &&
+            (initial_displayed_sizes[0] === null ||
+              prod.sizes?.includes(initial_displayed_sizes[0]) ||
+              collection.sizes?.includes(initial_displayed_sizes[0])),
+        ) ?? products[0]
 
-  const [displayedSizes, setDisplayedSizes] = useState(
-    selectedColor
-      ? displayedColors.find((prod) => prod?.color === selectedColor)?.sizes ??
-          []
-      : [],
+      return {
+        selectedBrand: '',
+        displayedNames: products,
+        selectedName: product ?? products[0].name,
+        displayedColors: initial_displayed_colors,
+        selectedColor: initial_selected_color,
+        displayedSizes: initial_displayed_sizes,
+        selectedSize: initial_displayed_sizes[0] ?? null,
+        selectedProduct: {
+          ...initial_found_product,
+          price: initial_found_product.price ?? collection.price,
+          price_before:
+            initial_found_product.price_before ?? collection.price_before ?? 0,
+        },
+      }
+    },
   )
-  const [selectedSize, setSelectedSize] = useState(displayedSizes[0] ?? null)
-
-  const found_product = useMemo(
-    () =>
-      products.find(
-        (prod) =>
-          prod.name === selectedName &&
-          (selectedColor === null || prod.color === selectedColor) &&
-          (selectedSize === null ||
-            prod.sizes?.includes(selectedSize) ||
-            collection.sizes?.includes(selectedSize)),
-      )!,
-    [selectedBrand, selectedName, selectedColor, selectedSize],
-  )
-  const selectedProduct = useMemo(
-    () => ({
-      id: found_product.id,
-      name: found_product.name,
-      brand: found_product.brand ?? null,
-      description: found_product.description ?? collection.description,
-      price: found_product.price ?? collection.price,
-      price_before: found_product.price_before ?? collection.price_before,
-      images: found_product.images,
-      color: found_product.color ?? null,
-      size: selectedSize,
-      upsell_id: found_product.upsell_id ?? collection.upsell_id,
-      sold_out: found_product.sold_out ?? collection.sold_out,
-    }),
-    [found_product],
-  )
-
   console.log('displayedBrands', displayedBrands)
-  console.log('displayedNames', displayedNames)
-  console.log('displayedColors', displayedColors)
-  console.log('displayedSizes', displayedSizes)
-  console.log('selectedProduct', selectedProduct)
+  console.log('state', state)
 
   const [count, handlers] = useCounter(0, { min: 1, max: 9 })
   const [
@@ -282,20 +427,20 @@ function Main({
     special_products.includes(prod.name),
   )
 
-  const variantIsSoldOut = selectedProduct.sold_out === true
+  const variantIsSoldOut = state.selectedProduct.sold_out === true
 
   useEffect(() => {
     facebookPixelViewContent(
       collection_name,
-      selectedProduct.name,
-      selectedProduct.price,
+      state.selectedProduct.name,
+      state.selectedProduct.price,
     )
     googleAnalyticsViewItem(
       collection_name,
-      selectedProduct.name,
-      selectedProduct.price,
+      state.selectedProduct.name,
+      state.selectedProduct.price,
     )
-  }, [collection_name, selectedProduct.name, selectedProduct.price])
+  }, [collection_name, state.selectedProduct.name])
 
   return (
     <>
@@ -595,7 +740,7 @@ function Main({
         <div className="md:flex">
           <div className="md:w-1/2">
             <Carousel withIndicators>
-              {selectedProduct.images.map((img) => (
+              {state.selectedProduct.images.map((img) => (
                 <Carousel.Slide key={img}>
                   <div className="relative aspect-[1/1.15]">
                     <Image
@@ -622,7 +767,7 @@ function Main({
                 {collection_name}
               </Link>
               <p>/</p>
-              <h1 className="text-xl xl:text-2xl">{selectedName}</h1>
+              <h1 className="text-xl xl:text-2xl">{state.selectedName}</h1>
             </div>
 
             <div className="flex items-center mb-4">
@@ -655,16 +800,16 @@ function Main({
                 </Link>
               )}
               <div className="flex gap-2 ml-auto">
-                {selectedProduct?.price_before && (
-                  <h2 className="text-xl xl:text-2xl text-[var(--mantine-border)] line-through decoration-red-500">{`${selectedProduct.price_before}€`}</h2>
+                {state.selectedProduct?.price_before && (
+                  <h2 className="text-xl xl:text-2xl text-[var(--mantine-border)] line-through decoration-red-500">{`${state.selectedProduct.price_before}€`}</h2>
                 )}
-                <h2 className="text-xl xl:text-2xl">{`${selectedProduct.price}€`}</h2>
+                <h2 className="text-xl xl:text-2xl">{`${state.selectedProduct.price}€`}</h2>
               </div>
             </div>
 
-            {selectedProduct.description && (
+            {state.selectedProduct.description && (
               <p className="mb-4 whitespace-pre-line proxima-nova xl:text-lg">
-                {selectedProduct.description}
+                {state.selectedProduct.description}
               </p>
             )}
 
@@ -679,7 +824,7 @@ function Main({
                       : 'border-b-[var(--mantine-border)]'
                   } hover:border-2 hover:rounded-lg hover:border-red-500`}
                 >
-                  {selectedBrand === '' ? (
+                  {state.selectedBrand === '' ? (
                     <UnstyledButton
                       style={{
                         height: '48px',
@@ -697,8 +842,8 @@ function Main({
                   ) : (
                     <div className="relative w-full max-w-96 h-12">
                       <Image
-                        src={`${envClient.MINIO_PRODUCT_URL}/brands/${selectedBrand}`}
-                        alt={selectedBrand}
+                        src={`${envClient.MINIO_PRODUCT_URL}/brands/${state.selectedBrand}`}
+                        alt={state.selectedBrand}
                         fill
                       />
                     </div>
@@ -724,10 +869,12 @@ function Main({
                       }}
                       className="flex flex-col gap-1 max-h-96 overflow-y-auto p-1 border rounded-lg mt-0.5"
                     >
-                      {selectedBrand !== '' && (
+                      {state.selectedBrand !== '' && (
                         <>
                           <div
-                            onClick={() => setSelectedBrand('')}
+                            onClick={() =>
+                              dispatch({ type: 'CHANGE_BRAND', payload: '' })
+                            }
                             className="p-1 border border-white rounded-lg hover:border-red-500"
                           >
                             <UnstyledButton
@@ -749,12 +896,15 @@ function Main({
                         </>
                       )}
                       {displayedBrands
-                        .filter((brand) => brand !== selectedBrand)
+                        .filter((brand) => brand !== state.selectedBrand)
                         .map((brand, index, array) => (
                           <Fragment key={index}>
                             <div
                               onClick={() => {
-                                setSelectedBrand(brand)
+                                dispatch({
+                                  type: 'CHANGE_BRAND',
+                                  payload: brand,
+                                })
                                 window.history.pushState(
                                   {},
                                   '',
@@ -782,14 +932,20 @@ function Main({
               </div>
             )}
 
-            {displayedNames.length > 1 && (
+            {state.displayedNames.filter(
+              (prod, index, self) =>
+                index === self.findIndex((other) => other.name === prod.name),
+            ).length > 1 && (
               <div id="variant" className="mb-2">
                 <div className="flex gap-2 items-center">
                   <h1 className="text-xl xl:text-2xl">Μοντέλο</h1>
                   {doNotFindYourMoto && (
                     <button
                       onClick={() => {
-                        setSelectedName(special_products[0])
+                        dispatch({
+                          type: 'CHANGE_NAME',
+                          payload: special_products[0],
+                        })
                         window.history.pushState(
                           {},
                           '',
@@ -821,11 +977,13 @@ function Main({
                     className="proxima-nova"
                     classNames={{
                       root: `!text-lg !xl:text-xl ${
-                        special_products.includes(selectedName) ? '!italic' : ''
+                        special_products.includes(state.selectedName)
+                          ? '!italic'
+                          : ''
                       }`,
                     }}
                   >
-                    {selectedName}
+                    {state.selectedName}
                   </UnstyledButton>
                   <motion.span
                     className="ml-auto"
@@ -848,13 +1006,20 @@ function Main({
                       }}
                       className="flex flex-col gap-1 max-h-96 overflow-y-auto p-1 border rounded-lg mt-0.5"
                     >
-                      {displayedNames
-                        .filter((prod) => prod.name !== selectedName)
+                      {state.displayedNames
+                        .filter(
+                          (prod, index, self) =>
+                            prod.name !== state.selectedName &&
+                            index ===
+                              self.findIndex(
+                                (other) => other.name === prod.name,
+                              ),
+                        )
                         .map(({ name }, index, array) => (
                           <Fragment key={index}>
                             <div
                               onClick={() => {
-                                setSelectedName(name)
+                                dispatch({ type: 'CHANGE_NAME', payload: name })
                                 window.history.pushState(
                                   {},
                                   '',
@@ -893,7 +1058,7 @@ function Main({
               </div>
             )}
 
-            {special_products.includes(selectedName) && (
+            {special_products.includes(state.selectedName) && (
               <Textarea
                 ref={customRef}
                 autosize
@@ -910,24 +1075,27 @@ function Main({
               />
             )}
 
-            {displayedColors.length > 0 && (
+            {state.displayedColors.length > 0 && (
               <div className="mb-2">
                 <h1 className="mb-1 text-xl xl:text-2xl">Χρώμα</h1>
                 <div className="flex gap-2">
-                  {displayedColors.map(({ color }, index) => {
-                    return color === selectedColor ? (
+                  {state.displayedColors.map(({ color }, index) => {
+                    return color === state.selectedColor ? (
                       <div
                         key={index}
                         onClick={() => {
-                          setSelectedColor(color ?? null)
+                          dispatch({
+                            type: 'CHANGE_COLOR',
+                            payload: color ?? null,
+                          })
                           window.history.pushState(
                             {},
                             '',
-                            `${ROUTE_PRODUCT}/${collection_name}/${selectedName}?color=${color}`,
+                            `${ROUTE_PRODUCT}/${collection_name}/${state.selectedName}?color=${color}`,
                           )
                         }}
                         className={`w-11 h-11 rounded-full p-0.5 border-2 ${
-                          selectedColor === color
+                          state.selectedColor === color
                             ? 'border-black'
                             : 'border-[var(--mantine-border)]'
                         } hover:cursor-pointer`}
@@ -941,11 +1109,14 @@ function Main({
                       <div
                         key={index}
                         onClick={() => {
-                          setSelectedColor(color ?? null)
+                          dispatch({
+                            type: 'CHANGE_COLOR',
+                            payload: color ?? null,
+                          })
                           window.history.pushState(
                             {},
                             '',
-                            `${ROUTE_PRODUCT}/${collection_name}/${selectedName}?color=${color}`,
+                            `${ROUTE_PRODUCT}/${collection_name}/${state.selectedName}?color=${color}`,
                           )
                         }}
                         style={{ backgroundColor: color }}
@@ -959,7 +1130,7 @@ function Main({
               </div>
             )}
 
-            {displayedSizes.length > 0 &&
+            {state.displayedSizes.length > 0 &&
               (collection.name === specialProductType ? (
                 <div>
                   <h1 className="mb-1 text-xl xl:text-2xl">Συσκευή</h1>
@@ -984,7 +1155,7 @@ function Main({
                         root: '!text-lg !xl:text-xl',
                       }}
                     >
-                      {selectedSize}
+                      {state.selectedSize}
                     </UnstyledButton>
                     <motion.span
                       className="ml-auto"
@@ -1007,12 +1178,17 @@ function Main({
                         }}
                         className="flex flex-col gap-1 max-h-96 overflow-y-auto p-1 border rounded-lg mt-0.5"
                       >
-                        {displayedSizes
-                          .filter((size) => size !== selectedSize)
+                        {state.displayedSizes
+                          .filter((size) => size !== state.selectedSize)
                           .map((size, index, array) => (
                             <Fragment key={index}>
                               <div
-                                onClick={() => setSelectedSize(size)}
+                                onClick={() =>
+                                  dispatch({
+                                    type: 'CHANGE_SIZE',
+                                    payload: size,
+                                  })
+                                }
                                 className="proxima-nova flex justify-center p-1 border border-white rounded-lg hover:border-red-500"
                               >
                                 <UnstyledButton
@@ -1056,21 +1232,23 @@ function Main({
                     )}
                   </div>
                   <div className="flex gap-2">
-                    {displayedSizes.map((size, index) => {
+                    {state.displayedSizes.map((size, index) => {
                       const sizeVariantIsSoldOut =
                         products.find(
                           (prod) =>
-                            prod.name === selectedName &&
-                            prod.color === selectedColor &&
-                            size === selectedSize,
+                            prod.name === state.selectedName &&
+                            prod.color === state.selectedColor &&
+                            size === state.selectedSize,
                         )?.sold_out === true
 
                       return (
                         <div
                           key={index}
-                          onClick={() => setSelectedSize(size)}
+                          onClick={() =>
+                            dispatch({ type: 'CHANGE_SIZE', payload: size })
+                          }
                           className={`w-12 h-[42px] border-2 rounded-lg ${
-                            selectedProduct.size === size
+                            state.selectedSize === size
                               ? 'border-black'
                               : 'border-[var(--mantine-border)]'
                           }`}
@@ -1137,7 +1315,7 @@ function Main({
               <Button
                 disabled={variantIsSoldOut}
                 onClick={() => {
-                  if (special_products.includes(selectedProduct.name)) {
+                  if (special_products.includes(state.selectedProduct.name)) {
                     const textAreaValueLength =
                       customRef.current!.value.trim().length
                     if (textAreaValueLength < 3) {
@@ -1165,9 +1343,9 @@ function Main({
                     const existingIndex = prev.findIndex(
                       (item) =>
                         item.collection === collection_name &&
-                        item.name === selectedProduct.name &&
-                        item.color === selectedProduct.color &&
-                        item.size === selectedProduct.size,
+                        item.name === state.selectedProduct.name &&
+                        item.color === (state.selectedColor ?? '') &&
+                        item.size === (state.selectedSize ?? ''),
                     )
                     if (existingIndex !== -1) {
                       const updatedCart = [...prev]
@@ -1180,15 +1358,21 @@ function Main({
                       return [
                         ...prev,
                         {
-                          image: selectedProduct.images[0],
+                          image: state.selectedProduct.images[0],
                           collection: collection_name,
-                          name: special_products.includes(selectedProduct.name)
+                          name: special_products.includes(
+                            state.selectedProduct.name,
+                          )
                             ? customRef.current!.value.trim()
-                            : selectedProduct.name,
-                          color: selectedProduct.color,
-                          size: selectedProduct.size,
-                          price: selectedProduct.price,
-                          price_before: selectedProduct.price_before,
+                            : state.selectedProduct.name,
+                          color: state.selectedColor ?? '',
+                          size: state.selectedSize ?? '',
+                          price:
+                            state.selectedProduct.price ?? collection.price,
+                          price_before:
+                            state.selectedProduct.price_before ??
+                            collection.price_before ??
+                            0,
                           quantity: count,
                         },
                       ]
@@ -1197,21 +1381,21 @@ function Main({
                   handlers.reset()
 
                   facebookPixelAddToCart(
-                    selectedProduct.price,
+                    state.selectedProduct.price ?? collection.price,
                     count,
                     collection_name,
-                    selectedProduct.name,
-                    selectedProduct.color,
-                    selectedProduct.size,
+                    state.selectedProduct.name,
+                    state.selectedColor ?? '',
+                    state.selectedSize ?? '',
                   )
 
                   googleAnalyticsAddToCart(
-                    selectedProduct.price,
+                    state.selectedProduct.price ?? collection.price,
                     count,
                     collection_name,
-                    selectedProduct.name,
-                    selectedProduct.color,
-                    selectedProduct.size,
+                    state.selectedProduct.name,
+                    state.selectedColor ?? '',
+                    state.selectedSize ?? '',
                   )
                 }}
                 color="red"
@@ -1228,7 +1412,7 @@ function Main({
               </h2>
             )}
             {page.faq.length > 0 && (
-              <Container size="xl" className="hidden md:block mt-auto w-full">
+              <Container size="xl" className="hidden md:block mt-8 w-full">
                 <h1 className="mb-2 text-center text-xl xl:text-2xl">FAQ</h1>
                 <Accordion variant="separated">
                   {page.faq.map((faq, index) => (
@@ -1423,7 +1607,7 @@ function Main({
             scroll={true}
             onClick={() => {
               const special_variant = special_products[0]
-              setSelectedName(special_variant)
+              dispatch({ type: 'CHANGE_NAME', payload: special_variant })
               window.history.pushState(
                 {},
                 '',
