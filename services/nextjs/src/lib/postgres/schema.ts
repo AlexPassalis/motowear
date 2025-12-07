@@ -69,7 +69,8 @@ export const collection_v2 = productsSchema.table('collection_v2', {
   price: Numeric('price', { precision: 7, scale: 2 }).notNull(),
   price_before: Numeric('price_before', { precision: 7, scale: 2 }),
   sizes: text('sizes').array(),
-  upsell_id: uuid('upsell_id'),
+  upsell_collection: text('upsell_collection'),
+  upsell_product: text('upsell_product'),
   sold_out: boolean('sold_out').default(false),
 })
 
@@ -87,7 +88,8 @@ export const product_v2 = productsSchema.table('product_v2', {
   price_before: Numeric('price_before', { precision: 7, scale: 2 }),
   color: text('color'),
   images: text('images').array().notNull(),
-  upsell_id: uuid('upsell_id'),
+  upsell_collection: text('upsell_collection'),
+  upsell_product: text('upsell_product'),
   sold_out: boolean('sold_out'),
 })
 
@@ -102,9 +104,9 @@ export const variant_v2 = productsSchema.table('variant_v2', {
 })
 
 export const collection_v2_relations = relations(collection_v2, ({ one }) => ({
-  upsell: one(product_v2, {
-    fields: [collection_v2.upsell_id],
-    references: [product_v2.id],
+  product_page: one(product_pages, {
+    fields: [collection_v2.name],
+    references: [product_pages.product_type],
   }),
 }))
 
@@ -112,14 +114,6 @@ export const product_v2_relations = relations(product_v2, ({ one, many }) => ({
   collection: one(collection_v2, {
     fields: [product_v2.collection_id],
     references: [collection_v2.id],
-  }),
-  upsell: one(product_v2, {
-    fields: [product_v2.upsell_id],
-    references: [product_v2.id],
-    relationName: 'upsell',
-  }),
-  upsold_by: many(product_v2, {
-    relationName: 'upsell',
   }),
   variants: many(variant_v2),
 }))

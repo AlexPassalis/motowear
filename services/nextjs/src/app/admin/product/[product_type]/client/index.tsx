@@ -1,6 +1,10 @@
 'use client'
 
-import type { typeProductPage, typeVariant } from '@/lib/postgres/data/type'
+import type {
+  Collection,
+  Product,
+  typeProductPage,
+} from '@/lib/postgres/data/type'
 import type { typeBrands } from '@/utils/getPostgres'
 import type { typeModal } from '@/app/admin/product/[product_type]/client/Modal'
 
@@ -11,23 +15,28 @@ import { Modal } from '@/app/admin/product/[product_type]/client/Modal'
 import { ProductPageComponent } from '@/app/admin/product/[product_type]/client/ProductPage'
 import { AdminProvider } from '@/app/admin/components/AdminProvider'
 
+export type ProductWithCollectionName = Product & {
+  collection_name: string
+}
+
 type AdminProductProductTypePageClientProps = {
-  product_type: string
-  imagesMinio: string[]
-  variantsPostgres: typeVariant[]
-  brandsPostgres: typeBrands
+  collection: Collection
+  products: ProductWithCollectionName[]
+  brands: typeBrands
+  images_minio: string[]
   product_page: typeProductPage
 }
 
 export function AdminProductProductTypePageClient({
-  product_type,
-  imagesMinio,
-  variantsPostgres,
-  brandsPostgres,
+  collection: collection_postgres,
+  products: product_all,
+  brands,
+  images_minio,
   product_page,
 }: AdminProductProductTypePageClientProps) {
-  const [variants, setVariants] = useState(
-    variantsPostgres.filter((variant) => variant.product_type === product_type),
+  const [collection, setCollection] = useState(collection_postgres)
+  const [products, setProducts] = useState(
+    product_all.filter((prod) => prod.collection_id === collection.id),
   )
 
   const [onRequest, setOnRequest] = useState(false)
@@ -41,23 +50,26 @@ export function AdminProductProductTypePageClient({
   return (
     <AdminProvider>
       <Modal
-        imagesMinio={imagesMinio}
-        variantsPostgres={variantsPostgres}
-        brandsPostgres={brandsPostgres}
-        variants={variants}
-        setVariants={setVariants}
+        collection={collection}
+        setCollection={setCollection}
+        images_minio={images_minio}
+        products_all={product_all}
+        brands_postgres={brands}
+        products={products}
+        setProducts={setProducts}
         modalState={modalState}
         setModalState={setModalState}
         modalOpened={modalOpened}
         closeModal={closeModal}
       />
       <ProductVariantsTable
-        product_type={product_type}
-        imagesMinio={imagesMinio}
-        variants={variants}
-        setVariants={setVariants}
-        variantsPostgres={variantsPostgres}
-        brandsPostgres={brandsPostgres}
+        collection={collection}
+        setCollection={setCollection}
+        images_minio={images_minio}
+        products={products}
+        setProducts={setProducts}
+        products_all={product_all}
+        brands_postgres={brands}
         onRequest={onRequest}
         setOnRequest={setOnRequest}
         modalState={modalState}
@@ -67,9 +79,9 @@ export function AdminProductProductTypePageClient({
         closeModal={closeModal}
       />
       <ProductPageComponent
-        product_type={product_type}
+        collection_name={collection.name}
+        images_minio={images_minio}
         product_page={product_page}
-        imagesMinio={imagesMinio}
         onRequest={onRequest}
         setOnRequest={setOnRequest}
       />

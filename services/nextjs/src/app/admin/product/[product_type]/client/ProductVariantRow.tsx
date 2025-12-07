@@ -1,14 +1,8 @@
-import type { typeVariant } from '@/lib/postgres/data/type'
+import type { Product } from '@/lib/postgres/data/type'
 import type { typeModal } from '@/app/admin/product/[product_type]/client/Modal'
+import type { ProductWithCollectionName } from '@/app/admin/product/[product_type]/client/index'
 
-import {
-  Button,
-  MultiSelect,
-  NumberInput,
-  Select,
-  Table,
-  TextInput,
-} from '@mantine/core'
+import { Button, NumberInput, Table, TextInput } from '@mantine/core'
 import { Dispatch, memo, SetStateAction } from 'react'
 
 import axios from 'axios'
@@ -18,16 +12,15 @@ import { ERROR } from '@/data/magic'
 export const ProductVariantRow = memo(
   ProductVariantRowNotMemoised,
   (prev, next) =>
-    prev.variant === next.variant && prev.onRequest === next.onRequest,
+    prev.product === next.product && prev.onRequest === next.onRequest,
 )
 
 type ProductVariantProps = {
-  product_type: string
-  imagesMinio: string[]
-  brandsPostgres: string[]
-  index: number
-  variant: typeVariant
-  setVariants: Dispatch<SetStateAction<typeVariant[]>>
+  collection: string
+  images_minio: string[]
+  brands_postgres: string[]
+  product: ProductWithCollectionName
+  setProducts: Dispatch<SetStateAction<ProductWithCollectionName[]>>
   setModalState: Dispatch<SetStateAction<typeModal>>
   openModal: () => void
   onRequest: boolean
@@ -35,31 +28,32 @@ type ProductVariantProps = {
 }
 
 function ProductVariantRowNotMemoised({
-  product_type,
-  imagesMinio,
-  brandsPostgres,
-  index,
-  variant,
-  setVariants,
+  collection,
+  images_minio,
+  brands_postgres,
+  product,
+  setProducts,
   setModalState,
   openModal,
   onRequest,
   setOnRequest,
 }: ProductVariantProps) {
+  function updateProduct(updates: Partial<Product>) {
+    setProducts((prev) =>
+      prev.map((item) =>
+        item.id === product.id ? { ...item, ...updates } : item,
+      ),
+    )
+  }
+
   return (
     <>
-      <Table.Td>{variant.id}</Table.Td>
-
       <Table.Td>
         <TextInput
-          defaultValue={variant.name}
-          onBlur={(e) =>
-            setVariants((prev) =>
-              prev.map((item, i) =>
-                i === index ? { ...item, name: e.target.value } : item,
-              ),
-            )
-          }
+          defaultValue={product.name}
+          onBlur={(e) => {
+            updateProduct({ name: e.target.value })
+          }}
           placeholder="crypton-x"
         />
       </Table.Td>
@@ -67,60 +61,26 @@ function ProductVariantRowNotMemoised({
       <Table.Td style={{ textAlign: 'center' }}>
         <Button
           onClick={() => {
-            setModalState({ type: 'DESCRIPTION', index: index })
+            setModalState({
+              type: 'DESCRIPTION',
+              index: 0,
+              product_id: product.id,
+            })
             openModal()
           }}
           color="blue"
           disabled={onRequest}
         >
-          {variant.description.length > 0 && '...'}
+          {product.description && product.description.length > 0 && '...'}
         </Button>
       </Table.Td>
 
       <Table.Td>
-        <MultiSelect
-          data={imagesMinio}
-          value={variant.images}
-          onChange={(value) =>
-            setVariants((prev) =>
-              prev.map((v, i) => {
-                if (i === index) {
-                  if (value.length > v.images.length) {
-                    const [newImg] = value.filter(
-                      (img) => !v.images.includes(img),
-                    )
-                    return { ...v, images: [newImg, ...v.images] }
-                  } else {
-                    return { ...v, images: value }
-                  }
-                }
-                return v
-              }),
-            )
-          }
-          disabled={onRequest}
-          style={{
-            width: 200,
-            justifySelf: 'center',
-          }}
-          searchable
-          nothingFoundMessage="Nothing found..."
-          checkIconPosition="right"
-          hidePickedOptions
-          maxDropdownHeight={200}
-        />
-      </Table.Td>
-
-      <Table.Td>
         <NumberInput
-          value={Number(variant.price)}
-          onChange={(e) =>
-            setVariants((prev) =>
-              prev.map((item, i) =>
-                i === index ? { ...item, price: Number(e) } : item,
-              ),
-            )
-          }
+          value={product.price || 0}
+          onChange={(e) => {
+            updateProduct({ price: Number(e) })
+          }}
           min={0}
           max={9999.99}
           suffix="€"
@@ -129,60 +89,11 @@ function ProductVariantRowNotMemoised({
       </Table.Td>
 
       <Table.Td>
-        <Select
-          data={brandsPostgres}
-          defaultValue={variant.brand}
-          onBlur={(e) =>
-            setVariants((prev) =>
-              prev.map((item, i) =>
-                i === index ? { ...item, brand: e.target.value } : item,
-              ),
-            )
-          }
-          placeholder="Yamaha"
-          disabled={onRequest}
-          checkIconPosition="right"
-          maxDropdownHeight={200}
-          searchable
-          nothingFoundMessage="Nothing found..."
-        />
-      </Table.Td>
-
-      <Table.Td style={{ textAlign: 'center' }}>
-        <Button
-          onClick={() => {
-            setModalState({ type: 'COLOR', index: index })
-            openModal()
-          }}
-          color={variant.color || ''}
-          disabled={onRequest}
-        />
-      </Table.Td>
-
-      <Table.Td>
-        <TextInput
-          defaultValue={variant.size}
-          onBlur={(e) =>
-            setVariants((prev) =>
-              prev.map((item, i) =>
-                i === index ? { ...item, size: e.target.value } : item,
-              ),
-            )
-          }
-          placeholder="M"
-        />
-      </Table.Td>
-
-      <Table.Td>
         <NumberInput
-          value={Number(variant.price_before)}
-          onChange={(e) =>
-            setVariants((prev) =>
-              prev.map((item, i) =>
-                i === index ? { ...item, price_before: Number(e) } : item,
-              ),
-            )
-          }
+          value={product.price_before || 0}
+          onChange={(e) => {
+            updateProduct({ price_before: Number(e) })
+          }}
           min={0}
           max={9999.99}
           suffix="€"
@@ -193,26 +104,35 @@ function ProductVariantRowNotMemoised({
       <Table.Td style={{ textAlign: 'center' }}>
         <Button
           onClick={() => {
-            setModalState({ type: 'UPSELL', index: index })
+            setModalState({ type: 'SIZE', index: 0, product_id: product.id })
             openModal()
           }}
           color="blue"
           disabled={onRequest}
         >
-          {variant.upsell && '...'}
+          {product.color || ''}
         </Button>
       </Table.Td>
 
       <Table.Td style={{ textAlign: 'center' }}>
         <Button
           onClick={() => {
-            setVariants((prev) =>
-              prev.map((item, i) =>
-                i === index ? { ...item, sold_out: !item.sold_out } : item,
-              ),
-            )
+            setModalState({ type: 'UPSELL', index: 0, product_id: product.id })
+            openModal()
           }}
-          color={variant.sold_out ? 'red' : 'green'}
+          color="blue"
+          disabled={onRequest}
+        >
+          {product.upsell && '...'}
+        </Button>
+      </Table.Td>
+
+      <Table.Td style={{ textAlign: 'center' }}>
+        <Button
+          onClick={() => {
+            updateProduct({ sold_out: !product.sold_out })
+          }}
+          color={product.sold_out ? 'red' : 'green'}
           disabled={onRequest}
         />
       </Table.Td>
@@ -220,15 +140,15 @@ function ProductVariantRowNotMemoised({
       <Table.Td>
         <Button
           onClick={async () => {
-            if (variant.id) {
+            if (product.id) {
               setOnRequest(true)
               try {
                 const res = await axios.delete(
-                  `${envClient.API_ADMIN_URL}/product/product_type/variant`,
+                  `${envClient.API_ADMIN_URL}/product/collection/product`,
                   {
                     data: {
-                      id: variant.id,
-                      product_type: product_type,
+                      id: product.id,
+                      collection_id: product.collection_id,
                     },
                   },
                 )
@@ -236,19 +156,21 @@ function ProductVariantRowNotMemoised({
                   window.location.reload()
                 } else {
                   alert(
-                    `Error deleting ${variant.id}: ${
+                    `Error deleting ${product.id}: ${
                       res.data?.message || ERROR.unexpected
                     }`,
                   )
                   console.error(res)
                 }
               } catch (err) {
-                alert(`Error deleting ${variant.id}`)
+                alert(`Error deleting ${product.id}`)
                 console.error(err)
               }
               setOnRequest(false)
             } else {
-              setVariants((prev) => prev.filter((_, i) => i !== index))
+              setProducts((prev) =>
+                prev.filter((item) => item.id !== product.id),
+              )
             }
           }}
           type="button"

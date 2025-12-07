@@ -13,17 +13,17 @@ import { useDisclosure, useListState } from '@mantine/hooks'
 import { ERROR } from '@/data/magic'
 
 type ProductPageComponentProps = {
-  product_type: string
+  collection_name: string
+  images_minio: string[]
   product_page: typeProductPage
-  imagesMinio: string[]
   onRequest: boolean
   setOnRequest: Dispatch<SetStateAction<boolean>>
 }
 
 export function ProductPageComponent({
-  product_type,
+  collection_name,
+  images_minio,
   product_page,
-  imagesMinio,
   onRequest,
   setOnRequest,
 }: ProductPageComponentProps) {
@@ -102,7 +102,7 @@ export function ProductPageComponent({
           <div>
             <h2 className="text-center p-1">Μεγεθολόγιο</h2>
             <Select
-              data={imagesMinio}
+              data={images_minio}
               defaultValue={productPage.size_chart}
               onBlur={(e) =>
                 setProductPage((prev) => ({
@@ -181,7 +181,7 @@ export function ProductPageComponent({
                                 <RxDragHandleDots2 size={20} />
                               </div>
                               <Select
-                                data={imagesMinio}
+                                data={images_minio}
                                 defaultValue={productPage.images[index]}
                                 onBlur={(e) =>
                                   setProductPage((prev) => ({
@@ -210,7 +210,7 @@ export function ProductPageComponent({
                                         `${envClient.API_ADMIN_URL}/product/product_type/product_page/images`,
                                         {
                                           data: {
-                                            product_type: product_type,
+                                            product_type: collection_name,
                                             image: image,
                                           },
                                         },
@@ -350,7 +350,7 @@ export function ProductPageComponent({
                                         `${envClient.API_ADMIN_URL}/product/product_type/product_page/faq`,
                                         {
                                           data: {
-                                            product_type: product_type,
+                                            product_type: collection_name,
                                             question: faq.question,
                                           },
                                         },
@@ -454,7 +454,7 @@ export function ProductPageComponent({
                                 <RxDragHandleDots2 size={20} />
                               </div>
                               <Select
-                                data={imagesMinio}
+                                data={images_minio}
                                 defaultValue={
                                   productPage.carousel[index]?.image
                                 }
@@ -501,7 +501,7 @@ export function ProductPageComponent({
                                         `${envClient.API_ADMIN_URL}/product/product_type/product_page/carousel`,
                                         {
                                           data: {
-                                            product_type: product_type,
+                                            product_type: collection_name,
                                             image: carousel.image,
                                           },
                                         },

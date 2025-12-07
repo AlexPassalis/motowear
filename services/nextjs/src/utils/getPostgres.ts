@@ -1,5 +1,9 @@
 import type { SQL } from 'drizzle-orm'
-import type { typeReview, typeVariant } from '@/lib/postgres/data/type'
+import type {
+  Collection,
+  typeReview,
+  typeVariant,
+} from '@/lib/postgres/data/type'
 
 import { postgres } from '@/lib/postgres'
 import {
@@ -47,10 +51,26 @@ export async function getProductTypes() {
 }
 export type typeProductTypes = Awaited<ReturnType<typeof getProductTypes>>
 
-export async function getVariants() {
-  const array = await postgres.select().from(variant).orderBy(variant.index)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  return array.map(({ index, ...rest }) => rest)
+export async function getAllProducts() {
+  const data = await postgres
+    .select()
+    .from(product_v2)
+    .leftJoin(collection_v2, eq(product_v2.collection_id, collection_v2.id))
+
+  return data.map((row) => ({
+    ...row.product_v2,
+    collection_name: row.collection_v2!.name,
+  }))
+}
+
+export async function getCollection(collection_name: Collection['name']) {
+  const data = await postgres
+    .select()
+    .from(collection_v2)
+    .where(eq(collection_v2.name, collection_name))
+    .limit(1)
+
+  return data[0]
 }
 
 export async function getPages() {
@@ -226,7 +246,8 @@ export async function getCollectionPageData(
         price: null,
         price_before: null,
         sizes: null,
-        upsell_id: null,
+        upsell_collection: null,
+        upsell_product: null,
         sold_out: null,
       },
       reviews: [],
@@ -304,7 +325,8 @@ export async function getProductPageData(
         price: 0,
         price_before: 0,
         sizes: [],
-        upsell_id: null,
+        upsell_collection: null,
+        upsell_product: null,
         sold_out: false,
       },
       reviews: [],
@@ -325,7 +347,8 @@ export async function getProductPageData(
       price_before: product_v2.price_before,
       color: product_v2.color,
       images: product_v2.images,
-      upsell_id: product_v2.upsell_id,
+      upsell_collection: product_v2.upsell_collection,
+      upsell_product: product_v2.upsell_product,
       sold_out: product_v2.sold_out,
     })
     .from(product_v2)
@@ -339,7 +362,10 @@ export async function getProductPageData(
     ...(prod.price_before && { price_before: prod.price_before }),
     ...(prod.color && { color: prod.color }),
     images: prod.images,
-    ...(prod.upsell_id && { upsell_id: prod.upsell_id }),
+    ...(prod.upsell_collection && {
+      upsell_collection: prod.upsell_collection,
+    }),
+    ...(prod.upsell_product && { upsell_product: prod.upsell_product }),
     ...(prod.sold_out && { sold_out: prod.sold_out }),
   }))
 
@@ -384,17 +410,29 @@ export async function getProductPageData(
     },
   )
 
-  const upsell_ids = [
-    ...(collection.upsell_id ? [collection.upsell_id] : []),
+  const upsell_items = [
+    ...(collection.upsell_collection && collection.upsell_product
+      ? [
+          {
+            collection: collection.upsell_collection,
+            product: collection.upsell_product,
+          },
+        ]
+      : []),
     ...sorted_products
-      .filter((product) => product.upsell_id)
-      .map((product) => product.upsell_id as string),
+      .filter((product) => product.upsell_collection && product.upsell_product)
+      .map((product) => ({
+        collection: product.upsell_collection as string,
+        product: product.upsell_product as string,
+      })),
   ]
 
   const upsells_with_variants =
-    upsell_ids.length === 0
+    upsell_items.length === 0
       ? []
       : await (async () => {
+          const upsell_product_names = upsell_items.map((item) => item.product)
+
           const upsells_raw = await postgres
             .select({
               id: product_v2.id,
@@ -405,7 +443,7 @@ export async function getProductPageData(
               images: product_v2.images,
             })
             .from(product_v2)
-            .where(inArray(product_v2.id, upsell_ids))
+            .where(inArray(product_v2.name, upsell_product_names))
 
           const upsells = upsells_raw.map((upsell) => ({
             id: upsell.id,

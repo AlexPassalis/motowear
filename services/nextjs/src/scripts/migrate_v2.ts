@@ -5,19 +5,7 @@ import {
   product_v2,
   variant_v2,
 } from '@/lib/postgres/schema'
-import type { typeUpsell } from '@/lib/postgres/data/type'
 import { eq, and, isNull } from 'drizzle-orm'
-
-// Store upsell data for resolution after all products are created
-const collection_upsells: Array<{
-  collection_name: string
-  upsell: typeUpsell | null
-}> = []
-
-const product_upsells: Array<{
-  product_id: string
-  upsell: typeUpsell | null
-}> = []
 
 export async function migrate_v2() {
   console.info('Running migrate_v2 script ...')
@@ -82,16 +70,11 @@ export async function migrate_v2() {
         price: most_common_price,
         price_before: most_common_price_before,
         sizes: most_common_sizes,
-        upsell_id: null, // Will be resolved later
+        upsell_collection: most_common_upsell?.product_type || null,
+        upsell_product: most_common_upsell?.name || null,
         sold_out: most_common_sold_out,
       })
       .returning({ name: collection_v2.name, id: collection_v2.id })
-
-    // Store the upsell data for later resolution
-    collection_upsells.push({
-      collection_name: created_collection.name,
-      upsell: most_common_upsell,
-    })
 
     console.info(`Created collection_v2: ${created_collection.name}`)
   }
@@ -172,11 +155,6 @@ export async function migrate_v2() {
         ...new Set(product_variants.map((v) => v.size).filter(Boolean)),
       ]
 
-      // Find the collection upsell data
-      const collection_upsell_data = collection_upsells.find(
-        (c) => c.collection_name === collection_after.name,
-      )
-
       // Use null if product value matches collection default (to inherit from collection)
       const product_description =
         most_common_description === collection_after.description
@@ -193,6 +171,23 @@ export async function migrate_v2() {
           ? null
           : most_common_sold_out
 
+      // Get the most common upsell for the collection
+      const collection_variants = await postgres
+        .select()
+        .from(variant)
+        .where(eq(variant.product_type, collection_after.name))
+      const collection_most_common_upsell = find_most_common(
+        collection_variants,
+        'upsell',
+      )
+
+      // Store upsell data (only if different from collection)
+      const product_upsell =
+        JSON.stringify(most_common_upsell) ===
+        JSON.stringify(collection_most_common_upsell)
+          ? null
+          : most_common_upsell
+
       const [created_product] = await postgres
         .insert(product_v2)
         .values({
@@ -204,24 +199,11 @@ export async function migrate_v2() {
           price_before: product_price_before,
           color: product_color, // Color is notNull in schema
           images: most_common_images, // Images always stored at product level
-          upsell_id: null, // Will be resolved later
+          upsell_collection: product_upsell?.product_type || null,
+          upsell_product: product_upsell?.name || null,
           sold_out: product_sold_out,
         })
         .returning({ id: product_v2.id })
-
-      // Store upsell data for later resolution (only if different from collection)
-      const product_upsell =
-        JSON.stringify(most_common_upsell) ===
-        JSON.stringify(collection_upsell_data?.upsell)
-          ? null
-          : most_common_upsell
-
-      if (product_upsell !== null) {
-        product_upsells.push({
-          product_id: created_product.id,
-          upsell: product_upsell,
-        })
-      }
 
       console.info(
         `Created product: ${product_name} (id: ${created_product.id})`,
@@ -249,138 +231,6 @@ export async function migrate_v2() {
         console.info(`Created variant with ${product_sizes.length} sizes`)
       }
     }
-  }
-
-  // Phase 4: Resolve upsells to product IDs
-  console.info('Resolving upsells...')
-
-  // Resolve collection upsells
-  for (const { collection_name, upsell } of collection_upsells) {
-    if (!upsell) continue
-
-    console.info(
-      `Resolving upsell for collection: ${collection_name} -> ${upsell.name} (${upsell.product_type})`,
-    )
-
-    // Find the collection that matches the upsell product_type
-    const upsell_collection = await postgres
-      .select({ id: collection_v2.id })
-      .from(collection_v2)
-      .where(eq(collection_v2.name, upsell.product_type))
-
-    if (upsell_collection.length === 0) {
-      console.warn(
-        `Could not find collection for upsell: ${upsell.product_type}`,
-      )
-      continue
-    }
-
-    // Find the product that matches the upsell name and collection
-    const upsell_product = await postgres
-      .select({ id: product_v2.id })
-      .from(product_v2)
-      .where(
-        and(
-          eq(product_v2.collection_id, upsell_collection[0].id),
-          eq(product_v2.name, upsell.name),
-        ),
-      )
-
-    if (upsell_product.length === 0) {
-      console.warn(
-        `Could not find product for upsell: ${upsell.name} in collection ${upsell.product_type}`,
-      )
-      continue
-    }
-
-    // Check if upsell is already resolved
-    const current_collection = await postgres
-      .select({ upsell_id: collection_v2.upsell_id })
-      .from(collection_v2)
-      .where(eq(collection_v2.name, collection_name))
-
-    if (current_collection[0]?.upsell_id === upsell_product[0].id) {
-      console.info(
-        `Collection ${collection_name} upsell already resolved, skipping`,
-      )
-      continue
-    }
-
-    // Update the collection with the resolved upsell_id
-    await postgres
-      .update(collection_v2)
-      .set({ upsell_id: upsell_product[0].id })
-      .where(eq(collection_v2.name, collection_name))
-
-    console.info(
-      `Updated collection ${collection_name} with upsell_id: ${upsell_product[0].id}`,
-    )
-  }
-
-  // Resolve product upsells
-  for (const { product_id, upsell } of product_upsells) {
-    if (!upsell) continue
-
-    const product_info = await postgres
-      .select({ name: product_v2.name })
-      .from(product_v2)
-      .where(eq(product_v2.id, product_id))
-
-    console.info(
-      `Resolving upsell for product: ${product_info[0]?.name} -> ${upsell.name} (${upsell.product_type})`,
-    )
-
-    // Find the collection that matches the upsell product_type
-    const upsell_collection = await postgres
-      .select({ id: collection_v2.id })
-      .from(collection_v2)
-      .where(eq(collection_v2.name, upsell.product_type))
-
-    if (upsell_collection.length === 0) {
-      console.warn(
-        `Could not find collection for upsell: ${upsell.product_type}`,
-      )
-      continue
-    }
-
-    // Find the product that matches the upsell name and collection
-    const upsell_product = await postgres
-      .select({ id: product_v2.id })
-      .from(product_v2)
-      .where(
-        and(
-          eq(product_v2.collection_id, upsell_collection[0].id),
-          eq(product_v2.name, upsell.name),
-        ),
-      )
-
-    if (upsell_product.length === 0) {
-      console.warn(
-        `Could not find product for upsell: ${upsell.name} in collection ${upsell.product_type}`,
-      )
-      continue
-    }
-
-    // Check if upsell is already resolved
-    const current_product = await postgres
-      .select({ upsell_id: product_v2.upsell_id })
-      .from(product_v2)
-      .where(eq(product_v2.id, product_id))
-
-    if (current_product[0]?.upsell_id === upsell_product[0].id) {
-      console.info(
-        `Product ${product_info[0]?.name} upsell already resolved, skipping`,
-      )
-      continue
-    }
-
-    // Update the product with the resolved upsell_id
-    await postgres
-      .update(product_v2)
-      .set({ upsell_id: upsell_product[0].id })
-      .where(eq(product_v2.id, product_id))
-
-    console.info(`Updated product with upsell_id: ${upsell_product[0].id}`)
   }
 
   console.info('Migration complete')

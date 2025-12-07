@@ -5,7 +5,8 @@ CREATE TABLE IF NOT EXISTS "products"."collection_v2" (
 	"price" numeric(7,2) NOT NULL,
 	"price_before" numeric(7,2),
 	"sizes" text[],
-	"upsell_id" uuid,
+	"upsell_collection" text,
+	"upsell_product" text,
 	"sold_out" boolean DEFAULT false
 );
 --> statement-breakpoint
@@ -19,7 +20,8 @@ CREATE TABLE IF NOT EXISTS "products"."product_v2" (
 	"price_before" numeric(7,2),
 	"color" text,
 	"images" text[] NOT NULL,
-	"upsell_id" uuid,
+	"upsell_collection" text,
+	"upsell_product" text,
 	"sold_out" boolean
 );
 --> statement-breakpoint
@@ -49,18 +51,6 @@ END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "products"."variant_v2" ADD CONSTRAINT "variant_v2_product_id_product_v2_id_fk" FOREIGN KEY ("product_id") REFERENCES "products"."product_v2"("id") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "products"."collection_v2" ADD CONSTRAINT "collection_v2_upsell_id_product_v2_id_fk" FOREIGN KEY ("upsell_id") REFERENCES "products"."product_v2"("id") ON DELETE set null ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "products"."product_v2" ADD CONSTRAINT "product_v2_upsell_id_product_v2_id_fk" FOREIGN KEY ("upsell_id") REFERENCES "products"."product_v2"("id") ON DELETE set null ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

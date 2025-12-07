@@ -1,9 +1,11 @@
 import { InferSelectModel } from 'drizzle-orm'
 import {
   abandoned_cart,
+  collection_v2,
   coupon,
   order,
   product_pages,
+  product_v2,
   review,
   variant,
 } from '../schema'
@@ -24,6 +26,9 @@ export type typeUpsells = typeUpsell[]
 
 export type typeCoupon = InferSelectModel<typeof coupon>
 export type typeProductPage = InferSelectModel<typeof product_pages>
+
+export type Collection = InferSelectModel<typeof collection_v2>
+export type Product = InferSelectModel<typeof product_v2>
 
 export type typeVariant = Omit<InferSelectModel<typeof variant>, 'index'> & {
   index?: number

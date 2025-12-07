@@ -18,7 +18,7 @@ type ProductVariantRowWrapperProps = {
   index: number
   variant: typeVariant
   common: {
-    product_type: string
+    collection: string
     imagesMinio: string[]
     brandsPostgres: string[]
     onRequest: boolean
@@ -36,7 +36,7 @@ export function ProductVariantRowWrapperNotMemoised({
   common,
 }: ProductVariantRowWrapperProps) {
   const {
-    product_type,
+    collection,
     imagesMinio,
     brandsPostgres,
     onRequest,
@@ -63,7 +63,7 @@ export function ProductVariantRowWrapperNotMemoised({
             <ProductVariantRow
               index={index}
               variant={variant}
-              product_type={product_type}
+              collection={collection}
               imagesMinio={imagesMinio}
               brandsPostgres={brandsPostgres}
               setVariants={setVariants}
