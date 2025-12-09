@@ -9,7 +9,14 @@ import type { typeModal } from '@/app/admin/product/[product_type]/client/Modal'
 import { zodProducts } from '@/lib/postgres/data/zod'
 import { z } from 'zod'
 
-import { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react'
+import {
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import {
   Button,
   NumberInput,
@@ -156,11 +163,22 @@ export function ProductNamesTable({
     set_page_number(1)
   }, [search_query])
 
+  const go_to_last_page = useCallback(() => {
+    const groups = group_products_by_name(
+      products.map((p) => ({ ...p, collection_name: collection.name })),
+    )
+    const last_page = Math.max(
+      1,
+      Math.ceil(groups.length / pagination_page_size),
+    )
+    set_page_number(last_page)
+  }, [products, collection.name])
+
   useEffect(() => {
     if (go_to_last_page_trigger > 0) {
       go_to_last_page()
     }
-  }, [go_to_last_page_trigger])
+  }, [go_to_last_page_trigger, go_to_last_page])
 
   function handle_group_click(group: ProductNameGroup) {
     const variants_for_product = products.filter(
@@ -170,17 +188,6 @@ export function ProductNamesTable({
     set_selected_product_name(group.name)
     set_color_variants(variants_for_product)
     open_color_variants_modal()
-  }
-
-  function go_to_last_page() {
-    const groups = group_products_by_name(
-      products.map((p) => ({ ...p, collection_name: collection.name })),
-    )
-    const last_page = Math.max(
-      1,
-      Math.ceil(groups.length / pagination_page_size),
-    )
-    set_page_number(last_page)
   }
 
   function handle_create_new_product() {

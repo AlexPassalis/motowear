@@ -406,8 +406,6 @@ function Main({
       }
     },
   )
-  console.log('displayedBrands', displayedBrands)
-  console.log('state', state)
 
   const [count, handlers] = useCounter(0, { min: 1, max: 9 })
   const [
