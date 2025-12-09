@@ -130,11 +130,6 @@ function ModalNotMemoised({
               products.find((prod) => prod.id === modalState.product_id)
                 ?.name || 'Product'
             }`
-          : modalState.type === 'SIZE' && modalState.product_id
-          ? `Size: ${
-              products.find((prod) => prod.id === modalState.product_id)
-                ?.name || 'Product'
-            }`
           : modalState.product_id
           ? `Description: ${
               products.find((prod) => prod.id === modalState.product_id)
@@ -531,24 +526,6 @@ function ModalNotMemoised({
           />
         )}
 
-        {modalState.type === 'SIZE' && modalState.product_id && (
-          <TextInput
-            value={
-              products.find((prod) => prod.id === modalState.product_id)
-                ?.color || ''
-            }
-            onChange={(e) => {
-              setProducts((prev) =>
-                prev.map((prod) =>
-                  prod.id === modalState.product_id
-                    ? { ...prod, color: e.target.value }
-                    : prod,
-                ),
-              )
-            }}
-            placeholder="M"
-          />
-        )}
       </>
     </MantineModal>
   )

@@ -198,7 +198,7 @@ export function ProductNamesTable({
     const new_name = `New Product ${new_number}`
 
     const new_product: ColorVariant = {
-      id: '',
+      id: id(),
       collection_id: collection.id,
       name: new_name,
       brand: null,

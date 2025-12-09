@@ -81,7 +81,7 @@ export function ColorVariantsModal({
 
   function handle_add_color() {
     const new_color_variant: ColorVariant = {
-      id: '',
+      id: id(),
       collection_id: collection.id,
       name: selected_product_name!,
       brand: color_variants[0]?.brand || null,
@@ -108,7 +108,7 @@ export function ColorVariantsModal({
 
     const new_variants = color_variants.map((variant) => {
       const new_variant: ColorVariant = {
-        id: '',
+        id: id(),
         collection_id: collection.id,
         name: copy_name.trim(),
         brand: copy_brand || variant.brand,
@@ -261,9 +261,9 @@ export function ColorVariantsModal({
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
-            {color_variants.map((variant) => (
+            {color_variants.map((variant, index) => (
               <ColorVariantRow
-                key={variant.id || id()}
+                key={variant.id || `new-variant-${index}`}
                 collection={collection}
                 images_minio={images_minio}
                 brands_postgres={brands_postgres}
