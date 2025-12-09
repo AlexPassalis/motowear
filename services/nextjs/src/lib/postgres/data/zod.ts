@@ -5,9 +5,11 @@ import {
   home_page,
   order,
   product_pages,
+  product_v2,
   review,
   shipping,
   variant,
+  variant_v2,
 } from '../schema'
 
 export const zodCheckout = z
@@ -99,3 +101,9 @@ export const zodOrderServer = zodOrder.extend({
 export const zodHomePage = createSelectSchema(home_page).omit({
   primary_key: true,
 })
+
+export const zodProduct = createSelectSchema(product_v2)
+export const zodProducts = z.array(zodProduct)
+
+export const zodVariantV2 = createSelectSchema(variant_v2)
+export const zodVariantsV2 = z.array(zodVariantV2)

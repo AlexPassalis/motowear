@@ -3,8 +3,9 @@ import { isSessionRSC } from '@/lib/better-auth/isSession'
 import {
   getBrands,
   getCollection,
+  getAllCollections,
   getProductPage,
-  getAllProducts,
+  getAllProductsWithSizes,
 } from '@/utils/getPostgres'
 import { notFound, redirect } from 'next/navigation'
 import { AdminProductProductTypePageClient } from '@/app/admin/product/[product_type]/client/index'
@@ -24,8 +25,9 @@ export default async function AdminProductProductTypePage({
 
   const result_1 = await Promise.allSettled([
     params,
-    getAllProducts(),
+    getAllProductsWithSizes(),
     getBrands(),
+    getAllCollections(),
   ])
 
   if (result_1[0].status === 'rejected') {
@@ -52,9 +54,18 @@ export default async function AdminProductProductTypePage({
     redirect(`${ROUTE_ERROR}?message=${ERROR.postgres}`)
   }
 
+  if (result_1[3].status === 'rejected') {
+    const err = result_1[3].reason
+    const location = `${ERROR.postgres} getAllCollections`
+    handleError(location, err)
+
+    redirect(`${ROUTE_ERROR}?message=${ERROR.postgres}`)
+  }
+
   const collection_name = decodeURIComponent(result_1[0].value.product_type)
   const products = result_1[1].value
   const brands = result_1[2].value
+  const all_collections = result_1[3].value
 
   const result_2 = await Promise.allSettled([
     getCollection(collection_name),
@@ -100,6 +111,7 @@ export default async function AdminProductProductTypePage({
       brands={brands}
       images_minio={images_minio}
       product_page={product_page}
+      all_collections={all_collections}
     />
   )
 }

@@ -1,6 +1,7 @@
 import type { SQL } from 'drizzle-orm'
 import type {
   Collection,
+  ColorVariant,
   typeReview,
   typeVariant,
 } from '@/lib/postgres/data/type'
@@ -63,6 +64,18 @@ export async function getAllProducts() {
   }))
 }
 
+export async function getAllProductsWithSizes(): Promise<ColorVariant[]> {
+  const data = await postgres
+    .select()
+    .from(product_v2)
+    .leftJoin(variant_v2, eq(product_v2.id, variant_v2.product_id))
+
+  return data.map((row) => ({
+    ...row.product_v2,
+    sizes: row.variant_v2?.sizes || [],
+  }))
+}
+
 export async function getCollection(collection_name: Collection['name']) {
   const data = await postgres
     .select()
@@ -71,6 +84,10 @@ export async function getCollection(collection_name: Collection['name']) {
     .limit(1)
 
   return data[0]
+}
+
+export async function getAllCollections() {
+  return await postgres.select().from(collection_v2)
 }
 
 export async function getPages() {

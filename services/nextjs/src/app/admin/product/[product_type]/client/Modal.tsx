@@ -32,6 +32,7 @@ export type typeModal = {
     | 'COLOR'
     | 'UPSELL'
     | 'SIZE'
+    | 'SIZES'
   index: number
   product_id?: string
 }
@@ -102,11 +103,33 @@ function ModalNotMemoised({
           index: 0,
         })
       }}
+      zIndex={1000}
       title={
-        modalState.type === 'COLLECTION_DESCRIPTION'
+        modalState.type === 'ALL_BRAND'
+          ? 'Update All: Brand'
+          : modalState.type === 'ALL_DESCRIPTION'
+          ? 'Update All: Description'
+          : modalState.type === 'ALL_PRICE'
+          ? 'Update All: Price'
+          : modalState.type === 'ALL_PRICE_BEFORE'
+          ? 'Update All: Price Before'
+          : modalState.type === 'ALL_COLOR'
+          ? 'Update All: Color'
+          : modalState.type === 'ALL_IMAGES'
+          ? 'Update All: Images'
+          : modalState.type === 'ALL_UPSELL'
+          ? 'Update All: Upsell'
+          : modalState.type === 'ALL_SIZE'
+          ? 'Update All: Sizes'
+          : modalState.type === 'COLLECTION_DESCRIPTION'
           ? 'Description: Default'
           : modalState.type === 'COLLECTION_SIZES'
           ? 'Sizes: Default'
+          : modalState.type === 'SIZES' && modalState.product_id
+          ? `Sizes: ${
+              products.find((prod) => prod.id === modalState.product_id)
+                ?.name || 'Product'
+            }`
           : modalState.type === 'SIZE' && modalState.product_id
           ? `Size: ${
               products.find((prod) => prod.id === modalState.product_id)
@@ -354,7 +377,58 @@ function ModalNotMemoised({
                     new_size_input_ref.current.value = ''
                   }
                 }}
-                color="green"
+                color="blue"
+              >
+                Create
+              </Button>
+            </div>
+          </>
+        )}
+
+        {modalState.type === 'SIZES' && modalState.product_id && (
+          <>
+            <MultiSelect
+              data={collection.sizes || []}
+              value={
+                products.find((prod) => prod.id === modalState.product_id)
+                  ?.sizes || []
+              }
+              onChange={(value) => {
+                setProducts((prev) =>
+                  prev.map((item) =>
+                    item.id === modalState.product_id
+                      ? { ...item, sizes: value }
+                      : item
+                  )
+                )
+              }}
+            />
+            <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+              <TextInput
+                ref={new_size_input_ref}
+                placeholder="Create new size"
+                style={{ flex: 1 }}
+              />
+              <Button
+                onClick={() => {
+                  if (!new_size_input_ref.current) {
+                    return
+                  }
+
+                  const new_size = new_size_input_ref.current.value.trim()
+                  const current_product = products.find((prod) => prod.id === modalState.product_id)
+                  if (new_size && current_product && !current_product.sizes?.includes(new_size)) {
+                    setProducts((prev) =>
+                      prev.map((item) =>
+                        item.id === modalState.product_id
+                          ? { ...item, sizes: [...(item.sizes || []), new_size] }
+                          : item
+                      )
+                    )
+                    new_size_input_ref.current.value = ''
+                  }
+                }}
+                color="blue"
               >
                 Create
               </Button>

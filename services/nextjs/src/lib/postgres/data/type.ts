@@ -8,6 +8,7 @@ import {
   product_v2,
   review,
   variant,
+  variant_v2,
 } from '../schema'
 
 import { z } from 'zod'
@@ -29,6 +30,22 @@ export type typeProductPage = InferSelectModel<typeof product_pages>
 
 export type Collection = InferSelectModel<typeof collection_v2>
 export type Product = InferSelectModel<typeof product_v2>
+export type Variant_v2 = InferSelectModel<typeof variant_v2>
+
+export type ProductWithCollectionName = Product & {
+  collection_name: string
+}
+
+export type ColorVariant = Product & {
+  sizes: string[]
+}
+
+export type ProductNameGroup = {
+  name: string
+  color_count: number
+  product_ids: string[]
+  collection_id: string
+}
 
 export type typeVariant = Omit<InferSelectModel<typeof variant>, 'index'> & {
   index?: number
