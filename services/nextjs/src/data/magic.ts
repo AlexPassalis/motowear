@@ -14,7 +14,7 @@ export const special_products = [
   'Δεν βρίσκω την μηχανή μου (custom σχέδιο) v2',
 ]
 
-export const specialProductType = 'Θήκη Κινητού' as const
+export const special_collections = ['Θήκη Κινητού', 'Θήκη Κινητού (Αυτοκίνητα)']
 
 export const special_brand = '3_motowear_500_x_70_px3.png' as const
 

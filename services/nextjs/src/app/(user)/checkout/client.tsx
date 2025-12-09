@@ -37,7 +37,7 @@ import axios from 'axios'
 import Link from 'next/link'
 import { facebookPixelPurchase } from '@/lib/facebook-pixel/index'
 import { googleAnalyticsPurchase } from '@/lib/google-analytics'
-import { couponCodeMPRELOK, ERROR, specialProductType } from '@/data/magic'
+import { couponCodeMPRELOK, ERROR, special_collections } from '@/data/magic'
 import Script from 'next/script'
 
 type CheckoutPageProps = {
@@ -378,15 +378,15 @@ export function CheckoutPageClient({
                         <div className="relative w-1/3 h-full rounded-lg overflow-hidden">
                           <Image
                             component={NextImage}
-                            src={`${envClient.MINIO_PRODUCT_URL}/${product.product_type}/${product.image}`}
-                            alt={`${product.product_type}/${product.name}`}
+                            src={`${envClient.MINIO_PRODUCT_URL}/${product.collection}/${product.image}`}
+                            alt={`${product.collection}/${product.name}`}
                             fill
                             style={{ objectFit: 'cover' }}
                             sizes="auto"
                           />
                         </div>
                         <div className="relative w-2/3 flex flex-col justify-center gap-0.5 p-2">
-                          <h1>{product.product_type}</h1>
+                          <h1>{product.collection}</h1>
                           <h1 className="flex-1 flex items-center break-words overflow-hidden">
                             {product.name}
                           </h1>
@@ -403,9 +403,11 @@ export function CheckoutPageClient({
                             <div className="flex gap-1">
                               <h2>
                                 {`${
-                                  product.product_type !== specialProductType
-                                    ? 'Μέγεθος'
-                                    : 'Συσκευή'
+                                  special_collections.includes(
+                                    product.collection,
+                                  )
+                                    ? 'Συσκευή'
+                                    : 'Μέγεθος'
                                 }:`}{' '}
                               </h2>
                               <p>{product.size}</p>
@@ -664,15 +666,15 @@ export function CheckoutPageClient({
                             <div className="relative w-1/3 h-full rounded-lg overflow-hidden">
                               <Image
                                 component={NextImage}
-                                src={`${envClient.MINIO_PRODUCT_URL}/${product.product_type}/${product.image}`}
-                                alt={`${product.product_type}/${product.name}`}
+                                src={`${envClient.MINIO_PRODUCT_URL}/${product.collection}/${product.image}`}
+                                alt={`${product.collection}/${product.name}`}
                                 fill
                                 style={{ objectFit: 'cover' }}
                                 sizes="auto"
                               />
                             </div>
                             <div className="relative w-2/3 flex flex-col justify-center gap-0.5 p-2">
-                              <h1>{product.product_type}</h1>
+                              <h1>{product.collection}</h1>
                               <h1 className="flex-1 flex items-center break-words overflow-hidden">
                                 {product.name}
                               </h1>
@@ -689,10 +691,11 @@ export function CheckoutPageClient({
                                 <div className="flex gap-1">
                                   <h2>
                                     {`${
-                                      product.product_type !==
-                                      specialProductType
-                                        ? 'Μέγεθος'
-                                        : 'Συσκευή'
+                                      special_collections.includes(
+                                        product.collection,
+                                      )
+                                        ? 'Συσκευή'
+                                        : 'Μέγεθος'
                                     }:`}{' '}
                                   </h2>
                                   <p>{product.size}</p>
@@ -784,7 +787,7 @@ export function CheckoutPageClient({
                       styles={{ body: { alignItems: 'center' } }}
                       label={
                         <span>
-                          {`courier Center ${
+                          {`ΕΛΤΑ Courier ${
                             shipping.expense_elta_courier === 0
                               ? 'Δωρεάν'
                               : shipping.expense_elta_courier

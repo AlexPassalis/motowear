@@ -46,13 +46,15 @@ export function Search({ isSearchOpen, setIsSearchOpen }: SearchProps) {
           </button>
         </div>
         <div className="mx-auto w-full max-w-[400px] flex flex-col h-full min-h-0">
-          <InstantSearch
-            searchClient={typesenseClient.searchClient}
-            indexName="product"
-            future={{ preserveSharedStateOnUnmount: true }}
-          >
-            <Instant />
-          </InstantSearch>
+          {isSearchOpen && (
+            <InstantSearch
+              searchClient={typesenseClient.searchClient}
+              indexName="product"
+              future={{ preserveSharedStateOnUnmount: true }}
+            >
+              <Instant />
+            </InstantSearch>
+          )}
         </div>
       </div>
     </section>

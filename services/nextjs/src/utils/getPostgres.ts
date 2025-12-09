@@ -355,19 +355,7 @@ export async function getProductPageData(
   const collection = collections[0]
 
   const products_raw = await postgres
-    .select({
-      id: product_v2.id,
-      name: product_v2.name,
-      brand: product_v2.brand,
-      description: product_v2.description,
-      price: product_v2.price,
-      price_before: product_v2.price_before,
-      color: product_v2.color,
-      images: product_v2.images,
-      upsell_collection: product_v2.upsell_collection,
-      upsell_product: product_v2.upsell_product,
-      sold_out: product_v2.sold_out,
-    })
+    .select()
     .from(product_v2)
     .where(eq(product_v2.collection_id, collection.id))
   const products = products_raw.map((prod) => ({
@@ -451,22 +439,16 @@ export async function getProductPageData(
           const upsell_product_names = upsell_items.map((item) => item.product)
 
           const upsells_raw = await postgres
-            .select({
-              id: product_v2.id,
-              name: product_v2.name,
-              price: product_v2.price,
-              price_before: product_v2.price_before,
-              color: product_v2.color,
-              images: product_v2.images,
-            })
+            .select()
             .from(product_v2)
             .where(inArray(product_v2.name, upsell_product_names))
 
           const upsells = upsells_raw.map((upsell) => ({
             id: upsell.id,
+            collection: '', // TODO in the previous SQL statement, do a join to get the collection name
             name: upsell.name,
-            ...(upsell.price && { price: upsell.price }),
-            ...(upsell.price_before && { price_before: upsell.price_before }),
+            ...(upsell.price && { price: upsell.price }), // default to the collection.price
+            ...(upsell.price_before && { price_before: upsell.price_before }), // default to the collection.price_before
             ...(upsell.color && { color: upsell.color }),
             images: upsell.images,
           }))

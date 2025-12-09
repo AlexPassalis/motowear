@@ -13,7 +13,7 @@ import { flush_all } from './lib/redis/flush_all'
 async function startup() {
   await run_migrations()
   await run_scripts()
-  // await flush_all()
+  await flush_all()
 }
 
 if (process.env.BUILD_TIME !== 'true') {

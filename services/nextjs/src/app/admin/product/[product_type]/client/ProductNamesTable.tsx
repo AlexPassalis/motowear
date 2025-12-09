@@ -1,18 +1,15 @@
-import type { ColorVariant, Collection, ProductNameGroup, typeProductPage } from '@/lib/postgres/data/type'
+import type {
+  ColorVariant,
+  Collection,
+  ProductNameGroup,
+  typeProductPage,
+} from '@/lib/postgres/data/type'
 import type { typeModal } from '@/app/admin/product/[product_type]/client/Modal'
 
 import { zodProducts } from '@/lib/postgres/data/zod'
 import { z } from 'zod'
 
-import {
-  Dispatch,
-  SetStateAction,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react'
 import {
   Button,
   NumberInput,
@@ -87,7 +84,7 @@ export function ProductNamesTable({
 
   const product_name_groups = useMemo(() => {
     return group_products_by_name(
-      products.map((p) => ({ ...p, collection_name: collection.name }))
+      products.map((p) => ({ ...p, collection_name: collection.name })),
     )
   }, [products, collection.name])
 
@@ -167,7 +164,7 @@ export function ProductNamesTable({
 
   function handle_group_click(group: ProductNameGroup) {
     const variants_for_product = products.filter(
-      (p) => p.name === group.name && p.collection_id === group.collection_id
+      (p) => p.name === group.name && p.collection_id === group.collection_id,
     )
 
     set_selected_product_name(group.name)
@@ -177,18 +174,18 @@ export function ProductNamesTable({
 
   function go_to_last_page() {
     const groups = group_products_by_name(
-      products.map((p) => ({ ...p, collection_name: collection.name }))
+      products.map((p) => ({ ...p, collection_name: collection.name })),
     )
     const last_page = Math.max(
       1,
-      Math.ceil(groups.length / pagination_page_size)
+      Math.ceil(groups.length / pagination_page_size),
     )
     set_page_number(last_page)
   }
 
   function handle_create_new_product() {
     const existing_new_products = products.filter((p) =>
-      p.name.startsWith('New Product')
+      p.name.startsWith('New Product'),
     )
     const new_number = existing_new_products.length + 1
     const new_name = `New Product ${new_number}`
@@ -213,11 +210,11 @@ export function ProductNamesTable({
     setProducts(updated_products)
 
     const new_groups = group_products_by_name(
-      updated_products.map((p) => ({ ...p, collection_name: collection.name }))
+      updated_products.map((p) => ({ ...p, collection_name: collection.name })),
     )
     const last_page = Math.max(
       1,
-      Math.ceil(new_groups.length / pagination_page_size)
+      Math.ceil(new_groups.length / pagination_page_size),
     )
     set_page_number(last_page)
   }
@@ -244,7 +241,9 @@ export function ProductNamesTable({
       if (res.status === 200) {
         window.location.reload()
       } else {
-        alert(`Error saving collection: ${res.data?.message || ERROR.unexpected}`)
+        alert(
+          `Error saving collection: ${res.data?.message || ERROR.unexpected}`,
+        )
         console.error(res)
       }
     } catch (err) {
@@ -358,7 +357,9 @@ export function ProductNamesTable({
                   color="blue"
                   disabled={onRequest}
                 >
-                  {collection.sizes && collection.sizes.length > 0 ? collection.sizes.length : ''}
+                  {collection.sizes && collection.sizes.length > 0
+                    ? collection.sizes.length
+                    : ''}
                 </Button>
               </Table.Td>
 
@@ -458,8 +459,14 @@ export function ProductNamesTable({
                   handle_group_click(group)
                 }}
                 onDelete={() => {
-                  if (confirm(`Are you sure you want to delete "${group.name}" and all its colors?`)) {
-                    setProducts((prev) => prev.filter((p) => p.name !== group.name))
+                  if (
+                    confirm(
+                      `Are you sure you want to delete "${group.name}" and all its colors?`,
+                    )
+                  ) {
+                    setProducts((prev) =>
+                      prev.filter((p) => p.name !== group.name),
+                    )
                   }
                 }}
                 onRequest={onRequest}
@@ -472,7 +479,11 @@ export function ProductNamesTable({
               <Table.Td colSpan={3}>
                 <div className="flex gap-2 flex-col mt-6">
                   <div className="flex gap-2 items-center justify-center">
-                    <Button onClick={handle_create_new_product} disabled={onRequest} color="blue">
+                    <Button
+                      onClick={handle_create_new_product}
+                      disabled={onRequest}
+                      color="blue"
+                    >
                       Create New
                     </Button>
                     <span>Search</span>
@@ -504,15 +515,17 @@ export function ProductNamesTable({
                             id: p.id || id(),
                           }))
 
-                          const validated_products = zodProducts.safeParse(products_with_ids)
+                          const validated_products =
+                            zodProducts.safeParse(products_with_ids)
                           if (!validated_products.success) {
-                            const error_messages = validated_products.error.errors
-                              .map((err) => {
-                                const path = err.path.join(' -> ')
+                            const error_messages =
+                              validated_products.error.errors
+                                .map((err) => {
+                                  const path = err.path.join(' -> ')
 
-                                return `${path}: ${err.message}`
-                              })
-                              .join('\n')
+                                  return `${path}: ${err.message}`
+                                })
+                                .join('\n')
 
                             alert(`Invalid product data:\n\n${error_messages}`)
                             console.error(validated_products.error)
@@ -531,17 +544,18 @@ export function ProductNamesTable({
                               z.object({
                                 product_id: z.string(),
                                 sizes: z.array(z.string()),
-                              })
+                              }),
                             )
                             .safeParse(variants_data)
                           if (!validated_variants.success) {
-                            const error_messages = validated_variants.error.errors
-                              .map((err) => {
-                                const path = err.path.join(' -> ')
+                            const error_messages =
+                              validated_variants.error.errors
+                                .map((err) => {
+                                  const path = err.path.join(' -> ')
 
-                                return `${path}: ${err.message}`
-                              })
-                              .join('\n')
+                                  return `${path}: ${err.message}`
+                                })
+                                .join('\n')
 
                             alert(`Invalid variant data:\n\n${error_messages}`)
                             console.error(validated_variants.error)
@@ -568,7 +582,11 @@ export function ProductNamesTable({
                             window.location.reload()
                           } else {
                             alert(
-                              `Error saving: ${res1.data?.message || res2.data?.message || ERROR.unexpected}`,
+                              `Error saving: ${
+                                res1.data?.message ||
+                                res2.data?.message ||
+                                ERROR.unexpected
+                              }`,
                             )
                             console.error(res1, res2)
                           }

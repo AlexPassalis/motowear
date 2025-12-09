@@ -60,8 +60,8 @@ export async function getCollectionPageDataCached(
   product_type: string,
 ): Promise<Awaited<ReturnType<typeof getCollectionPageData>>> {
   if (process.env.BUILD_TIME !== 'true') {
+    const redis_key = `collection_page_data_${product_type}`
     let collection_page_data
-    let redis_key = `collection_page_data_${product_type}`
 
     try {
       collection_page_data = await redis.get(redis_key)
@@ -93,8 +93,8 @@ export async function getProductPageDataCached(
   product_type: string,
 ): Promise<Awaited<ReturnType<typeof getProductPageData>>> {
   if (process.env.BUILD_TIME !== 'true') {
+    const redis_key = `product_page_data_${product_type}`
     let product_page_data
-    let redis_key = `product_page_data_${product_type}`
 
     try {
       product_page_data = await redis.get(redis_key)
@@ -133,7 +133,8 @@ export async function getProductPageDataCached(
         price: 0,
         price_before: 0,
         sizes: [],
-        upsell_id: null,
+        upsell_collection: null,
+        upsell_product: null,
         sold_out: false,
       },
       reviews: [],

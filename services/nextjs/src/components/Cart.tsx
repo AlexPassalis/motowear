@@ -27,7 +27,7 @@ import { useRouter } from 'next/navigation'
 import { zodCoupon } from '@/lib/postgres/data/zod'
 import { MdDiscount } from 'react-icons/md'
 import { facebookPixelInitiateCheckout } from '@/lib/facebook-pixel'
-import { couponCodeMPRELOK, ERROR, specialProductType } from '@/data/magic'
+import { couponCodeMPRELOK, ERROR, special_collections } from '@/data/magic'
 import { googleAnalyticsBeginCheckout } from '@/lib/google-analytics'
 
 type CartProps = {
@@ -209,9 +209,9 @@ export function Cart({
                       <div className="flex gap-1">
                         <h2>
                           {`${
-                            product.collection !== specialProductType
-                              ? 'Μέγεθος'
-                              : 'Συσκευή'
+                            special_collections.includes(product.collection)
+                              ? 'Συσκευή'
+                              : 'Μέγεθος'
                           }:`}{' '}
                         </h2>
                         <p>{product.size}</p>

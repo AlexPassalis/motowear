@@ -35,7 +35,7 @@ export function AdminProductProductTypePageClient({
   const [collection, setCollection] = useState(collection_postgres)
   const initial_products = useMemo(
     () => product_all.filter((prod) => prod.collection_id === collection.id),
-    [product_all, collection.id]
+    [product_all, collection.id],
   )
   const [products, setProducts] = useState<ColorVariant[]>(initial_products)
 
@@ -47,15 +47,21 @@ export function AdminProductProductTypePageClient({
   const [modalOpened, { open: openModal, close: closeModal }] =
     useDisclosure(false)
 
-  const [selected_product_name, set_selected_product_name] = useState<string | null>(null)
+  const [selected_product_name, set_selected_product_name] = useState<
+    string | null
+  >(null)
   const [color_variants, set_color_variants] = useState<ColorVariant[]>([])
-  const [color_variants_modal_opened, { open: open_color_variants_modal, close: close_color_variants_modal }] =
-    useDisclosure(false)
+  const [
+    color_variants_modal_opened,
+    { open: open_color_variants_modal, close: close_color_variants_modal },
+  ] = useDisclosure(false)
   const [go_to_last_page_trigger, set_go_to_last_page_trigger] = useState(0)
 
   useEffect(() => {
     if (selected_product_name) {
-      const updated_variants = products.filter((p) => p.name === selected_product_name)
+      const updated_variants = products.filter(
+        (p) => p.name === selected_product_name,
+      )
       if (updated_variants.length > 0) {
         set_color_variants(updated_variants)
       }
@@ -87,14 +93,18 @@ export function AdminProductProductTypePageClient({
             const updated = update(color_variants)
             set_color_variants(updated)
             setProducts((prev) => {
-              const other_products = prev.filter((p) => p.name !== selected_product_name)
+              const other_products = prev.filter(
+                (p) => p.name !== selected_product_name,
+              )
 
               return [...other_products, ...updated]
             })
           } else {
             set_color_variants(update)
             setProducts((prev) => {
-              const other_products = prev.filter((p) => p.name !== selected_product_name)
+              const other_products = prev.filter(
+                (p) => p.name !== selected_product_name,
+              )
 
               return [...other_products, ...update]
             })
