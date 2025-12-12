@@ -1,6 +1,9 @@
-import type { typeUpsells, Product, Collection } from '@/lib/postgres/data/type'
+import type {
+  typeUpsells,
+  Collection,
+  ColorVariant,
+} from '@/lib/postgres/data/type'
 import type { typeBrands } from '@/utils/getPostgres'
-import type { ProductWithCollectionName } from '@/app/admin/product/[product_type]/client/index'
 
 import {
   Button,
@@ -43,10 +46,10 @@ type ModalProps = {
   collection: Collection
   setCollection: Dispatch<SetStateAction<Collection>>
   images_minio: string[]
-  products_all: ProductWithCollectionName[]
+  products_all: ColorVariant[]
   brands_postgres: typeBrands
-  products: ProductWithCollectionName[]
-  setProducts: Dispatch<SetStateAction<ProductWithCollectionName[]>>
+  products: ColorVariant[]
+  setProducts: Dispatch<SetStateAction<ColorVariant[]>>
   modalState: typeModal
   setModalState: Dispatch<SetStateAction<typeModal>>
   modalOpened: boolean
@@ -71,7 +74,7 @@ function ModalNotMemoised({
   const upsells: typeUpsells = products_all
     .filter((product) => !product.sold_out)
     .map((product) => ({
-      product_type: product.collection_name || product.collection_id,
+      product_type: collection.name,
       name: product.name,
     }))
     .filter(
@@ -393,8 +396,8 @@ function ModalNotMemoised({
                   prev.map((item) =>
                     item.id === modalState.product_id
                       ? { ...item, sizes: value }
-                      : item
-                  )
+                      : item,
+                  ),
                 )
               }}
             />
@@ -411,14 +414,23 @@ function ModalNotMemoised({
                   }
 
                   const new_size = new_size_input_ref.current.value.trim()
-                  const current_product = products.find((prod) => prod.id === modalState.product_id)
-                  if (new_size && current_product && !current_product.sizes?.includes(new_size)) {
+                  const current_product = products.find(
+                    (prod) => prod.id === modalState.product_id,
+                  )
+                  if (
+                    new_size &&
+                    current_product &&
+                    !current_product.sizes?.includes(new_size)
+                  ) {
                     setProducts((prev) =>
                       prev.map((item) =>
                         item.id === modalState.product_id
-                          ? { ...item, sizes: [...(item.sizes || []), new_size] }
-                          : item
-                      )
+                          ? {
+                              ...item,
+                              sizes: [...(item.sizes || []), new_size],
+                            }
+                          : item,
+                      ),
                     )
                     new_size_input_ref.current.value = ''
                   }
@@ -525,7 +537,6 @@ function ModalNotMemoised({
             nothingFoundMessage="Nothing found..."
           />
         )}
-
       </>
     </MantineModal>
   )

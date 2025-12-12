@@ -45,11 +45,11 @@ export async function sendAbandonCartEmail(cart: typeCart, email: string) {
   for (const [index, item] of cart.entries()) {
     try {
       const res = await axios.get(
-        `${envServer.MINIO_PRODUCT_URL}/${item.product_type}/${item.image}`,
+        `${envServer.MINIO_PRODUCT_URL}/${item.collection}/${item.image}`,
         { responseType: 'arraybuffer' },
       )
       attachments.push({
-        filename: `${item.product_type} ${item.name}`,
+        filename: `${item.collection} ${item.name}`,
         content: res.data,
         cid: `item-${index}`,
         contentDisposition: 'inline',
@@ -105,11 +105,11 @@ export async function sendOrderConfirmationEmail(
   for (const [index, item] of cart.entries()) {
     try {
       const res = await axios.get(
-        `${envServer.MINIO_PRODUCT_URL}/${item.product_type}/${item.image}`,
+        `${envServer.MINIO_PRODUCT_URL}/${item.collection}/${item.image}`,
         { responseType: 'arraybuffer' },
       )
       attachments.push({
-        filename: `${item.product_type} ${item.name}`,
+        filename: `${item.collection} ${item.name}`,
         content: res.data,
         cid: `item-${index}`,
         contentDisposition: 'inline',
@@ -173,11 +173,11 @@ export async function sendOrderLateEmail(
   for (const [index, item] of cart.entries()) {
     try {
       const res = await axios.get(
-        `${envServer.MINIO_PRODUCT_URL}/${item.product_type}/${item.image}`,
+        `${envServer.MINIO_PRODUCT_URL}/${item.collection}/${item.image}`,
         { responseType: 'arraybuffer' },
       )
       attachments.push({
-        filename: `${item.product_type} ${item.name}`,
+        filename: `${item.collection} ${item.name}`,
         content: res.data,
         cid: `item-${index}`,
         contentDisposition: 'inline',
@@ -243,11 +243,11 @@ export async function sendOrderFulfilledEmail(
   for (const [index, item] of cart.entries()) {
     try {
       const res = await axios.get(
-        `${envServer.MINIO_PRODUCT_URL}/${item.product_type}/${item.image}`,
+        `${envServer.MINIO_PRODUCT_URL}/${item.collection}/${item.image}`,
         { responseType: 'arraybuffer' },
       )
       attachments.push({
-        filename: `${item.product_type} ${item.name}`,
+        filename: `${item.collection} ${item.name}`,
         content: res.data,
         cid: `item-${index}`,
         contentDisposition: 'inline',

@@ -1022,7 +1022,7 @@ export function AdminOrderPageClient({
                       > = {}
                       for (const { id, cart } of selection) {
                         for (const item of cart)
-                          (grouped[item.product_type] ||= []).push({
+                          (grouped[item.collection] ||= []).push({
                             orderId: id,
                             ...item,
                           })
@@ -1089,8 +1089,8 @@ export function AdminOrderPageClient({
 
                           const line = [
                             orderId.toString().padEnd(5),
-                            size.padEnd(6),
-                            color.padEnd(7),
+                            (size ?? '').padEnd(6),
+                            (color ?? '').padEnd(7),
                             `x${quantity.toString().padEnd(3)}`,
                             name,
                           ].join(' ')

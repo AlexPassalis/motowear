@@ -8,7 +8,6 @@ import {
   product_v2,
   review,
   shipping,
-  variant,
   variant_v2,
 } from '../schema'
 
@@ -64,20 +63,13 @@ export const zodCartItem = z.object({
   size: z.string().nullable(),
   price: z.number(),
   quantity: z.number(),
+  image: z.string(),
 })
 export const zodCart = z.array(zodCartItem)
 export const zodCartItemLocalStorage = zodCartItem.extend({
-  image: z.string(),
   price_before: z.number().nullable(),
 })
 export const zodCartLocalStorage = z.array(zodCartItemLocalStorage)
-export const zodVariant = createSelectSchema(variant)
-  .omit({ index: true })
-  .extend({
-    id: z.string(),
-    images: z.array(z.string()).min(1),
-  })
-export const zodVariants = z.array(zodVariant)
 export const zodCoupon = createSelectSchema(coupon)
 export const zodCoupons = z.array(zodCoupon)
 export const zodReview = createSelectSchema(review)

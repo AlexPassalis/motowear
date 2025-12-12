@@ -177,7 +177,12 @@ type ReducerState = {
   selectedUpsellColor: string | null
   displayedUpsellSizes: MainProps['upsells'][0][]
   selectedUpsellSize: string | null
-  selectedUpsellProduct: MainProps['upsells'][0]
+  selectedUpsellProduct:
+    | (MainProps['upsells'][0] & {
+        color: string | null
+        size: string | null
+      })
+    | null
 }
 
 type ReducerAction =
@@ -185,6 +190,8 @@ type ReducerAction =
   | { type: 'CHANGE_NAME'; payload: string }
   | { type: 'CHANGE_COLOR'; payload: string | null }
   | { type: 'CHANGE_SIZE'; payload: string | null }
+  | { type: 'CHANGE_UPSELL_COLOR'; payload: string | null }
+  | { type: 'CHANGE_UPSELL_SIZE'; payload: string | null }
 
 function create_reducer(
   collection: MainProps['collection'],
@@ -326,6 +333,55 @@ function create_reducer(
           },
         }
       }
+      case 'CHANGE_UPSELL_COLOR': {
+        const selected_upsell_color = action.payload
+
+        const displayed_upsell_sizes = state.displayedUpsellColors.filter(
+          (upsell) => upsell.color === selected_upsell_color,
+        )
+
+        const selected_upsell_size =
+          displayed_upsell_sizes[0]?.sizes?.[0] ?? null
+
+        const found_upsell = state.displayedUpsellColors.find(
+          (upsell) => upsell.color === selected_upsell_color,
+        )!
+
+        return {
+          ...state,
+          selectedUpsellColor: selected_upsell_color,
+          displayedUpsellSizes: displayed_upsell_sizes,
+          selectedUpsellSize: selected_upsell_size,
+          selectedUpsellProduct: {
+            ...found_upsell,
+            color: selected_upsell_color,
+            size: selected_upsell_size,
+          } as MainProps['upsells'][0] & {
+            color: string | null
+            size: string | null
+          },
+        }
+      }
+      case 'CHANGE_UPSELL_SIZE': {
+        const selected_upsell_size = action.payload
+
+        const found_upsell = state.displayedUpsellColors.find(
+          (upsell) => upsell.color === state.selectedUpsellColor,
+        )!
+
+        return {
+          ...state,
+          selectedUpsellSize: selected_upsell_size,
+          selectedUpsellProduct: {
+            ...found_upsell,
+            color: state.selectedUpsellColor,
+            size: selected_upsell_size,
+          } as MainProps['upsells'][0] & {
+            color: string | null
+            size: string | null
+          },
+        }
+      }
       default:
         return state
     }
@@ -389,6 +445,30 @@ function Main({
               collection.sizes?.includes(initial_displayed_sizes[0])),
         ) ?? products[0]
 
+      const initial_displayed_upsell_colors = upsells
+      const initial_selected_upsell_color =
+        initial_displayed_upsell_colors[0]?.color ?? null
+
+      const initial_displayed_upsell_sizes =
+        initial_displayed_upsell_colors.filter(
+          (upsell) => upsell.color === initial_selected_upsell_color,
+        )
+
+      const initial_selected_upsell_size =
+        initial_displayed_upsell_sizes[0]?.sizes?.[0] ?? null
+
+      const initial_selected_upsell_product =
+        upsells.length > 0
+          ? ({
+              ...initial_displayed_upsell_colors[0],
+              color: initial_selected_upsell_color,
+              size: initial_selected_upsell_size,
+            } as MainProps['upsells'][0] & {
+              color: string | null
+              size: string | null
+            })
+          : null
+
       return {
         selectedBrand: '',
         displayedNames: products,
@@ -403,9 +483,16 @@ function Main({
           price_before:
             initial_found_product.price_before ?? collection.price_before ?? 0,
         },
+        displayedUpsellColors: initial_displayed_upsell_colors,
+        selectedUpsellColor: initial_selected_upsell_color,
+        displayedUpsellSizes: initial_displayed_upsell_sizes,
+        selectedUpsellSize: initial_selected_upsell_size,
+        selectedUpsellProduct: initial_selected_upsell_product,
       }
     },
   )
+
+  console.info('This is the state: ', state) // Leave in production as well
 
   const [count, handlers] = useCounter(0, { min: 1, max: 9 })
   const [
@@ -461,287 +548,253 @@ function Main({
         </Modal>
       )}
 
-      <Modal
-        opened={upsellModal}
-        onClose={() => {
-          closeUpsellModal()
-          setIsCartOpen(true)
-        }}
-        title={`${page.upsell}`}
-        classNames={{
-          header: '!relative !flex',
-          title: '!mx-auto !text-xl',
-          close: '!absolute !top-4 !right-4',
-        }}
-        centered
-      >
-        <>
-          {state.selectedUpsellProduct && (
-            <div className="flex flex-col">
-              <div className="flex">
-                <h1 className="text-xl">
-                  {state.selectedUpsellProduct.collection}
-                </h1>
-                <div className="flex gap-2 ml-auto">
-                  {state.selectedUpsellProduct.price_before > 0 && (
-                    <h2 className="text-xl text-[var(--mantine-border)] line-through decoration-red-500">{`${state.selectedUpsellProduct.price_before}€`}</h2>
-                  )}
-                  <h2 className="text-xl">{`${state.selectedUpsellProduct.price}€`}</h2>
-                </div>
-              </div>
-              <h1 className="text-xl">{state.selectedUpsellProduct.name}</h1>
-              <div className="relative aspect-square w-3/4 mx-auto my-2">
-                <Image
-                  src={`${envClient.MINIO_PRODUCT_URL}/${state.selectedUpsellProduct.collection}/${state.selectedUpsellProduct.images[0]}`}
-                  alt={state.selectedUpsellProduct.images[0]}
-                  fill
-                  style={{ objectFit: 'cover' }}
-                />
-              </div>
-
-              {state.displayedUpsellColors
-                .map((prod) => prod.color)
-                .filter(
-                  (item, index, self) =>
-                    index === self.findIndex((other) => other === item),
-                ).length > 0 && (
-                <div className="mb-2">
-                  <h1 className="mb-1 text-lg">Χρώμα</h1>
-                  <div className="flex gap-2">
-                    {state.displayedUpsellColors
-                      .map((prod) => prod.color)
-                      .filter(
-                        (item, index, self) =>
-                          index === self.findIndex((other) => other === item),
-                      )
-                      .map((color, index) => {
-                        return color === state.selectedUpsellProduct.color ? (
-                          <div
-                            key={index}
-                            onClick={() => {
-                              const displayedVariants = upsellVariants
-                                .filter(
-                                  (prod) =>
-                                    prod.product_type ===
-                                      state.selectedUpsellProduct
-                                        .product_type &&
-                                    prod.name ===
-                                      state.selectedUpsellProduct.name,
-                                )
-                                .filter((prod) => prod.color === color)
-                                .filter(
-                                  (item, index, self) =>
-                                    index ===
-                                    self.findIndex((other) => other === item),
-                                )
-                              setstate.selectedUpsellProduct(
-                                displayedVariants[0],
-                              )
-                            }}
-                            className="w-8 h-8 rounded-full p-0.5 border-2 border-black hover:cursor-pointer"
-                          >
-                            <div
-                              style={{ backgroundColor: color }}
-                              className="w-full h-full rounded-full"
-                            />
-                          </div>
-                        ) : (
-                          <div
-                            key={index}
-                            onClick={() => {
-                              const displayedVariants = upsellVariants
-                                .filter(
-                                  (prod) =>
-                                    prod.product_type ===
-                                      state.selectedUpsellProduct
-                                        .product_type &&
-                                    prod.name ===
-                                      state.selectedUpsellProduct.name,
-                                )
-                                .filter((prod) => prod.color === color)
-                                .filter(
-                                  (item, index, self) =>
-                                    index ===
-                                    self.findIndex((other) => other === item),
-                                )
-                              setstate.selectedUpsellProduct(
-                                displayedVariants[0],
-                              )
-                            }}
-                            style={{ backgroundColor: color }}
-                            className={`w-8 h-8 rounded-full hover:cursor-pointer ${
-                              color === 'White' ? 'border border-black' : ''
-                            }`}
-                          />
-                        )
-                      })}
-                  </div>
-                </div>
-              )}
-
-              {state.displayedUpsellColors
-                .filter(
-                  (prod) => prod.color === state.selectedUpsellProduct.color,
-                )
-                .map((prod) => prod.size).length > 0 && (
-                <div className="mb-2">
-                  <h1 className="mb-1 text-lg">
-                    {special_collections.includes(
-                      state.selectedUpsellProduct.collection,
-                    )
-                      ? 'Μέγεθος'
-                      : 'Συσκευή'}
+      {upsells.length > 0 && (
+        <Modal
+          opened={upsellModal}
+          onClose={() => {
+            closeUpsellModal()
+            setIsCartOpen(true)
+          }}
+          title={`${page.upsell}`}
+          classNames={{
+            header: '!relative !flex',
+            title: '!mx-auto !text-xl',
+            close: '!absolute !top-4 !right-4',
+          }}
+          centered
+        >
+          <>
+            {state.selectedUpsellProduct && (
+              <div className="flex flex-col">
+                <div className="flex">
+                  <h1 className="text-xl">
+                    {state.selectedUpsellProduct.collection}
                   </h1>
-                  <div className="flex flex-wrap gap-2">
-                    {state.displayedUpsellColors
-                      .filter(
-                        (prod) =>
-                          prod.color === state.selectedUpsellProduct.color,
-                      )
-                      .map((prod) => prod.size)
-                      .map((size, index) => (
-                        <div
-                          key={index}
-                          onClick={() =>
-                            setstate.selectedUpsellProduct(
-                              state.displayedUpsellColors.find(
-                                (prod) =>
-                                  prod.color ===
-                                    state.selectedUpsellProduct.color &&
-                                  prod.size &&
-                                  prod.size === size,
-                              )!,
-                            )
-                          }
-                          className={`min-w-9 h-[31.5px] border-2 rounded-lg ${
-                            state.selectedUpsellProduct.size === size
-                              ? 'border-black'
-                              : 'border-[var(--mantine-border)]'
-                          }`}
-                        >
-                          <UnstyledButton
-                            style={{
-                              width: '100%',
-                              height: '100%',
-                              display: 'flex',
-                              justifyContent: 'center',
-                              alignItems: 'center',
-                              padding: '0 8px',
-                              whiteSpace: 'nowrap',
-                            }}
-                          >
-                            {size}
-                          </UnstyledButton>
-                        </div>
-                      ))}
+                  <div className="flex gap-2 ml-auto">
+                    {state.selectedUpsellProduct.price_before > 0 && (
+                      <h2 className="text-xl text-[var(--mantine-border)] line-through decoration-red-500">{`${state.selectedUpsellProduct.price_before}€`}</h2>
+                    )}
+                    <h2 className="text-xl">{`${state.selectedUpsellProduct.price}€`}</h2>
                   </div>
                 </div>
-              )}
+                <h1 className="text-xl">{state.selectedUpsellProduct.name}</h1>
+                <div className="relative aspect-square w-3/4 mx-auto my-2">
+                  <Image
+                    src={`${envClient.MINIO_PRODUCT_URL}/${state.selectedUpsellProduct.collection}/${state.selectedUpsellProduct.images[0]}`}
+                    alt={state.selectedUpsellProduct.images[0]}
+                    fill
+                    style={{ objectFit: 'cover' }}
+                  />
+                </div>
 
-              <div className="mt-4 flex gap-2 w-full justify-center items-center">
-                <div className="flex w-24 h-[42px] rounded-lg border-2 border-[var(--mantine-border)]">
-                  <div onClick={() => handlers.decrement()} className="w-1/3">
-                    <UnstyledButton
-                      size="compact-sm"
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                      }}
-                    >
-                      <FaMinus size={10} />
-                    </UnstyledButton>
+                {state.displayedUpsellColors
+                  .map((prod) => prod.color)
+                  .filter(
+                    (item, index, self) =>
+                      index === self.findIndex((other) => other === item),
+                  ).length > 0 && (
+                  <div className="mb-2">
+                    <h1 className="mb-1 text-lg">Χρώμα</h1>
+                    <div className="flex gap-2">
+                      {state.displayedUpsellColors
+                        .map((prod) => prod.color)
+                        .filter(
+                          (item, index, self) =>
+                            index === self.findIndex((other) => other === item),
+                        )
+                        .map((color, index) => {
+                          return color === state.selectedUpsellColor ? (
+                            <div
+                              key={index}
+                              onClick={() => {
+                                dispatch({
+                                  type: 'CHANGE_UPSELL_COLOR',
+                                  payload: color ?? null,
+                                })
+                              }}
+                              className="w-8 h-8 rounded-full p-0.5 border-2 border-black hover:cursor-pointer"
+                            >
+                              <div
+                                style={{ backgroundColor: color }}
+                                className="w-full h-full rounded-full"
+                              />
+                            </div>
+                          ) : (
+                            <div
+                              key={index}
+                              onClick={() => {
+                                dispatch({
+                                  type: 'CHANGE_UPSELL_COLOR',
+                                  payload: color ?? null,
+                                })
+                              }}
+                              style={{ backgroundColor: color }}
+                              className={`w-8 h-8 rounded-full hover:cursor-pointer ${
+                                color === 'White' ? 'border border-black' : ''
+                              }`}
+                            />
+                          )
+                        })}
+                    </div>
                   </div>
-                  <div className="flex w-1/3 items-center justify-center border-x-1 border-[var(--mantine-border)]">
-                    <p>{count}</p>
+                )}
+
+                {state.displayedUpsellSizes.length > 0 &&
+                  state.displayedUpsellSizes[0]?.sizes &&
+                  state.displayedUpsellSizes[0].sizes.length > 0 && (
+                    <div className="mb-2">
+                      <h1 className="mb-1 text-lg">
+                        {special_collections.includes(
+                          state.selectedUpsellProduct.collection,
+                        )
+                          ? 'Μέγεθος'
+                          : 'Συσκευή'}
+                      </h1>
+                      <div className="flex flex-wrap gap-2">
+                        {state.displayedUpsellSizes[0].sizes.map(
+                          (size, index) => (
+                            <div
+                              key={index}
+                              onClick={() => {
+                                dispatch({
+                                  type: 'CHANGE_UPSELL_SIZE',
+                                  payload: size,
+                                })
+                              }}
+                              className={`min-w-9 h-[31.5px] border-2 rounded-lg ${
+                                state.selectedUpsellSize === size
+                                  ? 'border-black'
+                                  : 'border-[var(--mantine-border)]'
+                              }`}
+                            >
+                              <UnstyledButton
+                                style={{
+                                  width: '100%',
+                                  height: '100%',
+                                  display: 'flex',
+                                  justifyContent: 'center',
+                                  alignItems: 'center',
+                                  padding: '0 8px',
+                                  whiteSpace: 'nowrap',
+                                }}
+                              >
+                                {size}
+                              </UnstyledButton>
+                            </div>
+                          ),
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                <div className="mt-4 flex gap-2 w-full justify-center items-center">
+                  <div className="flex w-24 h-[42px] rounded-lg border-2 border-[var(--mantine-border)]">
+                    <div onClick={() => handlers.decrement()} className="w-1/3">
+                      <UnstyledButton
+                        size="compact-sm"
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          display: 'flex',
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                        }}
+                      >
+                        <FaMinus size={10} />
+                      </UnstyledButton>
+                    </div>
+                    <div className="flex w-1/3 items-center justify-center border-x-1 border-[var(--mantine-border)]">
+                      <p>{count}</p>
+                    </div>
+                    <div onClick={() => handlers.increment()} className="w-1/3">
+                      <UnstyledButton
+                        size="compact-md"
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          display: 'flex',
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                        }}
+                      >
+                        <FaPlus size={10} />
+                      </UnstyledButton>
+                    </div>
                   </div>
-                  <div onClick={() => handlers.increment()} className="w-1/3">
-                    <UnstyledButton
-                      size="compact-md"
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                      }}
-                    >
-                      <FaPlus size={10} />
-                    </UnstyledButton>
-                  </div>
-                </div>
-                <Button
-                  onClick={() => {
-                    closeUpsellModal()
-                    setIsCartOpen(true)
-                    setCart((prev) => {
-                      const existingIndex = prev.findIndex(
-                        (item) =>
-                          item.product_type ===
-                            state.selectedUpsellProduct.collection &&
-                          item.name === state.selectedUpsellProduct.name &&
-                          item.color === state.selectedUpsellProduct.color &&
-                          item.size === state.selectedUpsellProduct.size,
-                      )
-                      if (existingIndex !== -1) {
-                        const updatedCart = [...prev]
-                        updatedCart[existingIndex] = {
-                          ...updatedCart[existingIndex],
-                          quantity: updatedCart[existingIndex].quantity + count,
-                        }
-                        return updatedCart
-                      } else {
-                        return [
-                          ...prev,
-                          {
-                            image: state.selectedUpsellProduct.images[0],
-                            product_type:
-                              state.selectedUpsellProduct.collection,
-                            name: state.selectedUpsellProduct.name,
-                            color: state.selectedUpsellProduct.color || '',
-                            size: state.selectedUpsellProduct.size || '',
-                            price: state.selectedUpsellProduct.price,
-                            price_before:
-                              state.selectedUpsellProduct.price_before,
-                            quantity: count,
-                          },
-                        ]
+                  <Button
+                    onClick={() => {
+                      closeUpsellModal()
+                      setIsCartOpen(true)
+                      if (!state.selectedUpsellProduct) {
+                        return
                       }
-                    })
-                    handlers.reset()
 
-                    facebookPixelAddToCart(
-                      state.selectedUpsellProduct.price,
-                      count,
-                      state.selectedUpsellProduct.collection,
-                      state.selectedUpsellProduct.name,
-                      state.selectedUpsellProduct.color,
-                      state.selectedUpsellProduct.size,
-                    )
+                      const upsell_product = state.selectedUpsellProduct
 
-                    googleAnalyticsAddToCart(
-                      state.selectedUpsellProduct.price,
-                      count,
-                      state.selectedUpsellProduct.collection,
-                      state.selectedUpsellProduct.name,
-                      state.selectedUpsellProduct.color,
-                      state.selectedUpsellProduct.size,
-                    )
-                  }}
-                  color="red"
-                  size="md"
-                  radius="md"
-                  style={{ width: '100%' }}
-                >
-                  Προσθήκη στο Καλάθι
-                </Button>
+                      setCart((prev) => {
+                        const existingIndex = prev.findIndex(
+                          (item) =>
+                            item.collection === upsell_product.collection &&
+                            item.name === upsell_product.name &&
+                            item.color === upsell_product.color &&
+                            item.size === upsell_product.size,
+                        )
+                        if (existingIndex !== -1) {
+                          const updatedCart = [...prev]
+                          updatedCart[existingIndex] = {
+                            ...updatedCart[existingIndex],
+                            quantity:
+                              updatedCart[existingIndex].quantity + count,
+                          }
+                          return updatedCart
+                        } else {
+                          return [
+                            ...prev,
+                            {
+                              image: upsell_product.images[0],
+                              collection: upsell_product.collection,
+                              name: upsell_product.name,
+                              color: upsell_product.color,
+                              size: upsell_product.size,
+                              price: upsell_product.price,
+                              price_before: upsell_product.price_before,
+                              quantity: count,
+                            },
+                          ]
+                        }
+                      })
+
+                      facebookPixelAddToCart(
+                        upsell_product.price,
+                        count,
+                        upsell_product.collection,
+                        upsell_product.name,
+                        upsell_product.color,
+                        upsell_product.size,
+                      )
+
+                      googleAnalyticsAddToCart(
+                        upsell_product.price,
+                        count,
+                        upsell_product.collection,
+                        upsell_product.name,
+                        upsell_product.color,
+                        upsell_product.size,
+                      )
+                    }}
+                    color="red"
+                    size="md"
+                    radius="md"
+                    style={{ width: '100%' }}
+                  >
+                    Προσθήκη στο Καλάθι
+                  </Button>
+                </div>
               </div>
-            </div>
-          )}
-        </>
-      </Modal>
+            )}
+          </>
+        </Modal>
+      )}
 
       <main className="flex-1">
         <div className="md:flex">
@@ -1339,12 +1392,11 @@ function Main({
                     }
                   }
 
-                  // if (state.selectedUpsellProduct) {
-                  //   openUpsellModal()
-                  // } else {
-                  //   setIsCartOpen(true)
-                  // }
-                  setIsCartOpen(true)
+                  if (state.selectedUpsellProduct) {
+                    openUpsellModal()
+                  } else {
+                    setIsCartOpen(true)
+                  }
 
                   setCart((prev) => {
                     const existingIndex = prev.findIndex(

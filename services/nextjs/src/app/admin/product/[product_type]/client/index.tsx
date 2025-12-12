@@ -131,7 +131,6 @@ export function AdminProductProductTypePageClient({
         products_postgres={initial_products}
         setProducts={setProducts}
         products_all={product_all}
-        brands_postgres={brands}
         onRequest={onRequest}
         setOnRequest={setOnRequest}
         modalState={modalState}

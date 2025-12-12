@@ -1,10 +1,5 @@
 import { postgres } from '@/lib/postgres/index'
-import {
-  variant,
-  collection_v2,
-  product_v2,
-  variant_v2,
-} from '@/lib/postgres/schema'
+import { collection_v2, product_v2, variant_v2, variant } from '@/lib/postgres/schema'
 import { eq, and, isNull } from 'drizzle-orm'
 
 export async function migrate_v2() {
@@ -57,7 +52,7 @@ export async function migrate_v2() {
 
     const most_common_description = find_most_common(variants, 'description')
     const most_common_price = find_most_common(variants, 'price')
-    const most_common_price_before = find_most_common(variants, 'price_before')
+    const most_common_price_before = find_most_common(variants, 'price_before') || 0
     const most_common_sold_out = find_most_common(variants, 'sold_out')
     const most_common_upsell = find_most_common(variants, 'upsell')
     const most_common_sizes = find_most_common_array(variants, 'size')

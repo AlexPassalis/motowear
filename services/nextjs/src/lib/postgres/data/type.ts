@@ -7,7 +7,6 @@ import {
   product_pages,
   product_v2,
   review,
-  variant,
   variant_v2,
 } from '../schema'
 
@@ -47,9 +46,6 @@ export type ProductNameGroup = {
   collection_id: string
 }
 
-export type typeVariant = Omit<InferSelectModel<typeof variant>, 'index'> & {
-  index?: number
-}
 export type typeReview = Omit<InferSelectModel<typeof review>, 'index'> & {
   index?: number
 }

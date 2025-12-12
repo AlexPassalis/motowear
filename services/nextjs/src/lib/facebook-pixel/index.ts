@@ -74,8 +74,8 @@ export async function facebookPixelAddToCart(
   count: number,
   collection: string,
   product: string,
-  color: null | string,
-  size: null | string,
+  color: string | null,
+  size: string | null,
 ) {
   if (!isProduction) {
     return

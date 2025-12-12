@@ -51,8 +51,8 @@ export function googleAnalyticsAddToCart(
   count: number,
   collection: string,
   product: string,
-  color: null | string,
-  size: null | string,
+  color: string | null,
+  size: string | null,
 ) {
   if (!isProduction) {
     return
@@ -88,9 +88,9 @@ export function googleAnalyticsBeginCheckout(
     currency: 'EUR',
     value: total,
     items: cart.map((item) => ({
-      item_id: `${item.product_type}:${item.name}`,
+      item_id: `${item.collection}:${item.name}`,
       item_name: item.name,
-      item_category: item.product_type,
+      item_category: item.collection,
       item_variant:
         [item.color, item.size].filter(Boolean).join(' ').trim() || undefined,
       price: item.price,
@@ -114,9 +114,9 @@ export function googleAnalyticsPurchase(
     currency: 'EUR',
     value: total,
     items: cart.map((item) => ({
-      item_id: `${item.product_type}:${item.name}`,
+      item_id: `${item.collection}:${item.name}`,
       item_name: item.name,
-      item_category: item.product_type,
+      item_category: item.collection,
       item_variant:
         [item.color, item.size].filter(Boolean).join(' ').trim() || undefined,
       price: item.price,

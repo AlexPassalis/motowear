@@ -92,7 +92,7 @@ export function OrderConfirmationEmail({
                       >
                         <Img
                           src={`cid:item-${index}`}
-                          alt={`${product.product_type} ${product.image}`}
+                          alt={`${product.collection} ${product.image}`}
                           style={{
                             display: 'block',
                             width: '100%',
@@ -102,7 +102,7 @@ export function OrderConfirmationEmail({
                       </Column>
 
                       <Column className="w-2/3 p-2 relative">
-                        <Text style={tight}>{product.product_type}</Text>
+                        <Text style={tight}>{product.collection}</Text>
                         <Text style={tight}>{product.name}</Text>
                         {product.color && (
                           <Text className="mr-1" style={{ margin: 0 }}>

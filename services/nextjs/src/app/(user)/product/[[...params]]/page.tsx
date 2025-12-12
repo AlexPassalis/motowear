@@ -4,7 +4,6 @@ import {
   getPagesCached,
   getProductTypesCached,
   getProductPageDataCached,
-  getReviewsCollectionCached,
 } from '@/app/(user)/cache'
 import { notFound, redirect } from 'next/navigation'
 import { ROUTE_ERROR } from '@/data/routes'

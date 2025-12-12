@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
       name: z.string(),
       description: z.string().nullable(),
       price: z.number(),
-      price_before: z.number().nullable(),
+      price_before: z.number(),
       sizes: z.array(z.string()).nullable(),
       upsell_collection: z.string().nullable(),
       upsell_product: z.string().nullable(),

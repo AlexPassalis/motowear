@@ -40,7 +40,6 @@ type ProductNamesTableProps = {
   setCollection: Dispatch<SetStateAction<Collection>>
   images_minio: string[]
   products_all: ColorVariant[]
-  brands_postgres: string[]
   products: ColorVariant[]
   products_postgres: ColorVariant[]
   setProducts: Dispatch<SetStateAction<ColorVariant[]>>
@@ -69,7 +68,6 @@ export function ProductNamesTable({
   setCollection,
   images_minio,
   products_all,
-  brands_postgres,
   products,
   products_postgres,
   setProducts,
@@ -341,9 +339,9 @@ export function ProductNamesTable({
 
               <Table.Td>
                 <NumberInput
-                  value={collection.price_before || undefined}
+                  value={collection.price_before}
                   onChange={(e) => {
-                    update_collection({ price_before: e ? Number(e) : null })
+                    update_collection({ price_before: Number(e) })
                   }}
                   min={0}
                   max={9999.99}

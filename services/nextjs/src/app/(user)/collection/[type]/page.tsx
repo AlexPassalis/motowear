@@ -65,7 +65,8 @@ export default async function CollectionPage({ params }: ProductPageProps) {
   )
 
   const { brands, products } = results_2
-  if (products.size === 0) {
+  const products_set = new Set(products)
+  if (products_set.size === 0) {
     notFound()
   }
 
@@ -75,7 +76,7 @@ export default async function CollectionPage({ params }: ProductPageProps) {
       product_types={product_types}
       shipping={shipping}
       brands={brands}
-      products={products}
+      products={products_set}
     />
   )
 }

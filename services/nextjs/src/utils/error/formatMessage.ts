@@ -28,7 +28,7 @@ export function formatOrderMessage(id: number, total: number, cart: typeCart) {
   const cartLines = cart
     .map(
       (i) =>
-        `• <b>${escHtml(i.product_type)} ${escHtml(i.name)}${
+        `• <b>${escHtml(i.collection)} ${escHtml(i.name)}${
           i.color ? ` ${escHtml(i.color)}` : ''
         }${i.size ? ` ${escHtml(i.size)}` : ''}</b>\n` +
         `  ${i.quantity} × ${i.price} = ${(i.quantity * i.price).toFixed(2)}€`,

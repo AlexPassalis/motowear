@@ -3,14 +3,13 @@ import type {
   Collection,
   ColorVariant,
   typeReview,
-  typeVariant,
 } from '@/lib/postgres/data/type'
 
 import { postgres } from '@/lib/postgres'
 import {
   product_pages,
   brand,
-  variant,
+
   review,
   order,
   daily_session,
@@ -115,18 +114,33 @@ export type typeHomePage = Awaited<ReturnType<typeof getHomePage>>
 export async function getHomePageVariants() {
   const product_types = await getProductTypes()
   const arrays = await Promise.all(
-    product_types.map((product_type) =>
-      postgres
-        .selectDistinctOn([variant.name], {
-          product_type: variant.product_type,
-          name: variant.name,
-          image: sql`${variant.images}[1]` as SQL<string>,
+    product_types.map(async (product_type) => {
+      const collections = await postgres
+        .select({ id: collection_v2.id })
+        .from(collection_v2)
+        .where(eq(collection_v2.name, product_type))
+        .limit(1)
+
+      if (collections.length === 0) {
+        return []
+      }
+
+      const products = await postgres
+        .select({
+          name: product_v2.name,
+          image: sql`${product_v2.images}[1]` as SQL<string>,
         })
-        .from(variant)
-        .where(eq(variant.product_type, product_type))
-        .orderBy(variant.name, variant.index)
-        .limit(4),
-    ),
+        .from(product_v2)
+        .where(eq(product_v2.collection_id, collections[0].id))
+        .orderBy(product_v2.name)
+        .limit(4)
+
+      return products.map((p) => ({
+        product_type,
+        name: p.name,
+        image: p.image,
+      }))
+    }),
   )
 
   return arrays.flat()
@@ -234,18 +248,33 @@ export async function unsubscribe(customer_email: string) {
 }
 
 export async function getVariantsProductType(product_type: string) {
-  const array = await postgres
+  const collections = await postgres
+    .select({ id: collection_v2.id })
+    .from(collection_v2)
+    .where(eq(collection_v2.name, product_type))
+    .limit(1)
+
+  if (collections.length === 0) {
+    return []
+  }
+
+  const products_raw = await postgres
     .select()
-    .from(variant)
-    .where(eq(variant.product_type, product_type))
-    .orderBy(variant.index)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  return array.map(({ index, ...rest }) => rest)
+    .from(product_v2)
+    .innerJoin(collection_v2, eq(product_v2.collection_id, collection_v2.id))
+    .where(eq(product_v2.collection_id, collections[0].id))
+    .orderBy(product_v2.name)
+
+  return products_raw.map(({ product_v2: prod }) => ({
+    id: prod.id,
+    product_type,
+    name: prod.name,
+    color: prod.color ?? '',
+    image: prod.images[0],
+  }))
 }
 
-export async function getCollectionPageData(
-  product_type: typeVariant['product_type'],
-) {
+export async function getCollectionPageData(product_type: string) {
   const collections = await postgres
     .select({
       id: collection_v2.id,
@@ -325,9 +354,7 @@ export async function getCollectionPageData(
   return { brands, products: collection_page_products }
 }
 
-export async function getProductPageData(
-  product_type: typeVariant['product_type'],
-) {
+export async function getProductPageData(product_type: string) {
   const collections = await postgres
     .select()
     .from(collection_v2)
@@ -357,22 +384,25 @@ export async function getProductPageData(
   const products_raw = await postgres
     .select()
     .from(product_v2)
+    .innerJoin(collection_v2, eq(product_v2.collection_id, collection_v2.id))
     .where(eq(product_v2.collection_id, collection.id))
-  const products = products_raw.map((prod) => ({
-    id: prod.id,
-    name: prod.name,
-    ...(prod.brand && { brand: prod.brand }),
-    ...(prod.description && { description: prod.description }),
-    ...(prod.price && { price: prod.price }),
-    ...(prod.price_before && { price_before: prod.price_before }),
-    ...(prod.color && { color: prod.color }),
-    images: prod.images,
-    ...(prod.upsell_collection && {
-      upsell_collection: prod.upsell_collection,
+  const products = products_raw.map(
+    ({ collection_v2: coll, product_v2: prod }) => ({
+      id: prod.id,
+      name: prod.name,
+      ...(prod.brand && { brand: prod.brand }),
+      ...(prod.description && { description: prod.description }),
+      price: prod.price ?? coll.price,
+      price_before: prod.price_before ?? coll.price_before,
+      ...(prod.color && { color: prod.color }),
+      images: prod.images,
+      ...(prod.upsell_collection && {
+        upsell_collection: prod.upsell_collection,
+      }),
+      ...(prod.upsell_product && { upsell_product: prod.upsell_product }),
+      ...(prod.sold_out && { sold_out: prod.sold_out }),
     }),
-    ...(prod.upsell_product && { upsell_product: prod.upsell_product }),
-    ...(prod.sold_out && { sold_out: prod.sold_out }),
-  }))
+  )
 
   const product_ids = products.map((product) => product.id)
 
@@ -441,17 +471,23 @@ export async function getProductPageData(
           const upsells_raw = await postgres
             .select()
             .from(product_v2)
+            .leftJoin(
+              collection_v2,
+              eq(product_v2.collection_id, collection_v2.id),
+            )
             .where(inArray(product_v2.name, upsell_product_names))
 
-          const upsells = upsells_raw.map((upsell) => ({
-            id: upsell.id,
-            collection: '', // TODO in the previous SQL statement, do a join to get the collection name
-            name: upsell.name,
-            ...(upsell.price && { price: upsell.price }), // default to the collection.price
-            ...(upsell.price_before && { price_before: upsell.price_before }), // default to the collection.price_before
-            ...(upsell.color && { color: upsell.color }),
-            images: upsell.images,
-          }))
+          const upsells = upsells_raw.map(
+            ({ collection_v2: coll, product_v2: prod }) => ({
+              id: prod.id,
+              collection: coll!.name,
+              name: prod.name,
+              price: prod.price ?? coll!.price,
+              price_before: prod.price_before ?? coll!.price_before,
+              ...(prod.color && { color: prod.color }),
+              images: prod.images,
+            }),
+          )
 
           const upsell_product_ids = upsells.map((upsell) => upsell.id)
 
@@ -498,9 +534,9 @@ export async function getProductPageData(
 
 export async function getUniqueVariantNames() {
   const array = await postgres
-    .selectDistinctOn([variant.name])
-    .from(variant)
-    .orderBy(variant.name)
+    .selectDistinctOn([product_v2.name])
+    .from(product_v2)
+    .orderBy(product_v2.name)
 
   return array.map((row) => row.name)
 }

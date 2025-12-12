@@ -67,7 +67,7 @@ export const collection_v2 = productsSchema.table('collection_v2', {
     }),
   description: text('description'),
   price: Numeric('price', { precision: 7, scale: 2 }).notNull(),
-  price_before: Numeric('price_before', { precision: 7, scale: 2 }),
+  price_before: Numeric('price_before', { precision: 7, scale: 2 }).notNull(),
   sizes: text('sizes').array(),
   upsell_collection: text('upsell_collection'),
   upsell_product: text('upsell_product'),

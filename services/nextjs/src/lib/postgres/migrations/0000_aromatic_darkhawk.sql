@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS "products"."collection_v2" (
 	"name" text NOT NULL,
 	"description" text,
 	"price" numeric(7,2) NOT NULL,
-	"price_before" numeric(7,2),
+	"price_before" numeric(7,2) NOT NULL,
 	"sizes" text[],
 	"upsell_collection" text,
 	"upsell_product" text,
