@@ -336,16 +336,20 @@ function create_reducer(
       case 'CHANGE_UPSELL_COLOR': {
         const selected_upsell_color = action.payload
 
-        const displayed_upsell_sizes = state.displayedUpsellColors.filter(
-          (upsell) => upsell.color === selected_upsell_color,
-        )
+        const displayed_upsell_sizes =
+          selected_upsell_color !== null
+            ? state.displayedUpsellColors.filter(
+                (upsell) => upsell.color === selected_upsell_color,
+              )
+            : state.displayedUpsellColors
 
         const selected_upsell_size =
           displayed_upsell_sizes[0]?.sizes?.[0] ?? null
 
-        const found_upsell = state.displayedUpsellColors.find(
-          (upsell) => upsell.color === selected_upsell_color,
-        )!
+        const found_upsell =
+          state.displayedUpsellColors.find(
+            (upsell) => upsell.color === selected_upsell_color,
+          ) ?? state.displayedUpsellColors[0]
 
         return {
           ...state,
@@ -365,9 +369,10 @@ function create_reducer(
       case 'CHANGE_UPSELL_SIZE': {
         const selected_upsell_size = action.payload
 
-        const found_upsell = state.displayedUpsellColors.find(
-          (upsell) => upsell.color === state.selectedUpsellColor,
-        )!
+        const found_upsell =
+          state.displayedUpsellColors.find(
+            (upsell) => upsell.color === state.selectedUpsellColor,
+          ) ?? state.displayedUpsellColors[0]
 
         return {
           ...state,
@@ -450,9 +455,11 @@ function Main({
         initial_displayed_upsell_colors[0]?.color ?? null
 
       const initial_displayed_upsell_sizes =
-        initial_displayed_upsell_colors.filter(
-          (upsell) => upsell.color === initial_selected_upsell_color,
-        )
+        initial_selected_upsell_color !== null
+          ? initial_displayed_upsell_colors.filter(
+              (upsell) => upsell.color === initial_selected_upsell_color,
+            )
+          : initial_displayed_upsell_colors
 
       const initial_selected_upsell_size =
         initial_displayed_upsell_sizes[0]?.sizes?.[0] ?? null
@@ -588,6 +595,7 @@ function Main({
                 </div>
 
                 {state.displayedUpsellColors
+                  .filter((prod) => prod.color)
                   .map((prod) => prod.color)
                   .filter(
                     (item, index, self) =>
@@ -597,6 +605,7 @@ function Main({
                     <h1 className="mb-1 text-lg">Χρώμα</h1>
                     <div className="flex gap-2">
                       {state.displayedUpsellColors
+                        .filter((prod) => prod.color)
                         .map((prod) => prod.color)
                         .filter(
                           (item, index, self) =>

@@ -271,16 +271,9 @@ function ModalNotMemoised({
           <>
             <MultiSelect
               data={[]}
-              value={(() => {
-                const all_sizes = new Set<string>()
-                for (const prod of products) {
-                  for (const size of prod.sizes || []) {
-                    all_sizes.add(size)
-                  }
-                }
-
-                return Array.from(all_sizes)
-              })()}
+              value={
+                products.length > 0 && products[0].sizes ? products[0].sizes : []
+              }
               onChange={(value) => {
                 setProducts((prevRows) =>
                   prevRows.map((item) => ({

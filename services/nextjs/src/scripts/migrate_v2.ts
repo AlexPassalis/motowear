@@ -1,6 +1,12 @@
 import { postgres } from '@/lib/postgres/index'
-import { collection_v2, product_v2, variant_v2, variant } from '@/lib/postgres/schema'
+import {
+  collection_v2,
+  product_v2,
+  variant_v2,
+  variant,
+} from '@/lib/postgres/schema'
 import { eq, and, isNull } from 'drizzle-orm'
+import { flush_all } from '@/lib/redis/flush_all'
 
 export async function migrate_v2() {
   console.info('Running migrate_v2 script ...')
@@ -18,6 +24,7 @@ export async function migrate_v2() {
     console.info(
       'Migration already completed (v2 tables have data), skipping migration',
     )
+
     return
   }
 
@@ -52,7 +59,8 @@ export async function migrate_v2() {
 
     const most_common_description = find_most_common(variants, 'description')
     const most_common_price = find_most_common(variants, 'price')
-    const most_common_price_before = find_most_common(variants, 'price_before') || 0
+    const most_common_price_before =
+      find_most_common(variants, 'price_before') || 0
     const most_common_sold_out = find_most_common(variants, 'sold_out')
     const most_common_upsell = find_most_common(variants, 'upsell')
     const most_common_sizes = find_most_common_array(variants, 'size')
@@ -229,6 +237,8 @@ export async function migrate_v2() {
   }
 
   console.info('Migration complete')
+
+  await flush_all()
 }
 
 type Variant = typeof variant.$inferSelect
