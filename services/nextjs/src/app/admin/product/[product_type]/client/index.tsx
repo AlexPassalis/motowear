@@ -82,6 +82,7 @@ export function AdminProductProductTypePageClient({
         setModalState={setModalState}
         modalOpened={modalOpened}
         closeModal={closeModal}
+        all_collections={all_collections}
       />
       <ColorVariantsModal
         opened={color_variants_modal_opened}

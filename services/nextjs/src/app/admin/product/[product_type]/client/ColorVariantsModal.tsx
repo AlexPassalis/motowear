@@ -70,7 +70,7 @@ export function ColorVariantsModal({
           unique_names.add(product.name)
           options.push({
             label: `${collection_name} - ${product.name}`,
-            value: `${collection_name}::${product.name}`,
+            value: `${collection_name}@@${product.name}`,
           })
         }
       }
@@ -80,20 +80,22 @@ export function ColorVariantsModal({
   }, [products_all, all_collections])
 
   function handle_add_color() {
+    const reference_variant = color_variants[color_variants.length - 1]
+
     const new_color_variant: ColorVariant = {
       id: id(),
       collection_id: collection.id,
       name: selected_product_name!,
-      brand: color_variants[0]?.brand || null,
-      description: null,
-      price: null,
-      price_before: null,
+      brand: reference_variant?.brand || null,
+      description: reference_variant?.description || null,
+      price: reference_variant?.price || null,
+      price_before: reference_variant?.price_before || null,
       color: null,
-      images: [],
-      upsell_collection: null,
-      upsell_product: null,
-      sold_out: false,
-      sizes: [],
+      images: reference_variant?.images || [],
+      upsell_collection: reference_variant?.upsell_collection || null,
+      upsell_product: reference_variant?.upsell_product || null,
+      sold_out: reference_variant?.sold_out || false,
+      sizes: reference_variant?.sizes || [],
     }
 
     setColorVariants([...color_variants, new_color_variant])
@@ -256,7 +258,19 @@ export function ColorVariantsModal({
               >
                 Sizes
               </Table.Th>
-              <Table.Th style={{ textAlign: 'center' }}>Sold Out</Table.Th>
+              <Table.Th
+                style={{ textAlign: 'center', cursor: 'pointer' }}
+                className="hover:!text-green-600 transition-colors"
+                onClick={() => {
+                  setModalState({
+                    type: 'ALL_SOLD_OUT',
+                    index: 0,
+                  })
+                  openModal()
+                }}
+              >
+                Sold Out
+              </Table.Th>
               <Table.Th style={{ textAlign: 'center' }}>Actions</Table.Th>
             </Table.Tr>
           </Table.Thead>

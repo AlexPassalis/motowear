@@ -75,6 +75,7 @@ function ColorVariantRowNotMemoised({
           clearable
           disabled={onRequest}
           placeholder="Select brand"
+          comboboxProps={{ zIndex: 500 }}
         />
       </Table.Td>
 
@@ -136,6 +137,7 @@ function ColorVariantRowNotMemoised({
           clearable
           disabled={onRequest}
           placeholder="Select color"
+          comboboxProps={{ zIndex: 500 }}
         />
       </Table.Td>
 
@@ -150,6 +152,7 @@ function ColorVariantRowNotMemoised({
           maxDropdownHeight={200}
           disabled={onRequest}
           placeholder={variant.images.length === 0 ? "Select images" : undefined}
+          comboboxProps={{ zIndex: 500 }}
         />
       </Table.Td>
 
@@ -158,12 +161,12 @@ function ColorVariantRowNotMemoised({
           data={upsells_select_data}
           value={
             variant.upsell_collection && variant.upsell_product
-              ? `${variant.upsell_collection}::${variant.upsell_product}`
+              ? `${variant.upsell_collection}@@${variant.upsell_product}`
               : null
           }
           onChange={(value) => {
             if (value) {
-              const parts = value.split('::')
+              const parts = value.split('@@')
               if (parts.length === 2) {
                 update_variant({
                   upsell_collection: parts[0],
@@ -181,6 +184,7 @@ function ColorVariantRowNotMemoised({
           searchable
           clearable
           disabled={onRequest}
+          comboboxProps={{ zIndex: 500 }}
         />
       </Table.Td>
 

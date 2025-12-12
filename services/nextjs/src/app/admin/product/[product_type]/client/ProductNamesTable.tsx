@@ -120,7 +120,7 @@ export function ProductNamesTable({
           unique_names.add(product.name)
           options.push({
             label: `${collection_name} - ${product.name}`,
-            value: `${collection_name}::${product.name}`,
+            value: `${collection_name}@@${product.name}`,
           })
         }
       }
@@ -373,12 +373,12 @@ export function ProductNamesTable({
                   data={upsells_select_data}
                   value={
                     collection.upsell_collection && collection.upsell_product
-                      ? `${collection.upsell_collection}::${collection.upsell_product}`
+                      ? `${collection.upsell_collection}@@${collection.upsell_product}`
                       : null
                   }
                   onChange={(value) => {
                     if (value) {
-                      const parts = value.split('::')
+                      const parts = value.split('@@')
                       if (parts.length === 2) {
                         update_collection({
                           upsell_collection: parts[0],

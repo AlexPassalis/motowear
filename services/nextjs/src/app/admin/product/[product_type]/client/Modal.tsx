@@ -1,5 +1,4 @@
 import type {
-  typeUpsells,
   Collection,
   ColorVariant,
 } from '@/lib/postgres/data/type'
@@ -29,6 +28,7 @@ export type typeModal = {
     | 'ALL_SIZE'
     | 'ALL_PRICE_BEFORE'
     | 'ALL_UPSELL'
+    | 'ALL_SOLD_OUT'
     | 'COLLECTION_DESCRIPTION'
     | 'COLLECTION_SIZES'
     | 'DESCRIPTION'
@@ -54,6 +54,7 @@ type ModalProps = {
   setModalState: Dispatch<SetStateAction<typeModal>>
   modalOpened: boolean
   closeModal: () => void
+  all_collections: Collection[]
 }
 
 function ModalNotMemoised({
@@ -68,33 +69,38 @@ function ModalNotMemoised({
   setModalState,
   modalOpened,
   closeModal,
+  all_collections,
 }: ModalProps) {
   const new_size_input_ref = useRef<HTMLInputElement>(null)
 
-  const upsells: typeUpsells = products_all
-    .filter((product) => !product.sold_out)
-    .map((product) => ({
-      product_type: collection.name,
-      name: product.name,
-    }))
-    .filter(
-      (item, index, self) =>
-        index ===
-        self.findIndex(
-          (other) =>
-            other.product_type === item.product_type &&
-            other.name === item.name,
-        ),
-    )
-
-  function stringifyUpsell(u: typeUpsells[number]) {
-    return `${u.product_type}@@${u.name}`
+  const collection_map = new Map<string, string>()
+  for (const coll of all_collections) {
+    collection_map.set(coll.id, coll.name)
   }
 
-  const upsellsSelectData = upsells.map((item) => ({
-    label: `${item.product_type} - ${item.name}`,
-    value: stringifyUpsell(item),
-  }))
+  const products_by_collection = new Map<string, ColorVariant[]>()
+  for (const product of products_all) {
+    if (!products_by_collection.has(product.collection_id)) {
+      products_by_collection.set(product.collection_id, [])
+    }
+    products_by_collection.get(product.collection_id)!.push(product)
+  }
+
+  const upsellsSelectData: { label: string; value: string }[] = []
+  for (const [collection_id, collection_products] of products_by_collection) {
+    const collection_name = collection_map.get(collection_id) || collection_id
+    const unique_names = new Set<string>()
+
+    for (const product of collection_products) {
+      if (!product.sold_out && !unique_names.has(product.name)) {
+        unique_names.add(product.name)
+        upsellsSelectData.push({
+          label: `${collection_name} - ${product.name}`,
+          value: `${collection_name}@@${product.name}`,
+        })
+      }
+    }
+  }
 
   return (
     <MantineModal
@@ -124,15 +130,22 @@ function ModalNotMemoised({
           ? 'Update All: Upsell'
           : modalState.type === 'ALL_SIZE'
           ? 'Update All: Sizes'
+          : modalState.type === 'ALL_SOLD_OUT'
+          ? 'Update All: Sold Out'
           : modalState.type === 'COLLECTION_DESCRIPTION'
           ? 'Description: Default'
           : modalState.type === 'COLLECTION_SIZES'
           ? 'Sizes: Default'
           : modalState.type === 'SIZES' && modalState.product_id
-          ? `Sizes: ${
-              products.find((prod) => prod.id === modalState.product_id)
-                ?.name || 'Product'
-            }`
+          ? (() => {
+              const product = products.find(
+                (prod) => prod.id === modalState.product_id,
+              )
+
+              return `Sizes: ${product?.name || 'Product'}${
+                product?.color ? ` - ${product.color}` : ''
+              }`
+            })()
           : modalState.product_id
           ? `Description: ${
               products.find((prod) => prod.id === modalState.product_id)
@@ -193,6 +206,7 @@ function ModalNotMemoised({
             checkIconPosition="right"
             hidePickedOptions
             maxDropdownHeight={200}
+            comboboxProps={{ zIndex: 1100 }}
           />
         )}
 
@@ -216,11 +230,11 @@ function ModalNotMemoised({
           <Select
             data={brands_postgres}
             placeholder="Yamaha"
-            onBlur={(e) =>
+            onChange={(value) =>
               setProducts((prevRows) =>
                 prevRows.map((item) => ({
                   ...item,
-                  brand: e.target.value,
+                  brand: value,
                 })),
               )
             }
@@ -228,6 +242,7 @@ function ModalNotMemoised({
             maxDropdownHeight={200}
             searchable
             nothingFoundMessage="Nothing found..."
+            comboboxProps={{ zIndex: 1100 }}
           />
         )}
 
@@ -248,21 +263,64 @@ function ModalNotMemoised({
             maxDropdownHeight={200}
             searchable
             nothingFoundMessage="Nothing found..."
+            comboboxProps={{ zIndex: 1100 }}
           />
         )}
 
         {modalState.type === 'ALL_SIZE' && (
-          <TextInput
-            placeholder="M"
-            onBlur={(e) =>
-              setProducts((prevRows) =>
-                prevRows.map((item) => ({
-                  ...item,
-                  size: e.target.value,
-                })),
-              )
-            }
-          />
+          <>
+            <MultiSelect
+              data={[]}
+              value={(() => {
+                const all_sizes = new Set<string>()
+                for (const prod of products) {
+                  for (const size of prod.sizes || []) {
+                    all_sizes.add(size)
+                  }
+                }
+
+                return Array.from(all_sizes)
+              })()}
+              onChange={(value) => {
+                setProducts((prevRows) =>
+                  prevRows.map((item) => ({
+                    ...item,
+                    sizes: value,
+                  })),
+                )
+              }}
+            />
+            <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+              <TextInput
+                ref={new_size_input_ref}
+                placeholder="Create new size"
+                style={{ flex: 1 }}
+              />
+              <Button
+                onClick={() => {
+                  if (!new_size_input_ref.current) {
+                    return
+                  }
+
+                  const new_size = new_size_input_ref.current.value.trim()
+                  if (new_size) {
+                    setProducts((prev) =>
+                      prev.map((item) => ({
+                        ...item,
+                        sizes: [...(item.sizes || []), new_size].filter(
+                          (s, idx, arr) => arr.indexOf(s) === idx,
+                        ),
+                      })),
+                    )
+                    new_size_input_ref.current.value = ''
+                  }
+                }}
+                color="blue"
+              >
+                Create
+              </Button>
+            </div>
+          </>
         )}
 
         {modalState.type === 'ALL_PRICE_BEFORE' && (
@@ -292,10 +350,7 @@ function ModalNotMemoised({
                   prod.upsell_collection === products[0].upsell_collection &&
                   prod.upsell_product === products[0].upsell_product,
               )
-                ? stringifyUpsell({
-                    product_type: products[0].upsell_collection!,
-                    name: products[0].upsell_product!,
-                  })
+                ? `${products[0].upsell_collection!}@@${products[0].upsell_product!}`
                 : null
             }
             onChange={(value) => {
@@ -324,7 +379,33 @@ function ModalNotMemoised({
             maxDropdownHeight={200}
             searchable
             nothingFoundMessage="Nothing found..."
+            comboboxProps={{ zIndex: 1100 }}
           />
+        )}
+
+        {modalState.type === 'ALL_SOLD_OUT' && (
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '12px' }}>
+            <Button
+              onClick={() => {
+                setProducts((prev) =>
+                  prev.map((prod) => ({ ...prod, sold_out: true })),
+                )
+              }}
+              color="red"
+            >
+              Set All to Sold Out
+            </Button>
+            <Button
+              onClick={() => {
+                setProducts((prev) =>
+                  prev.map((prod) => ({ ...prod, sold_out: false })),
+                )
+              }}
+              color="green"
+            >
+              Set All to Available
+            </Button>
+          </div>
         )}
 
         {modalState.type === 'COLLECTION_DESCRIPTION' && (
@@ -386,7 +467,7 @@ function ModalNotMemoised({
         {modalState.type === 'SIZES' && modalState.product_id && (
           <>
             <MultiSelect
-              data={collection.sizes || []}
+              data={[]}
               value={
                 products.find((prod) => prod.id === modalState.product_id)
                   ?.sizes || []
@@ -481,6 +562,7 @@ function ModalNotMemoised({
             maxDropdownHeight={200}
             searchable
             nothingFoundMessage="Nothing found..."
+            comboboxProps={{ zIndex: 1100 }}
           />
         )}
 
@@ -500,10 +582,7 @@ function ModalNotMemoised({
                 return null
               }
 
-              return stringifyUpsell({
-                product_type: product.upsell_collection,
-                name: product.upsell_product,
-              })
+              return `${product.upsell_collection}@@${product.upsell_product}`
             })()}
             onChange={(value) => {
               if (!value) {
@@ -535,6 +614,7 @@ function ModalNotMemoised({
             maxDropdownHeight={200}
             searchable
             nothingFoundMessage="Nothing found..."
+            comboboxProps={{ zIndex: 1100 }}
           />
         )}
       </>
