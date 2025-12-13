@@ -4,10 +4,10 @@ set -euo pipefail
 echo "--> Checking for missing migration file"
 
 # Check if schema file changed
-SCHEMA_CHANGED=$(git diff origin/main...HEAD --name-only | grep -E "schema\.ts$")
+SCHEMA_CHANGED=$(git diff origin/main...HEAD --name-only | grep -E "schema\.ts$" || true)
 
 # Check if any migration files were added
-MIGRATIONS_ADDED=$(git diff origin/main...HEAD --name-only | grep -E "migrations/.*\.sql$")
+MIGRATIONS_ADDED=$(git diff origin/main...HEAD --name-only | grep -E "migrations/.*\.sql$" || true)
 
 if [ -n "$SCHEMA_CHANGED" ] && [ -z "$MIGRATIONS_ADDED" ]; then
   echo "error: Migration file is missing"
