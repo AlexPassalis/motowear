@@ -106,6 +106,7 @@ export default async function AdminProductProductTypePage({
 
   return (
     <AdminProductProductTypePageClient
+      key={collection.id}
       collection={collection}
       products={products}
       brands={brands}
