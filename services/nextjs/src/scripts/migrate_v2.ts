@@ -57,8 +57,8 @@ export async function migrate_v2() {
       .from(variant)
       .where(eq(variant.product_type, collection.product_type))
 
-    const most_common_description = find_most_common(variants, 'description')
-    const most_common_price = find_most_common(variants, 'price')
+    const most_common_description = find_most_common(variants, 'description') || ''
+    const most_common_price = find_most_common(variants, 'price') || 0
     const most_common_price_before =
       find_most_common(variants, 'price_before') || 0
     const most_common_sold_out = find_most_common(variants, 'sold_out')

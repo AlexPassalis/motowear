@@ -1,9 +1,9 @@
 CREATE TABLE IF NOT EXISTS "products"."collection_v2" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"name" text NOT NULL,
-	"description" text,
-	"price" numeric(7,2) NOT NULL,
-	"price_before" numeric(7,2) NOT NULL,
+	"description" text DEFAULT '' NOT NULL,
+	"price" numeric(7,2) DEFAULT 0 NOT NULL,
+	"price_before" numeric(7,2) DEFAULT 0 NOT NULL,
 	"sizes" text[],
 	"upsell_collection" text,
 	"upsell_product" text,

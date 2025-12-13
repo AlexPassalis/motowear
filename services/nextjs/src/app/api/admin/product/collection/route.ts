@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     collection: z.object({
       id: z.string(),
       name: z.string(),
-      description: z.string().nullable(),
+      description: z.string(),
       price: z.number(),
       price_before: z.number(),
       sizes: z.array(z.string()).nullable(),

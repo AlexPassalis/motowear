@@ -403,7 +403,7 @@ function ModalNotMemoised({
 
         {modalState.type === 'COLLECTION_DESCRIPTION' && (
           <Textarea
-            value={collection.description || ''}
+            value={collection.description}
             autosize
             minRows={10}
             onChange={(e) =>

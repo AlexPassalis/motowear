@@ -318,9 +318,7 @@ export function ProductNamesTable({
                   color="blue"
                   disabled={onRequest}
                 >
-                  {collection.description && collection.description.length > 0
-                    ? '...'
-                    : 'Add'}
+                  {collection.description.length > 0 ? '...' : 'Add'}
                 </Button>
               </Table.Td>
 

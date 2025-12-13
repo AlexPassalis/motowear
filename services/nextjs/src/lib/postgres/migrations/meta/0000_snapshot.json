@@ -187,41 +187,38 @@
           "name": "description",
           "type": "text",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": "''"
         },
         "price": {
           "name": "price",
-          "type": "numeric",
+          "type": "numeric(7, 2)",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": "0"
         },
         "price_before": {
           "name": "price_before",
-          "type": "numeric",
+          "type": "numeric(7, 2)",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": "0"
         },
-        "color": {
-          "name": "color",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "size": {
-          "name": "size",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "images": {
-          "name": "images",
+        "sizes": {
+          "name": "sizes",
           "type": "text[]",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
-        "upsell": {
-          "name": "upsell",
-          "type": "jsonb",
+        "upsell_collection": {
+          "name": "upsell_collection",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "upsell_product": {
+          "name": "upsell_product",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
@@ -229,7 +226,7 @@
           "name": "sold_out",
           "type": "boolean",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "default": false
         }
       },
@@ -618,8 +615,7 @@
           "name": "brand",
           "type": "text",
           "primaryKey": false,
-          "notNull": true,
-          "default": "''"
+          "notNull": false
         },
         "description": {
           "name": "description",
@@ -629,13 +625,13 @@
         },
         "price": {
           "name": "price",
-          "type": "numeric",
+          "type": "numeric(7, 2)",
           "primaryKey": false,
           "notNull": false
         },
         "price_before": {
           "name": "price_before",
-          "type": "numeric",
+          "type": "numeric(7, 2)",
           "primaryKey": false,
           "notNull": false
         },
@@ -645,21 +641,21 @@
           "primaryKey": false,
           "notNull": false
         },
-        "size": {
-          "name": "size",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
         "images": {
           "name": "images",
           "type": "text[]",
           "primaryKey": false,
+          "notNull": true
+        },
+        "upsell_collection": {
+          "name": "upsell_collection",
+          "type": "text",
+          "primaryKey": false,
           "notNull": false
         },
-        "upsell": {
-          "name": "upsell",
-          "type": "jsonb",
+        "upsell_product": {
+          "name": "upsell_product",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
@@ -697,7 +693,7 @@
           "columnsTo": [
             "image"
           ],
-          "onDelete": "set default",
+          "onDelete": "set null",
           "onUpdate": "no action"
         }
       },
@@ -1085,29 +1081,11 @@
           "primaryKey": false,
           "notNull": true
         },
-        "images": {
-          "name": "images",
+        "sizes": {
+          "name": "sizes",
           "type": "text[]",
           "primaryKey": false,
-          "notNull": false
-        },
-        "color": {
-          "name": "color",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "size": {
-          "name": "size",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "sold_out": {
-          "name": "sold_out",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false
+          "notNull": true
         }
       },
       "indexes": {},
