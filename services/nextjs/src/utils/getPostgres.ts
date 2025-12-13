@@ -422,7 +422,11 @@ export async function getProductPageData(product_type: string) {
     const product_variant = variants_raw.find(
       (variant) => variant.product_id === product.id,
     )
-    const sizes = product_variant?.sizes ?? collection.sizes
+    const variant_sizes = product_variant?.sizes
+    const sizes =
+      variant_sizes && variant_sizes.length > 0
+        ? variant_sizes
+        : collection.sizes
 
     return {
       ...product,

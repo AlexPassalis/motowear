@@ -502,8 +502,6 @@ function Main({
     },
   )
 
-  console.info('This is the state: ', state) // Leave in production as well
-
   const [count, handlers] = useCounter(0, { min: 1, max: 9 })
   const [
     sizeChartModal,
