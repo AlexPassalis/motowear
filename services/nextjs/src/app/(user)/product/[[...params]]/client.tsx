@@ -511,7 +511,7 @@ function Main({
   const [upsellModal, { open: openUpsellModal, close: closeUpsellModal }] =
     useDisclosure(false)
 
-  const [reviews, setReviews] = useState(postgres_reviews.slice(0, 5))
+  const [reviewsPage, setReviewsPage] = useState(1)
 
   const autoplay = useRef(Autoplay({ delay: 3000 }))
 
@@ -841,7 +841,7 @@ function Main({
             </div>
 
             <div className="flex items-center mb-4">
-              {reviews.length > 0 && (
+              {postgres_reviews.length > 0 && (
                 <Link
                   href="#reviews"
                   scroll={true}
@@ -850,10 +850,10 @@ function Main({
                   {Array.from(
                     {
                       length: Math.round(
-                        reviews.reduce(
+                        postgres_reviews.reduce(
                           (sum, review) => sum + review.rating,
                           0,
-                        ) / reviews.length,
+                        ) / postgres_reviews.length,
                       ),
                     },
                     (_, i) => (
@@ -865,7 +865,7 @@ function Main({
                     ),
                   )}
                   <span className="ml-2 proxima-nova text-sm xl:text-base">
-                    ({reviews.length} κριτικές)
+                    ({postgres_reviews.length} κριτικές)
                   </span>
                 </Link>
               )}
@@ -1580,49 +1580,47 @@ function Main({
         )}
 
         <div className="md:flex">
-          {reviews.length > 0 && (
+          {postgres_reviews.length > 0 && (
             <div id="reviews" className="mx-4 my-8 md:w-1/2">
               <h1 className="mb-2 text-center text-xl xl:text-2xl">
                 Αξιολογήσεις
               </h1>
-              {Array.from(reviews).map((review, index) => (
-                <div
-                  key={index}
-                  className={`p-2 xl:text-lg border-[var(--mantine-border)] border-b-2 ${
-                    index === 0 ? 'border-t-2' : ''
-                  }`}
-                >
-                  <div className="flex mb-1">
-                    {Array.from({ length: review.rating }, (_, i) => (
-                      <IoIosStar
-                        key={i}
-                        size={18}
-                        className="text-yellow-500"
-                      />
-                    ))}
-                    <h2 className="proxima-nova ml-auto">{review.date}</h2>
-                  </div>
-                  <div className="mb-1 flex justify-between flex-wrap items-center">
-                    <h2 className="mr-5 proxima-nova text-sm sm:text-base">
-                      {review.full_name}
-                    </h2>
-                    <div className="flex items-center">
-                      <FaCheck size={18} color="green" className="mr-1" />
-                      <p className="proxima-nova text-sm sm:text-base">
-                        επιβεβαιωμένη αγορά
-                      </p>
+              {postgres_reviews
+                .slice((reviewsPage - 1) * 5, reviewsPage * 5)
+                .map((review, index) => (
+                  <div
+                    key={index}
+                    className={`p-2 xl:text-lg border-[var(--mantine-border)] border-b-2 ${
+                      index === 0 ? 'border-t-2' : ''
+                    }`}
+                  >
+                    <div className="flex mb-1">
+                      {Array.from({ length: review.rating }, (_, i) => (
+                        <IoIosStar
+                          key={i}
+                          size={18}
+                          className="text-yellow-500"
+                        />
+                      ))}
+                      <h2 className="proxima-nova ml-auto">{review.date}</h2>
                     </div>
+                    <div className="mb-1 flex justify-between flex-wrap items-center">
+                      <h2 className="mr-5 proxima-nova text-sm sm:text-base">
+                        {review.full_name}
+                      </h2>
+                      <div className="flex items-center">
+                        <FaCheck size={18} color="green" className="mr-1" />
+                        <p className="proxima-nova text-sm sm:text-base">
+                          επιβεβαιωμένη αγορά
+                        </p>
+                      </div>
+                    </div>
+                    <h2 className="whitespace-pre-line">{review.review}</h2>
                   </div>
-                  <h2 className="whitespace-pre-line">{review.review}</h2>
-                </div>
-              ))}
+                ))}
               <Pagination
-                total={Math.ceil(reviews.length / 5)}
-                onChange={(pageNumber) =>
-                  setReviews(
-                    reviews.slice((pageNumber - 1) * 5, pageNumber * 5),
-                  )
-                }
+                total={Math.ceil(postgres_reviews.length / 5)}
+                onChange={(pageNumber) => setReviewsPage(pageNumber)}
                 mt="xs"
                 style={{ display: 'flex', justifyContent: 'center' }}
               />
