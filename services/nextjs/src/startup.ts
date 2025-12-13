@@ -7,11 +7,16 @@ import '@/lib/cron/index'
 import '@/lib/prometheus/index'
 
 import { run_migrations } from '@/lib/postgres/run_migrations'
-import { flush_all } from './lib/redis/flush_all'
+import { run_scripts } from '@/scripts/index'
 
-export async function startup() {
+async function startup() {
   await run_migrations()
-  await flush_all()
+  await run_scripts()
+}
 
+if (process.env.BUILD_TIME !== 'true') {
+  await startup()
   console.info('Startup completed successfully')
 }
+
+export {} // To make this a module

@@ -27,7 +27,7 @@ import { useRouter } from 'next/navigation'
 import { zodCoupon } from '@/lib/postgres/data/zod'
 import { MdDiscount } from 'react-icons/md'
 import { facebookPixelInitiateCheckout } from '@/lib/facebook-pixel'
-import { couponCodeMPRELOK, ERROR, specialProductType } from '@/data/magic'
+import { couponCodeMPRELOK, ERROR, special_collections } from '@/data/magic'
 import { googleAnalyticsBeginCheckout } from '@/lib/google-analytics'
 
 type CartProps = {
@@ -173,13 +173,13 @@ export function Cart({
                   className="flex w-full h-36 mb-2 rounded-lg border border-[var(--mantine-border)]"
                 >
                   <Link
-                    href={`${ROUTE_PRODUCT}/${product.product_type}/${product.name}`}
+                    href={`${ROUTE_PRODUCT}/${product.collection}/${product.name}`}
                     className="relative w-1/3 h-full rounded-lg overflow-hidden"
                   >
                     <Image
                       component={NextImage}
-                      src={`${envClient.MINIO_PRODUCT_URL}/${product.product_type}/${product.image}`}
-                      alt={`${product.product_type}/${product.name}`}
+                      src={`${envClient.MINIO_PRODUCT_URL}/${product.collection}/${product.image}`}
+                      alt={`${product.collection}/${product.name}`}
                       fill
                       style={{ objectFit: 'cover' }}
                       sizes="auto"
@@ -192,7 +192,7 @@ export function Cart({
                       }
                       className="absolute top-2 right-2 hover:cursor-pointer"
                     />
-                    <h1>{product.product_type}</h1>
+                    <h1>{product.collection}</h1>
                     <h1 className="flex-1 flex items-center break-words overflow-hidden">
                       {product.name}
                     </h1>
@@ -209,9 +209,9 @@ export function Cart({
                       <div className="flex gap-1">
                         <h2>
                           {`${
-                            product.product_type !== specialProductType
-                              ? 'Μέγεθος'
-                              : 'Συσκευή'
+                            special_collections.includes(product.collection)
+                              ? 'Συσκευή'
+                              : 'Μέγεθος'
                           }:`}{' '}
                         </h2>
                         <p>{product.size}</p>

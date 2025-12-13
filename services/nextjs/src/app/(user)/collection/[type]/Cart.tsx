@@ -8,29 +8,25 @@ import { envClient } from '@/envClient'
 export const Cart = memo(CartNotMemoised)
 
 type CartProps = {
-  paramsProduct_type: string
+  collection: string
   isLoading: boolean
   index: number
   name: string
-  color: string
   image: string
   onImageLoad: (index: number) => void
 }
 
 function CartNotMemoised({
-  paramsProduct_type,
+  collection,
   isLoading,
   index,
   name,
-  color,
   image,
   onImageLoad,
 }: CartProps) {
   return (
     <Link
-      href={`${ROUTE_PRODUCT}/${paramsProduct_type}/${name}${
-        color ? `?color=${encodeURIComponent(color)}` : ''
-      }`}
+      href={`${ROUTE_PRODUCT}/${collection}/${name}`}
       className="border border-[var(--mantine-border)] rounded-lg overflow-hidden"
     >
       <div className="relative aspect-square rounded-lg">
@@ -40,7 +36,7 @@ function CartNotMemoised({
           overlayProps={{ radius: 'sm', blur: 2 }}
         />
         <Image
-          src={`${envClient.MINIO_PRODUCT_URL}/${paramsProduct_type}/${image}`}
+          src={`${envClient.MINIO_PRODUCT_URL}/${collection}/${image}`}
           alt={name}
           fill
           style={{ objectFit: 'cover' }}

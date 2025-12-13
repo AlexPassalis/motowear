@@ -437,9 +437,9 @@ export function AdminOrderPageClient({
                   <Fragment key={index}>
                     <div className="flex flex-col gap-2 border-2 border-[var(--mantine-border)] rounded-lg p-2">
                       <div className="flex justify-between items-center">
-                        <h1>product_type</h1>
+                        <h1>collection</h1>
                         <TextInput
-                          value={modalOrder.cart[index].product_type}
+                          value={modalOrder.cart[index].collection}
                           onChange={(e) => {
                             setOrders((prev) =>
                               prev.map((order) => {
@@ -451,7 +451,7 @@ export function AdminOrderPageClient({
                                         cartIndex === index
                                           ? {
                                               ...cartItem,
-                                              product_type: e.target.value,
+                                              collection: e.target.value,
                                             }
                                           : cartItem,
                                     ),
@@ -492,62 +492,66 @@ export function AdminOrderPageClient({
                           classNames={{ input: '!text-center' }}
                         />
                       </div>
-                      <div className="flex justify-between items-center">
-                        <h1>color</h1>
-                        <TextInput
-                          value={modalOrder.cart[index].color}
-                          onChange={(e) => {
-                            setOrders((prev) =>
-                              prev.map((order) => {
-                                if (order.id === modalState.id) {
-                                  return {
-                                    ...order,
-                                    cart: order.cart.map(
-                                      (cartItem, cartIndex) =>
-                                        cartIndex === index
-                                          ? {
-                                              ...cartItem,
-                                              color: e.target.value,
-                                            }
-                                          : cartItem,
-                                    ),
+                      {modalOrder.cart[index].color && (
+                        <div className="flex justify-between items-center">
+                          <h1>color</h1>
+                          <TextInput
+                            value={modalOrder.cart[index].color}
+                            onChange={(e) => {
+                              setOrders((prev) =>
+                                prev.map((order) => {
+                                  if (order.id === modalState.id) {
+                                    return {
+                                      ...order,
+                                      cart: order.cart.map(
+                                        (cartItem, cartIndex) =>
+                                          cartIndex === index
+                                            ? {
+                                                ...cartItem,
+                                                color: e.target.value,
+                                              }
+                                            : cartItem,
+                                      ),
+                                    }
                                   }
-                                }
-                                return order
-                              }),
-                            )
-                          }}
-                          classNames={{ input: '!text-center' }}
-                        />
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <h1>size</h1>
-                        <TextInput
-                          value={modalOrder.cart[index].size}
-                          onChange={(e) => {
-                            setOrders((prev) =>
-                              prev.map((order) => {
-                                if (order.id === modalState.id) {
-                                  return {
-                                    ...order,
-                                    cart: order.cart.map(
-                                      (cartItem, cartIndex) =>
-                                        cartIndex === index
-                                          ? {
-                                              ...cartItem,
-                                              size: e.target.value,
-                                            }
-                                          : cartItem,
-                                    ),
+                                  return order
+                                }),
+                              )
+                            }}
+                            classNames={{ input: '!text-center' }}
+                          />
+                        </div>
+                      )}
+                      {modalOrder.cart[index].size && (
+                        <div className="flex justify-between items-center">
+                          <h1>size</h1>
+                          <TextInput
+                            value={modalOrder.cart[index].size}
+                            onChange={(e) => {
+                              setOrders((prev) =>
+                                prev.map((order) => {
+                                  if (order.id === modalState.id) {
+                                    return {
+                                      ...order,
+                                      cart: order.cart.map(
+                                        (cartItem, cartIndex) =>
+                                          cartIndex === index
+                                            ? {
+                                                ...cartItem,
+                                                size: e.target.value,
+                                              }
+                                            : cartItem,
+                                      ),
+                                    }
                                   }
-                                }
-                                return order
-                              }),
-                            )
-                          }}
-                          classNames={{ input: '!text-center' }}
-                        />
-                      </div>
+                                  return order
+                                }),
+                              )
+                            }}
+                            classNames={{ input: '!text-center' }}
+                          />
+                        </div>
+                      )}
                       <div className="flex justify-between items-center">
                         <h1>price</h1>
                         <NumberInput
@@ -1018,7 +1022,7 @@ export function AdminOrderPageClient({
                       > = {}
                       for (const { id, cart } of selection) {
                         for (const item of cart)
-                          (grouped[item.product_type] ||= []).push({
+                          (grouped[item.collection] ||= []).push({
                             orderId: id,
                             ...item,
                           })
@@ -1085,8 +1089,8 @@ export function AdminOrderPageClient({
 
                           const line = [
                             orderId.toString().padEnd(5),
-                            size.padEnd(6),
-                            color.padEnd(7),
+                            (size ?? '').padEnd(6),
+                            (color ?? '').padEnd(7),
                             `x${quantity.toString().padEnd(3)}`,
                             name,
                           ].join(' ')

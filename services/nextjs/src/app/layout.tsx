@@ -1,5 +1,4 @@
-import { startup } from '@/startup'
-await startup()
+import '@/startup'
 
 import '@mantine/core/styles.css'
 import '@mantine/carousel/styles.css'

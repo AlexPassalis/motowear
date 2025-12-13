@@ -5,9 +5,10 @@ import {
   home_page,
   order,
   product_pages,
+  product_v2,
   review,
   shipping,
-  variant,
+  variant_v2,
 } from '../schema'
 
 export const zodCheckout = z
@@ -56,27 +57,19 @@ export const zodCheckout = z
   })
 
 export const zodCartItem = z.object({
-  product_type: z.string(),
+  collection: z.string(),
   name: z.string(),
-  color: z.string().default(''),
-  size: z.string().default(''),
+  color: z.string().nullable(),
+  size: z.string().nullable(),
   price: z.number(),
   quantity: z.number(),
   image: z.string(),
 })
 export const zodCart = z.array(zodCartItem)
 export const zodCartItemLocalStorage = zodCartItem.extend({
-  image: z.string(),
-  price_before: z.number(),
+  price_before: z.number().nullable(),
 })
 export const zodCartLocalStorage = z.array(zodCartItemLocalStorage)
-export const zodVariant = createSelectSchema(variant)
-  .omit({ index: true })
-  .extend({
-    id: z.string(),
-    images: z.array(z.string()).min(1),
-  })
-export const zodVariants = z.array(zodVariant)
 export const zodCoupon = createSelectSchema(coupon)
 export const zodCoupons = z.array(zodCoupon)
 export const zodReview = createSelectSchema(review)
@@ -100,3 +93,9 @@ export const zodOrderServer = zodOrder.extend({
 export const zodHomePage = createSelectSchema(home_page).omit({
   primary_key: true,
 })
+
+export const zodProduct = createSelectSchema(product_v2)
+export const zodProducts = z.array(zodProduct)
+
+export const zodVariantV2 = createSelectSchema(variant_v2)
+export const zodVariantsV2 = z.array(zodVariantV2)

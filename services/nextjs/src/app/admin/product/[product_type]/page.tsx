@@ -1,6 +1,12 @@
 import { ROUTE_ERROR } from '@/data/routes'
 import { isSessionRSC } from '@/lib/better-auth/isSession'
-import { getBrands, getProductPage, getVariants } from '@/utils/getPostgres'
+import {
+  getBrands,
+  getCollection,
+  getAllCollections,
+  getProductPage,
+  getAllProductsWithSizes,
+} from '@/utils/getPostgres'
 import { notFound, redirect } from 'next/navigation'
 import { AdminProductProductTypePageClient } from '@/app/admin/product/[product_type]/client/index'
 import { getFileNames } from '@/lib/minio'
@@ -17,82 +23,95 @@ export default async function AdminProductProductTypePage({
 }: AdminProductsProductTypePageProps) {
   await isSessionRSC()
 
-  const asyncFunctions = [getVariants, getBrands]
-  const resolvedFirst = await Promise.allSettled([
+  const result_1 = await Promise.allSettled([
     params,
-    ...asyncFunctions.map((asyncFunction) => asyncFunction()),
+    getAllProductsWithSizes(),
+    getBrands(),
+    getAllCollections(),
   ])
-  resolvedFirst.forEach((result, index) => {
-    if (result.status === 'rejected') {
-      if (index > 0) {
-        const location = `${ERROR.postgres} ${asyncFunctions[index - 1].name}`
-        const err = result.reason
-        handleError(location, err)
 
-        redirect(`${ROUTE_ERROR}?message=${ERROR.postgres}`)
-      }
-    }
-  })
+  if (result_1[0].status === 'rejected') {
+    const err = result_1[0].reason
+    const location = `${ERROR.unexpected} params`
+    handleError(location, err)
 
-  const resolved_params = (
-    resolvedFirst[0] as PromiseFulfilledResult<{ product_type: string }>
-  ).value
-  const variants = (
-    resolvedFirst[1] as PromiseFulfilledResult<
-      Awaited<ReturnType<typeof getVariants>>
-    >
-  ).value
-  const brands = (
-    resolvedFirst[2] as PromiseFulfilledResult<
-      Awaited<ReturnType<typeof getBrands>>
-    >
-  ).value
+    redirect(`${ROUTE_ERROR}?message=${ERROR.unexpected}`)
+  }
 
-  const product_type = decodeURIComponent(resolved_params.product_type)
+  if (result_1[1].status === 'rejected') {
+    const err = result_1[1].reason
+    const location = `${ERROR.postgres} getAllProductsWithSizes`
+    handleError(location, err)
 
-  const resolvedSecond = await Promise.allSettled([
-    getFileNames(product_type),
-    getProductPage(product_type),
+    redirect(`${ROUTE_ERROR}?message=${ERROR.postgres}`)
+  }
+
+  if (result_1[2].status === 'rejected') {
+    const err = result_1[2].reason
+    const location = `${ERROR.postgres} getBrands`
+    handleError(location, err)
+
+    redirect(`${ROUTE_ERROR}?message=${ERROR.postgres}`)
+  }
+
+  if (result_1[3].status === 'rejected') {
+    const err = result_1[3].reason
+    const location = `${ERROR.postgres} getAllCollections`
+    handleError(location, err)
+
+    redirect(`${ROUTE_ERROR}?message=${ERROR.postgres}`)
+  }
+
+  const collection_name = decodeURIComponent(result_1[0].value.product_type)
+  const products = result_1[1].value
+  const brands = result_1[2].value
+  const all_collections = result_1[3].value
+
+  const result_2 = await Promise.allSettled([
+    getCollection(collection_name),
+    getProductPage(collection_name),
+    getFileNames(collection_name),
   ])
-  resolvedSecond.forEach((result, index) => {
-    if (result.status === 'rejected') {
-      const err = result.reason
-      if (index === 0) {
-        const location = `${ERROR.minio} getFileNames`
-        handleError(location, err)
 
-        redirect(`${ROUTE_ERROR}?message=${ERROR.minio}`)
-      } else {
-        const location = `${ERROR.postgres} getProductPage`
-        handleError(location, err)
+  if (result_2[0].status === 'rejected') {
+    const err = result_2[0].reason
+    const location = `${ERROR.postgres} getCollection`
+    handleError(location, err)
 
-        redirect(`${ROUTE_ERROR}?message=${ERROR.postgres}`)
-      }
-    }
-  })
+    redirect(`${ROUTE_ERROR}?message=${ERROR.postgres}`)
+  }
 
-  const images_minio = (
-    resolvedSecond[0] as PromiseFulfilledResult<
-      Awaited<ReturnType<typeof getFileNames>>
-    >
-  ).value
-  const product_page = (
-    resolvedSecond[1] as PromiseFulfilledResult<
-      Awaited<ReturnType<typeof getProductPage>>
-    >
-  ).value
+  if (result_2[1].status === 'rejected') {
+    const err = result_2[1].reason
+    const location = `${ERROR.postgres} getProductPage`
+    handleError(location, err)
 
+    redirect(`${ROUTE_ERROR}?message=${ERROR.postgres}`)
+  }
+
+  if (result_2[2].status === 'rejected') {
+    const err = result_2[2].reason
+    const location = `${ERROR.minio} getFileNames`
+    handleError(location, err)
+
+    redirect(`${ROUTE_ERROR}?message=${ERROR.minio}`)
+  }
+
+  const collection = result_2[0].value
+  const product_page = result_2[1].value
   if (!product_page) {
     notFound()
   }
+  const images_minio = result_2[2].value
 
   return (
     <AdminProductProductTypePageClient
-      product_type={product_type}
-      variantsPostgres={variants}
-      brandsPostgres={brands}
-      imagesMinio={images_minio}
+      collection={collection}
+      products={products}
+      brands={brands}
+      images_minio={images_minio}
       product_page={product_page}
+      all_collections={all_collections}
     />
   )
 }

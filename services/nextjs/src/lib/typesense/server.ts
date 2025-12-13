@@ -61,7 +61,7 @@ export async function updateTypesense(product_type: string) {
         id: variant.id,
         product_type: variant.product_type,
         variant: variant.name,
-        image: variant.images[0],
+        image: variant.image,
       }
       try {
         await typesense.collections(collectionName).documents().upsert(document)

@@ -69,7 +69,7 @@ export default async function ReviewPage({ searchParams }: ReviewPageProps) {
 
   const orderId = array[0].id
   const unique_product_types = array[0].cart
-    .map((item) => item.product_type)
+    .map((item) => item.collection)
     .filter(
       (item, index, self) =>
         index === self.findIndex((other) => other === item),
