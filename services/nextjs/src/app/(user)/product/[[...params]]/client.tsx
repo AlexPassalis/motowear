@@ -546,7 +546,7 @@ function Main({
         >
           <div className="relative aspect-square">
             <Image
-              src={`${envClient.MINIO_PRODUCT_URL}/${collection}/${page.size_chart}`}
+              src={`${envClient.MINIO_PRODUCT_URL}/${collection_name}/${page.size_chart}`}
               alt={page.size_chart}
               fill
               style={{ objectFit: 'cover' }}
@@ -1655,7 +1655,7 @@ function Main({
                       </div>
                       <div className="relative aspect-square">
                         <Image
-                          src={`${envClient.MINIO_PRODUCT_URL}/${collection}/${image}`}
+                          src={`${envClient.MINIO_PRODUCT_URL}/${collection_name}/${image}`}
                           alt={image}
                           fill
                           style={{ objectFit: 'cover' }}

@@ -57,10 +57,12 @@ export async function getAllProducts() {
     .from(product_v2)
     .leftJoin(collection_v2, eq(product_v2.collection_id, collection_v2.id))
 
-  return data.map((row) => ({
-    ...row.product_v2,
-    collection_name: row.collection_v2!.name,
-  }))
+  return data
+    .filter((row) => row.collection_v2 !== null)
+    .map((row) => ({
+      ...row.product_v2,
+      collection_name: row.collection_v2!.name,
+    }))
 }
 
 export async function getAllProductsWithSizes(): Promise<ColorVariant[]> {
@@ -150,12 +152,12 @@ export type typeHomePageVariants = Awaited<
 >
 
 export async function getReviewsCollection(
-  product_type: typeReview['product_type'],
+  collection_name: typeReview['product_type'],
 ) {
   return await postgres
     .select()
     .from(review)
-    .where(eq(review.product_type, product_type))
+    .where(eq(review.product_type, collection_name))
     .orderBy(desc(review.date))
 }
 
