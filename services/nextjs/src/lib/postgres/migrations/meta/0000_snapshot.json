@@ -125,12 +125,8 @@
           "tableFrom": "account",
           "tableTo": "user",
           "schemaTo": "auth",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -187,22 +183,19 @@
           "name": "description",
           "type": "text",
           "primaryKey": false,
-          "notNull": true,
-          "default": "''"
+          "notNull": false
         },
         "price": {
           "name": "price",
           "type": "numeric(7, 2)",
           "primaryKey": false,
-          "notNull": true,
-          "default": "0"
+          "notNull": false
         },
         "price_before": {
           "name": "price_before",
           "type": "numeric(7, 2)",
           "primaryKey": false,
-          "notNull": true,
-          "default": "0"
+          "notNull": false
         },
         "sizes": {
           "name": "sizes",
@@ -226,8 +219,7 @@
           "name": "sold_out",
           "type": "boolean",
           "primaryKey": false,
-          "notNull": false,
-          "default": false
+          "notNull": false
         }
       },
       "indexes": {},
@@ -237,12 +229,8 @@
           "tableFrom": "collection_v2",
           "tableTo": "product_pages",
           "schemaTo": "pages",
-          "columnsFrom": [
-            "name"
-          ],
-          "columnsTo": [
-            "product_type"
-          ],
+          "columnsFrom": ["name"],
+          "columnsTo": ["product_type"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -673,12 +661,8 @@
           "tableFrom": "product_v2",
           "tableTo": "collection_v2",
           "schemaTo": "products",
-          "columnsFrom": [
-            "collection_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["collection_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -687,12 +671,8 @@
           "tableFrom": "product_v2",
           "tableTo": "brand",
           "schemaTo": "products",
-          "columnsFrom": [
-            "brand"
-          ],
-          "columnsTo": [
-            "image"
-          ],
+          "columnsFrom": ["brand"],
+          "columnsTo": ["image"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -812,12 +792,8 @@
           "tableFrom": "session",
           "tableTo": "user",
           "schemaTo": "auth",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -827,9 +803,7 @@
         "session_token_unique": {
           "name": "session_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       },
       "policies": {},
@@ -933,9 +907,7 @@
         "user_email_unique": {
           "name": "user_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -1034,12 +1006,8 @@
           "tableFrom": "variant",
           "tableTo": "product_pages",
           "schemaTo": "pages",
-          "columnsFrom": [
-            "product_type"
-          ],
-          "columnsTo": [
-            "product_type"
-          ],
+          "columnsFrom": ["product_type"],
+          "columnsTo": ["product_type"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1048,12 +1016,8 @@
           "tableFrom": "variant",
           "tableTo": "brand",
           "schemaTo": "products",
-          "columnsFrom": [
-            "brand"
-          ],
-          "columnsTo": [
-            "image"
-          ],
+          "columnsFrom": ["brand"],
+          "columnsTo": ["image"],
           "onDelete": "set default",
           "onUpdate": "no action"
         }
@@ -1095,12 +1059,8 @@
           "tableFrom": "variant_v2",
           "tableTo": "product_v2",
           "schemaTo": "products",
-          "columnsFrom": [
-            "product_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["product_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }

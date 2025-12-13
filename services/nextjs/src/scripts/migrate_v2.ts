@@ -57,11 +57,11 @@ export async function migrate_v2() {
       .from(variant)
       .where(eq(variant.product_type, collection.product_type))
 
-    const most_common_description = find_most_common(variants, 'description') || ''
-    const most_common_price = find_most_common(variants, 'price') || 0
+    const most_common_description = find_most_common(variants, 'description') || null
+    const most_common_price = find_most_common(variants, 'price') || null
     const most_common_price_before =
-      find_most_common(variants, 'price_before') || 0
-    const most_common_sold_out = find_most_common(variants, 'sold_out')
+      find_most_common(variants, 'price_before') || null
+    const most_common_sold_out = find_most_common(variants, 'sold_out') || null
     const most_common_upsell = find_most_common(variants, 'upsell')
     const most_common_sizes = find_most_common_array(variants, 'size')
 
@@ -72,7 +72,7 @@ export async function migrate_v2() {
         description: most_common_description,
         price: most_common_price,
         price_before: most_common_price_before,
-        sizes: most_common_sizes,
+        sizes: most_common_sizes && most_common_sizes.length > 0 ? most_common_sizes : null,
         upsell_collection: most_common_upsell?.product_type || null,
         upsell_product: most_common_upsell?.name || null,
         sold_out: most_common_sold_out,

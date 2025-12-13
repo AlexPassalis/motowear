@@ -17,13 +17,13 @@ export async function POST(req: NextRequest) {
     collection: z.object({
       id: z.string(),
       name: z.string(),
-      description: z.string(),
-      price: z.number(),
-      price_before: z.number(),
+      description: z.string().nullable(),
+      price: z.number().nullable(),
+      price_before: z.number().nullable(),
       sizes: z.array(z.string()).nullable(),
       upsell_collection: z.string().nullable(),
       upsell_product: z.string().nullable(),
-      sold_out: z.boolean(),
+      sold_out: z.boolean().nullable(),
     }),
   })
   const request_body = await req.json()

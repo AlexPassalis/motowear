@@ -9,7 +9,6 @@ import { postgres } from '@/lib/postgres'
 import {
   product_pages,
   brand,
-
   review,
   order,
   daily_session,
@@ -269,7 +268,6 @@ export async function getVariantsProductType(product_type: string) {
     id: prod.id,
     product_type,
     name: prod.name,
-    color: prod.color ?? '',
     image: prod.images[0],
   }))
 }
@@ -365,13 +363,13 @@ export async function getProductPageData(product_type: string) {
       collection: {
         id: '',
         name: '',
-        description: '',
-        price: 0,
-        price_before: 0,
-        sizes: [],
+        description: null,
+        price: null,
+        price_before: null,
+        sizes: null,
         upsell_collection: null,
         upsell_product: null,
-        sold_out: false,
+        sold_out: null,
       },
       reviews: [],
       brands: [],
@@ -387,21 +385,27 @@ export async function getProductPageData(product_type: string) {
     .innerJoin(collection_v2, eq(product_v2.collection_id, collection_v2.id))
     .where(eq(product_v2.collection_id, collection.id))
   const products = products_raw.map(
-    ({ collection_v2: coll, product_v2: prod }) => ({
-      id: prod.id,
-      name: prod.name,
-      ...(prod.brand && { brand: prod.brand }),
-      ...(prod.description && { description: prod.description }),
-      price: prod.price ?? coll.price,
-      price_before: prod.price_before ?? coll.price_before,
-      ...(prod.color && { color: prod.color }),
-      images: prod.images,
-      ...(prod.upsell_collection && {
-        upsell_collection: prod.upsell_collection,
-      }),
-      ...(prod.upsell_product && { upsell_product: prod.upsell_product }),
-      ...(prod.sold_out && { sold_out: prod.sold_out }),
-    }),
+    ({ collection_v2: coll, product_v2: prod }) => {
+      const price = prod.price ?? coll.price
+      const price_before = prod.price_before ?? coll.price_before
+      const sold_out = prod.sold_out ?? coll.sold_out
+
+      return {
+        id: prod.id,
+        name: prod.name,
+        ...(prod.brand && { brand: prod.brand }),
+        ...(prod.description && { description: prod.description }),
+        ...(price != null && { price }),
+        ...(price_before != null && { price_before }),
+        ...(prod.color && { color: prod.color }),
+        images: prod.images,
+        ...(prod.upsell_collection && {
+          upsell_collection: prod.upsell_collection,
+        }),
+        ...(prod.upsell_product && { upsell_product: prod.upsell_product }),
+        ...(sold_out && { sold_out }),
+      }
+    },
   )
 
   const product_ids = products.map((product) => product.id)
@@ -418,12 +422,11 @@ export async function getProductPageData(product_type: string) {
     const product_variant = variants_raw.find(
       (variant) => variant.product_id === product.id,
     )
+    const sizes = product_variant?.sizes ?? collection.sizes
 
     return {
       ...product,
-      ...(product_variant && {
-        sizes: product_variant.sizes,
-      }),
+      ...(sizes && sizes.length > 0 && { sizes }),
     }
   })
 

@@ -1,13 +1,13 @@
 CREATE TABLE IF NOT EXISTS "products"."collection_v2" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"name" text NOT NULL,
-	"description" text DEFAULT '' NOT NULL,
-	"price" numeric(7,2) DEFAULT 0 NOT NULL,
-	"price_before" numeric(7,2) DEFAULT 0 NOT NULL,
+	"description" text,
+	"price" numeric(7,2),
+	"price_before" numeric(7,2),
 	"sizes" text[],
 	"upsell_collection" text,
 	"upsell_product" text,
-	"sold_out" boolean DEFAULT false
+	"sold_out" boolean
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "products"."product_v2" (

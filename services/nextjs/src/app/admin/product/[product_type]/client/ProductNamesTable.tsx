@@ -318,13 +318,13 @@ export function ProductNamesTable({
                   color="blue"
                   disabled={onRequest}
                 >
-                  {collection.description.length > 0 ? '...' : 'Add'}
+                  {(collection.description ?? '').length > 0 ? '...' : 'Add'}
                 </Button>
               </Table.Td>
 
               <Table.Td>
                 <NumberInput
-                  value={collection.price}
+                  value={collection.price ?? 0}
                   onChange={(e) => {
                     update_collection({ price: Number(e) })
                   }}
@@ -337,7 +337,7 @@ export function ProductNamesTable({
 
               <Table.Td>
                 <NumberInput
-                  value={collection.price_before}
+                  value={collection.price_before ?? 0}
                   onChange={(e) => {
                     update_collection({ price_before: Number(e) })
                   }}
@@ -400,12 +400,12 @@ export function ProductNamesTable({
               <Table.Td style={{ textAlign: 'center' }}>
                 <Button
                   onClick={() => {
-                    update_collection({ sold_out: !collection.sold_out })
+                    update_collection({ sold_out: !(collection.sold_out ?? false) })
                   }}
-                  color={collection.sold_out ? 'red' : 'green'}
+                  color={(collection.sold_out ?? false) ? 'red' : 'green'}
                   disabled={onRequest}
                 >
-                  {collection.sold_out ? 'Yes' : 'No'}
+                  {(collection.sold_out ?? false) ? 'Yes' : 'No'}
                 </Button>
               </Table.Td>
             </Table.Tr>

@@ -172,7 +172,10 @@ type ReducerState = {
   selectedColor: string | null
   displayedSizes: string[]
   selectedSize: string | null
-  selectedProduct: MainProps['products'][0]
+  selectedProduct: Omit<MainProps['products'][0], 'price' | 'price_before'> & {
+    price: number
+    price_before: number
+  }
   displayedUpsellColors: MainProps['upsells'][0][]
   selectedUpsellColor: string | null
   displayedUpsellSizes: MainProps['upsells'][0][]
@@ -240,7 +243,7 @@ function create_reducer(
           selectedSize: displayed_sizes[0] ?? null,
           selectedProduct: {
             ...found_product,
-            price: found_product.price ?? collection.price,
+            price: found_product.price ?? collection.price ?? 0,
             price_before:
               found_product.price_before ?? collection.price_before ?? 0,
           },
@@ -277,7 +280,7 @@ function create_reducer(
           selectedSize: displayed_sizes[0] ?? null,
           selectedProduct: {
             ...found_product,
-            price: found_product.price ?? collection.price,
+            price: found_product.price ?? collection.price ?? 0,
             price_before:
               found_product.price_before ?? collection.price_before ?? 0,
           },
@@ -307,7 +310,7 @@ function create_reducer(
           selectedSize: displayed_sizes[0] ?? null,
           selectedProduct: {
             ...found_product,
-            price: found_product.price ?? collection.price,
+            price: found_product.price ?? collection.price ?? 0,
             price_before:
               found_product.price_before ?? collection.price_before ?? 0,
           },
@@ -327,7 +330,7 @@ function create_reducer(
           selectedSize: selected_size,
           selectedProduct: {
             ...found_product,
-            price: found_product.price ?? collection.price,
+            price: found_product.price ?? collection.price ?? 0,
             price_before:
               found_product.price_before ?? collection.price_before ?? 0,
           },
@@ -486,7 +489,7 @@ function Main({
         selectedSize: initial_displayed_sizes[0] ?? null,
         selectedProduct: {
           ...initial_found_product,
-          price: initial_found_product.price ?? collection.price,
+          price: initial_found_product.price ?? collection.price ?? 0,
           price_before:
             initial_found_product.price_before ?? collection.price_before ?? 0,
         },
@@ -578,7 +581,7 @@ function Main({
                     {state.selectedUpsellProduct.collection}
                   </h1>
                   <div className="flex gap-2 ml-auto">
-                    {state.selectedUpsellProduct.price_before > 0 && (
+                    {(state.selectedUpsellProduct.price_before ?? 0) > 0 && (
                       <h2 className="text-xl text-[var(--mantine-border)] line-through decoration-red-500">{`${state.selectedUpsellProduct.price_before}€`}</h2>
                     )}
                     <h2 className="text-xl">{`${state.selectedUpsellProduct.price}€`}</h2>
@@ -765,7 +768,7 @@ function Main({
                               name: upsell_product.name,
                               color: upsell_product.color,
                               size: upsell_product.size,
-                              price: upsell_product.price,
+                              price: upsell_product.price ?? 0,
                               price_before: upsell_product.price_before,
                               quantity: count,
                             },
@@ -774,7 +777,7 @@ function Main({
                       })
 
                       facebookPixelAddToCart(
-                        upsell_product.price,
+                        upsell_product.price ?? 0,
                         count,
                         upsell_product.collection,
                         upsell_product.name,
@@ -783,7 +786,7 @@ function Main({
                       )
 
                       googleAnalyticsAddToCart(
-                        upsell_product.price,
+                        upsell_product.price ?? 0,
                         count,
                         upsell_product.collection,
                         upsell_product.name,
@@ -1435,12 +1438,8 @@ function Main({
                             : state.selectedProduct.name,
                           color: state.selectedColor ?? '',
                           size: state.selectedSize ?? '',
-                          price:
-                            state.selectedProduct.price ?? collection.price,
-                          price_before:
-                            state.selectedProduct.price_before ??
-                            collection.price_before ??
-                            0,
+                          price: state.selectedProduct.price,
+                          price_before: state.selectedProduct.price_before,
                           quantity: count,
                         },
                       ]
@@ -1449,7 +1448,7 @@ function Main({
                   handlers.reset()
 
                   facebookPixelAddToCart(
-                    state.selectedProduct.price ?? collection.price,
+                    state.selectedProduct.price,
                     count,
                     collection_name,
                     state.selectedProduct.name,
@@ -1458,7 +1457,7 @@ function Main({
                   )
 
                   googleAnalyticsAddToCart(
-                    state.selectedProduct.price ?? collection.price,
+                    state.selectedProduct.price,
                     count,
                     collection_name,
                     state.selectedProduct.name,
