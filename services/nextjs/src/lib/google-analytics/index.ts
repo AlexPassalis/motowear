@@ -24,8 +24,8 @@ export function googleAnalyticsSearch(query: string) {
 }
 
 export function googleAnalyticsViewItem(
-  product_type: string,
-  variant: string,
+  collection: string,
+  product: string,
   price: number,
 ) {
   if (!isProduction) {
@@ -36,9 +36,9 @@ export function googleAnalyticsViewItem(
     value: price,
     items: [
       {
-        item_id: `${product_type}:${variant}`,
-        item_name: variant,
-        item_category: product_type,
+        item_id: `${collection}:${product}`,
+        item_name: product,
+        item_category: collection,
         price,
         quantity: 1,
       },

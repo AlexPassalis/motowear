@@ -40,7 +40,7 @@ export default async function AdminProductProductTypePage({
 
   if (result_1[1].status === 'rejected') {
     const err = result_1[1].reason
-    const location = `${ERROR.postgres} getVariants`
+    const location = `${ERROR.postgres} getAllProductsWithSizes`
     handleError(location, err)
 
     redirect(`${ROUTE_ERROR}?message=${ERROR.postgres}`)

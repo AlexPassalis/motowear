@@ -437,7 +437,7 @@ export function AdminOrderPageClient({
                   <Fragment key={index}>
                     <div className="flex flex-col gap-2 border-2 border-[var(--mantine-border)] rounded-lg p-2">
                       <div className="flex justify-between items-center">
-                        <h1>product_type</h1>
+                        <h1>collection</h1>
                         <TextInput
                           value={modalOrder.cart[index].collection}
                           onChange={(e) => {
@@ -451,7 +451,7 @@ export function AdminOrderPageClient({
                                         cartIndex === index
                                           ? {
                                               ...cartItem,
-                                              product_type: e.target.value,
+                                              collection: e.target.value,
                                             }
                                           : cartItem,
                                     ),
