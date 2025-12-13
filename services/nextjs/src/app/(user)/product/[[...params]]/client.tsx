@@ -172,16 +172,26 @@ type ReducerState = {
   selectedColor: string | null
   displayedSizes: string[]
   selectedSize: string | null
-  selectedProduct: Omit<MainProps['products'][0], 'price' | 'price_before'> & {
+  selectedProduct: Omit<
+    MainProps['products'][0],
+    'price' | 'price_before' | 'sold_out'
+  > & {
     price: number
     price_before: number
+    sold_out: boolean
   }
   displayedUpsellColors: MainProps['upsells'][0][]
   selectedUpsellColor: string | null
   displayedUpsellSizes: MainProps['upsells'][0][]
   selectedUpsellSize: string | null
   selectedUpsellProduct:
-    | (MainProps['upsells'][0] & {
+    | (Omit<
+        MainProps['upsells'][0],
+        'price' | 'price_before' | 'color' | 'sold_out'
+      > & {
+        price: number
+        price_before: number
+        sold_out: boolean
         color: string | null
         size: string | null
       })
@@ -243,9 +253,10 @@ function create_reducer(
           selectedSize: displayed_sizes[0] ?? null,
           selectedProduct: {
             ...found_product,
-            price: found_product.price ?? collection.price ?? 0,
+            price: found_product?.price ?? collection.price ?? 0,
             price_before:
-              found_product.price_before ?? collection.price_before ?? 0,
+              found_product?.price_before ?? collection.price_before ?? 0,
+            sold_out: found_product?.sold_out ?? collection.sold_out ?? false,
           },
         }
       }
@@ -280,9 +291,10 @@ function create_reducer(
           selectedSize: displayed_sizes[0] ?? null,
           selectedProduct: {
             ...found_product,
-            price: found_product.price ?? collection.price ?? 0,
+            price: found_product?.price ?? collection.price ?? 0,
             price_before:
-              found_product.price_before ?? collection.price_before ?? 0,
+              found_product?.price_before ?? collection.price_before ?? 0,
+            sold_out: found_product?.sold_out ?? collection.sold_out ?? false,
           },
         }
       }
@@ -310,9 +322,10 @@ function create_reducer(
           selectedSize: displayed_sizes[0] ?? null,
           selectedProduct: {
             ...found_product,
-            price: found_product.price ?? collection.price ?? 0,
+            price: found_product?.price ?? collection.price ?? 0,
             price_before:
-              found_product.price_before ?? collection.price_before ?? 0,
+              found_product?.price_before ?? collection.price_before ?? 0,
+            sold_out: found_product?.sold_out ?? collection.sold_out ?? false,
           },
         }
       }
@@ -330,9 +343,10 @@ function create_reducer(
           selectedSize: selected_size,
           selectedProduct: {
             ...found_product,
-            price: found_product.price ?? collection.price ?? 0,
+            price: found_product?.price ?? collection.price ?? 0,
             price_before:
-              found_product.price_before ?? collection.price_before ?? 0,
+              found_product?.price_before ?? collection.price_before ?? 0,
+            sold_out: found_product?.sold_out ?? collection.sold_out ?? false,
           },
         }
       }
@@ -361,11 +375,11 @@ function create_reducer(
           selectedUpsellSize: selected_upsell_size,
           selectedUpsellProduct: {
             ...found_upsell,
+            price: found_upsell?.price ?? 0,
+            price_before: found_upsell?.price_before ?? 0,
+            sold_out: found_upsell?.sold_out ?? false,
             color: selected_upsell_color,
             size: selected_upsell_size,
-          } as MainProps['upsells'][0] & {
-            color: string | null
-            size: string | null
           },
         }
       }
@@ -382,11 +396,11 @@ function create_reducer(
           selectedUpsellSize: selected_upsell_size,
           selectedUpsellProduct: {
             ...found_upsell,
+            price: found_upsell?.price ?? 0,
+            price_before: found_upsell?.price_before ?? 0,
+            sold_out: found_upsell?.sold_out ?? false,
             color: state.selectedUpsellColor,
             size: selected_upsell_size,
-          } as MainProps['upsells'][0] & {
-            color: string | null
-            size: string | null
           },
         }
       }
@@ -469,14 +483,15 @@ function Main({
 
       const initial_selected_upsell_product =
         upsells.length > 0
-          ? ({
+          ? {
               ...initial_displayed_upsell_colors[0],
+              price: initial_displayed_upsell_colors[0]?.price ?? 0,
+              price_before:
+                initial_displayed_upsell_colors[0]?.price_before ?? 0,
+              sold_out: initial_displayed_upsell_colors[0]?.sold_out ?? false,
               color: initial_selected_upsell_color,
               size: initial_selected_upsell_size,
-            } as MainProps['upsells'][0] & {
-              color: string | null
-              size: string | null
-            })
+            }
           : null
 
       return {
@@ -489,9 +504,11 @@ function Main({
         selectedSize: initial_displayed_sizes[0] ?? null,
         selectedProduct: {
           ...initial_found_product,
-          price: initial_found_product.price ?? collection.price ?? 0,
+          price: initial_found_product?.price ?? collection.price ?? 0,
           price_before:
-            initial_found_product.price_before ?? collection.price_before ?? 0,
+            initial_found_product?.price_before ?? collection.price_before ?? 0,
+          sold_out:
+            initial_found_product?.sold_out ?? collection.sold_out ?? false,
         },
         displayedUpsellColors: initial_displayed_upsell_colors,
         selectedUpsellColor: initial_selected_upsell_color,
@@ -522,7 +539,7 @@ function Main({
     special_products.includes(prod.name),
   )
 
-  const variantIsSoldOut = state.selectedProduct.sold_out === true
+  const variantIsSoldOut = state.selectedProduct.sold_out
 
   useEffect(() => {
     facebookPixelViewContent(
@@ -547,7 +564,7 @@ function Main({
         >
           <div className="relative aspect-square">
             <Image
-              src={`${envClient.MINIO_PRODUCT_URL}/${collection}/${page.size_chart}`}
+              src={`${envClient.MINIO_PRODUCT_URL}/${collection_name}/${page.size_chart}`}
               alt={page.size_chart}
               fill
               style={{ objectFit: 'cover' }}
@@ -579,7 +596,7 @@ function Main({
                     {state.selectedUpsellProduct.collection}
                   </h1>
                   <div className="flex gap-2 ml-auto">
-                    {(state.selectedUpsellProduct.price_before ?? 0) > 0 && (
+                    {state.selectedUpsellProduct.price_before > 0 && (
                       <h2 className="text-xl text-[var(--mantine-border)] line-through decoration-red-500">{`${state.selectedUpsellProduct.price_before}€`}</h2>
                     )}
                     <h2 className="text-xl">{`${state.selectedUpsellProduct.price}€`}</h2>
@@ -732,6 +749,7 @@ function Main({
                     </div>
                   </div>
                   <Button
+                    disabled={state.selectedUpsellProduct.sold_out}
                     onClick={() => {
                       closeUpsellModal()
                       setIsCartOpen(true)
@@ -766,7 +784,7 @@ function Main({
                               name: upsell_product.name,
                               color: upsell_product.color,
                               size: upsell_product.size,
-                              price: upsell_product.price ?? 0,
+                              price: upsell_product.price,
                               price_before: upsell_product.price_before,
                               quantity: count,
                             },
@@ -775,7 +793,7 @@ function Main({
                       })
 
                       facebookPixelAddToCart(
-                        upsell_product.price ?? 0,
+                        upsell_product.price,
                         count,
                         upsell_product.collection,
                         upsell_product.name,
@@ -784,7 +802,7 @@ function Main({
                       )
 
                       googleAnalyticsAddToCart(
-                        upsell_product.price ?? 0,
+                        upsell_product.price,
                         count,
                         upsell_product.collection,
                         upsell_product.name,
@@ -797,7 +815,9 @@ function Main({
                     radius="md"
                     style={{ width: '100%' }}
                   >
-                    Προσθήκη στο Καλάθι
+                    {state.selectedUpsellProduct.sold_out
+                      ? 'Sold out'
+                      : 'Προσθήκη στο Καλάθι'}
                   </Button>
                 </div>
               </div>
@@ -1308,7 +1328,8 @@ function Main({
                           (prod) =>
                             prod.name === state.selectedName &&
                             prod.color === state.selectedColor &&
-                            size === state.selectedSize,
+                            prod.sizes &&
+                            prod.sizes.includes(size),
                         )?.sold_out === true
 
                       return (
@@ -1652,7 +1673,7 @@ function Main({
                       </div>
                       <div className="relative aspect-square">
                         <Image
-                          src={`${envClient.MINIO_PRODUCT_URL}/${collection}/${image}`}
+                          src={`${envClient.MINIO_PRODUCT_URL}/${collection_name}/${image}`}
                           alt={image}
                           fill
                           style={{ objectFit: 'cover' }}

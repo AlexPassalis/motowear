@@ -198,6 +198,7 @@ export function HomePageClient({
                           overlayProps={{ radius: 'sm', blur: 2 }}
                         />
                         <Image
+                          key={`${product_type}-${name}-${image}-${index}`}
                           src={`${envClient.MINIO_PRODUCT_URL}/${product_type}/${image}`}
                           alt={name}
                           fill

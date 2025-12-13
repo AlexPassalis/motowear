@@ -478,22 +478,30 @@ export async function getProductPageData(product_type: string) {
           const upsells_raw = await postgres
             .select()
             .from(product_v2)
-            .leftJoin(
+            .innerJoin(
               collection_v2,
               eq(product_v2.collection_id, collection_v2.id),
             )
             .where(inArray(product_v2.name, upsell_product_names))
 
           const upsells = upsells_raw.map(
-            ({ collection_v2: coll, product_v2: prod }) => ({
-              id: prod.id,
-              collection: coll!.name,
-              name: prod.name,
-              price: prod.price ?? coll!.price,
-              price_before: prod.price_before ?? coll!.price_before,
-              ...(prod.color && { color: prod.color }),
-              images: prod.images,
-            }),
+            ({ collection_v2: coll, product_v2: prod }) => {
+              const price = prod.price ?? coll.price
+              const price_before = prod.price_before ?? coll.price_before
+              const sold_out = prod.sold_out ?? coll.sold_out
+
+              return {
+                id: prod.id,
+                collection: coll.name,
+                ...(coll.sizes && { collection_sizes: coll.sizes }),
+                name: prod.name,
+                ...(price != null && { price }),
+                ...(price_before != null && { price_before }),
+                ...(prod.color && { color: prod.color }),
+                images: prod.images,
+                ...(sold_out && { sold_out }),
+              }
+            },
           )
 
           const upsell_product_ids = upsells.map((upsell) => upsell.id)
@@ -510,10 +518,20 @@ export async function getProductPageData(product_type: string) {
             const upsell_variant = upsell_variants_raw.find(
               (variant) => variant.product_id === upsell.id,
             )
+            const variant_sizes = upsell_variant?.sizes
+            const sizes =
+              variant_sizes && variant_sizes.length > 0
+                ? variant_sizes
+                : upsell.collection_sizes
+
+            // Remove collection_sizes from the returned object
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { collection_sizes, ...upsell_without_collection_sizes } =
+              upsell
 
             return {
-              ...upsell,
-              ...(upsell_variant && { sizes: upsell_variant.sizes }),
+              ...upsell_without_collection_sizes,
+              ...(sizes && sizes.length > 0 && { sizes }),
             }
           })
         })()
