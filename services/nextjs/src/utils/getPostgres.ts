@@ -125,7 +125,7 @@ export async function getHomePageVariants() {
       }
 
       const products = await postgres
-        .select({
+        .selectDistinctOn([product_v2.name], {
           name: product_v2.name,
           image: sql`${product_v2.images}[1]` as SQL<string>,
         })
@@ -325,23 +325,7 @@ export async function getCollectionPageData(product_type: string) {
       .orderBy(product_v2.brand),
   ])
 
-  const special_products_filtered = products.filter((prod) =>
-    special_products.includes(prod.name),
-  )
-  const regular_products = products.filter(
-    (prod) => !special_products.includes(prod.name),
-  )
-
-  const ordered_products =
-    special_products_filtered.length > 0
-      ? [
-          ...special_products_filtered,
-          ...regular_products,
-          ...special_products_filtered,
-        ]
-      : products
-
-  const collection_page_products = ordered_products.map((product) => ({
+  const collection_page_products = products.map((product) => ({
     name: product.name,
     ...(product.brand && { brand: product.brand }),
     image: product.images[0],
