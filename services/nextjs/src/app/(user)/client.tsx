@@ -187,7 +187,7 @@ export function HomePageClient({
                 {displayedVariants.map(
                   ({ product_type, name, image }, index) => (
                     <Link
-                      key={`${product_type}-${name}`}
+                      key={`${product_type}-${name}-${image}-${index}`}
                       href={`${ROUTE_PRODUCT}/${product_type}/${name}`}
                       className="border border-[var(--mantine-border)] rounded-lg overflow-hidden"
                     >
@@ -198,7 +198,7 @@ export function HomePageClient({
                           overlayProps={{ radius: 'sm', blur: 2 }}
                         />
                         <Image
-                          key={`${product_type}-${name}-${image}-${index}`}
+                          key={`${name}-${image}-${index}`}
                           src={`${envClient.MINIO_PRODUCT_URL}/${product_type}/${image}`}
                           alt={name}
                           fill

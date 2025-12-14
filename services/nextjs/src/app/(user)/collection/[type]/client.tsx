@@ -11,7 +11,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { IoIosArrowDown } from 'react-icons/io'
 import { Cart } from '@/app/(user)/collection/[type]/Cart'
 import { useDisclosure } from '@mantine/hooks'
-import { special_products, special_brand } from '@/data/magic'
+import { special_products } from '@/data/magic'
 
 type CollectionPageClientProps = {
   collection: string
@@ -49,33 +49,30 @@ export function CollectionPageClient({
 
   const products_array = useMemo(() => Array.from(products), [products])
 
-  const special_products_set = useMemo(() => new Set(special_products), [])
-
   const filtered = useMemo(() => {
+    const special_prods = products_array.filter((prod) =>
+      special_products.includes(prod.name),
+    )
+
     if (selectedBrand) {
-      const filtered_by_brand = products_array.filter(
-        (prod) => prod.brand === selectedBrand,
-      )
-
-      // If selected brand is the special brand, don't duplicate special products
-      if (selectedBrand === special_brand) {
-        return filtered_by_brand
-      }
-
-      // Otherwise, duplicate special products at start and end
-      const special_prods = products_array.filter((prod) =>
-        special_products_set.has(prod.name),
-      )
-      const regular_filtered = filtered_by_brand.filter(
-        (prod) => !special_products_set.has(prod.name),
+      const brand_filtered = products_array.filter(
+        (prod) =>
+          prod.brand === selectedBrand && !special_products.includes(prod.name),
       )
 
       return special_prods.length > 0
-        ? [...special_prods, ...regular_filtered, ...special_prods]
-        : filtered_by_brand
+        ? [...special_prods, ...brand_filtered, ...special_prods]
+        : brand_filtered
     }
-    return products_array
-  }, [selectedBrand, products_array, special_products_set])
+
+    const regular_prods = products_array.filter(
+      (prod) => !special_products.includes(prod.name),
+    )
+
+    return special_prods.length > 0
+      ? [...special_prods, ...regular_prods, ...special_prods]
+      : products_array
+  }, [selectedBrand, products_array])
 
   const paginated = useMemo(() => {
     return filtered.slice((pageNumber - 1) * 20, pageNumber * 20)
