@@ -1323,14 +1323,7 @@ function Main({
                   </div>
                   <div className="flex gap-2">
                     {state.displayedSizes.map((size, index) => {
-                      const sizeVariantIsSoldOut =
-                        products.find(
-                          (prod) =>
-                            prod.name === state.selectedName &&
-                            prod.color === state.selectedColor &&
-                            prod.sizes &&
-                            prod.sizes.includes(size),
-                        )?.sold_out === true
+                      const sizeVariantIsSoldOut = state.selectedProduct.sold_out
 
                       return (
                         <div

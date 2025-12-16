@@ -8,6 +8,13 @@
       "when": 1764358007432,
       "tag": "0000_aromatic_darkhawk",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1765923027377,
+      "tag": "0001_dry_warbound",
+      "breakpoints": true
     }
   ]
 }

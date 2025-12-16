@@ -48,6 +48,7 @@ export async function POST(req: NextRequest) {
         brand: product.brand,
         color: product.color,
         images: product.images,
+        sizes: product.sizes,
         description:
           product.description === collection_defaults.description
             ? null
@@ -88,6 +89,7 @@ export async function POST(req: NextRequest) {
             price_before: normalized_product.price_before,
             color: normalized_product.color,
             images: normalized_product.images,
+            sizes: normalized_product.sizes,
             upsell_collection: normalized_product.upsell_collection,
             upsell_product: normalized_product.upsell_product,
             sold_out: normalized_product.sold_out,

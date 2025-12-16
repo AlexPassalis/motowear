@@ -5,7 +5,7 @@ import {
   getCollection,
   getAllCollections,
   getProductPage,
-  getAllProductsWithSizes,
+  getAllProducts,
 } from '@/utils/getPostgres'
 import { notFound, redirect } from 'next/navigation'
 import { AdminProductProductTypePageClient } from '@/app/admin/product/[product_type]/client/index'
@@ -25,7 +25,7 @@ export default async function AdminProductProductTypePage({
 
   const result_1 = await Promise.allSettled([
     params,
-    getAllProductsWithSizes(),
+    getAllProducts(),
     getBrands(),
     getAllCollections(),
   ])
@@ -40,7 +40,7 @@ export default async function AdminProductProductTypePage({
 
   if (result_1[1].status === 'rejected') {
     const err = result_1[1].reason
-    const location = `${ERROR.postgres} getAllProductsWithSizes`
+    const location = `${ERROR.postgres} getAllProducts`
     handleError(location, err)
 
     redirect(`${ROUTE_ERROR}?message=${ERROR.postgres}`)

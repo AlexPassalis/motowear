@@ -1,4 +1,4 @@
-import type { ColorVariant, Collection } from '@/lib/postgres/data/type'
+import type { Product, Collection } from '@/lib/postgres/data/type'
 import type { typeModal } from '@/app/admin/product/[product_type]/client/Modal'
 
 import { Modal, Table, Button, Group, TextInput, Select, MultiSelect } from '@mantine/core'
@@ -10,12 +10,12 @@ type ColorVariantsModalProps = {
   opened: boolean
   close: () => void
   selected_product_name: string | null
-  color_variants: ColorVariant[]
-  setColorVariants: Dispatch<SetStateAction<ColorVariant[]>>
+  color_variants: Product[]
+  setColorVariants: Dispatch<SetStateAction<Product[]>>
   collection: Collection
   images_minio: string[]
   brands_postgres: string[]
-  products_all: ColorVariant[]
+  products_all: Product[]
   all_collections: Collection[]
   setModalState: Dispatch<SetStateAction<typeModal>>
   openModal: () => void
@@ -49,7 +49,7 @@ export function ColorVariantsModal({
       collection_map.set(coll.id, coll.name)
     }
 
-    const products_by_collection = new Map<string, ColorVariant[]>()
+    const products_by_collection = new Map<string, Product[]>()
 
     for (const product of products_all) {
       if (!products_by_collection.has(product.collection_id)) {
@@ -82,7 +82,7 @@ export function ColorVariantsModal({
   function handle_add_color() {
     const reference_variant = color_variants[color_variants.length - 1]
 
-    const new_color_variant: ColorVariant = {
+    const new_color_variant: Product = {
       id: id(),
       collection_id: collection.id,
       name: selected_product_name!,
@@ -109,7 +109,7 @@ export function ColorVariantsModal({
     }
 
     const new_variants = color_variants.map((variant) => {
-      const new_variant: ColorVariant = {
+      const new_variant: Product = {
         id: id(),
         collection_id: collection.id,
         name: copy_name.trim(),

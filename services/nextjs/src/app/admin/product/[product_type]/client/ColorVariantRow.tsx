@@ -1,4 +1,4 @@
-import type { ColorVariant, Collection } from '@/lib/postgres/data/type'
+import type { Product, Collection } from '@/lib/postgres/data/type'
 import type { typeModal } from '@/app/admin/product/[product_type]/client/Modal'
 
 import { Button, NumberInput, Select, MultiSelect, Table, TextInput } from '@mantine/core'
@@ -14,9 +14,9 @@ type ColorVariantRowProps = {
   collection: Collection
   images_minio: string[]
   brands_postgres: string[]
-  variant: ColorVariant
-  color_variants: ColorVariant[]
-  setColorVariants: Dispatch<SetStateAction<ColorVariant[]>>
+  variant: Product
+  color_variants: Product[]
+  setColorVariants: Dispatch<SetStateAction<Product[]>>
   upsells_select_data: { label: string; value: string }[]
   setModalState: Dispatch<SetStateAction<typeModal>>
   openModal: () => void
@@ -35,7 +35,7 @@ function ColorVariantRowNotMemoised({
   openModal,
   onRequest,
 }: ColorVariantRowProps) {
-  function update_variant(updates: Partial<ColorVariant>) {
+  function update_variant(updates: Partial<Product>) {
     setColorVariants((prev) =>
       prev.map((item) => (item.id === variant.id ? { ...item, ...updates } : item)),
     )

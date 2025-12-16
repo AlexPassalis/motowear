@@ -8,7 +8,6 @@ import {
   product_v2,
   review,
   shipping,
-  variant_v2,
 } from '../schema'
 
 export const zodCheckout = z
@@ -64,6 +63,7 @@ export const zodCartItem = z.object({
   price: z.number(),
   quantity: z.number(),
   image: z.string(),
+  mtrl: z.number().optional(),
 })
 export const zodCart = z.array(zodCartItem)
 export const zodCartItemLocalStorage = zodCartItem.extend({
@@ -96,6 +96,3 @@ export const zodHomePage = createSelectSchema(home_page).omit({
 
 export const zodProduct = createSelectSchema(product_v2)
 export const zodProducts = z.array(zodProduct)
-
-export const zodVariantV2 = createSelectSchema(variant_v2)
-export const zodVariantsV2 = z.array(zodVariantV2)

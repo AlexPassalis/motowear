@@ -2,7 +2,7 @@
 
 import type {
   Collection,
-  ColorVariant,
+  Product,
   typeProductPage,
 } from '@/lib/postgres/data/type'
 import type { typeBrands } from '@/utils/getPostgres'
@@ -17,7 +17,7 @@ import { AdminProvider } from '@/app/admin/components/AdminProvider'
 
 type AdminProductProductTypePageClientProps = {
   collection: Collection
-  products: ColorVariant[]
+  products: Product[]
   brands: typeBrands
   images_minio: string[]
   product_page: typeProductPage
@@ -37,7 +37,7 @@ export function AdminProductProductTypePageClient({
     () => product_all.filter((prod) => prod.collection_id === collection.id),
     [product_all, collection.id],
   )
-  const [products, setProducts] = useState<ColorVariant[]>(initial_products)
+  const [products, setProducts] = useState<Product[]>(initial_products)
 
   const [onRequest, setOnRequest] = useState(false)
   const [modalState, setModalState] = useState<typeModal>({
@@ -50,7 +50,7 @@ export function AdminProductProductTypePageClient({
   const [selected_product_name, set_selected_product_name] = useState<
     string | null
   >(null)
-  const [color_variants, set_color_variants] = useState<ColorVariant[]>([])
+  const [color_variants, set_color_variants] = useState<Product[]>([])
   const [
     color_variants_modal_opened,
     { open: open_color_variants_modal, close: close_color_variants_modal },
