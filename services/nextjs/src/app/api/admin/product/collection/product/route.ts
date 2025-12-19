@@ -9,6 +9,7 @@ import { redis } from '@/lib/redis/index'
 import { handleError } from '@/utils/error/handleError'
 import { eq } from 'drizzle-orm'
 import { v4 as id } from 'uuid'
+import { updateTypesense } from '@/lib/typesense/server'
 
 export { OPTIONS } from '@/utils/OPTIONS'
 
@@ -104,6 +105,8 @@ export async function POST(req: NextRequest) {
   }
 
   if (validated_body.products.length > 0) {
+    let collection_name: string | null = null
+
     try {
       const collection = await postgres
         .select({ name: collection_v2.name })
@@ -112,12 +115,25 @@ export async function POST(req: NextRequest) {
         .limit(1)
 
       if (collection[0]) {
+        collection_name = collection[0].name
         await redis.del(`product_page_data_${collection[0].name}`)
         await redis.del(`collection_page_data_${collection[0].name}`)
+        await redis.del('home_page_variants')
       }
     } catch (err) {
       const location = 'POST REDIS delete cache'
       handleError(location, err)
+    }
+
+    if (collection_name) {
+      try {
+        await updateTypesense(collection_name)
+      } catch (err) {
+        const location = 'POST TYPESENSE updateTypesense'
+        handleError(location, err)
+
+        return NextResponse.json({ err: location }, { status: 500 })
+      }
     }
   }
 
@@ -151,6 +167,8 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ err: location }, { status: 500 })
   }
 
+  let collection_name: string | null = null
+
   try {
     const collection = await postgres
       .select({ name: collection_v2.name })
@@ -159,12 +177,25 @@ export async function DELETE(req: NextRequest) {
       .limit(1)
 
     if (collection[0]) {
+      collection_name = collection[0].name
       await redis.del(`product_page_data_${collection[0].name}`)
       await redis.del(`collection_page_data_${collection[0].name}`)
+      await redis.del('home_page_variants')
     }
   } catch (err) {
     const location = 'DELETE REDIS delete cache'
     handleError(location, err)
+  }
+
+  if (collection_name) {
+    try {
+      await updateTypesense(collection_name)
+    } catch (err) {
+      const location = 'DELETE TYPESENSE updateTypesense'
+      handleError(location, err)
+
+      return NextResponse.json({ err: location }, { status: 500 })
+    }
   }
 
   return NextResponse.json({}, { status: 200 })

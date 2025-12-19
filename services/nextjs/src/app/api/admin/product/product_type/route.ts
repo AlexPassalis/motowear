@@ -6,7 +6,7 @@ import { sql } from 'drizzle-orm'
 import { headers } from 'next/headers'
 import { deleteTypeImages } from '@/lib/minio'
 import { updateTypesense } from '@/lib/typesense/server'
-import { product_pages } from '@/lib/postgres/schema'
+import { product_pages, collection_v2 } from '@/lib/postgres/schema'
 import { redis } from '@/lib/redis/index'
 import { handleError } from '@/utils/error/handleError'
 import {
@@ -52,6 +52,17 @@ export async function POST(req: NextRequest) {
     })
   } catch (err) {
     const location = 'POST POSTGRES insert product_pages'
+    handleError(location, err)
+
+    return NextResponse.json({ err: location }, { status: 500 })
+  }
+
+  try {
+    await postgres.insert(collection_v2).values({
+      name: validatedBody.product_type,
+    })
+  } catch (err) {
+    const location = 'POST POSTGRES insert collection_v2'
     handleError(location, err)
 
     return NextResponse.json({ err: location }, { status: 500 })

@@ -310,10 +310,11 @@ export function ProductNamesTable({
                 <NumberInput
                   value={collection.mtrl}
                   onChange={(e) => {
-                    update_collection({ mtrl: Number(e) })
+                    update_collection({ mtrl: e === '' ? 1 : Number(e) })
                   }}
                   min={1}
                   max={99999}
+                  allowDecimal={false}
                   disabled={onRequest}
                 />
               </Table.Td>
@@ -412,12 +413,14 @@ export function ProductNamesTable({
               <Table.Td style={{ textAlign: 'center' }}>
                 <Button
                   onClick={() => {
-                    update_collection({ sold_out: !(collection.sold_out ?? false) })
+                    update_collection({
+                      sold_out: !(collection.sold_out ?? false),
+                    })
                   }}
-                  color={(collection.sold_out ?? false) ? 'red' : 'green'}
+                  color={collection.sold_out ?? false ? 'red' : 'green'}
                   disabled={onRequest}
                 >
-                  {(collection.sold_out ?? false) ? 'Yes' : 'No'}
+                  {collection.sold_out ?? false ? 'Yes' : 'No'}
                 </Button>
               </Table.Td>
             </Table.Tr>
