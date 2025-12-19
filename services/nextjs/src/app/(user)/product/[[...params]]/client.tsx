@@ -1322,10 +1322,7 @@ function Main({
                     )}
                   </div>
                   <div className="flex gap-2">
-                    {state.displayedSizes.map((size, index) => {
-                      const sizeVariantIsSoldOut = state.selectedProduct.sold_out
-
-                      return (
+                    {state.displayedSizes.map((size, index) => (
                         <div
                           key={index}
                           onClick={() =>
@@ -1345,10 +1342,10 @@ function Main({
                               display: 'flex',
                               justifyContent: 'center',
                               alignItems: 'center',
-                              textDecoration: sizeVariantIsSoldOut
+                              textDecoration: variantIsSoldOut
                                 ? 'line-through'
                                 : 'none',
-                              textDecorationColor: sizeVariantIsSoldOut
+                              textDecorationColor: variantIsSoldOut
                                 ? 'red'
                                 : 'inherit',
                             }}
@@ -1356,8 +1353,7 @@ function Main({
                             {size}
                           </UnstyledButton>
                         </div>
-                      )
-                    })}
+                    ))}
                   </div>
                 </div>
               ))}
