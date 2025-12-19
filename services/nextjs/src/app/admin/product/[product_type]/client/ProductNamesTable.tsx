@@ -428,7 +428,7 @@ export function ProductNamesTable({
 
           <Table.Tfoot>
             <Table.Tr>
-              <Table.Td colSpan={6}>
+              <Table.Td colSpan={7}>
                 <div className="flex justify-center">
                   <Button
                     onClick={handle_save_collection}

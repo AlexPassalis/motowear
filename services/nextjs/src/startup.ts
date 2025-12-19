@@ -12,11 +12,14 @@ import { run_scripts } from '@/scripts/index'
 async function startup() {
   await run_migrations()
   await run_scripts()
+  global.global_startup_completed = true
+  console.info('Startup completed successfully')
 }
 
 if (process.env.BUILD_TIME !== 'true') {
-  await startup()
-  console.info('Startup completed successfully')
+  if (!global.global_startup_completed) {
+    await startup()
+  }
 }
 
 export {} // To make this a module

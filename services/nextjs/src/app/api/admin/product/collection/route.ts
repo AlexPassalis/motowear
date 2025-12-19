@@ -17,6 +17,7 @@ export async function POST(req: NextRequest) {
     collection: z.object({
       id: z.string(),
       name: z.string(),
+      mtrl: z.number(),
       description: z.string().nullable(),
       price: z.number().nullable(),
       price_before: z.number().nullable(),
@@ -41,6 +42,7 @@ export async function POST(req: NextRequest) {
     await postgres
       .update(collection_v2)
       .set({
+        mtrl: validated_body.collection.mtrl,
         description: validated_body.collection.description,
         price: validated_body.collection.price,
         price_before: validated_body.collection.price_before,
