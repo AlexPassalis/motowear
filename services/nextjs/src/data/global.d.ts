@@ -6,6 +6,7 @@ import type { CronJob } from 'cron'
 import type { Registry } from 'prom-client'
 
 declare global {
+  var global_startup_completed: boolean
   var global_postgres_pool: Pool | undefined
   var global_postgres: ReturnType<typeof drizzle> | undefined
   var global_redis: Redis | undefined

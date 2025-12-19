@@ -1,9 +1,5 @@
 import type { SQL } from 'drizzle-orm'
-import type {
-  Collection,
-  ColorVariant,
-  typeReview,
-} from '@/lib/postgres/data/type'
+import type { Collection, typeReview } from '@/lib/postgres/data/type'
 
 import { postgres } from '@/lib/postgres'
 import {
@@ -19,7 +15,6 @@ import {
   phone,
   collection_v2,
   product_v2,
-  variant_v2,
 } from '@/lib/postgres/schema'
 import {
   eq,
@@ -51,27 +46,7 @@ export async function getProductTypes() {
 export type typeProductTypes = Awaited<ReturnType<typeof getProductTypes>>
 
 export async function getAllProducts() {
-  const data = await postgres
-    .select()
-    .from(product_v2)
-    .leftJoin(collection_v2, eq(product_v2.collection_id, collection_v2.id))
-
-  return data.map((row) => ({
-    ...row.product_v2,
-    collection_name: row.collection_v2!.name,
-  }))
-}
-
-export async function getAllProductsWithSizes(): Promise<ColorVariant[]> {
-  const data = await postgres
-    .select()
-    .from(product_v2)
-    .leftJoin(variant_v2, eq(product_v2.id, variant_v2.product_id))
-
-  return data.map((row) => ({
-    ...row.product_v2,
-    sizes: row.variant_v2?.sizes || [],
-  }))
+  return await postgres.select().from(product_v2)
 }
 
 export async function getCollection(collection_name: Collection['name']) {
@@ -368,11 +343,13 @@ export async function getProductPageData(product_type: string) {
     .from(product_v2)
     .innerJoin(collection_v2, eq(product_v2.collection_id, collection_v2.id))
     .where(eq(product_v2.collection_id, collection.id))
-  const products = products_raw.map(
+  const products_with_variants = products_raw.map(
     ({ collection_v2: coll, product_v2: prod }) => {
       const price = prod.price ?? coll.price
       const price_before = prod.price_before ?? coll.price_before
       const sold_out = prod.sold_out ?? coll.sold_out
+      const sizes =
+        prod.sizes && prod.sizes.length > 0 ? prod.sizes : collection.sizes
 
       return {
         id: prod.id,
@@ -388,35 +365,10 @@ export async function getProductPageData(product_type: string) {
         }),
         ...(prod.upsell_product && { upsell_product: prod.upsell_product }),
         ...(sold_out && { sold_out }),
+        ...(sizes && sizes.length > 0 && { sizes }),
       }
     },
   )
-
-  const product_ids = products.map((product) => product.id)
-
-  const variants_raw = await postgres
-    .select({
-      product_id: variant_v2.product_id,
-      sizes: variant_v2.sizes,
-    })
-    .from(variant_v2)
-    .where(inArray(variant_v2.product_id, product_ids))
-
-  const products_with_variants = products.map((product) => {
-    const product_variant = variants_raw.find(
-      (variant) => variant.product_id === product.id,
-    )
-    const variant_sizes = product_variant?.sizes
-    const sizes =
-      variant_sizes && variant_sizes.length > 0
-        ? variant_sizes
-        : collection.sizes
-
-    return {
-      ...product,
-      ...(sizes && sizes.length > 0 && { sizes }),
-    }
-  })
 
   const sorted_products = products_with_variants.sort(
     ({ name: name_a }, { name: name_b }) => {
@@ -468,56 +420,27 @@ export async function getProductPageData(product_type: string) {
             )
             .where(inArray(product_v2.name, upsell_product_names))
 
-          const upsells = upsells_raw.map(
+          return upsells_raw.map(
             ({ collection_v2: coll, product_v2: prod }) => {
               const price = prod.price ?? coll.price
               const price_before = prod.price_before ?? coll.price_before
               const sold_out = prod.sold_out ?? coll.sold_out
+              const sizes =
+                prod.sizes && prod.sizes.length > 0 ? prod.sizes : coll.sizes
 
               return {
                 id: prod.id,
                 collection: coll.name,
-                ...(coll.sizes && { collection_sizes: coll.sizes }),
                 name: prod.name,
                 ...(price != null && { price }),
                 ...(price_before != null && { price_before }),
                 ...(prod.color && { color: prod.color }),
                 images: prod.images,
                 ...(sold_out && { sold_out }),
+                ...(sizes && sizes.length > 0 && { sizes }),
               }
             },
           )
-
-          const upsell_product_ids = upsells.map((upsell) => upsell.id)
-
-          const upsell_variants_raw = await postgres
-            .select({
-              product_id: variant_v2.product_id,
-              sizes: variant_v2.sizes,
-            })
-            .from(variant_v2)
-            .where(inArray(variant_v2.product_id, upsell_product_ids))
-
-          return upsells.map((upsell) => {
-            const upsell_variant = upsell_variants_raw.find(
-              (variant) => variant.product_id === upsell.id,
-            )
-            const variant_sizes = upsell_variant?.sizes
-            const sizes =
-              variant_sizes && variant_sizes.length > 0
-                ? variant_sizes
-                : upsell.collection_sizes
-
-            // Remove collection_sizes from the returned object
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const { collection_sizes, ...upsell_without_collection_sizes } =
-              upsell
-
-            return {
-              ...upsell_without_collection_sizes,
-              ...(sizes && sizes.length > 0 && { sizes }),
-            }
-          })
         })()
 
   const brands = [

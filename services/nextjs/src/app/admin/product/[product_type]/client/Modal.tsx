@@ -1,6 +1,6 @@
 import type {
   Collection,
-  ColorVariant,
+  Product,
 } from '@/lib/postgres/data/type'
 import type { typeBrands } from '@/utils/getPostgres'
 
@@ -46,10 +46,10 @@ type ModalProps = {
   collection: Collection
   setCollection: Dispatch<SetStateAction<Collection>>
   images_minio: string[]
-  products_all: ColorVariant[]
+  products_all: Product[]
   brands_postgres: typeBrands
-  products: ColorVariant[]
-  setProducts: Dispatch<SetStateAction<ColorVariant[]>>
+  products: Product[]
+  setProducts: Dispatch<SetStateAction<Product[]>>
   modalState: typeModal
   setModalState: Dispatch<SetStateAction<typeModal>>
   modalOpened: boolean
@@ -78,7 +78,7 @@ function ModalNotMemoised({
     collection_map.set(coll.id, coll.name)
   }
 
-  const products_by_collection = new Map<string, ColorVariant[]>()
+  const products_by_collection = new Map<string, Product[]>()
   for (const product of products_all) {
     if (!products_by_collection.has(product.collection_id)) {
       products_by_collection.set(product.collection_id, [])

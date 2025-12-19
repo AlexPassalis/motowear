@@ -6,7 +6,7 @@ import { sql } from 'drizzle-orm'
 import { headers } from 'next/headers'
 import { deleteTypeImages } from '@/lib/minio'
 import { updateTypesense } from '@/lib/typesense/server'
-import { product_pages } from '@/lib/postgres/schema'
+import { product_pages, collection_v2 } from '@/lib/postgres/schema'
 import { redis } from '@/lib/redis/index'
 import { handleError } from '@/utils/error/handleError'
 import {
@@ -57,6 +57,26 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ err: location }, { status: 500 })
   }
 
+  try {
+    await postgres.insert(collection_v2).values({
+      name: validatedBody.product_type,
+    })
+  } catch (err) {
+    const location = 'POST POSTGRES insert collection_v2'
+    handleError(location, err)
+
+    try {
+      await postgres
+        .delete(product_pages)
+        .where(sql`product_type = ${validatedBody.product_type}`)
+    } catch (cleanup_err) {
+      const cleanup_location = 'POST POSTGRES cleanup product_pages after collection_v2 failure'
+      handleError(cleanup_location, cleanup_err)
+    }
+
+    return NextResponse.json({ err: location }, { status: 500 })
+  }
+
   let product_types_postgres
   let pages_postgres
   try {
@@ -79,6 +99,15 @@ export async function POST(req: NextRequest) {
     await redis.set('pages', JSON.stringify(pages_postgres), 'EX', 3600)
   } catch (err) {
     const location = 'POST REDIS set product_types/pages'
+    handleError(location, err)
+
+    return NextResponse.json({ err: location }, { status: 500 })
+  }
+
+  try {
+    await updateTypesense(validatedBody.product_type)
+  } catch (err) {
+    const location = 'POST TYPESENSE updateTypesense'
     handleError(location, err)
 
     return NextResponse.json({ err: location }, { status: 500 })
