@@ -462,7 +462,7 @@ function Main({
             prod.name === (product ?? products[0].name) &&
             (initial_selected_color === null ||
               prod.color === initial_selected_color) &&
-            (initial_displayed_sizes[0] === null ||
+            (initial_displayed_sizes.length === 0 ||
               prod.sizes?.includes(initial_displayed_sizes[0]) ||
               collection.sizes?.includes(initial_displayed_sizes[0])),
         ) ?? products[0]
