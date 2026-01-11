@@ -104,11 +104,23 @@ export function CheckoutPageClient({
     validate: zodResolver(zodCheckout),
   })
 
+  const countryIsGreece = form.values.country === 'Ελλάδα'
+  const antikataboliIsAllowed =
+    countryIsGreece && shipping.surcharge !== null && shipping.surcharge > 0
+
   useEffect(() => {
     const checkout = localStorage.getItem('checkout')
     if (checkout) {
-      form.setValues(JSON.parse(checkout))
+      const checkout_parsed = JSON.parse(checkout)
+      if (
+        !antikataboliIsAllowed &&
+        checkout_parsed.payment_method === 'Αντικαταβολή'
+      ) {
+        checkout_parsed.payment_method = 'Κάρτα'
+      }
+      form.setValues(checkout_parsed)
     }
+
     const localStorageCart = getLocalStorageCart()
     if (!orderCompleteResponse && localStorageCart.length < 1) {
       router.push(ROUTE_HOME)
@@ -249,7 +261,6 @@ export function CheckoutPageClient({
     orderCompleteResponse,
   ])
 
-  const countryIsGreece = form.values.country === 'Ελλάδα'
   useEffect(() => {
     if (form.values.country === 'Κύπρος') {
       form.setFieldValue('delivery_method', 'ΕΛΤΑ Courier')
@@ -869,7 +880,7 @@ export function CheckoutPageClient({
                         </div>
                       }
                     />
-                    {countryIsGreece && (
+                    {antikataboliIsAllowed && (
                       <>
                         <hr className="w-full border-[var(--mantine-border)]" />
                         <Radio
