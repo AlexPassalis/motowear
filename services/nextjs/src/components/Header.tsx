@@ -105,9 +105,9 @@ export function Header({
           )}
         </div>
       </header>
-      <section className="bg-red-600 py-2 mb-2">
+      {/* <section className="bg-red-600 py-2 mb-2">
         <h1 className="text-white text-center">ΜΕ ΚΑΡΤΑ, ΔΩΡΕΑΝ ΜΕΤΑΦΟΡΙΚΑ</h1>
-      </section>
+      </section> */}
     </>
   )
 }
