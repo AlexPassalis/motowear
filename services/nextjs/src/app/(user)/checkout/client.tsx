@@ -37,7 +37,12 @@ import axios from 'axios'
 import Link from 'next/link'
 import { facebookPixelPurchase } from '@/lib/facebook-pixel/index'
 import { googleAnalyticsPurchase } from '@/lib/google-analytics'
-import { couponCodeMPRELOK, ERROR, special_collections } from '@/data/magic'
+import {
+  couponCodeMPRELOK,
+  couponCodeSHIP,
+  ERROR,
+  special_collections,
+} from '@/data/magic'
 import Script from 'next/script'
 
 type CheckoutPageProps = {
@@ -949,7 +954,18 @@ export function CheckoutPageClient({
                               }
 
                               if (validatedResponse.couponArray.length === 1) {
-                                setCoupon(validatedResponse.couponArray[0])
+                                const applied_coupon =
+                                  validatedResponse.couponArray[0]
+                                setCoupon(applied_coupon)
+
+                                if (
+                                  applied_coupon.coupon_code === couponCodeSHIP
+                                ) {
+                                  form.setFieldValue(
+                                    'payment_method',
+                                    'Αντικαταβολή',
+                                  )
+                                }
                               } else {
                                 setCoupon(null)
                               }
