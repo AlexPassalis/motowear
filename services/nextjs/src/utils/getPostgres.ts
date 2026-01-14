@@ -13,8 +13,8 @@ import {
   coupon,
   email,
   phone,
-  collection_v2,
-  product_v2,
+  collection,
+  product,
 } from '@/lib/postgres/schema'
 import {
   eq,
@@ -27,7 +27,8 @@ import {
   desc,
   inArray,
 } from 'drizzle-orm'
-import { special_products } from '@/data/magic'
+import { ERROR, special_products } from '@/data/magic'
+import { handleError } from '@/utils/error/handleError'
 
 export async function getProductTypes() {
   const array = await postgres
@@ -46,21 +47,21 @@ export async function getProductTypes() {
 export type typeProductTypes = Awaited<ReturnType<typeof getProductTypes>>
 
 export async function getAllProducts() {
-  return await postgres.select().from(product_v2)
+  return await postgres.select().from(product)
 }
 
 export async function getCollection(collection_name: Collection['name']) {
   const data = await postgres
     .select()
-    .from(collection_v2)
-    .where(eq(collection_v2.name, collection_name))
+    .from(collection)
+    .where(eq(collection.name, collection_name))
     .limit(1)
 
   return data[0]
 }
 
 export async function getAllCollections() {
-  return await postgres.select().from(collection_v2)
+  return await postgres.select().from(collection)
 }
 
 export async function getPages() {
@@ -90,9 +91,9 @@ export async function getHomePageVariants() {
   const arrays = await Promise.all(
     product_types.map(async (product_type) => {
       const collections = await postgres
-        .select({ id: collection_v2.id })
-        .from(collection_v2)
-        .where(eq(collection_v2.name, product_type))
+        .select({ id: collection.id })
+        .from(collection)
+        .where(eq(collection.name, product_type))
         .limit(1)
 
       if (collections.length === 0) {
@@ -100,13 +101,13 @@ export async function getHomePageVariants() {
       }
 
       const products = await postgres
-        .selectDistinctOn([product_v2.name], {
-          name: product_v2.name,
-          image: sql`${product_v2.images}[1]` as SQL<string>,
+        .selectDistinctOn([product.name], {
+          name: product.name,
+          image: sql`${product.images}[1]` as SQL<string>,
         })
-        .from(product_v2)
-        .where(eq(product_v2.collection_id, collections[0].id))
-        .orderBy(product_v2.name)
+        .from(product)
+        .where(eq(product.collection_id, collections[0].id))
+        .orderBy(product.name)
         .limit(4)
 
       return products.map((p) => ({
@@ -223,9 +224,9 @@ export async function unsubscribe(customer_email: string) {
 
 export async function getVariantsProductType(product_type: string) {
   const collections = await postgres
-    .select({ id: collection_v2.id })
-    .from(collection_v2)
-    .where(eq(collection_v2.name, product_type))
+    .select({ id: collection.id })
+    .from(collection)
+    .where(eq(collection.name, product_type))
     .limit(1)
 
   if (collections.length === 0) {
@@ -234,26 +235,38 @@ export async function getVariantsProductType(product_type: string) {
 
   const products_raw = await postgres
     .select()
-    .from(product_v2)
-    .innerJoin(collection_v2, eq(product_v2.collection_id, collection_v2.id))
-    .where(eq(product_v2.collection_id, collections[0].id))
-    .orderBy(product_v2.name)
+    .from(product)
+    .innerJoin(collection, eq(product.collection_id, collection.id))
+    .where(eq(product.collection_id, collections[0].id))
+    .orderBy(product.name)
 
-  return products_raw.map(({ product_v2: prod }) => ({
-    id: prod.id,
-    product_type,
-    name: prod.name,
-    image: prod.images[0],
-  }))
+  return products_raw.map(({ product: prod }) => {
+    let prod_image = prod.images[0]
+
+    if (!prod_image) {
+      const location = `${ERROR.unexpected} getVariantsProductType`
+      const err = `The ${product_type} ${prod.name} is missing an image`
+      handleError(location, err)
+
+      prod_image = ''
+    }
+
+    return {
+      id: prod.id,
+      product_type,
+      name: prod.name,
+      image: prod_image,
+    }
+  })
 }
 
 export async function getCollectionPageData(product_type: string) {
   const collections = await postgres
     .select({
-      id: collection_v2.id,
+      id: collection.id,
     })
-    .from(collection_v2)
-    .where(eq(collection_v2.name, product_type))
+    .from(collection)
+    .where(eq(collection.name, product_type))
     .limit(1)
 
   if (collections.length === 0) {
@@ -276,34 +289,34 @@ export async function getCollectionPageData(product_type: string) {
     }
   }
 
-  const collection = collections[0]
+  const collection_row = collections[0]
 
   const [products, unique_brands] = await Promise.all([
     postgres
-      .selectDistinctOn([product_v2.name], {
-        name: product_v2.name,
-        brand: product_v2.brand,
-        images: product_v2.images,
+      .selectDistinctOn([product.name], {
+        name: product.name,
+        brand: product.brand,
+        images: product.images,
       })
-      .from(product_v2)
-      .where(eq(product_v2.collection_id, collection.id))
-      .orderBy(product_v2.name),
+      .from(product)
+      .where(eq(product.collection_id, collection_row.id))
+      .orderBy(product.name),
     postgres
-      .selectDistinctOn([product_v2.brand], { brand: product_v2.brand })
-      .from(product_v2)
+      .selectDistinctOn([product.brand], { brand: product.brand })
+      .from(product)
       .where(
         and(
-          eq(product_v2.collection_id, collection.id),
-          isNotNull(product_v2.brand),
+          eq(product.collection_id, collection_row.id),
+          isNotNull(product.brand),
         ),
       )
-      .orderBy(product_v2.brand),
+      .orderBy(product.brand),
   ])
 
-  const collection_page_products = products.map((product) => ({
-    name: product.name,
-    ...(product.brand && { brand: product.brand }),
-    image: product.images[0],
+  const collection_page_products = products.map((product_item) => ({
+    name: product_item.name,
+    ...(product_item.brand && { brand: product_item.brand }),
+    image: product_item.images[0],
   }))
 
   const brands = unique_brands.map((b) => b.brand as string) // null values have been filtered out by the query
@@ -314,8 +327,8 @@ export async function getCollectionPageData(product_type: string) {
 export async function getProductPageData(product_type: string) {
   const collections = await postgres
     .select()
-    .from(collection_v2)
-    .where(eq(collection_v2.name, product_type))
+    .from(collection)
+    .where(eq(collection.name, product_type))
     .limit(1)
   if (collections.length !== 1) {
     return {
@@ -336,20 +349,20 @@ export async function getProductPageData(product_type: string) {
       upsells: [],
     }
   }
-  const collection = collections[0]
+  const collection_row = collections[0]
 
   const products_raw = await postgres
     .select()
-    .from(product_v2)
-    .innerJoin(collection_v2, eq(product_v2.collection_id, collection_v2.id))
-    .where(eq(product_v2.collection_id, collection.id))
+    .from(product)
+    .innerJoin(collection, eq(product.collection_id, collection.id))
+    .where(eq(product.collection_id, collection_row.id))
   const products_with_variants = products_raw.map(
-    ({ collection_v2: coll, product_v2: prod }) => {
+    ({ collection: coll, product: prod }) => {
       const price = prod.price ?? coll.price
       const price_before = prod.price_before ?? coll.price_before
       const sold_out = prod.sold_out ?? coll.sold_out
       const sizes =
-        prod.sizes && prod.sizes.length > 0 ? prod.sizes : collection.sizes
+        prod.sizes && prod.sizes.length > 0 ? prod.sizes : collection_row.sizes
 
       return {
         id: prod.id,
@@ -389,19 +402,22 @@ export async function getProductPageData(product_type: string) {
   )
 
   const upsell_items = [
-    ...(collection.upsell_collection && collection.upsell_product
+    ...(collection_row.upsell_collection && collection_row.upsell_product
       ? [
           {
-            collection: collection.upsell_collection,
-            product: collection.upsell_product,
+            collection: collection_row.upsell_collection,
+            product: collection_row.upsell_product,
           },
         ]
       : []),
     ...sorted_products
-      .filter((product) => product.upsell_collection && product.upsell_product)
-      .map((product) => ({
-        collection: product.upsell_collection as string,
-        product: product.upsell_product as string,
+      .filter(
+        (product_item) =>
+          product_item.upsell_collection && product_item.upsell_product,
+      )
+      .map((product_item) => ({
+        collection: product_item.upsell_collection as string,
+        product: product_item.upsell_product as string,
       })),
   ]
 
@@ -413,50 +429,46 @@ export async function getProductPageData(product_type: string) {
 
           const upsells_raw = await postgres
             .select()
-            .from(product_v2)
-            .innerJoin(
-              collection_v2,
-              eq(product_v2.collection_id, collection_v2.id),
-            )
-            .where(inArray(product_v2.name, upsell_product_names))
+            .from(product)
+            .innerJoin(collection, eq(product.collection_id, collection.id))
+            .where(inArray(product.name, upsell_product_names))
 
-          return upsells_raw.map(
-            ({ collection_v2: coll, product_v2: prod }) => {
-              const price = prod.price ?? coll.price
-              const price_before = prod.price_before ?? coll.price_before
-              const sold_out = prod.sold_out ?? coll.sold_out
-              const sizes =
-                prod.sizes && prod.sizes.length > 0 ? prod.sizes : coll.sizes
+          return upsells_raw.map(({ collection: coll, product: prod }) => {
+            const price = prod.price ?? coll.price
+            const price_before = prod.price_before ?? coll.price_before
+            const sold_out = prod.sold_out ?? coll.sold_out
+            const sizes =
+              prod.sizes && prod.sizes.length > 0 ? prod.sizes : coll.sizes
 
-              return {
-                id: prod.id,
-                collection: coll.name,
-                name: prod.name,
-                ...(price != null && { price }),
-                ...(price_before != null && { price_before }),
-                ...(prod.color && { color: prod.color }),
-                images: prod.images,
-                ...(sold_out && { sold_out }),
-                ...(sizes && sizes.length > 0 && { sizes }),
-              }
-            },
-          )
+            return {
+              id: prod.id,
+              collection: coll.name,
+              name: prod.name,
+              ...(price != null && { price }),
+              ...(price_before != null && { price_before }),
+              ...(prod.color && { color: prod.color }),
+              images: prod.images,
+              ...(sold_out && { sold_out }),
+              ...(sizes && sizes.length > 0 && { sizes }),
+            }
+          })
         })()
 
   const brands = [
     ...new Set(
       sorted_products
         .filter(
-          (product) => product.brand !== null && product.brand !== undefined,
+          (product_item) =>
+            product_item.brand !== null && product_item.brand !== undefined,
         )
-        .map((product) => product.brand as string),
+        .map((product_item) => product_item.brand as string),
     ),
   ].sort()
 
   const reviews = await getReviewsCollection(product_type)
 
   return {
-    collection,
+    collection: collection_row,
     reviews,
     brands,
     products: sorted_products,
@@ -466,9 +478,9 @@ export async function getProductPageData(product_type: string) {
 
 export async function getUniqueVariantNames() {
   const array = await postgres
-    .selectDistinctOn([product_v2.name])
-    .from(product_v2)
-    .orderBy(product_v2.name)
+    .selectDistinctOn([product.name])
+    .from(product)
+    .orderBy(product.name)
 
   return array.map((row) => row.name)
 }

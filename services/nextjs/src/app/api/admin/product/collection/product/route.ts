@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { headers } from 'next/headers'
 import { postgres } from '@/lib/postgres/index'
-import { product_v2, collection_v2 } from '@/lib/postgres/schema'
+import { product, collection } from '@/lib/postgres/schema'
 import { redis } from '@/lib/redis/index'
 import { handleError } from '@/utils/error/handleError'
 import { eq } from 'drizzle-orm'
@@ -29,58 +29,58 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    for (const product of validated_body.products) {
-      const collection = await postgres
+    for (const product_item of validated_body.products) {
+      const collection_rows = await postgres
         .select()
-        .from(collection_v2)
-        .where(eq(collection_v2.id, product.collection_id))
+        .from(collection)
+        .where(eq(collection.id, product_item.collection_id))
         .limit(1)
 
-      if (collection.length === 0) {
-        throw new Error(`Collection not found: ${product.collection_id}`)
+      if (collection_rows.length === 0) {
+        throw new Error(`Collection not found: ${product_item.collection_id}`)
       }
 
-      const collection_defaults = collection[0]
+      const collection_defaults = collection_rows[0]
 
       const normalized_product = {
-        id: product.id || id(),
-        collection_id: product.collection_id,
-        name: product.name,
-        brand: product.brand,
-        color: product.color,
-        images: product.images,
-        sizes: product.sizes,
+        id: product_item.id || id(),
+        collection_id: product_item.collection_id,
+        name: product_item.name,
+        brand: product_item.brand,
+        color: product_item.color,
+        images: product_item.images,
+        sizes: product_item.sizes,
         description:
-          product.description === collection_defaults.description
+          product_item.description === collection_defaults.description
             ? null
-            : product.description,
+            : product_item.description,
         price:
-          product.price === collection_defaults.price ? null : product.price,
+          product_item.price === collection_defaults.price ? null : product_item.price,
         price_before:
-          product.price_before === collection_defaults.price_before
+          product_item.price_before === collection_defaults.price_before
             ? null
-            : product.price_before,
+            : product_item.price_before,
         upsell_collection:
-          product.upsell_collection === collection_defaults.upsell_collection &&
-          product.upsell_product === collection_defaults.upsell_product
+          product_item.upsell_collection === collection_defaults.upsell_collection &&
+          product_item.upsell_product === collection_defaults.upsell_product
             ? null
-            : product.upsell_collection,
+            : product_item.upsell_collection,
         upsell_product:
-          product.upsell_collection === collection_defaults.upsell_collection &&
-          product.upsell_product === collection_defaults.upsell_product
+          product_item.upsell_collection === collection_defaults.upsell_collection &&
+          product_item.upsell_product === collection_defaults.upsell_product
             ? null
-            : product.upsell_product,
+            : product_item.upsell_product,
         sold_out:
-          product.sold_out === collection_defaults.sold_out
+          product_item.sold_out === collection_defaults.sold_out
             ? null
-            : product.sold_out,
+            : product_item.sold_out,
       }
 
       await postgres
-        .insert(product_v2)
+        .insert(product)
         .values(normalized_product)
         .onConflictDoUpdate({
-          target: [product_v2.id],
+          target: [product.id],
           set: {
             collection_id: normalized_product.collection_id,
             name: normalized_product.name,
@@ -98,7 +98,7 @@ export async function POST(req: NextRequest) {
         })
     }
   } catch (err) {
-    const location = 'POST POSTGRES upsert product_v2'
+    const location = 'POST POSTGRES upsert product'
     handleError(location, err)
 
     return NextResponse.json({ err: location }, { status: 500 })
@@ -108,16 +108,16 @@ export async function POST(req: NextRequest) {
     let collection_name: string | null = null
 
     try {
-      const collection = await postgres
-        .select({ name: collection_v2.name })
-        .from(collection_v2)
-        .where(eq(collection_v2.id, validated_body.products[0].collection_id))
+      const collection_rows = await postgres
+        .select({ name: collection.name })
+        .from(collection)
+        .where(eq(collection.id, validated_body.products[0].collection_id))
         .limit(1)
 
-      if (collection[0]) {
-        collection_name = collection[0].name
-        await redis.del(`product_page_data_${collection[0].name}`)
-        await redis.del(`collection_page_data_${collection[0].name}`)
+      if (collection_rows[0]) {
+        collection_name = collection_rows[0].name
+        await redis.del(`product_page_data_${collection_rows[0].name}`)
+        await redis.del(`collection_page_data_${collection_rows[0].name}`)
         await redis.del('home_page_variants')
       }
     } catch (err) {
@@ -159,9 +159,9 @@ export async function DELETE(req: NextRequest) {
   }
 
   try {
-    await postgres.delete(product_v2).where(eq(product_v2.id, validated_body.id))
+    await postgres.delete(product).where(eq(product.id, validated_body.id))
   } catch (err) {
-    const location = 'DELETE POSTGRES delete product_v2'
+    const location = 'DELETE POSTGRES delete product'
     handleError(location, err)
 
     return NextResponse.json({ err: location }, { status: 500 })
@@ -170,16 +170,16 @@ export async function DELETE(req: NextRequest) {
   let collection_name: string | null = null
 
   try {
-    const collection = await postgres
-      .select({ name: collection_v2.name })
-      .from(collection_v2)
-      .where(eq(collection_v2.id, validated_body.collection_id))
+    const collection_rows = await postgres
+      .select({ name: collection.name })
+      .from(collection)
+      .where(eq(collection.id, validated_body.collection_id))
       .limit(1)
 
-    if (collection[0]) {
-      collection_name = collection[0].name
-      await redis.del(`product_page_data_${collection[0].name}`)
-      await redis.del(`collection_page_data_${collection[0].name}`)
+    if (collection_rows[0]) {
+      collection_name = collection_rows[0].name
+      await redis.del(`product_page_data_${collection_rows[0].name}`)
+      await redis.del(`collection_page_data_${collection_rows[0].name}`)
       await redis.del('home_page_variants')
     }
   } catch (err) {

@@ -6,7 +6,7 @@ import { sql } from 'drizzle-orm'
 import { headers } from 'next/headers'
 import { deleteTypeImages } from '@/lib/minio'
 import { updateTypesense } from '@/lib/typesense/server'
-import { product_pages, collection_v2 } from '@/lib/postgres/schema'
+import { product_pages, collection } from '@/lib/postgres/schema'
 import { redis } from '@/lib/redis/index'
 import { handleError } from '@/utils/error/handleError'
 import {
@@ -58,11 +58,11 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    await postgres.insert(collection_v2).values({
+    await postgres.insert(collection).values({
       name: validatedBody.product_type,
     })
   } catch (err) {
-    const location = 'POST POSTGRES insert collection_v2'
+    const location = 'POST POSTGRES insert collection'
     handleError(location, err)
 
     try {
@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
         .delete(product_pages)
         .where(sql`product_type = ${validatedBody.product_type}`)
     } catch (cleanup_err) {
-      const cleanup_location = 'POST POSTGRES cleanup product_pages after collection_v2 failure'
+      const cleanup_location = 'POST POSTGRES cleanup product_pages after collection failure'
       handleError(cleanup_location, cleanup_err)
     }
 

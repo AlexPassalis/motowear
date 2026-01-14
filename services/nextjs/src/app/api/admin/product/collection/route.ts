@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { headers } from 'next/headers'
 import { postgres } from '@/lib/postgres/index'
-import { collection_v2 } from '@/lib/postgres/schema'
+import { collection } from '@/lib/postgres/schema'
 import { redis } from '@/lib/redis/index'
 import { handleError } from '@/utils/error/handleError'
 import { eq } from 'drizzle-orm'
@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
 
   try {
     await postgres
-      .update(collection_v2)
+      .update(collection)
       .set({
         mtrl: validated_body.collection.mtrl,
         description: validated_body.collection.description,
@@ -51,9 +51,9 @@ export async function POST(req: NextRequest) {
         upsell_product: validated_body.collection.upsell_product,
         sold_out: validated_body.collection.sold_out,
       })
-      .where(eq(collection_v2.id, validated_body.collection.id))
+      .where(eq(collection.id, validated_body.collection.id))
   } catch (err) {
-    const location = 'POST POSTGRES update collection_v2'
+    const location = 'POST POSTGRES update collection'
     handleError(location, err)
 
     return NextResponse.json({ err: location }, { status: 500 })
