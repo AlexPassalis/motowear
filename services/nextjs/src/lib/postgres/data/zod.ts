@@ -5,7 +5,7 @@ import {
   home_page,
   order,
   product_pages,
-  product_v2,
+  product,
   review,
   shipping,
 } from '../schema'
@@ -94,5 +94,5 @@ export const zodHomePage = createSelectSchema(home_page).omit({
   primary_key: true,
 })
 
-export const zodProduct = createSelectSchema(product_v2)
+export const zodProduct = createSelectSchema(product)
 export const zodProducts = z.array(zodProduct)

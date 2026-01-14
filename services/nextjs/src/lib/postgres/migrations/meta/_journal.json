@@ -15,6 +15,13 @@
       "when": 1765923027377,
       "tag": "0001_dry_warbound",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1768395012601,
+      "tag": "0002_curly_beast",
+      "breakpoints": true
     }
   ]
 }

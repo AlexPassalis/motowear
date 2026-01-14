@@ -58,7 +58,7 @@ export const brand = productsSchema.table('brand', {
   image: text('image').primaryKey(),
 })
 
-export const collection_v2 = productsSchema.table('collection_v2', {
+export const collection = productsSchema.table('collection', {
   id: uuid('id').primaryKey().defaultRandom(),
   mtrl: integer('mtrl').default(1).notNull(),
   name: text('name')
@@ -75,11 +75,11 @@ export const collection_v2 = productsSchema.table('collection_v2', {
   sold_out: boolean('sold_out'),
 })
 
-export const product_v2 = productsSchema.table('product_v2', {
+export const product = productsSchema.table('product', {
   id: uuid('id').primaryKey().defaultRandom(),
   collection_id: uuid('collection_id')
     .notNull()
-    .references(() => collection_v2.id, {
+    .references(() => collection.id, {
       onDelete: 'cascade',
     }),
   name: text('name').notNull(),
@@ -95,17 +95,17 @@ export const product_v2 = productsSchema.table('product_v2', {
   sold_out: boolean('sold_out'),
 })
 
-export const collection_v2_relations = relations(collection_v2, ({ one }) => ({
+export const collection_relations = relations(collection, ({ one }) => ({
   product_page: one(product_pages, {
-    fields: [collection_v2.name],
+    fields: [collection.name],
     references: [product_pages.product_type],
   }),
 }))
 
-export const product_v2_relations = relations(product_v2, ({ one }) => ({
-  collection: one(collection_v2, {
-    fields: [product_v2.collection_id],
-    references: [collection_v2.id],
+export const product_relations = relations(product, ({ one }) => ({
+  collection: one(collection, {
+    fields: [product.collection_id],
+    references: [collection.id],
   }),
 }))
 
