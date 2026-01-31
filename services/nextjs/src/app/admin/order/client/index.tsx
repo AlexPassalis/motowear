@@ -483,6 +483,7 @@ export function AdminOrderPageClient({
                                 href={`${envClient.MINIO_PUBLIC_URL}/custom_orders/${modalState.id}/${variant_image}`}
                                 download
                                 target="_blank"
+                                rel="noopener noreferrer"
                               >
                                 <h1 className="text-blue-700">variant</h1>
                               </a>

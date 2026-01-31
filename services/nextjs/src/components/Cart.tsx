@@ -222,8 +222,14 @@ export function Cart({
                     <FaTrashCan
                       onClick={() => {
                         delete_custom_image(product.name)
-                        if (custom_image_urls[product.name]) {
-                          URL.revokeObjectURL(custom_image_urls[product.name])
+                        const url = custom_image_urls[product.name]
+                        if (url) {
+                          URL.revokeObjectURL(url)
+                          set_custom_image_urls((prev) => {
+                            const { [product.name]: _removed, ...rest } = prev
+
+                            return rest
+                          })
                         }
                         setCart((prev) => prev.filter((_, i) => i !== index))
                       }}

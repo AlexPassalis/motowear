@@ -66,9 +66,14 @@ export async function get_custom_image_as_base64(name: string) {
     return null
   }
 
-  const array_buffer = await blob.arrayBuffer()
-  const bytes = new Uint8Array(array_buffer)
-  const binary = String.fromCharCode(...bytes)
-
-  return `data:${blob.type};base64,${btoa(binary)}`
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      resolve(reader.result as string)
+    }
+    reader.onerror = () => {
+      reject(reader.error)
+    }
+    reader.readAsDataURL(blob)
+  })
 }

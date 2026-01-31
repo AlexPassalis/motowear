@@ -89,6 +89,38 @@ export function CheckoutPageClient({
   const [custom_image_urls, set_custom_image_urls] = useState<
     Record<string, string>
   >({})
+  const custom_image_urls_ref = useRef<Record<string, string>>({})
+
+  useEffect(() => {
+    custom_image_urls_ref.current = custom_image_urls
+  }, [custom_image_urls])
+
+  useEffect(() => {
+    const cart_names = new Set(cart.map((item) => item.name))
+    set_custom_image_urls((prev) => {
+      let changed = false
+      const next = { ...prev }
+
+      for (const [name, url] of Object.entries(prev)) {
+        if (!cart_names.has(name)) {
+          URL.revokeObjectURL(url)
+          delete next[name]
+          changed = true
+        }
+      }
+
+      return changed ? next : prev
+    })
+  }, [cart])
+
+  useEffect(() => {
+    return () => {
+      Object.values(custom_image_urls_ref.current).forEach((url) =>
+        URL.revokeObjectURL(url),
+      )
+    }
+  }, [])
+
   useEffect(() => {
     async function load_images() {
       for (const item of cart) {

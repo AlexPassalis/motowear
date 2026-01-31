@@ -1203,9 +1203,11 @@ function Main({
                           setCustomError(
                             'Το αρχείο είναι πολύ μεγάλο. Μέγιστο μέγεθος: 5MB',
                           )
+
                           return
                         }
 
+                        setCustomError(null)
                         set_custom_image(file)
                       }}
                     >
