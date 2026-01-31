@@ -793,6 +793,7 @@ function Main({
                             quantity:
                               updatedCart[existingIndex].quantity + count,
                           }
+
                           return updatedCart
                         } else {
                           return [
@@ -806,6 +807,7 @@ function Main({
                               price: upsell_product.price,
                               price_before: upsell_product.price_before,
                               quantity: count,
+                              cash_on_delivery: upsell_product.cash_on_delivery,
                             },
                           ]
                         }
@@ -1513,6 +1515,7 @@ function Main({
                         ...updatedCart[existingIndex],
                         quantity: updatedCart[existingIndex].quantity + count,
                       }
+
                       return updatedCart
                     } else {
                       return [
@@ -1530,6 +1533,7 @@ function Main({
                           price: state.selectedProduct.price,
                           price_before: state.selectedProduct.price_before,
                           quantity: count,
+                          cash_on_delivery: collection.cash_on_delivery,
                         },
                       ]
                     }

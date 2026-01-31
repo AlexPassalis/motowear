@@ -136,6 +136,7 @@ export async function getProductPageDataCached(
         upsell_collection: null,
         upsell_product: null,
         sold_out: null,
+        cash_on_delivery: false,
       },
       reviews: [],
       brands: [],

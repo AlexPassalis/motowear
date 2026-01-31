@@ -83,6 +83,7 @@ export const zodCartItem = z.object({
 export const zodCart = z.array(zodCartItem)
 export const zodCartItemLocalStorage = zodCartItem.extend({
   price_before: z.number().nullable(),
+  cash_on_delivery: z.boolean(),
 })
 export const zodCartLocalStorage = z.array(zodCartItemLocalStorage)
 export const zodCoupon = createSelectSchema(coupon)

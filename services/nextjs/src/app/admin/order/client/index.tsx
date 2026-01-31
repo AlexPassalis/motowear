@@ -468,8 +468,12 @@ export function AdminOrderPageClient({
                         />
                       </div>
                       {(() => {
-                        const variant_image = custom_order_images[modalState.id]?.find(
-                          (filename) => filename === sanitizeFilename(modalOrder.cart[index].name)
+                        const variant_image = custom_order_images[
+                          modalState.id
+                        ]?.find(
+                          (filename) =>
+                            filename ===
+                            sanitizeFilename(modalOrder.cart[index].name),
                         )
 
                         return (
@@ -1108,16 +1112,16 @@ export function AdminOrderPageClient({
                             drawHeading(type)
                           }
 
-                          const has_custom_image = custom_order_images[orderId]?.includes(
-                            sanitizeFilename(name)
-                          )
+                          const has_custom_image = custom_order_images[
+                            orderId
+                          ]?.includes(sanitizeFilename(name))
 
                           const line = [
                             orderId.toString().padEnd(5),
                             (size ?? '').padEnd(6),
                             (color ?? '').padEnd(7),
                             `x${quantity.toString().padEnd(3)}`,
-                            has_custom_image ? `${name}   (custom-image)` : name,
+                            has_custom_image ? `${name}  (image)` : name,
                           ].join(' ')
 
                           page.drawText(line, {

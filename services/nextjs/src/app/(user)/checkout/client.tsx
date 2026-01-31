@@ -46,6 +46,7 @@ import {
 import {
   get_custom_image,
   get_custom_image_as_base64,
+  delete_custom_image,
 } from '@/utils/indexedDB'
 import Script from 'next/script'
 
@@ -137,16 +138,18 @@ export function CheckoutPageClient({
     validate: zodResolver(zodCheckout),
   })
 
-  const countryIsGreece = form.values.country === 'Ελλάδα'
-  const antikataboliIsAllowed =
-    countryIsGreece && shipping.surcharge !== null && shipping.surcharge > 0
+  const country_is_greece = form.values.country === 'Ελλάδα'
+  const valid_surcharge = shipping.surcharge !== null && shipping.surcharge > 0
+  const cart_allows_cod = cart.every((item) => item.cash_on_delivery)
+  const cash_on_delivery_is_allowed =
+    country_is_greece && valid_surcharge && cart_allows_cod
 
   useEffect(() => {
     const checkout = localStorage.getItem('checkout')
     if (checkout) {
       const checkout_parsed = JSON.parse(checkout)
       if (
-        !antikataboliIsAllowed &&
+        !cash_on_delivery_is_allowed &&
         checkout_parsed.payment_method === 'Αντικαταβολή'
       ) {
         checkout_parsed.payment_method = 'Κάρτα'
@@ -305,12 +308,12 @@ export function CheckoutPageClient({
   const [boxNowMapHasRendered, setBoxNowMapHasRendered] = useState(false)
   const boxNowButtonRef = useRef<HTMLButtonElement | null>(null)
   useEffect(() => {
-    if (!countryIsGreece || !boxNowScriptHasLoaded || boxNowMapHasRendered) {
+    if (!country_is_greece || !boxNowScriptHasLoaded || boxNowMapHasRendered) {
       return
     }
     requestAnimationFrame(() => boxNowButtonRef.current?.click())
     setBoxNowMapHasRendered(true)
-  }, [countryIsGreece, boxNowScriptHasLoaded, boxNowMapHasRendered])
+  }, [country_is_greece, boxNowScriptHasLoaded, boxNowMapHasRendered])
   const isBoxNow = form.values.delivery_method === 'BOX NOW'
 
   useEffect(() => {
@@ -567,6 +570,12 @@ export function CheckoutPageClient({
                     if (error) {
                       router.push(`${ROUTE_ERROR}?message=Invalid response`)
                       return
+                    }
+
+                    for (const item of cart_with_images) {
+                      if (item?.custom_image) {
+                        delete_custom_image(item.name)
+                      }
                     }
 
                     setOrderCompleteResponse(validatedResponse)
@@ -859,7 +868,7 @@ export function CheckoutPageClient({
                         </span>
                       }
                     />
-                    {countryIsGreece && (
+                    {country_is_greece && (
                       <>
                         <hr className="w-full border-[var(--mantine-border)]" />
                         <Radio
@@ -927,7 +936,7 @@ export function CheckoutPageClient({
                         </div>
                       }
                     />
-                    {antikataboliIsAllowed && (
+                    {cash_on_delivery_is_allowed && (
                       <>
                         <hr className="w-full border-[var(--mantine-border)]" />
                         <Radio
