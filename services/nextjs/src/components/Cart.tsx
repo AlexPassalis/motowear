@@ -27,7 +27,13 @@ import { useRouter } from 'next/navigation'
 import { zodCoupon } from '@/lib/postgres/data/zod'
 import { MdDiscount } from 'react-icons/md'
 import { facebookPixelInitiateCheckout } from '@/lib/facebook-pixel'
-import { couponCodeMPRELOK, ERROR, special_collections } from '@/data/magic'
+import {
+  couponCodeMPRELOK,
+  ERROR,
+  special_collections,
+  special_products,
+} from '@/data/magic'
+import { get_custom_image, delete_custom_image } from '@/utils/indexedDB'
 import { googleAnalyticsBeginCheckout } from '@/lib/google-analytics'
 
 type CartProps = {
@@ -62,8 +68,8 @@ export function Cart({
         coupon?.percentage
           ? cartTotal - cartTotal * coupon.percentage
           : coupon?.fixed
-          ? cartTotal - coupon.fixed
-          : cartTotal,
+            ? cartTotal - coupon.fixed
+            : cartTotal,
       )
     } else {
       setTotal(cartTotal)
@@ -73,6 +79,30 @@ export function Cart({
     couponLoadingOverlay,
     { open: openCouponLoadingOverlay, close: closeCouponLoadingOverlay },
   ] = useDisclosure(false)
+
+  const [custom_image_urls, set_custom_image_urls] = useState<
+    Record<string, string>
+  >({})
+  useEffect(() => {
+    async function load_images() {
+      for (const item of cart) {
+        const already_loaded = custom_image_urls[item.name]
+        if (already_loaded) {
+          continue
+        }
+
+        const blob = await get_custom_image(item.name)
+        if (!blob) {
+          continue
+        }
+
+        const url = URL.createObjectURL(blob)
+        set_custom_image_urls((prev) => ({ ...prev, [item.name]: url }))
+      }
+    }
+
+    load_images()
+  }, [cart])
 
   return (
     <section
@@ -178,7 +208,10 @@ export function Cart({
                   >
                     <Image
                       component={NextImage}
-                      src={`${envClient.MINIO_PRODUCT_URL}/${product.collection}/${product.image}`}
+                      src={
+                        custom_image_urls[product.name] ||
+                        `${envClient.MINIO_PRODUCT_URL}/${product.collection}/${product.image}`
+                      }
                       alt={`${product.collection}/${product.name}`}
                       fill
                       style={{ objectFit: 'cover' }}
@@ -187,9 +220,13 @@ export function Cart({
                   </Link>
                   <div className="relative w-2/3 flex flex-col justify-center gap-0.5 p-2">
                     <FaTrashCan
-                      onClick={() =>
+                      onClick={() => {
+                        delete_custom_image(product.name)
+                        if (custom_image_urls[product.name]) {
+                          URL.revokeObjectURL(custom_image_urls[product.name])
+                        }
                         setCart((prev) => prev.filter((_, i) => i !== index))
-                      }
+                      }}
                       className="absolute top-2 right-2 hover:cursor-pointer"
                     />
                     <h1>{product.collection}</h1>
@@ -400,15 +437,15 @@ export function Cart({
                   {coupon?.percentage
                     ? `${(total * coupon.percentage).toFixed(2)}€`
                     : coupon?.fixed
-                    ? `${coupon.fixed.toFixed(2)}€`
-                    : ''}
+                      ? `${coupon.fixed.toFixed(2)}€`
+                      : ''}
                 </span>
                 <span>
                   {coupon?.percentage
                     ? `${coupon.percentage * 100}% έκπτωση`
                     : coupon?.fixed
-                    ? `${coupon.fixed.toFixed(2)}€ έκπτωση`
-                    : 'Δώρο Μπρελόκ'}
+                      ? `${coupon.fixed.toFixed(2)}€ έκπτωση`
+                      : 'Δώρο Μπρελόκ'}
                 </span>
               </div>
             )}

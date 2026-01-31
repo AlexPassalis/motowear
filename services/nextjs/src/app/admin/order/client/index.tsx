@@ -33,16 +33,19 @@ import { z } from 'zod'
 import { AdminProvider } from '@/app/admin/components/AdminProvider'
 import { regexOrderFirstLastName, regexOrderId } from '@/data/regex'
 import { normalise } from '@/utils/normalise'
+import { sanitizeFilename } from '@/utils/sanitize'
 import { ERROR } from '@/data/magic'
 
 type AdminOrderPageClientProps = {
   postgres_orders: typeOrder[]
   postgres_unique_variant_names: typeUniqueVariantNames
+  custom_order_images: Record<number, string[]>
 }
 
 export function AdminOrderPageClient({
   postgres_orders,
   postgres_unique_variant_names,
+  custom_order_images,
 }: AdminOrderPageClientProps) {
   const [onRequest, setOnRequest] = useState(false)
   const [orders, setOrders] = useState(postgres_orders)
@@ -464,34 +467,52 @@ export function AdminOrderPageClient({
                           classNames={{ input: '!text-center' }}
                         />
                       </div>
-                      <div className="flex justify-between items-center">
-                        <h1>variant</h1>
-                        <TextInput
-                          value={modalOrder.cart[index].name}
-                          onChange={(e) => {
-                            setOrders((prev) =>
-                              prev.map((order) => {
-                                if (order.id === modalState.id) {
-                                  return {
-                                    ...order,
-                                    cart: order.cart.map(
-                                      (cartItem, cartIndex) =>
-                                        cartIndex === index
-                                          ? {
-                                              ...cartItem,
-                                              name: e.target.value,
-                                            }
-                                          : cartItem,
-                                    ),
-                                  }
-                                }
-                                return order
-                              }),
-                            )
-                          }}
-                          classNames={{ input: '!text-center' }}
-                        />
-                      </div>
+                      {(() => {
+                        const variant_image = custom_order_images[modalState.id]?.find(
+                          (filename) => filename === sanitizeFilename(modalOrder.cart[index].name)
+                        )
+
+                        return (
+                          <div className="flex justify-between items-center">
+                            {variant_image ? (
+                              <a
+                                href={`${envClient.MINIO_PUBLIC_URL}/custom_orders/${modalState.id}/${variant_image}`}
+                                download
+                                target="_blank"
+                              >
+                                <h1 className="text-blue-700">variant</h1>
+                              </a>
+                            ) : (
+                              <h1>variant</h1>
+                            )}
+                            <TextInput
+                              value={modalOrder.cart[index].name}
+                              onChange={(e) => {
+                                setOrders((prev) =>
+                                  prev.map((order) => {
+                                    if (order.id === modalState.id) {
+                                      return {
+                                        ...order,
+                                        cart: order.cart.map(
+                                          (cartItem, cartIndex) =>
+                                            cartIndex === index
+                                              ? {
+                                                  ...cartItem,
+                                                  name: e.target.value,
+                                                }
+                                              : cartItem,
+                                        ),
+                                      }
+                                    }
+                                    return order
+                                  }),
+                                )
+                              }}
+                              classNames={{ input: '!text-center' }}
+                            />
+                          </div>
+                        )
+                      })()}
                       {modalOrder.cart[index].color && (
                         <div className="flex justify-between items-center">
                           <h1>color</h1>
@@ -805,8 +826,8 @@ export function AdminOrderPageClient({
                           ? order.coupon.percentage
                             ? `${order.coupon.percentage * 100}%`
                             : order.coupon.fixed
-                            ? `${order.coupon.fixed}€`
-                            : order.coupon.coupon_code
+                              ? `${order.coupon.fixed}€`
+                              : order.coupon.coupon_code
                           : '-'}
                       </Text>
                     </HoverCard.Dropdown>
@@ -1087,12 +1108,16 @@ export function AdminOrderPageClient({
                             drawHeading(type)
                           }
 
+                          const has_custom_image = custom_order_images[orderId]?.includes(
+                            sanitizeFilename(name)
+                          )
+
                           const line = [
                             orderId.toString().padEnd(5),
                             (size ?? '').padEnd(6),
                             (color ?? '').padEnd(7),
                             `x${quantity.toString().padEnd(3)}`,
-                            name,
+                            has_custom_image ? `${name}   (custom-image)` : name,
                           ].join(' ')
 
                           page.drawText(line, {
@@ -1100,9 +1125,11 @@ export function AdminOrderPageClient({
                             y,
                             size: fontSize,
                             font: greekFont,
-                            color: !postgres_unique_variant_names.includes(name)
-                              ? rgb(0.85, 0, 0)
-                              : rgb(0, 0, 0),
+                            color:
+                              !postgres_unique_variant_names.includes(name) &&
+                              name !== 'Πιστόνι'
+                                ? rgb(0.85, 0, 0)
+                                : rgb(0, 0, 0),
                           })
                           y -= lineHeight
                         }
