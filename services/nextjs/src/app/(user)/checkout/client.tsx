@@ -43,6 +43,11 @@ import {
   ERROR,
   special_collections,
 } from '@/data/magic'
+import {
+  get_custom_image,
+  get_custom_image_as_base64,
+  delete_custom_image,
+} from '@/utils/indexedDB'
 import Script from 'next/script'
 
 type CheckoutPageProps = {
@@ -81,6 +86,62 @@ export function CheckoutPageClient({
   const [saveInfo, setSaveInfo] = useState(true)
   const [cart, setCart] = useState<typeCartLocalStorage>([])
 
+  const [custom_image_urls, set_custom_image_urls] = useState<
+    Record<string, string>
+  >({})
+  const custom_image_urls_ref = useRef<Record<string, string>>({})
+
+  useEffect(() => {
+    custom_image_urls_ref.current = custom_image_urls
+  }, [custom_image_urls])
+
+  useEffect(() => {
+    const cart_names = new Set(cart.map((item) => item.name))
+    set_custom_image_urls((prev) => {
+      let changed = false
+      const next = { ...prev }
+
+      for (const [name, url] of Object.entries(prev)) {
+        if (!cart_names.has(name)) {
+          URL.revokeObjectURL(url)
+          delete next[name]
+          changed = true
+        }
+      }
+
+      return changed ? next : prev
+    })
+  }, [cart])
+
+  useEffect(() => {
+    return () => {
+      Object.values(custom_image_urls_ref.current).forEach((url) =>
+        URL.revokeObjectURL(url),
+      )
+    }
+  }, [])
+
+  useEffect(() => {
+    async function load_images() {
+      for (const item of cart) {
+        const already_loaded = custom_image_urls[item.name]
+        if (already_loaded) {
+          continue
+        }
+
+        const blob = await get_custom_image(item.name)
+        if (!blob) {
+          continue
+        }
+
+        const url = URL.createObjectURL(blob)
+        set_custom_image_urls((prev) => ({ ...prev, [item.name]: url }))
+      }
+    }
+
+    load_images()
+  }, [cart])
+
   const form = useForm({
     mode: 'controlled',
     onValuesChange(values) {
@@ -109,16 +170,18 @@ export function CheckoutPageClient({
     validate: zodResolver(zodCheckout),
   })
 
-  const countryIsGreece = form.values.country === 'Ελλάδα'
-  const antikataboliIsAllowed =
-    countryIsGreece && shipping.surcharge !== null && shipping.surcharge > 0
+  const country_is_greece = form.values.country === 'Ελλάδα'
+  const valid_surcharge = shipping.surcharge !== null && shipping.surcharge > 0
+  const cart_allows_cod = cart.every((item) => item.cash_on_delivery)
+  const cash_on_delivery_is_allowed =
+    country_is_greece && valid_surcharge && cart_allows_cod
 
   useEffect(() => {
     const checkout = localStorage.getItem('checkout')
     if (checkout) {
       const checkout_parsed = JSON.parse(checkout)
       if (
-        !antikataboliIsAllowed &&
+        !cash_on_delivery_is_allowed &&
         checkout_parsed.payment_method === 'Αντικαταβολή'
       ) {
         checkout_parsed.payment_method = 'Κάρτα'
@@ -161,15 +224,15 @@ export function CheckoutPageClient({
   const cartTotal = coupon?.percentage
     ? baseCartTotal - baseCartTotal * coupon.percentage
     : coupon?.fixed
-    ? baseCartTotal - coupon.fixed
-    : baseCartTotal
+      ? baseCartTotal - coupon.fixed
+      : baseCartTotal
 
   const freeShipping = shipping.free ? cartTotal >= shipping.free : false
   const shippingExpense = freeShipping
     ? 0
     : form.values.delivery_method === 'ΕΛΤΑ Courier'
-    ? shipping.expense_elta_courier ?? 0
-    : shipping.expense_box_now ?? 0
+      ? (shipping.expense_elta_courier ?? 0)
+      : (shipping.expense_box_now ?? 0)
   const shippingSurcharge =
     form.values.payment_method === 'Αντικαταβολή'
       ? shipping.surcharge
@@ -277,12 +340,12 @@ export function CheckoutPageClient({
   const [boxNowMapHasRendered, setBoxNowMapHasRendered] = useState(false)
   const boxNowButtonRef = useRef<HTMLButtonElement | null>(null)
   useEffect(() => {
-    if (!countryIsGreece || !boxNowScriptHasLoaded || boxNowMapHasRendered) {
+    if (!country_is_greece || !boxNowScriptHasLoaded || boxNowMapHasRendered) {
       return
     }
     requestAnimationFrame(() => boxNowButtonRef.current?.click())
     setBoxNowMapHasRendered(true)
-  }, [countryIsGreece, boxNowScriptHasLoaded, boxNowMapHasRendered])
+  }, [country_is_greece, boxNowScriptHasLoaded, boxNowMapHasRendered])
   const isBoxNow = form.values.delivery_method === 'BOX NOW'
 
   useEffect(() => {
@@ -394,7 +457,10 @@ export function CheckoutPageClient({
                         <div className="relative w-1/3 h-full rounded-lg overflow-hidden">
                           <Image
                             component={NextImage}
-                            src={`${envClient.MINIO_PRODUCT_URL}/${product.collection}/${product.image}`}
+                            src={
+                              custom_image_urls[product.name] ||
+                              `${envClient.MINIO_PRODUCT_URL}/${product.collection}/${product.image}`
+                            }
                             alt={`${product.collection}/${product.name}`}
                             fill
                             style={{ objectFit: 'cover' }}
@@ -496,11 +562,19 @@ export function CheckoutPageClient({
               onSubmit={form.onSubmit(async (values) => {
                 openFormLoadingOverlay()
                 try {
+                  const cart_with_images = await Promise.all(
+                    cart.map(async (item) => {
+                      const base64 = await get_custom_image_as_base64(item.name)
+
+                      return base64 ? { ...item, custom_image: base64 } : item
+                    }),
+                  )
+
                   const res = await axios.post(
                     `${envClient.API_USER_URL}/checkout`,
                     {
                       checkout: values,
-                      cart: cart,
+                      cart: cart_with_images,
                       coupon: coupon,
                     },
                   )
@@ -528,6 +602,12 @@ export function CheckoutPageClient({
                     if (error) {
                       router.push(`${ROUTE_ERROR}?message=Invalid response`)
                       return
+                    }
+
+                    for (const item of cart_with_images) {
+                      if (item?.custom_image) {
+                        delete_custom_image(item.name)
+                      }
                     }
 
                     setOrderCompleteResponse(validatedResponse)
@@ -682,7 +762,10 @@ export function CheckoutPageClient({
                             <div className="relative w-1/3 h-full rounded-lg overflow-hidden">
                               <Image
                                 component={NextImage}
-                                src={`${envClient.MINIO_PRODUCT_URL}/${product.collection}/${product.image}`}
+                                src={
+                                  custom_image_urls[product.name] ||
+                                  `${envClient.MINIO_PRODUCT_URL}/${product.collection}/${product.image}`
+                                }
                                 alt={`${product.collection}/${product.name}`}
                                 fill
                                 style={{ objectFit: 'cover' }}
@@ -807,8 +890,8 @@ export function CheckoutPageClient({
                             shipping.expense_elta_courier === 0
                               ? 'Δωρεάν'
                               : shipping.expense_elta_courier
-                              ? `(${shipping.expense_elta_courier}€ έξοδα αποστολής)`
-                              : ''
+                                ? `(${shipping.expense_elta_courier}€ έξοδα αποστολής)`
+                                : ''
                           }`}
                           <br />
                           <span className="proxima-nova">
@@ -817,7 +900,7 @@ export function CheckoutPageClient({
                         </span>
                       }
                     />
-                    {countryIsGreece && (
+                    {country_is_greece && (
                       <>
                         <hr className="w-full border-[var(--mantine-border)]" />
                         <Radio
@@ -830,8 +913,8 @@ export function CheckoutPageClient({
                                 shipping.expense_box_now === 0
                                   ? 'Δωρεάν'
                                   : shipping.expense_box_now
-                                  ? `(${shipping.expense_box_now}€ έξοδα αποστολής)`
-                                  : ''
+                                    ? `(${shipping.expense_box_now}€ έξοδα αποστολής)`
+                                    : ''
                               }`}
                               <br />
                               <span className="proxima-nova">
@@ -885,7 +968,7 @@ export function CheckoutPageClient({
                         </div>
                       }
                     />
-                    {antikataboliIsAllowed && (
+                    {cash_on_delivery_is_allowed && (
                       <>
                         <hr className="w-full border-[var(--mantine-border)]" />
                         <Radio
@@ -1007,15 +1090,15 @@ export function CheckoutPageClient({
                         {coupon?.percentage
                           ? `${(total * coupon.percentage).toFixed(2)}€`
                           : coupon?.fixed
-                          ? `${coupon.fixed.toFixed(2)}€`
-                          : ''}
+                            ? `${coupon.fixed.toFixed(2)}€`
+                            : ''}
                       </span>
                       <span>
                         {coupon?.percentage
                           ? `${coupon.percentage * 100}% έκπτωση`
                           : coupon?.fixed
-                          ? `${coupon.fixed.toFixed(2)}€ έκπτωση`
-                          : 'Δώρο Μπρελόκ'}
+                            ? `${coupon.fixed.toFixed(2)}€ έκπτωση`
+                            : 'Δώρο Μπρελόκ'}
                       </span>
                     </div>
                   )}
@@ -1049,8 +1132,8 @@ export function CheckoutPageClient({
                       <div className="ml-auto flex gap-2 items-center">
                         <p className="text-[var(--mantine-border)] line-through decoration-red-500">
                           {(form.values.delivery_method === 'ΕΛΤΑ Courier'
-                            ? shipping.expense_elta_courier ?? 0
-                            : shipping.expense_box_now ?? 0
+                            ? (shipping.expense_elta_courier ?? 0)
+                            : (shipping.expense_box_now ?? 0)
                           ).toFixed(2)}
                           €
                         </p>

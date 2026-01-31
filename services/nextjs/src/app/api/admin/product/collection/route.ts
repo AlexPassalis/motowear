@@ -25,6 +25,7 @@ export async function POST(req: NextRequest) {
       upsell_collection: z.string().nullable(),
       upsell_product: z.string().nullable(),
       sold_out: z.boolean().nullable(),
+      cash_on_delivery: z.boolean(),
     }),
   })
   const request_body = await req.json()
@@ -50,6 +51,7 @@ export async function POST(req: NextRequest) {
         upsell_collection: validated_body.collection.upsell_collection,
         upsell_product: validated_body.collection.upsell_product,
         sold_out: validated_body.collection.sold_out,
+        cash_on_delivery: validated_body.collection.cash_on_delivery,
       })
       .where(eq(collection.id, validated_body.collection.id))
   } catch (err) {

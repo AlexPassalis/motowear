@@ -342,6 +342,7 @@ export async function getProductPageData(product_type: string) {
         upsell_collection: null,
         upsell_product: null,
         sold_out: null,
+        cash_on_delivery: false,
       },
       reviews: [],
       brands: [],
@@ -450,6 +451,7 @@ export async function getProductPageData(product_type: string) {
               images: prod.images,
               ...(sold_out && { sold_out }),
               ...(sizes && sizes.length > 0 && { sizes }),
+              cash_on_delivery: coll.cash_on_delivery,
             }
           })
         })()

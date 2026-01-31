@@ -9,6 +9,7 @@ import {
   Dispatch,
   SetStateAction,
   useEffect,
+  useMemo,
   useRef,
   useState,
   useReducer,
@@ -17,9 +18,13 @@ import {
 import { useCounter, useDisclosure } from '@mantine/hooks'
 import {
   Accordion,
+  ActionIcon,
   Button,
   Card,
   Container,
+  FileButton,
+  Image as MantineImage,
+  Input,
   Modal,
   Text,
   Textarea,
@@ -40,6 +45,8 @@ import { Pagination } from '@mantine/core'
 import { IoIosStar } from 'react-icons/io'
 import { TfiRulerAlt } from 'react-icons/tfi'
 import { FaPlus, FaMinus, FaCheck } from 'react-icons/fa'
+import { IoClose } from 'react-icons/io5'
+import { save_custom_image } from '@/utils/indexedDB'
 import {
   facebookPixelAddToCart,
   facebookPixelViewContent,
@@ -535,6 +542,18 @@ function Main({
   const customRef = useRef<null | HTMLTextAreaElement>(null)
   const [customError, setCustomError] = useState<string | null>(null)
 
+  const [custom_image, set_custom_image] = useState<File | null>(null)
+  const custom_image_preview = useMemo(() => {
+    return custom_image ? URL.createObjectURL(custom_image) : null
+  }, [custom_image])
+  useEffect(() => {
+    return () => {
+      if (custom_image_preview) {
+        URL.revokeObjectURL(custom_image_preview)
+      }
+    }
+  }, [custom_image_preview])
+
   const doNotFindYourMoto = products.some((prod) =>
     special_products.includes(prod.name),
   )
@@ -774,6 +793,7 @@ function Main({
                             quantity:
                               updatedCart[existingIndex].quantity + count,
                           }
+
                           return updatedCart
                         } else {
                           return [
@@ -787,6 +807,7 @@ function Main({
                               price: upsell_product.price,
                               price_before: upsell_product.price_before,
                               quantity: count,
+                              cash_on_delivery: upsell_product.cash_on_delivery,
                             },
                           ]
                         }
@@ -1149,20 +1170,79 @@ function Main({
             )}
 
             {special_products.includes(state.selectedName) && (
-              <Textarea
-                ref={customRef}
-                autosize
-                minRows={5}
-                label="Πληκτρολογήστε το μοντέλο της μηχανής"
-                placeholder={`ΠΩΣ ΛΕΙΤΟΥΡΓΕΙ;
-    1. Πληκτρολογείς το μοντέλο της μηχανής σου (με χρονολογία)
+              <>
+                <Textarea
+                  ref={customRef}
+                  autosize
+                  minRows={5}
+                  label="Πληκτρολογήστε το μοντέλο της μηχανής"
+                  placeholder={`ΠΩΣ ΛΕΙΤΟΥΡΓΕΙ;
+    1. Πληκτρολογείς το μοντέλο της μηχανής σου (με χρονολογία και χρώμα της μηχανής)
     2. Ο εξιδεικευμένος γραφίστας μας φτιάχνει το σχέδιο σου σε 2-3 εργάσιμες.
-    3. Σου το στέλνουμε στο email ώστε να το εγκρινεις.
-    4. Το τυπώνουμε στη μπλούζα και το παραλαμβάνεις σε 1-3 εργάσιμες.`}
-                mb="sm"
-                error={customError}
-                onChange={() => customError && setCustomError(null)}
-              />
+    3. Το τυπώνουμε στη μπλούζα και το παραλαμβάνεις σε 1-3 εργάσιμες.
+    π.χ. Tracer 900 του 2023 κόκκινο`}
+                  mb="sm"
+                  error={customError}
+                  onChange={() => customError && setCustomError(null)}
+                />
+
+                <Input.Wrapper
+                  label="Προαιρετικά στείλε μας και μια φωτογραφία της μηχανής σου"
+                  mb="md"
+                >
+                  <div className="flex items-center gap-3 mt-1">
+                    <FileButton
+                      accept="image/jpeg,image/png"
+                      onChange={(file) => {
+                        if (!file) {
+                          return
+                        }
+
+                        const max_size = 5 * 1024 * 1024
+                        if (file.size > max_size) {
+                          setCustomError(
+                            'Το αρχείο είναι πολύ μεγάλο. Μέγιστο μέγεθος: 5MB',
+                          )
+
+                          return
+                        }
+
+                        setCustomError(null)
+                        set_custom_image(file)
+                      }}
+                    >
+                      {(props) => (
+                        <Button {...props} variant="outline" size="sm">
+                          Ανέβασε φωτογραφία
+                        </Button>
+                      )}
+                    </FileButton>
+
+                    {custom_image_preview && (
+                      <div className="relative">
+                        <MantineImage
+                          src={custom_image_preview}
+                          w={80}
+                          h={80}
+                          fit="cover"
+                          radius="sm"
+                        />
+                        <ActionIcon
+                          size="xs"
+                          color="red"
+                          variant="filled"
+                          className="absolute -top-2 -right-2"
+                          onClick={() => {
+                            set_custom_image(null)
+                          }}
+                        >
+                          <IoClose size={12} />
+                        </ActionIcon>
+                      </div>
+                    )}
+                  </div>
+                </Input.Wrapper>
+              </>
             )}
 
             {state.displayedColors.length > 0 && (
@@ -1323,36 +1403,36 @@ function Main({
                   </div>
                   <div className="flex gap-2">
                     {state.displayedSizes.map((size, index) => (
-                        <div
-                          key={index}
-                          onClick={() =>
-                            dispatch({ type: 'CHANGE_SIZE', payload: size })
-                          }
-                          className={`w-12 h-[42px] border-2 rounded-lg ${
-                            state.selectedSize === size
-                              ? 'border-black'
-                              : 'border-[var(--mantine-border)]'
-                          }`}
+                      <div
+                        key={index}
+                        onClick={() =>
+                          dispatch({ type: 'CHANGE_SIZE', payload: size })
+                        }
+                        className={`w-12 h-[42px] border-2 rounded-lg ${
+                          state.selectedSize === size
+                            ? 'border-black'
+                            : 'border-[var(--mantine-border)]'
+                        }`}
+                      >
+                        <UnstyledButton
+                          size="md"
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            textDecoration: variantIsSoldOut
+                              ? 'line-through'
+                              : 'none',
+                            textDecorationColor: variantIsSoldOut
+                              ? 'red'
+                              : 'inherit',
+                          }}
                         >
-                          <UnstyledButton
-                            size="md"
-                            style={{
-                              width: '100%',
-                              height: '100%',
-                              display: 'flex',
-                              justifyContent: 'center',
-                              alignItems: 'center',
-                              textDecoration: variantIsSoldOut
-                                ? 'line-through'
-                                : 'none',
-                              textDecorationColor: variantIsSoldOut
-                                ? 'red'
-                                : 'inherit',
-                            }}
-                          >
-                            {size}
-                          </UnstyledButton>
-                        </div>
+                          {size}
+                        </UnstyledButton>
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -1394,7 +1474,7 @@ function Main({
               </div>
               <Button
                 disabled={variantIsSoldOut}
-                onClick={() => {
+                onClick={async () => {
                   if (special_products.includes(state.selectedProduct.name)) {
                     const textAreaValueLength =
                       customRef.current!.value.trim().length
@@ -1409,6 +1489,11 @@ function Main({
                         'Μπορείτε να πληκτρολογήσετε μέχρι 50 χαρακτήρες!',
                       )
                       return
+                    }
+
+                    const custom_name = customRef.current!.value.trim()
+                    if (custom_image) {
+                      await save_custom_image(custom_name, custom_image)
                     }
                   }
 
@@ -1432,6 +1517,7 @@ function Main({
                         ...updatedCart[existingIndex],
                         quantity: updatedCart[existingIndex].quantity + count,
                       }
+
                       return updatedCart
                     } else {
                       return [
@@ -1449,6 +1535,7 @@ function Main({
                           price: state.selectedProduct.price,
                           price_before: state.selectedProduct.price_before,
                           quantity: count,
+                          cash_on_delivery: collection.cash_on_delivery,
                         },
                       ]
                     }
@@ -1472,6 +1559,13 @@ function Main({
                     state.selectedColor ?? '',
                     state.selectedSize ?? '',
                   )
+
+                  if (customRef.current) {
+                    customRef.current.value = ''
+                  }
+                  if (custom_image) {
+                    set_custom_image(null)
+                  }
                 }}
                 color="red"
                 size="md"
