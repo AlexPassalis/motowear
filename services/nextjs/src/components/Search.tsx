@@ -1,4 +1,4 @@
-import type { Hit } from '.pnpm/instantsearch.js@4.83.0_algoliasearch@5.43.0/node_modules/instantsearch.js/es/types/results.d.ts'
+import type { Hit } from 'instantsearch.js'
 
 import { useHeaderContext } from '@/context/useHeaderContext'
 import { ROUTE_PRODUCT } from '@/data/routes'
