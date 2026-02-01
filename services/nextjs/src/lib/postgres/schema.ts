@@ -73,6 +73,7 @@ export const collection = productsSchema.table('collection', {
   upsell_collection: text('upsell_collection'),
   upsell_product: text('upsell_product'),
   sold_out: boolean('sold_out'),
+  cash_on_delivery: boolean('cash_on_delivery').default(false).notNull(),
 })
 
 export const product = productsSchema.table('product', {

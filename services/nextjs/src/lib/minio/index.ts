@@ -79,3 +79,38 @@ export function deleteTypeImages(productType: string): Promise<void> {
     })
   })
 }
+
+export async function upload_custom_order_image(
+  order_id: number,
+  base64_data: string,
+  filename: string,
+) {
+  const match = base64_data.match(/^data:(.+);base64,(.+)$/)
+  const content_type = match?.[1] ?? 'application/octet-stream'
+  const buffer = Buffer.from(match?.[2] ?? base64_data, 'base64')
+  const object_name = `custom_orders/${order_id}/${sanitizeFilename(filename)}`
+
+  await minio.putObject(bucketName, object_name, buffer, buffer.length, {
+    'Content-Type': content_type,
+  })
+
+  return object_name
+}
+
+export async function get_custom_order_images() {
+  const result: Record<number, string[]> = {}
+  const prefix = 'custom_orders/'
+  const stream = minio.listObjects(bucketName, prefix, true)
+
+  for await (const obj of stream) {
+    const parts = obj.name.slice(prefix.length).split('/')
+    const order_id = parseInt(parts[0], 10)
+    const filename = parts[1]
+    if (!result[order_id]) {
+      result[order_id] = []
+    }
+    result[order_id].push(filename)
+  }
+
+  return result
+}

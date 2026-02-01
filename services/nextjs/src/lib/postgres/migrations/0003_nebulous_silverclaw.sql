@@ -1,0 +1,1 @@
+ALTER TABLE "products"."collection" ADD COLUMN "cash_on_delivery" boolean DEFAULT false NOT NULL;

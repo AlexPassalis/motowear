@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { custom_image_max_size } from '@/data/magic'
 import { createSelectSchema } from 'drizzle-zod'
 import {
   coupon,
@@ -64,10 +65,28 @@ export const zodCartItem = z.object({
   quantity: z.number(),
   image: z.string(),
   mtrl: z.number().optional(),
+  custom_image: z
+    .string()
+    .refine(
+      (data) =>
+        data.startsWith('data:image/jpeg') || data.startsWith('data:image/png'),
+      'Only JPEG and PNG formats are supported.',
+    )
+    .refine((data) => {
+      const base64 = data.split(',')[1]
+      if (!base64) {
+        return false
+      }
+      const size = atob(base64).length
+
+      return size <= custom_image_max_size
+    }, 'Max image size is 10MB.')
+    .optional(),
 })
 export const zodCart = z.array(zodCartItem)
 export const zodCartItemLocalStorage = zodCartItem.extend({
   price_before: z.number().nullable(),
+  cash_on_delivery: z.boolean(),
 })
 export const zodCartLocalStorage = z.array(zodCartItemLocalStorage)
 export const zodCoupon = createSelectSchema(coupon)

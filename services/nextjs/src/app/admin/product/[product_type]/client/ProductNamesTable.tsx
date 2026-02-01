@@ -285,7 +285,7 @@ export function ProductNamesTable({
           <Table.Thead>
             <Table.Tr style={{ borderBottom: 'none' }}>
               <Table.Th
-                colSpan={7}
+                colSpan={8}
                 style={{ textAlign: 'center' }}
                 className="text-2xl font-bold"
               >
@@ -301,6 +301,7 @@ export function ProductNamesTable({
               <Table.Th style={{ textAlign: 'center' }}>Sizes</Table.Th>
               <Table.Th style={{ textAlign: 'center' }}>Upsell</Table.Th>
               <Table.Th style={{ textAlign: 'center' }}>Sold Out</Table.Th>
+              <Table.Th style={{ textAlign: 'center' }}>COD</Table.Th>
             </Table.Tr>
           </Table.Thead>
 
@@ -423,12 +424,26 @@ export function ProductNamesTable({
                   {collection.sold_out ?? false ? 'Yes' : 'No'}
                 </Button>
               </Table.Td>
+
+              <Table.Td style={{ textAlign: 'center' }}>
+                <Button
+                  onClick={() => {
+                    update_collection({
+                      cash_on_delivery: !collection.cash_on_delivery,
+                    })
+                  }}
+                  color={collection.cash_on_delivery ? 'green' : 'red'}
+                  disabled={onRequest}
+                >
+                  {collection.cash_on_delivery ? 'Yes' : 'No'}
+                </Button>
+              </Table.Td>
             </Table.Tr>
           </Table.Tbody>
 
           <Table.Tfoot>
             <Table.Tr>
-              <Table.Td colSpan={7}>
+              <Table.Td colSpan={8}>
                 <div className="flex justify-center">
                   <Button
                     onClick={handle_save_collection}
