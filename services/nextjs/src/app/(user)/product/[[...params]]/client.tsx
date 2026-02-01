@@ -51,7 +51,11 @@ import {
   facebookPixelAddToCart,
   facebookPixelViewContent,
 } from '@/lib/facebook-pixel'
-import { special_products, special_collections } from '@/data/magic'
+import {
+  special_products,
+  special_collections,
+  custom_image_max_size,
+} from '@/data/magic'
 import {
   googleAnalyticsAddToCart,
   googleAnalyticsViewItem,
@@ -1187,7 +1191,7 @@ function Main({
                 />
 
                 <Input.Wrapper
-                  label="Προαιρετικά στείλε μας και μια φωτογραφία της μηχανής σου"
+                  label="Προαιρετικά στείλτε μας και μια φωτογραφία της μηχανής σας"
                   mb="md"
                 >
                   <div className="flex items-center gap-3 mt-1">
@@ -1198,10 +1202,9 @@ function Main({
                           return
                         }
 
-                        const max_size = 5 * 1024 * 1024
-                        if (file.size > max_size) {
+                        if (file.size > custom_image_max_size) {
                           setCustomError(
-                            'Το αρχείο είναι πολύ μεγάλο. Μέγιστο μέγεθος: 5MB',
+                            'Το αρχείο είναι πολύ μεγάλο. Μέγιστο μέγεθος: 10MB',
                           )
 
                           return

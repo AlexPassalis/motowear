@@ -19,3 +19,5 @@ export const special_collections = ['Θήκη Κινητού', 'Θήκη Κιν�
 export const couponCodeMPRELOK = 'freemprelok' as const
 export const couponCodeSHIP = 'freeship' as const
 export const couponCodeReview = 'review15' as const
+
+export const custom_image_max_size = 10 * 1024 * 1024

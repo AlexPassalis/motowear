@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { custom_image_max_size } from '@/data/magic'
 import { createSelectSchema } from 'drizzle-zod'
 import {
   coupon,
@@ -78,8 +79,8 @@ export const zodCartItem = z.object({
       }
       const size = atob(base64).length
 
-      return size <= 5 * 1024 * 1024
-    }, 'Max image size is 5MB.')
+      return size <= custom_image_max_size
+    }, 'Max image size is 10MB.')
     .optional(),
 })
 export const zodCart = z.array(zodCartItem)
