@@ -91,9 +91,12 @@ export function AdminProductProductTypePageClient({
         color_variants={color_variants}
         setColorVariants={(update) => {
           if (typeof update === 'function') {
-            const updated = update(color_variants)
-            set_color_variants(updated)
+            set_color_variants((prev_variants) => update(prev_variants))
             setProducts((prev) => {
+              const current_variants = prev.filter(
+                (p) => p.name === selected_product_name,
+              )
+              const updated = update(current_variants)
               const other_products = prev.filter(
                 (p) => p.name !== selected_product_name,
               )
