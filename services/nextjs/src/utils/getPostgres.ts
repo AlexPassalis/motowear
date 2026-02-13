@@ -300,7 +300,7 @@ export async function getCollectionPageData(product_type: string) {
       })
       .from(product)
       .where(eq(product.collection_id, collection_row.id))
-      .orderBy(product.name),
+      .orderBy(product.name, product.color),
     postgres
       .selectDistinctOn([product.brand], { brand: product.brand })
       .from(product)
